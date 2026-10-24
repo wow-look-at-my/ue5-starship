@@ -1,0 +1,8 @@
+{
+	"entry": "components",
+	"outdir": "components",
+	"target": "browser",
+	"format": "esm",
+	"sourcemap": false,
+	"declarations": false
+}
