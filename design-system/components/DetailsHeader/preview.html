@@ -15,7 +15,11 @@
 		flex: 1; min-width: 0; padding: 0 3px 0 8px; /* SDetailNameArea.cpp:138 Padding(8,0,3,0) */
 		font: 400 14.667px/1.172 var(--font-sans); /* DEFAULT_FONT("Regular", 11): StarshipStyle.cpp:3149-3152 */
 		color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+		padding-block: 2px; margin-block: -2px; border-radius: 4px; outline: 0; /* box room for the hover and focus outline; net layout unchanged */
 	}
+	/* The name is an SEditableTextBox (SDetailNameArea.cpp:131-141): NormalEditableTextBox hovered and focused brushes: StarshipCoreStyle.cpp:1283-1285 */
+	.DetailsHeader-label:hover, .DetailsHeader-label.is-hover { background: var(--input); box-shadow: inset 0 0 0 1px var(--hover); }
+	.DetailsHeader-label:focus, .DetailsHeader-label.is-focused { background: var(--input); box-shadow: inset 0 0 0 1px var(--primary); }
 	.DetailsHeader-actions { display: flex; align-items: center; flex: none; }
 	.DetailsHeader-btn {
 		display: inline-flex; align-items: center; justify-content: center; flex: none;
@@ -23,10 +27,12 @@
 		color: var(--foreground-hover);
 	}
 	.DetailsHeader-btn svg { width: 16px; height: 16px; flex: none; }
+	.DetailsHeader-btn:focus-visible { outline: 1px solid var(--primary-hover); outline-offset: 1px; } /* browser keyboard ring: Slate draws none */
+	.DetailsHeader-btn:disabled { opacity: .45; cursor: default; } /* alpha x .45: SlateElementPixelShader.usf:535 */
 	/* "Button" style: StarshipCoreStyle.cpp:1372-1382 (Secondary fill, Input 1px outline, radius 4) */
 	.DetailsHeader-add, .DetailsHeader-icon-btn { background: var(--secondary); box-shadow: inset 0 0 0 1px var(--input); }
-	.DetailsHeader-add:hover, .DetailsHeader-icon-btn:hover { background: var(--hover); }
-	.DetailsHeader-add:active, .DetailsHeader-icon-btn:active { background: var(--header); }
+	.DetailsHeader-add:hover, .DetailsHeader-icon-btn:hover, .DetailsHeader-add.is-hover, .DetailsHeader-icon-btn.is-hover { background: var(--hover); }
+	.DetailsHeader-add:active, .DetailsHeader-icon-btn:active, .DetailsHeader-add.is-pressed, .DetailsHeader-icon-btn.is-pressed { background: var(--header); }
 	/* Add: SComboButton content padding (2,1.5) + Button NormalPadding (12,1.5): ToolWidgetsStyle.cpp:16-21, 63, StarshipCoreStyle.cpp:1381 */
 	.DetailsHeader-add { padding: 0 14px; gap: 3px; margin-right: 4px; } /* icon/label gap 3: ToolWidgetsStylePrivate.h:23 */
 	.DetailsHeader-add svg { color: var(--accent-green); } /* PositiveActionButton icon colour: ToolWidgetsStyle.cpp:76 */
@@ -35,7 +41,8 @@
 	.DetailsHeader-icon-btn { width: 28px; padding: 0; color: var(--white); }
 	/* SDocumentationAnchor -> SSimpleButton: (2,1) content + (2,1) style = (4,2): SSimpleButton.cpp:33-34, ToolWidgetsStyle.cpp:123 */
 	.DetailsHeader-help { width: 24px; height: 20px; margin-left: 4px; padding: 0; background: transparent; color: var(--foreground); }
-	.DetailsHeader-help:hover, .DetailsHeader-lock:hover { background: var(--dropdown); color: var(--foreground-hover); } /* SimpleButton hover: StarshipCoreStyle.cpp:1391 */
+	.DetailsHeader-help:hover, .DetailsHeader-lock:hover, .DetailsHeader-help.is-hover, .DetailsHeader-lock.is-hover,
+	.DetailsHeader-help:active, .DetailsHeader-lock:active, .DetailsHeader-help.is-pressed, .DetailsHeader-lock.is-pressed { background: var(--dropdown); color: var(--foreground-hover); } /* SimpleButton hover and pressed: StarshipCoreStyle.cpp:1391-1396 */
 	/* Lock: SimpleButton, ContentPadding(4,2) + style (2,1) = (6,3); slot padding (4,0,4,0): SDetailNameArea.cpp:164-170 */
 	.DetailsHeader-lock { width: 28px; padding: 0; margin: 0 4px; background: transparent; color: var(--foreground); }
 	/* Instance row: SCSEditor.Background Recessed r4 + padding 4: StarshipStyle.cpp:4237, SSubobjectInstanceEditor.cpp:163-164 */
