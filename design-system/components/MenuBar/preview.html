@@ -60,5 +60,85 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 	<div class="menuBar-item">Help</div>
 </div>
 
+<div class="menuBar-note">Live: hover an item, click to open its menu, then hover another item to switch. Escape or a click outside closes. Keys: Left and Right between items, Down opens, Up and Down in a menu, Enter picks. The menu entries are illustrative.</div>
+<ue-menu-bar>
+	<div class="menuBar-stage">
+		<div class="menuBar" role="menubar" aria-label="Main menu">
+			<div class="menuBar-slot">
+				<div class="menuBar-item" role="menuitem" tabindex="0" aria-haspopup="menu" aria-expanded="false">File</div>
+				<div class="menuBar-menu" role="menu">
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">New Level</span><span class="menuBar-keys">Ctrl+N</span></div>
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">Open Level</span><span class="menuBar-keys">Ctrl+O</span></div>
+					<div class="menuBar-sep" role="separator"></div>
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">Save Current Level</span><span class="menuBar-keys">Ctrl+S</span></div>
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">Save All</span><span class="menuBar-keys">Ctrl+Shift+S</span></div>
+					<div class="menuBar-sep" role="separator"></div>
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">Exit</span></div>
+				</div>
+			</div>
+			<div class="menuBar-slot">
+				<div class="menuBar-item" role="menuitem" tabindex="-1" aria-haspopup="menu" aria-expanded="false">Edit</div>
+				<div class="menuBar-menu" role="menu">
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">Undo</span><span class="menuBar-keys">Ctrl+Z</span></div>
+					<div class="menuBar-row" role="menuitem" tabindex="-1" aria-disabled="true"><span class="menuBar-label">Redo</span><span class="menuBar-keys">Ctrl+Y</span></div>
+					<div class="menuBar-sep" role="separator"></div>
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">Cut</span><span class="menuBar-keys">Ctrl+X</span></div>
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">Copy</span><span class="menuBar-keys">Ctrl+C</span></div>
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">Paste</span><span class="menuBar-keys">Ctrl+V</span></div>
+					<div class="menuBar-sep" role="separator"></div>
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">Editor Preferences</span></div>
+				</div>
+			</div>
+			<div class="menuBar-slot">
+				<div class="menuBar-item" role="menuitem" tabindex="-1" aria-haspopup="menu" aria-expanded="false">Window</div>
+				<div class="menuBar-menu" role="menu">
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">Content Browser</span></div>
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">Details</span></div>
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">Outliner</span></div>
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">Output Log</span></div>
+				</div>
+			</div>
+			<div class="menuBar-slot">
+				<div class="menuBar-item" role="menuitem" tabindex="-1" aria-haspopup="menu" aria-expanded="false">Tools</div>
+				<div class="menuBar-menu" role="menu">
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">New C++ Class</span></div>
+					<div class="menuBar-row" role="menuitem" tabindex="-1" aria-disabled="true"><span class="menuBar-label">Source Control</span></div>
+				</div>
+			</div>
+			<div class="menuBar-slot">
+				<div class="menuBar-item" role="menuitem" tabindex="-1" aria-haspopup="menu" aria-expanded="false">Build</div>
+				<div class="menuBar-menu" role="menu">
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">Build All Levels</span></div>
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">Build Geometry</span></div>
+				</div>
+			</div>
+			<div class="menuBar-slot">
+				<div class="menuBar-item" role="menuitem" tabindex="-1" aria-haspopup="menu" aria-expanded="false">Select</div>
+				<div class="menuBar-menu" role="menu">
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">Select All</span></div>
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">Select None</span></div>
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">Invert Selection</span></div>
+				</div>
+			</div>
+			<div class="menuBar-slot">
+				<div class="menuBar-item" role="menuitem" tabindex="-1" aria-haspopup="menu" aria-expanded="false">Actor</div>
+				<div class="menuBar-menu" role="menu">
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">Go to Actor</span></div>
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">Pilot Actor</span></div>
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">Detach</span></div>
+				</div>
+			</div>
+			<div class="menuBar-slot">
+				<div class="menuBar-item" role="menuitem" tabindex="-1" aria-haspopup="menu" aria-expanded="false">Help</div>
+				<div class="menuBar-menu" role="menu">
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">Documentation</span></div>
+					<div class="menuBar-row" role="menuitem" tabindex="-1"><span class="menuBar-label">About Unreal Editor</span></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</ue-menu-bar>
+
+<script type="module" src="./MenuBar.js"></script>
 </body>
 </html>
