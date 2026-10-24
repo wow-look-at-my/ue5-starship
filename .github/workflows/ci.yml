@@ -30,3 +30,22 @@ jobs:
         with:
           schema: design-system/design-system.schema.json
           files: design-system/design-system.json
+
+  typescript:
+    runs-on: ${{ github.event.repository.visibility == 'public' && 'ubuntu-latest' || vars.CI_RUNNER || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm ci
+
+      - run: npx playwright install --with-deps chromium
+
+      # ts0 type-checks, runs the Playwright tests, then compiles design-system/src to design-system/components.
+      - uses: wow-look-at-my/ts0@lkgb
+
+      # The committed .js files must match what ts0 just built.
+      - run: test -z "$(git status --porcelain -- design-system/components)"

@@ -1,0 +1,7 @@
+{
+	"entry": "tools/compose-editor-layout.ts",
+	"outfile": ".build/compose-editor-layout.js",
+	"target": "node",
+	"sourcemap": false,
+	"exclude": ["design-system", "tests", "node_modules"]
+}
