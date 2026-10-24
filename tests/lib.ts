@@ -1,6 +1,7 @@
 /// <reference lib="dom" />
 // Shared helpers for the preview interaction tests. The DOM lib types the callbacks that run in the page.
 import fs from 'node:fs';
+import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium, type Browser, type Page } from 'playwright';
@@ -38,6 +39,39 @@ export interface Preview {
 	errors: string[];
 }
 
+const MIME: Record<string, string> = {
+	'.html': 'text/html; charset=utf-8',
+	'.js': 'text/javascript; charset=utf-8',
+	'.css': 'text/css; charset=utf-8',
+	'.json': 'application/json',
+	'.png': 'image/png',
+	'.svg': 'image/svg+xml',
+};
+
+let baseUrl: Promise<string> | undefined;
+
+// Serves design-system over http, because Chromium blocks module scripts on file://. One server per process.
+function serve(): Promise<string> {
+	baseUrl ??= new Promise((resolve, reject) => {
+		const server = http.createServer((req, res) => {
+			const file = path.join(root, decodeURIComponent(new URL(req.url ?? '/', 'http://x').pathname));
+			if (!file.startsWith(root) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
+				res.writeHead(404).end();
+				return;
+			}
+			res.writeHead(200, { 'content-type': MIME[path.extname(file)] ?? 'application/octet-stream' });
+			fs.createReadStream(file).pipe(res);
+		});
+		server.on('error', reject);
+		server.listen(0, '127.0.0.1', () => {
+			server.unref();
+			const address = server.address();
+			resolve('http://127.0.0.1:' + (typeof address === 'object' && address ? address.port : 0));
+		});
+	});
+	return baseUrl;
+}
+
 // Opens a component preview with the tokens injected. Console and page errors collect in `errors`.
 export async function openPreview(browser: Browser, name: string, viewport = { width: 1000, height: 800 }): Promise<Preview> {
 	const page = await browser.newPage({ viewport });
@@ -46,7 +80,7 @@ export async function openPreview(browser: Browser, name: string, viewport = { w
 	page.on('console', (m) => {
 		if (m.type() === 'error' && !/fonts\.g|ERR_|Failed to load resource/.test(m.text())) errors.push(m.text());
 	});
-	await page.goto('file://' + path.join(root, 'components', name, 'preview.html'));
+	await page.goto((await serve()) + '/components/' + name + '/preview.html');
 	await page.addStyleTag({ content: tokensCss() });
 	await page.waitForTimeout(100);
 	return { page, errors };

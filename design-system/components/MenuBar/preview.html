@@ -18,12 +18,26 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 .menuBar-item { padding: 4px 12px; color: var(--foreground); background: transparent; cursor: default; white-space: nowrap; } /* NormalForeground Foreground (SC:2439), Normal brush none (SC:2419) */
 .menuBar-item:hover, .menuBar-item.is-hover { background: var(--hover); color: var(--foreground-hover); } /* Hovered colour brush Hover (SC:2436), HoveredForeground ForegroundHover (SC:2437) */
 .menuBar-item.is-open { background: var(--primary); color: var(--foreground-hover); } /* menu open = Pressed brush Primary (SC:2420), PressedForeground ForegroundHover (SC:2438); SMenuEntryBlock.cpp:1614-1616 */
+.menuBar-item:focus-visible { outline: 1px solid var(--primary-hover); outline-offset: -1px; }
+
+/* Live strip: each item and its pop-up share a slot, so the pop-up anchors under its item. The look of the pop-up is the PopupMenu component's. */
+.menuBar-slot { position: relative; display: flex; align-items: stretch; }
+.menuBar-stage { min-height: 230px; }
+.menuBar-menu { display: none; position: absolute; z-index: 10; top: 100%; left: 0; box-sizing: border-box; min-width: 220px; padding: 8px 0; background: var(--dropdown); box-shadow: inset 0 0 0 1px var(--dropdown-outline); font: 400 13.333px/16px var(--font-sans); color: var(--foreground-hover); white-space: nowrap; user-select: none; cursor: default; } /* menu box padding (0,8,0,8) MultiBox.cpp:1344, Menu.Background Dropdown with DropdownOutline 1px, radius 0 (SC:2302-2303), Menu.Label NormalText (SC:2321) */
+.menuBar-item.is-open + .menuBar-menu { display: block; }
+.menuBar-row { display: flex; align-items: center; justify-content: space-between; padding: 3px 5px 3px 12px; background: transparent; color: var(--foreground-hover); outline: none; } /* Menu.Block.Padding (12,1,5,1) (SC:2314-2316) + Menu.Button padding (0,2) (SC:2423) */
+.menuBar-row:hover, .menuBar-row:focus { background: var(--primary); } /* hovered brush Primary, no radius (SC:2420-2421) */
+.menuBar-row:active { background: var(--primary); padding: 4px 5px 2px 12px; } /* pressed padding (0,3,0,1) (SC:2424) */
+.menuBar-row[aria-disabled="true"] { opacity: .45; pointer-events: none; } /* alpha x .45 (SlateElementPixelShader.usf:535) */
+.menuBar-label { margin: 0 6px 0 2px; } /* label padding (2,0,6,0) (SMenuEntryBlock.cpp:602) */
+.menuBar-keys { margin-left: 25px; padding: 0 4px 0 16px; font-size: 10.667px; opacity: .6; } /* key binding padding 25 and box (16,0,4,0) (SMenuEntryBlock.cpp:612, 618), Small 8pt (SC:2324), subdued (SMenuEntryBlock.cpp:622) */
+.menuBar-sep { height: 1px; margin: 6px 12px; background: var(--white-25); } /* Menu.Separator White25, padding (12,6,12,6) (SC:2318-2319); thickness 1 (SMenuSeparatorBlock.cpp:56) */
 </style>
 </head>
 <body>
 
-<div class="menuBar-note">Normal, with Edit hovered</div>
-<div class="menuBar">
+<div class="menuBar-note">Normal, with Edit hovered (pinned)</div>
+<div class="menuBar" data-pinned>
 	<div class="menuBar-item">File</div>
 	<div class="menuBar-item is-hover">Edit</div>
 	<div class="menuBar-item">Window</div>
@@ -34,8 +48,8 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 	<div class="menuBar-item">Help</div>
 </div>
 
-<div class="menuBar-note">Window menu open</div>
-<div class="menuBar">
+<div class="menuBar-note">Window menu open (pinned)</div>
+<div class="menuBar" data-pinned>
 	<div class="menuBar-item">File</div>
 	<div class="menuBar-item">Edit</div>
 	<div class="menuBar-item is-open">Window</div>
