@@ -1,0 +1,93 @@
+<!-- @dsCard group="Controls" height=200 subtitle="ComboButton and SimpleComboButton with caret: normal, hovered, open, disabled, plus the ComboBox popup" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ComboButton</title>
+<style>
+	/* Slate unit = 1px. Outline is drawn inside the box (inset shadow). */
+	.combobutton-page { padding: 16px; display: flex; flex-wrap: wrap; gap: 20px 32px; align-items: flex-start; }
+	.combobutton-col { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+	.combobutton-cap { font: 400 10.667px/1.2 var(--font-sans); color: var(--foreground); opacity: .7; }
+	.combobutton-row { display: flex; align-items: center; gap: 12px; }
+
+	.combobutton {
+		display: inline-flex; align-items: center; margin: 0; border: 0; min-width: 120px;
+		padding: 1px 8px; /* ComboButtonMargin (8,1,8,1) CoreStyle.h:114; ContentPadding 0 StarshipCoreStyle.cpp:1490 */
+		border-radius: 4px; /* InputFocusRadius CoreStyle.h:117 */
+		background: var(--input); /* StarshipCoreStyle.cpp:1471 */
+		box-shadow: inset 0 0 0 1px var(--input-outline); /* :1471, thickness CoreStyle.h:118 */
+		color: var(--foreground); /* NormalForeground :1475 */
+		font: 400 13.333px/16px var(--font-sans); /* NormalText 10pt */
+		white-space: nowrap; cursor: default; user-select: none;
+	}
+	.combobutton:hover, .combobutton--hover { box-shadow: inset 0 0 0 1px var(--hover); color: var(--foreground-hover); } /* :1472, :1476 */
+	.combobutton:active, .combobutton--open { box-shadow: inset 0 0 0 1px var(--hover); color: var(--foreground-hover); padding: 2px 8px 0; } /* :1473, :1477, PressedComboButtonMargin (8,2,8,0) CoreStyle.h:115 */
+	.combobutton--disabled, .combobutton--disabled:hover { opacity: .45; box-shadow: inset 0 0 0 1px var(--input-outline); color: var(--foreground); } /* alpha x .45 SlateElementPixelShader.usf:535 */
+	.combobutton__label { flex: 1 1 auto; }
+	.combobutton__arrow {
+		flex: none; width: 16px; height: 16px; margin: 2px; /* wide-chevron-down 16x16 :1491, DownArrowPadding 2 SlateTypes.cpp:165 */
+		fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; /* approximation of the SVG */
+	}
+
+	.combobutton--simple {
+		min-width: 0; background: transparent; box-shadow: none; color: var(--foreground); /* SimpleButtonLabelAndIcon: NoResource :1390, fg :1394 */
+		padding: 1px 4px; /* (4,1,4,1) :1402 */
+	}
+	.combobutton--simple:hover, .combobutton--simple.combobutton--hover { background: var(--dropdown); color: var(--foreground-hover); box-shadow: none; } /* :1391, :1395 */
+	.combobutton--simple:active, .combobutton--simple.combobutton--open { background: var(--dropdown); color: var(--foreground-hover); box-shadow: none; padding: 2px 4px 0; } /* :1392, (4,2,4,0) :1403 */
+	.combobutton--simple .combobutton__label { margin-right: 4px; }
+
+	.combobutton-anchor { display: inline-block; position: relative; }
+	.combobutton-menu {
+		position: absolute; left: 0; top: 100%; min-width: 100%; box-sizing: border-box;
+		background: var(--dropdown); /* MenuBorderBrush fill :1492 */
+		box-shadow: inset 0 0 0 1px var(--dropdown-outline); /* outline 1px, radius 0 :1492 */
+		padding: 0; /* MenuBorderPadding :1493 */
+	}
+	.combobutton-row-item {
+		position: relative; padding: 3px 8px; /* MenuRowPadding (8,3) :1503 */
+		font: 400 13.333px/16px var(--font-sans); color: var(--foreground-hover); /* TextColor White :1549 */
+	}
+	.combobutton-row-item--hover { background: var(--primary); } /* hovered brush :1534 */
+	.combobutton-row-item--focus::after { content: ""; position: absolute; inset: 0; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--select); } /* SelectorFocusedBrush r4 1px Select :1539 */
+	.combobutton-spacer { height: 78px; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+	<symbol id="combobutton-caret" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></symbol>
+</svg>
+<div class="combobutton-page">
+	<div class="combobutton-col">
+		<span class="combobutton-cap">ComboButton</span>
+		<div class="combobutton-row">
+			<span class="combobutton"><span class="combobutton__label">Location</span><svg class="combobutton__arrow"><use href="#combobutton-caret"/></svg></span>
+			<span class="combobutton combobutton--hover"><span class="combobutton__label">Location</span><svg class="combobutton__arrow"><use href="#combobutton-caret"/></svg></span>
+			<span class="combobutton combobutton--disabled"><span class="combobutton__label">Location</span><svg class="combobutton__arrow"><use href="#combobutton-caret"/></svg></span>
+		</div>
+		<span class="combobutton-cap">Normal, hovered, disabled</span>
+		<span class="combobutton-cap" style="margin-top:6px">SimpleComboButton (borderless)</span>
+		<div class="combobutton-row">
+			<span class="combobutton combobutton--simple"><span class="combobutton__label">Settings</span><svg class="combobutton__arrow"><use href="#combobutton-caret"/></svg></span>
+			<span class="combobutton combobutton--simple combobutton--hover"><span class="combobutton__label">Settings</span><svg class="combobutton__arrow"><use href="#combobutton-caret"/></svg></span>
+		</div>
+		<span class="combobutton-cap">Normal, hovered</span>
+	</div>
+	<div class="combobutton-col">
+		<span class="combobutton-cap">Open (mouse down) with ComboBox popup</span>
+		<div class="combobutton-anchor">
+			<span class="combobutton combobutton--open" style="min-width:160px"><span class="combobutton__label">Rotation</span><svg class="combobutton__arrow"><use href="#combobutton-caret"/></svg></span>
+			<div class="combobutton-menu">
+				<div class="combobutton-row-item">Location</div>
+				<div class="combobutton-row-item combobutton-row-item--hover">Rotation</div>
+				<div class="combobutton-row-item combobutton-row-item--focus">Scale</div>
+			</div>
+		</div>
+		<div class="combobutton-spacer"></div>
+		<span class="combobutton-cap">Hovered row fills with Primary. The ring marks keyboard focus.</span>
+	</div>
+</div>
+</body>
+</html>

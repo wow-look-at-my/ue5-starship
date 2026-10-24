@@ -1,0 +1,51 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cover</title>
+<style>
+	html, body { margin: 0; background: var(--background); }
+	.cover { display: block; width: 960px; height: 288px; }
+	.cover .ground { fill: var(--background); }
+	.cover .primary { fill: var(--primary); }
+	.cover .panel { fill: var(--panel); }
+	.cover .header { fill: var(--header); }
+	.cover .inactive { fill: var(--select-inactive); }
+	.cover .folder { fill: var(--accent-folder); }
+	.cover .green { fill: var(--accent-green); }
+	.cover .cut { fill: var(--background); }
+	.cover .tile { rx: 4px; }
+	.cover .name { font: 700 56px/1 var(--font-condensed); fill: var(--foreground-hover); }
+	.cover .tag { font: 400 13px/1 var(--font-sans); fill: var(--hover-2); }
+</style>
+</head>
+<body>
+<svg class="cover" viewBox="0 0 960 288" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="UE5.5 Editor UI (Starship)">
+<!--
+blocks: primary 264 x 104, panel 248 x 104, select-inactive 112 x 104, accent-folder 112 x 104, accent-green 56 x 104, header 128 x 104 (unequal strips across the top, flush to the edges)
+arrangement: horizontal band of unequal strips with an 8px gap, because docked panels in the editor sit as flush, unequal bands
+pattern row: dense modular UI, so tiles cut by the 4px input radius, ground colour cut out of the primary and panel strips on a 24px pitch
+steps and radii: 8px gap, 24px pitch, 16px tiles, radius-input 4px
+-->
+	<rect class="ground" width="960" height="288"/>
+	<rect class="primary tile" x="0" y="0" width="264" height="104"/>
+	<rect class="panel tile" x="272" y="0" width="248" height="104"/>
+	<rect class="inactive tile" x="528" y="0" width="112" height="104"/>
+	<rect class="folder tile" x="648" y="0" width="112" height="104"/>
+	<rect class="green tile" x="768" y="0" width="56" height="104"/>
+	<rect class="header tile" x="832" y="0" width="128" height="104"/>
+	<g class="cut">
+		<rect class="tile" x="24" y="20" width="16" height="16"/><rect class="tile" x="48" y="20" width="16" height="16"/><rect class="tile" x="72" y="20" width="16" height="16"/>
+		<rect class="tile" x="24" y="44" width="40" height="16"/><rect class="tile" x="72" y="44" width="16" height="16"/>
+		<rect class="tile" x="24" y="68" width="16" height="16"/><rect class="tile" x="48" y="68" width="40" height="16"/>
+		<rect class="tile" x="296" y="20" width="40" height="16"/><rect class="tile" x="344" y="20" width="16" height="16"/>
+		<rect class="tile" x="296" y="44" width="16" height="16"/><rect class="tile" x="320" y="44" width="40" height="16"/>
+		<rect class="tile" x="296" y="68" width="16" height="16"/><rect class="tile" x="320" y="68" width="16" height="16"/><rect class="tile" x="344" y="68" width="16" height="16"/>
+	</g>
+	<text class="name" x="24" y="212">UE5.5 Editor UI (Starship)</text>
+	<text class="tag" x="24" y="250">Dark, flat, dockable tool windows from the Unreal Engine 5.5 editor.</text>
+</svg>
+</body>
+</html>

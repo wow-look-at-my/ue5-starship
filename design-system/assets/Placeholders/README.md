@@ -1,0 +1,1 @@
+`viewport-placeholder.png` stands in for the live 3D viewport of the editor. It is a crop of a real editor screenshot with the viewport toolbar removed. Place it in a viewport slot at its native 858 x 500 ratio. Never restyle it or draw over it. It is a raster picture. It carries no theme colours.

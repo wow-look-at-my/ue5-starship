@@ -1,0 +1,57 @@
+<!-- @dsCard group="Controls" height=140 subtitle="ExpandableArea: collapsed and expanded, caret, bold small title, rounded panel body" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ExpandableArea</title>
+<style>
+	/* Slate unit = 1px. */
+	.expandablearea-page { padding: 16px; display: flex; flex-wrap: wrap; gap: 20px 32px; align-items: flex-start; }
+	.expandablearea-col { display: flex; flex-direction: column; gap: 6px; width: 260px; }
+	.expandablearea-cap { font: 400 10.667px/1.2 var(--font-sans); color: var(--foreground); opacity: .7; }
+
+	.expandablearea {
+		border-radius: 4px; /* ExpandableArea.Border radius 4 StarshipCoreStyle.cpp:568 */
+		background: var(--panel); /* fill Panel :568 */
+		color: var(--foreground-hover); /* inherited default foreground, white WidgetStyle.h:21 */
+	}
+	.expandablearea__header {
+		display: flex; align-items: center;
+		padding: 2px 4px; /* HeaderPadding (4,2) SExpandableArea.h:41; NoBorder padding 0 StarshipCoreStyle.cpp:240 */
+		cursor: default; user-select: none;
+	}
+	.expandablearea__caret {
+		flex: none; width: 16px; height: 16px; margin-right: 3px; /* caret 16x16 :564-565; AreaTitlePadding (0,0,3,0) SExpandableArea.h:40 */
+		fill: none; stroke: var(--foreground); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; /* tint Foreground :564; approximation of the SVG */
+	}
+	.expandablearea__title { font: 700 10.667px/13px var(--font-sans); } /* ExpandableArea.TitleFont SmallBold 8pt :567; line box derived */
+	.expandablearea__body { padding: 1px; } /* body padding 1 SExpandableArea.h:42 */
+	.expandablearea__row { padding: 4px 8px; font: 400 13.333px/16px var(--font-sans); color: var(--foreground); } /* consumer content; sample only */
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+	<symbol id="expandablearea-right" viewBox="0 0 16 16"><path d="M6 4l4 4-4 4z"/></symbol>
+	<symbol id="expandablearea-down" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4z"/></symbol>
+</svg>
+<div class="expandablearea-page">
+	<div class="expandablearea-col">
+		<span class="expandablearea-cap">Collapsed</span>
+		<div class="expandablearea">
+			<div class="expandablearea__header"><svg class="expandablearea__caret" style="fill:var(--foreground)"><use href="#expandablearea-right"/></svg><span class="expandablearea__title">Advanced</span></div>
+		</div>
+	</div>
+	<div class="expandablearea-col">
+		<span class="expandablearea-cap">Expanded</span>
+		<div class="expandablearea">
+			<div class="expandablearea__header"><svg class="expandablearea__caret" style="fill:var(--foreground)"><use href="#expandablearea-down"/></svg><span class="expandablearea__title">Transform</span></div>
+			<div class="expandablearea__body">
+				<div class="expandablearea__row">Location</div>
+				<div class="expandablearea__row">Rotation</div>
+			</div>
+		</div>
+	</div>
+</div>
+</body>
+</html>

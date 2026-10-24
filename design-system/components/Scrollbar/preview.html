@@ -1,0 +1,60 @@
+<!-- @dsCard group="Outliner" height=240 subtitle="Thumb normal, hover, dragged; 8px thumb" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scrollbar</title>
+<style>
+	/* Metrics: StarshipCoreStyle.cpp:188-192, SScrollBar.cpp, SScrollBarTrack.cpp:12, STableViewBase.cpp:100. See README. */
+	.sb-page { padding: 16px; display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap; }
+	.sb-group { display: flex; flex-direction: column; gap: 8px; }
+	.sb-group-title { font: 700 11px/1 var(--font-sans); letter-spacing: .06em; text-transform: uppercase; color: var(--foreground); opacity: .6; }
+	.sb-row { display: flex; gap: 20px; align-items: flex-start; }
+	.sb-col { display: flex; flex-direction: column; gap: 6px; align-items: center; }
+	.sb-cap { font-size: 11px; line-height: 1.2; color: var(--foreground); opacity: .6; text-align: center; }
+	.sb-well { background: var(--recessed); }
+
+	/* Slot: 16 wide inside a table view (STableViewBase.cpp:100), SScrollBar uniform padding 2 (SScrollBar.h:32) */
+	.sb { position: relative; flex: none; }
+	.sb-v { width: 16px; height: 150px; }
+	.sb-h { width: 170px; height: 16px; }
+	.sb-box-v { width: 12px; height: 150px; }
+	/* Thumb: 8 thick centered in the slot, radius 4, no track fill -- StarshipCoreStyle.cpp:189,192 */
+	.sb-thumb { position: absolute; border-radius: 4px; background: var(--hover); }
+	.sb-v .sb-thumb { left: 4px; width: 8px; }
+	.sb-box-v .sb-thumb { left: 2px; width: 8px; }
+	.sb-h .sb-thumb { top: 4px; height: 8px; }
+	/* Hovered or dragged thumb = Hover2 -- StarshipCoreStyle.cpp:190-191 */
+	.sb.is-hover .sb-thumb, .sb.is-drag .sb-thumb, .sb:hover .sb-thumb { background: var(--hover-2); }
+</style>
+</head>
+<body>
+<div class="sb-page">
+	<div class="sb-group">
+		<div class="sb-group-title">Vertical, table view slot (16)</div>
+		<div class="sb-row">
+			<div class="sb-col"><div class="sb sb-well sb-v"><div class="sb-thumb" style="top:2px;height:70px"></div></div><div class="sb-cap">normal<br>Hover</div></div>
+			<div class="sb-col"><div class="sb sb-well sb-v is-hover"><div class="sb-thumb" style="top:2px;height:70px"></div></div><div class="sb-cap">hovered<br>Hover2</div></div>
+			<div class="sb-col"><div class="sb sb-well sb-v is-drag"><div class="sb-thumb" style="top:40px;height:70px"></div></div><div class="sb-cap">dragged<br>Hover2</div></div>
+			<div class="sb-col"><div class="sb sb-well sb-v"><div class="sb-thumb" style="top:2px;height:35px"></div></div><div class="sb-cap">min thumb<br>35</div></div>
+		</div>
+	</div>
+
+	<div class="sb-group">
+		<div class="sb-group-title">Horizontal</div>
+		<div class="sb-col"><div class="sb sb-well sb-h"><div class="sb-thumb" style="left:2px;width:80px"></div></div><div class="sb-cap">normal</div></div>
+		<div class="sb-col"><div class="sb sb-well sb-h is-hover"><div class="sb-thumb" style="left:2px;width:80px"></div></div><div class="sb-cap">hovered</div></div>
+		<div class="sb-col"><div class="sb sb-well sb-h is-drag"><div class="sb-thumb" style="left:50px;width:80px"></div></div><div class="sb-cap">dragged</div></div>
+	</div>
+
+	<div class="sb-group">
+		<div class="sb-group-title">ScrollBox (12)</div>
+		<div class="sb-row">
+			<div class="sb-col"><div class="sb sb-well sb-box-v"><div class="sb-thumb" style="top:2px;height:70px"></div></div><div class="sb-cap">normal</div></div>
+			<div class="sb-col"><div class="sb sb-well sb-box-v is-hover"><div class="sb-thumb" style="top:2px;height:70px"></div></div><div class="sb-cap">hovered</div></div>
+		</div>
+	</div>
+</div>
+</body>
+</html>

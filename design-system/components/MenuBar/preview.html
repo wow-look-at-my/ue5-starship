@@ -1,0 +1,50 @@
+<!-- @dsCard group="Toolbars" height=140 subtitle="Main menu strip: normal, hover, menu open" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MenuBar</title>
+<style>
+/* SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp. Style set "WindowMenuBar" (SC:2443-2448), buttons built by SMenuEntryBlock.cpp:247-298. */
+body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* Normal font 10pt = 13.333px (SC:36, SC:2444); 16px line height approximates Roboto metrics */
+.menuBar-note { margin: 14px 0 6px; font: 400 10.667px/12px var(--font-sans); color: var(--foreground); opacity: .7; } /* Small font 8pt (SC:40) */
+.menuBar-note:first-child { margin-top: 0; }
+
+/* Strip: WindowMenuBar.Background is FSlateNoResource (SC:2443); the bar is transparent and sits on the title area */
+.menuBar { display: flex; align-items: stretch; background: transparent; }
+
+/* Item: SBorder (state brush) around an SButton with ContentPadding WindowMenuBar.MenuBar.Padding (12,4) (SC:2448) */
+.menuBar-item { padding: 4px 12px; color: var(--foreground); background: transparent; cursor: default; white-space: nowrap; } /* NormalForeground Foreground (SC:2439), Normal brush none (SC:2419) */
+.menuBar-item:hover, .menuBar-item.is-hover { background: var(--hover); color: var(--foreground-hover); } /* Hovered colour brush Hover (SC:2436), HoveredForeground ForegroundHover (SC:2437) */
+.menuBar-item.is-open { background: var(--primary); color: var(--foreground-hover); } /* menu open = Pressed brush Primary (SC:2420), PressedForeground ForegroundHover (SC:2438); SMenuEntryBlock.cpp:1614-1616 */
+</style>
+</head>
+<body>
+
+<div class="menuBar-note">Normal, with Edit hovered</div>
+<div class="menuBar">
+	<div class="menuBar-item">File</div>
+	<div class="menuBar-item is-hover">Edit</div>
+	<div class="menuBar-item">Window</div>
+	<div class="menuBar-item">Tools</div>
+	<div class="menuBar-item">Build</div>
+	<div class="menuBar-item">Select</div>
+	<div class="menuBar-item">Actor</div>
+	<div class="menuBar-item">Help</div>
+</div>
+
+<div class="menuBar-note">Window menu open</div>
+<div class="menuBar">
+	<div class="menuBar-item">File</div>
+	<div class="menuBar-item">Edit</div>
+	<div class="menuBar-item is-open">Window</div>
+	<div class="menuBar-item">Tools</div>
+	<div class="menuBar-item">Build</div>
+	<div class="menuBar-item">Select</div>
+	<div class="menuBar-item">Actor</div>
+	<div class="menuBar-item">Help</div>
+</div>
+
+</body>
+</html>

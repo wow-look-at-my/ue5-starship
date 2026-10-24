@@ -1,0 +1,64 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://github.com/wow-look-at-my/ue5-starship/design-system/design-system.schema.json",
+	"title": "Design system index",
+	"description": "The index file of a Design System kept in files. The createdOnFiles marker makes the page treat it as an index.",
+	"type": "object",
+	"required": ["v", "layout", "createdOnFiles", "title", "namespace", "libraries", "assetGroups", "docs"],
+	"properties": {
+		"v": { "const": 3 },
+		"layout": { "const": "files" },
+		"createdOnFiles": {
+			"type": "object",
+			"required": ["v", "at"],
+			"properties": {
+				"v": { "const": 1 },
+				"at": { "type": "string", "format": "date-time" }
+			}
+		},
+		"title": { "type": "string", "minLength": 1 },
+		"namespace": { "type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$" },
+		"libraries": { "type": "array" },
+		"groups": { "type": "array", "items": { "type": "string" } },
+		"assetGroups": {
+			"type": "object",
+			"additionalProperties": {
+				"type": "object",
+				"required": ["name", "files"],
+				"properties": {
+					"name": { "type": "string" },
+					"tile": { "type": "string" },
+					"order": { "type": "array", "items": { "type": "string" } },
+					"files": {
+						"type": "object",
+						"additionalProperties": {
+							"type": "object",
+							"required": ["name", "blob", "size", "type"],
+							"properties": {
+								"name": { "type": "string" },
+								"blob": { "type": "string", "pattern": "^[0-9a-f]{32}$" },
+								"size": { "type": "integer", "minimum": 1 },
+								"type": { "type": "string" }
+							}
+						}
+					}
+				}
+			}
+		},
+		"docs": {
+			"type": "object",
+			"required": ["readme"],
+			"properties": { "readme": { "const": "project/README.md" } }
+		},
+		"lastChange": {
+			"type": "object",
+			"required": ["by", "at"],
+			"properties": {
+				"by": { "type": "string" },
+				"at": { "type": "string", "format": "date-time" },
+				"via": { "type": "string" },
+				"note": { "type": "string" }
+			}
+		}
+	}
+}

@@ -1,0 +1,169 @@
+<!-- @dsCard group="Content Browser" height=260 subtitle="Composed panel: toolbar, source tree, splitter, search bar, folder tiles, item count" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ContentBrowser</title>
+<style>
+	.ContentBrowser { width: 1200px; margin: 12px 16px; background: var(--background); font: 400 13.333px/16px var(--font-sans); color: var(--foreground); }
+	.ContentBrowser svg { width: 16px; height: 16px; flex: none; display: block; }
+	.ContentBrowser button { font: inherit; color: inherit; border: 0; background: none; margin: 0; cursor: default; display: flex; align-items: center; }
+
+	/* ===== top row: SContentBrowser.cpp:764-855 (Panel, Padding 3) ===== */
+	.ContentBrowser__top { display: flex; align-items: center; background: var(--panel); padding: 3px; }
+	.ContentBrowser__tools { display: flex; align-items: center; margin-left: 5px; padding: 2px 0 2px 4px; }
+	.ContentBrowser__sep { width: 2px; margin: 0 4px; }
+	.ContentBrowser__add { gap: 3px; padding: 3px 14px; height: 22px; border-radius: 4px; background: var(--secondary); box-shadow: inset 0 0 0 1px var(--input); color: var(--foreground-hover); }
+	.ContentBrowser__add:hover { background: var(--hover); }
+	.ContentBrowser__add svg { color: var(--accent-green); }
+	.ContentBrowser__btn { gap: 3px; padding: 3px 4px; border-radius: 4px; }
+	.ContentBrowser__btn:hover, .ContentBrowser__nav:hover:not(:disabled), .ContentBrowser__crumb:hover, .ContentBrowser__settings:hover { background: var(--dropdown); color: var(--foreground-hover); }
+	.ContentBrowser__nav { padding: 1px 3px; border-radius: 4px; }
+	.ContentBrowser__nav--back { margin-left: 10px; }
+	.ContentBrowser__nav--fwd { margin-left: 2px; }
+	.ContentBrowser__nav:disabled { opacity: .45; }
+	.ContentBrowser__path { flex: 1; min-width: 0; display: flex; align-items: center; margin-left: 2px; }
+	.ContentBrowser__folder { margin: 0 4px 0 6px; }
+	.ContentBrowser__crumb { padding: 3px 4px; border-radius: 4px; }
+	.ContentBrowser__delim { padding: 1px 5px; }
+	.ContentBrowser__settings { margin-left: 5px; padding: 1px 4px; border-radius: 4px; }
+	.ContentBrowser__settings svg, .ContentBrowser__settings span { margin: 0 4px; }
+
+	/* SSeparator Thickness(2), Separator brush = Recessed (SContentBrowser.cpp:861; StarshipCoreStyle.cpp:707) */
+	.ContentBrowser__rule { height: 2px; background: var(--recessed); }
+
+	/* ===== body: SSplitter, handle 2px (SContentBrowser.cpp:871); handle = Splitter normal brush Background (StarshipCoreStyle.cpp:633-635) ===== */
+	.ContentBrowser__body { display: flex; align-items: stretch; background: var(--background); }
+	.ContentBrowser__sources { width: 340px; flex: none; padding: 4px; box-sizing: border-box; }     /* SBox Padding(4) :880 */
+	.ContentBrowser__sourcesFrame { display: flex; flex-direction: column; gap: 2px; background: var(--background); } /* vertical splitter handle 2px :897 */
+	.ContentBrowser__area { background: var(--header); padding-top: 2px; }                            /* :908-909 */
+	.ContentBrowser__head { display: flex; align-items: center; padding: 0 4px; min-height: 24px; }   /* HeaderPadding(4,0) :1473 */
+	.ContentBrowser__arrow { margin-right: 3px; }
+	.ContentBrowser__title { flex: 1; font-weight: 700; }
+	.ContentBrowser__tool { margin: 0 4px; padding: 4px; border-radius: 4px; display: flex; }
+	.ContentBrowser__add2 { margin-left: 4px; padding: 1px 3px; border-radius: 4px; display: flex; }
+	.ContentBrowser__add2 + .ContentBrowser__tool { margin-left: 4px; }
+	.ContentBrowser__tree { background: var(--recessed); }
+	.ContentBrowser__row { display: flex; align-items: center; height: 16px; }
+	.ContentBrowser__row--root { height: 19px; padding-top: 3px; }
+	.ContentBrowser__row--parent { background: var(--select-parent); }
+	.ContentBrowser__row--sel { background: var(--select-inactive); color: var(--foreground-hover); }
+	.ContentBrowser__exp { width: 16px; height: 16px; flex: none; }
+	.ContentBrowser__fi { margin-right: 2px; color: var(--accent-folder); }
+
+	.ContentBrowser__split { width: 2px; background: var(--background); flex: none; }
+
+	/* ===== asset area: Brushes.Panel, Padding(2,2,2,0) (SContentBrowser.cpp:1445-1447) ===== */
+	.ContentBrowser__assets { flex: 1; min-width: 0; margin: 0; display: flex; flex-direction: column; background: var(--panel); padding: 2px 2px 0; }
+	.ContentBrowser__search { display: flex; align-items: flex-start; padding: 4px 0 4px 6px; }   /* :1362 */
+	.ContentBrowser__field { display: flex; align-items: center; width: 500px; max-width: 100%; box-sizing: border-box; border-radius: 999px; background: var(--input); box-shadow: inset 0 0 0 1px var(--secondary); }
+	.ContentBrowser__field svg { margin-left: 4px; width: 14px; height: 14px; }
+	.ContentBrowser__hint { flex: 1; padding: 3px 30px 4px 8px; opacity: .35; }
+	.ContentBrowser__ibtn { display: flex; align-items: center; margin-left: 2px; padding: 1px 2px; border-radius: 4px; height: 18px; align-self: center; }
+	.ContentBrowser__ibtn:hover { background: var(--dropdown); color: var(--foreground-hover); }
+	.ContentBrowser__ibtn--filter { padding: 1px 3px; } .ContentBrowser__ibtn--filter svg + svg { margin-left: 2px; }
+	.ContentBrowser__tiles { display: flex; flex-wrap: wrap; align-content: flex-start; flex: 1; }
+	.ContentBrowser__tile { box-sizing: border-box; width: 82px; height: 130px; padding: 0 9px 9px 0; flex: none; }   /* AssetViewWidgets.cpp:2204,2208; SAssetView.cpp:5727 */
+	.ContentBrowser__card { width: 73px; height: 121px; border-radius: 4px; }
+	.ContentBrowser__thumb { width: 73px; height: 73px; padding: 5px; box-sizing: border-box; }                       /* :173 */
+	.ContentBrowser__thumb svg { width: 100%; height: 100%; padding: 0 2px 2px 0; box-sizing: border-box; color: var(--accent-folder); filter: drop-shadow(1.5px 1.5px 1.5px rgba(0,0,0,.55)); }
+	.ContentBrowser__label { padding: 3px 2px; }
+	.ContentBrowser__label div { padding: 2px 0 0 2px; font: 400 12px/14px var(--font-sans); text-align: center; }    /* 9pt */
+	.ContentBrowser__tile.is-sel .ContentBrowser__card { background: var(--secondary); box-shadow: inset 0 0 0 1px var(--primary), 2px 2px 3px rgba(0,0,0,.5); }
+	.ContentBrowser__tile.is-sel .ContentBrowser__label div { color: var(--white); }
+	/* bottom bar: Text Padding(8,5) (SAssetView.cpp:1383-1387) */
+	.ContentBrowser__status { padding: 5px 8px; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+	<defs>
+		<symbol id="cb-plus" viewBox="0 0 16 16"><path d="M8 2.5v11M2.5 8h11" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square"/></symbol>
+		<symbol id="cb-import" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"><path d="M2 9v5h12V9"/><path d="M8 1.5v8M5 6.5l3 3 3-3"/><path d="M2 9V6.5h2"/></g></symbol>
+		<symbol id="cb-saveall" viewBox="0 0 16 16"><g fill="currentColor"><path d="M4 1h8l3 3v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zm1 1v4h6V2zm1 9v3h5v-3z"/><path d="M1 4h1.5v10H1z" opacity=".6"/></g></symbol>
+		<symbol id="cb-back" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><path d="M11.5 8h-7M7.5 5l-3 3 3 3"/></g></symbol>
+		<symbol id="cb-fwd" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><path d="M4.5 8h7M8.5 5l3 3-3 3"/></g></symbol>
+		<symbol id="cb-chev-r" viewBox="0 0 16 16"><path d="M6 3.5L10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+		<symbol id="cb-gear" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><circle cx="8" cy="8" r="2.25"/><path d="M8 1.5l1.2 1.7 2-.5.6 2 2 .7-.5 2 1.7 1.3-1.7 1.3.5 2-2 .7-.6 2-2-.5L8 14.5l-1.2-1.7-2 .5-.6-2-2-.7.5-2L1.5 8l1.7-1.3-.5-2 2-.7.6-2 2 .5z"/></g></symbol>
+		<symbol id="cb-fc" viewBox="0 0 16 16"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2H6l1.5 1.5H13.5A1.5 1.5 0 0 1 15 5v7.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5z" fill="currentColor"/></symbol>
+		<symbol id="cb-fo" viewBox="0 0 16 16"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2H6l1.5 1.5h6A1.5 1.5 0 0 1 15 5v1H4.2L1 12.5zM4.2 7.2H15.6L12.6 13.8H1.2z" fill="currentColor"/></symbol>
+		<symbol id="cb-cr" viewBox="0 0 16 16"><path d="M5.5 3l6 5-6 5z" fill="currentColor"/></symbol>
+		<symbol id="cb-cd" viewBox="0 0 16 16"><path d="M3 5.5h10L8 11.5z" fill="currentColor"/></symbol>
+		<symbol id="cb-glass" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6.75" cy="6.75" r="4.5"/><path d="M10.2 10.2L14 14"/></g></symbol>
+		<symbol id="cb-pc" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.75v6.5M4.75 8h6.5"/></g></symbol>
+		<symbol id="cb-save" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"><path d="M2.5 2.5h9l2 2v9h-11z"/><path d="M5 2.5v3.5h5V2.5M5 13.5v-4h6v4"/></g></symbol>
+		<symbol id="cb-filter" viewBox="0 0 16 16"><path d="M2 4h12M4 8h8M6.5 12h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+		<symbol id="cb-chev-d" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+		<symbol id="cb-folder64" viewBox="0 0 64 64">
+			<path d="M2 13a2 2 0 0 1 2-2h18l5 6h33a2 2 0 0 1 2 2v31a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="currentColor"/>
+			<path d="M2 13a2 2 0 0 1 2-2h18l5 6H2z" fill="#fff" opacity=".12"/>
+			<path d="M2 24h60v26a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="#000" opacity=".12"/>
+		</symbol>
+	</defs>
+</svg>
+
+<div class="ContentBrowser">
+	<div class="ContentBrowser__top">
+		<div class="ContentBrowser__tools">
+			<button class="ContentBrowser__add"><svg><use href="#cb-plus"/></svg><span>Add</span></button>
+			<span class="ContentBrowser__sep"></span>
+			<button class="ContentBrowser__btn"><svg><use href="#cb-import"/></svg><span>Import</span></button>
+			<span class="ContentBrowser__sep"></span>
+			<button class="ContentBrowser__btn"><svg><use href="#cb-saveall"/></svg><span>Save All</span></button>
+		</div>
+		<button class="ContentBrowser__nav ContentBrowser__nav--back" aria-label="Back"><svg><use href="#cb-back"/></svg></button>
+		<button class="ContentBrowser__nav ContentBrowser__nav--fwd" aria-label="Forward" disabled><svg><use href="#cb-fwd"/></svg></button>
+		<div class="ContentBrowser__path">
+			<svg class="ContentBrowser__folder"><use href="#cb-fc"/></svg>
+			<button class="ContentBrowser__crumb">All</button><span class="ContentBrowser__delim"><svg><use href="#cb-chev-r"/></svg></span>
+			<button class="ContentBrowser__crumb">Content</button><span class="ContentBrowser__delim"><svg><use href="#cb-chev-r"/></svg></span>
+			<button class="ContentBrowser__crumb">StarterContent</button><span class="ContentBrowser__delim"><svg><use href="#cb-chev-r"/></svg></span>
+		</div>
+		<button class="ContentBrowser__settings"><svg><use href="#cb-gear"/></svg><span>Settings</span></button>
+	</div>
+	<div class="ContentBrowser__rule"></div>
+
+	<div class="ContentBrowser__body">
+		<div class="ContentBrowser__sources">
+			<div class="ContentBrowser__sourcesFrame">
+				<div class="ContentBrowser__area"><div class="ContentBrowser__head"><svg class="ContentBrowser__arrow"><use href="#cb-cr"/></svg><span class="ContentBrowser__title">Favorites</span><span class="ContentBrowser__tool"><svg><use href="#cb-glass"/></svg></span></div></div>
+				<div class="ContentBrowser__area">
+					<div class="ContentBrowser__head"><svg class="ContentBrowser__arrow"><use href="#cb-cd"/></svg><span class="ContentBrowser__title">LevelDesignProject</span><span class="ContentBrowser__tool"><svg><use href="#cb-glass"/></svg></span></div>
+					<div class="ContentBrowser__tree">
+						<div class="ContentBrowser__row ContentBrowser__row--parent ContentBrowser__row--root"><span class="ContentBrowser__exp"><svg><use href="#cb-cd"/></svg></span><svg class="ContentBrowser__fi"><use href="#cb-fo"/></svg>All</div>
+						<div class="ContentBrowser__row ContentBrowser__row--parent" style="padding-left:10px"><span class="ContentBrowser__exp"><svg><use href="#cb-cd"/></svg></span><svg class="ContentBrowser__fi"><use href="#cb-fo"/></svg>Content</div>
+						<div class="ContentBrowser__row ContentBrowser__row--sel" style="padding-left:20px"><span class="ContentBrowser__exp"><svg><use href="#cb-cd"/></svg></span><svg class="ContentBrowser__fi"><use href="#cb-fo"/></svg>StarterContent</div>
+						<div class="ContentBrowser__row" style="padding-left:30px"><span class="ContentBrowser__exp"></span><svg class="ContentBrowser__fi"><use href="#cb-fc"/></svg>Architecture</div>
+					</div>
+				</div>
+				<div class="ContentBrowser__area"><div class="ContentBrowser__head"><svg class="ContentBrowser__arrow"><use href="#cb-cr"/></svg><span class="ContentBrowser__title">Collections</span><span class="ContentBrowser__add2"><svg><use href="#cb-pc"/></svg></span><span class="ContentBrowser__tool"><svg><use href="#cb-glass"/></svg></span></div></div>
+			</div>
+		</div>
+
+		<div class="ContentBrowser__split"></div>
+
+		<div class="ContentBrowser__assets">
+			<div class="ContentBrowser__search">
+				<div class="ContentBrowser__field"><svg><use href="#cb-glass"/></svg><span class="ContentBrowser__hint">Search StarterContent</span></div>
+				<span class="ContentBrowser__ibtn"><svg><use href="#cb-save"/></svg></span>
+				<span class="ContentBrowser__ibtn ContentBrowser__ibtn--filter"><svg><use href="#cb-filter"/></svg><svg><use href="#cb-chev-d"/></svg></span>
+			</div>
+			<div class="ContentBrowser__tiles">
+				<div class="ContentBrowser__tile"><div class="ContentBrowser__card"><div class="ContentBrowser__thumb"><svg><use href="#cb-folder64"/></svg></div><div class="ContentBrowser__label"><div>Architecture</div></div></div></div>
+				<div class="ContentBrowser__tile"><div class="ContentBrowser__card"><div class="ContentBrowser__thumb"><svg><use href="#cb-folder64"/></svg></div><div class="ContentBrowser__label"><div>Audio</div></div></div></div>
+				<div class="ContentBrowser__tile is-sel"><div class="ContentBrowser__card"><div class="ContentBrowser__thumb"><svg><use href="#cb-folder64"/></svg></div><div class="ContentBrowser__label"><div>Blueprints</div></div></div></div>
+				<div class="ContentBrowser__tile"><div class="ContentBrowser__card"><div class="ContentBrowser__thumb"><svg><use href="#cb-folder64"/></svg></div><div class="ContentBrowser__label"><div>HDRI</div></div></div></div>
+				<div class="ContentBrowser__tile"><div class="ContentBrowser__card"><div class="ContentBrowser__thumb"><svg><use href="#cb-folder64"/></svg></div><div class="ContentBrowser__label"><div>Maps</div></div></div></div>
+				<div class="ContentBrowser__tile"><div class="ContentBrowser__card"><div class="ContentBrowser__thumb"><svg><use href="#cb-folder64"/></svg></div><div class="ContentBrowser__label"><div>Materials</div></div></div></div>
+				<div class="ContentBrowser__tile"><div class="ContentBrowser__card"><div class="ContentBrowser__thumb"><svg><use href="#cb-folder64"/></svg></div><div class="ContentBrowser__label"><div>Particles</div></div></div></div>
+				<div class="ContentBrowser__tile"><div class="ContentBrowser__card"><div class="ContentBrowser__thumb"><svg><use href="#cb-folder64"/></svg></div><div class="ContentBrowser__label"><div>Props</div></div></div></div>
+				<div class="ContentBrowser__tile"><div class="ContentBrowser__card"><div class="ContentBrowser__thumb"><svg><use href="#cb-folder64"/></svg></div><div class="ContentBrowser__label"><div>Shapes</div></div></div></div>
+				<div class="ContentBrowser__tile"><div class="ContentBrowser__card"><div class="ContentBrowser__thumb"><svg><use href="#cb-folder64"/></svg></div><div class="ContentBrowser__label"><div>Textures</div></div></div></div>
+			</div>
+			<div class="ContentBrowser__status">10 items</div>
+		</div>
+	</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!-- @dsCard group="Details" height=76 subtitle="Asset row: 48px thumbnail, combo, use-selected and browse icon buttons, reset arrow" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AssetPicker</title>
+<style>
+	/* Every metric below is cited in README.md. Icons are 16x16 stroke approximations of the Starship SVGs. */
+	.AssetPicker-frame { width: 360px; background: var(--recessed); }
+	/* Property row (see DetailsCategory): SDetailSingleItemRow.cpp:732-760 */
+	.AssetPicker-row { display: flex; min-height: 27px; padding-bottom: 1px; background: var(--recessed); }
+	.AssetPicker-name, .AssetPicker-value, .AssetPicker-right { background: var(--panel); display: flex; align-items: center; min-width: 0; }
+	.AssetPicker-name { flex: 0 0 40%; padding-left: 20px; font: 400 10.667px/1.172 var(--font-sans); color: var(--foreground); }
+	.AssetPicker-value { flex: 1; padding: 0 2px 0 12px; align-items: flex-start; } /* RightRowPadding (12,0,2,0): SDetailSingleItemRow.cpp:39 */
+	.AssetPicker-right { flex: 0 0 22px; justify-content: flex-end; }
+	.AssetPicker-split { flex: 0 0 1px; background: var(--recessed); }
+	.AssetPicker-row:hover .AssetPicker-name, .AssetPicker-row:hover .AssetPicker-value, .AssetPicker-row:hover .AssetPicker-right { background: var(--header); }
+
+	/* Thumbnail slot: Padding(0,3,5,0), drop-shadow border padding (0,0,4,4), overlay padding 1: SPropertyEditorAsset.cpp:613-648 */
+	.AssetPicker-thumbSlot { flex: none; margin: 3px 5px 0 0; padding: 0 4px 4px 0; align-self: flex-start; }
+	.AssetPicker-thumbFrame { position: relative; padding: 1px; width: 50px; height: 50px; border-radius: 4px; box-shadow: 2px 2px 4px rgba(0, 0, 0, .55); } /* drop-shadow is a raster box brush (not in source tree): approximated */
+	.AssetPicker-thumb { position: relative; width: 48px; height: 48px; overflow: hidden; background: linear-gradient(160deg, var(--hover-2), var(--dropdown)); color: var(--header); } /* ThumbnailSize (48,48): SPropertyEditorAsset.h:62 */
+	.AssetPicker-thumb svg { position: absolute; inset: 8px; width: 32px; height: 32px; }
+	.AssetPicker-strip { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: #29f1f2; } /* 2px asset colour strip: AssetThumbnail.cpp:1050-1054; colour sampled from the reference screenshot, class colour not in this tree */
+	.AssetPicker-thumbBorder { position: absolute; inset: 0; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--input-outline); pointer-events: none; } /* PropertyEditor.AssetThumbnailBorder: StarshipStyle.cpp:3021 */
+	.AssetPicker-thumbFrame:hover .AssetPicker-thumbBorder { box-shadow: inset 0 0 0 1px var(--hover-2); } /* StarshipStyle.cpp:3022 */
+
+	.AssetPicker-col { flex: 1; min-width: 0; align-self: center; display: flex; flex-direction: column; } /* VBox, VAlign center: SPropertyEditorAsset.cpp:651-677 */
+	/* Combo: ComboButton style, content padding 0 + button padding (8,1,8,1), 16px arrow + padding 2: StarshipCoreStyle.cpp:1470-1494 */
+	.AssetPicker-combo {
+		display: flex; align-items: center; height: 22px; padding: 1px 8px; border: 0; margin: 0; cursor: pointer; text-align: left;
+		background: var(--input); border-radius: 4px; box-shadow: inset 0 0 0 1px var(--input-outline);
+		color: var(--foreground); font: 400 10.667px/1.172 var(--font-sans); /* PropertyFontStyle: SPropertyEditorAsset.cpp:570 */
+	}
+	.AssetPicker-combo:hover { box-shadow: inset 0 0 0 1px var(--hover); color: var(--foreground-hover); }
+	.AssetPicker-combo .label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.AssetPicker-combo svg { width: 16px; height: 16px; margin: 2px; flex: none; }
+	/* Button strip: SBox Padding(0,2,4,2), each button a 22x22 SBox with slot padding (2,0): SPropertyEditorAsset.cpp:670-673, 721-748 */
+	.AssetPicker-buttons { display: flex; padding: 2px 4px 2px 0; }
+	.AssetPicker-btnBox { width: 22px; height: 22px; margin: 0 2px; display: flex; align-items: center; justify-content: center; } /* PropertyCustomizationHelpers.cpp:74-79 */
+	.AssetPicker-btn { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 18px; padding: 0; border: 0; border-radius: 4px; background: transparent; cursor: pointer; color: var(--foreground); } /* SimpleButton, ContentPadding 0 + (2,1): PropertyCustomizationHelpers.cpp:81-85 */
+	.AssetPicker-btn:hover { background: var(--dropdown); color: var(--foreground-hover); } /* StarshipCoreStyle.cpp:1391, 1395 */
+	.AssetPicker-btn svg { width: 16px; height: 16px; }
+	.AssetPicker-reset { width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; border: 0; padding: 0; background: transparent; color: var(--foreground); cursor: pointer; align-self: center; } /* StarshipStyle.cpp:3277-3283 */
+	.AssetPicker-reset:hover { color: var(--foreground-hover); }
+	.AssetPicker-reset svg { width: 16px; height: 16px; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+	<symbol id="AssetPicker-chev" viewBox="0 0 16 16"><path d="m4.5 6.5 3.5 3.5 3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+	<symbol id="AssetPicker-use" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.25"/><path d="M11 8H5.5m2.5-2.75L5.25 8 8 10.75" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+	<symbol id="AssetPicker-browse" viewBox="0 0 16 16"><path d="M1.75 4.25a1 1 0 0 1 1-1h3.2l1.3 1.5h5a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H2.75a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/></symbol>
+	<symbol id="AssetPicker-reset" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+	<symbol id="AssetPicker-cube" viewBox="0 0 16 16"><path d="M8 1.5 14 4.75v6.5L8 14.5 2 11.25v-6.5z M2 4.75 8 8l6-3.25 M8 8v6.5" fill="none" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/></symbol>
+</svg>
+<div class="AssetPicker-frame">
+	<div class="AssetPicker-row">
+		<div class="AssetPicker-name" style="align-self: stretch">Static Mesh</div>
+		<div class="AssetPicker-split"></div>
+		<div class="AssetPicker-value">
+			<div class="AssetPicker-thumbSlot">
+				<div class="AssetPicker-thumbFrame">
+					<div class="AssetPicker-thumb"><svg><use href="#AssetPicker-cube"/></svg><i class="AssetPicker-strip"></i></div>
+					<i class="AssetPicker-thumbBorder"></i>
+				</div>
+			</div>
+			<div class="AssetPicker-col">
+				<button class="AssetPicker-combo"><span class="label">SM_Chair</span><svg><use href="#AssetPicker-chev"/></svg></button>
+				<div class="AssetPicker-buttons">
+					<span class="AssetPicker-btnBox"><button class="AssetPicker-btn" title="Use Selected Asset from Content Browser"><svg><use href="#AssetPicker-use"/></svg></button></span>
+					<span class="AssetPicker-btnBox"><button class="AssetPicker-btn" title="Browse to Asset in Content Browser"><svg><use href="#AssetPicker-browse"/></svg></button></span>
+				</div>
+			</div>
+		</div>
+		<div class="AssetPicker-split"></div>
+		<div class="AssetPicker-right"><button class="AssetPicker-reset" title="Reset this property to its default value."><svg><use href="#AssetPicker-reset"/></svg></button></div>
+	</div>
+</div>
+</body>
+</html>

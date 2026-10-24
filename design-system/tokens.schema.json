@@ -1,0 +1,126 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://github.com/wow-look-at-my/ue5-starship/design-system/tokens.schema.json",
+	"title": "Design system tokens",
+	"description": "The shape the Design System page reads from tokens.json. Every family but type is a list of entries, never a name-to-value map.",
+	"type": "object",
+	"required": ["name", "version", "color", "type", "spacing", "radius"],
+	"additionalProperties": false,
+	"properties": {
+		"name": { "type": "string", "minLength": 1 },
+		"version": { "type": "integer", "minimum": 1 },
+		"color": {
+			"type": "object",
+			"required": ["themes", "tokens"],
+			"additionalProperties": false,
+			"properties": {
+				"themes": {
+					"type": "array",
+					"minItems": 1,
+					"maxItems": 8,
+					"items": {
+						"type": "object",
+						"required": ["id", "name"],
+						"additionalProperties": false,
+						"properties": {
+							"id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_.-]{0,63}$" },
+							"name": { "type": "string", "minLength": 1 }
+						}
+					}
+				},
+				"tokens": {
+					"type": "array",
+					"minItems": 1,
+					"maxItems": 600,
+					"items": { "$ref": "#/$defs/colorToken" }
+				}
+			}
+		},
+		"type": {
+			"type": "object",
+			"required": ["fonts", "families", "groups"],
+			"additionalProperties": false,
+			"properties": {
+				"fonts": { "type": "array", "items": { "type": "object", "required": ["family", "file"] } },
+				"families": {
+					"type": "object",
+					"maxProperties": 12,
+					"additionalProperties": { "type": "string", "minLength": 1, "maxLength": 200 }
+				},
+				"groups": {
+					"type": "array",
+					"minItems": 1,
+					"maxItems": 12,
+					"items": {
+						"type": "object",
+						"required": ["name", "family", "styles"],
+						"additionalProperties": false,
+						"properties": {
+							"name": { "type": "string", "minLength": 1 },
+							"family": { "type": "string", "minLength": 1 },
+							"styles": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/typeStyle" } }
+						}
+					}
+				}
+			}
+		},
+		"spacing": { "$ref": "#/$defs/lengthFamily" },
+		"radius": { "$ref": "#/$defs/lengthFamily" }
+	},
+	"$defs": {
+		"tokenName": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$" },
+		"usage": { "type": "string", "minLength": 1, "maxLength": 1000 },
+		"colorValue": {
+			"type": "string",
+			"pattern": "^(#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})|\\{[A-Za-z0-9][A-Za-z0-9_.-]{0,63}\\})$"
+		},
+		"colorToken": {
+			"type": "object",
+			"required": ["name", "value", "usage"],
+			"additionalProperties": false,
+			"properties": {
+				"name": { "$ref": "#/$defs/tokenName" },
+				"value": {
+					"oneOf": [
+						{ "$ref": "#/$defs/colorValue" },
+						{ "type": "object", "minProperties": 1, "additionalProperties": { "$ref": "#/$defs/colorValue" } }
+					]
+				},
+				"usage": { "$ref": "#/$defs/usage" }
+			}
+		},
+		"typeStyle": {
+			"type": "object",
+			"required": ["name", "fontSize"],
+			"properties": {
+				"name": { "$ref": "#/$defs/tokenName" },
+				"fontSize": { "type": "string", "pattern": "^[0-9]+(\\.[0-9]+)?(px|rem|em|%)$" },
+				"lineHeight": { "type": ["number", "string"] },
+				"fontWeight": { "type": "integer", "minimum": 1, "maximum": 1000 },
+				"fontStyle": { "enum": ["normal", "italic"] },
+				"usage": { "$ref": "#/$defs/usage" }
+			}
+		},
+		"lengthFamily": {
+			"type": "object",
+			"required": ["tokens"],
+			"properties": {
+				"tokens": {
+					"type": "array",
+					"minItems": 1,
+					"maxItems": 60,
+					"items": {
+						"type": "object",
+						"required": ["name", "value", "usage"],
+						"additionalProperties": false,
+						"properties": {
+							"name": { "$ref": "#/$defs/tokenName" },
+							"value": { "type": "string", "pattern": "^[0-9]+(\\.[0-9]+)?(px|rem|em|%)?$" },
+							"usage": { "$ref": "#/$defs/usage" }
+						}
+					}
+				}
+			}
+		}
+	}
+}

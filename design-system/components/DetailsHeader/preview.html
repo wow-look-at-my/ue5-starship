@@ -1,0 +1,82 @@
+<!-- @dsCard group="Details" height=84 subtitle="Name area: class icon, actor name, Add, Blueprint, help, lock, plus the instance row" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DetailsHeader</title>
+<style>
+	/* Every metric below is cited in README.md. Icons are 16x16 stroke approximations of the Starship SVGs. */
+	.DetailsHeader-frame { width: 360px; background: var(--panel); padding-bottom: 6px; } /* Brushes.Panel: StarshipCoreStyle.cpp:1123 */
+	.DetailsHeader { padding: 4px 0 0 10px; } /* SActorDetails.cpp:336 Padding(10,4,0,0) */
+	.DetailsHeader-name { display: flex; align-items: center; min-height: 22px; }
+	.DetailsHeader-icon { width: 16px; height: 16px; flex: none; color: var(--foreground); } /* class icon 16x16: SDetailNameArea.cpp:112-122 */
+	.DetailsHeader-label {
+		flex: 1; min-width: 0; padding: 0 3px 0 8px; /* SDetailNameArea.cpp:138 Padding(8,0,3,0) */
+		font: 400 14.667px/1.172 var(--font-sans); /* DEFAULT_FONT("Regular", 11): StarshipStyle.cpp:3149-3152 */
+		color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+	}
+	.DetailsHeader-actions { display: flex; align-items: center; flex: none; }
+	.DetailsHeader-btn {
+		display: inline-flex; align-items: center; justify-content: center; flex: none;
+		height: 22px; margin: 0; border: 0; border-radius: 4px; cursor: pointer; font: inherit;
+		color: var(--foreground-hover);
+	}
+	.DetailsHeader-btn svg { width: 16px; height: 16px; flex: none; }
+	/* "Button" style: StarshipCoreStyle.cpp:1372-1382 (Secondary fill, Input 1px outline, radius 4) */
+	.DetailsHeader-add, .DetailsHeader-icon-btn { background: var(--secondary); box-shadow: inset 0 0 0 1px var(--input); }
+	.DetailsHeader-add:hover, .DetailsHeader-icon-btn:hover { background: var(--hover); }
+	.DetailsHeader-add:active, .DetailsHeader-icon-btn:active { background: var(--header); }
+	/* Add: SComboButton content padding (2,1.5) + Button NormalPadding (12,1.5): ToolWidgetsStyle.cpp:16-21, 63, StarshipCoreStyle.cpp:1381 */
+	.DetailsHeader-add { padding: 0 14px; gap: 3px; margin-right: 4px; } /* icon/label gap 3: ToolWidgetsStylePrivate.h:23 */
+	.DetailsHeader-add svg { color: var(--accent-green); } /* PositiveActionButton icon colour: ToolWidgetsStyle.cpp:76 */
+	.DetailsHeader-add span { font: 400 13.333px/1.172 var(--font-sans); } /* SmallButtonText = NormalText 10pt: StarshipCoreStyle.cpp:1433 */
+	/* NameAreaButton: padding (6,3), content padding 0: StarshipStyle.cpp:3325-3328, SSubobjectInstanceEditor.cpp:100-101 */
+	.DetailsHeader-icon-btn { width: 28px; padding: 0; color: var(--white); }
+	/* SDocumentationAnchor -> SSimpleButton: (2,1) content + (2,1) style = (4,2): SSimpleButton.cpp:33-34, ToolWidgetsStyle.cpp:123 */
+	.DetailsHeader-help { width: 24px; height: 20px; margin-left: 4px; padding: 0; background: transparent; color: var(--foreground); }
+	.DetailsHeader-help:hover, .DetailsHeader-lock:hover { background: var(--dropdown); color: var(--foreground-hover); } /* SimpleButton hover: StarshipCoreStyle.cpp:1391 */
+	/* Lock: SimpleButton, ContentPadding(4,2) + style (2,1) = (6,3); slot padding (4,0,4,0): SDetailNameArea.cpp:164-170 */
+	.DetailsHeader-lock { width: 28px; padding: 0; margin: 0 4px; background: transparent; color: var(--foreground); }
+	/* Instance row: SCSEditor.Background Recessed r4 + padding 4: StarshipStyle.cpp:4237, SSubobjectInstanceEditor.cpp:163-164 */
+	.DetailsHeader-instanceBox { margin: 4px 2px 0; padding: 4px; background: var(--recessed); border-radius: 4px; } /* ComponentsBox padding (2,0,2,0): SActorDetails.cpp:269 */
+	.DetailsHeader-instance {
+		display: flex; align-items: center; padding: 4px 0; /* row padding (0,4,0,4): SSubobjectEditor.cpp:721 */
+		background: var(--select-inactive); /* SceneOutliner.TableViewRow inactive brush: StarshipCoreStyle.cpp:2012 */
+		color: var(--foreground-hover); font: 400 13.333px/1.172 var(--font-sans); /* selected text ForegroundHover: StarshipCoreStyle.cpp:2019 */
+	}
+	.DetailsHeader-instance svg { width: 16px; height: 16px; margin-left: 4px; flex: none; } /* root actor icon margin: SSubobjectEditor.cpp:777 */
+	.DetailsHeader-instance .name { margin-left: 6px; } /* SSubobjectEditor.cpp:789 */
+	.DetailsHeader-instance .ctx { margin-left: 4px; } /* SSubobjectEditor.cpp:797 */
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+	<symbol id="DetailsHeader-cube" viewBox="0 0 16 16"><path d="M8 1.5 14 4.75v6.5L8 14.5 2 11.25v-6.5z M2 4.75 8 8l6-3.25 M8 8v6.5" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/></symbol>
+	<symbol id="DetailsHeader-plus" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></symbol>
+	<symbol id="DetailsHeader-bp" viewBox="0 0 16 16"><path d="M2.5 3.5h4v3h-4z M9.5 9.5h4v3h-4z M6.5 5h2.5a1.5 1.5 0 0 1 1.5 1.5V9.5 M2.5 11h4" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+	<symbol id="DetailsHeader-help" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.25"/><path d="M6.2 6.3a1.9 1.9 0 1 1 2.7 1.7c-.6.3-.9.7-.9 1.3M8 11.4v.1" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></symbol>
+	<symbol id="DetailsHeader-unlock" viewBox="0 0 16 16"><rect x="3" y="7.5" width="10" height="6.5" rx="1.25" fill="none" stroke="currentColor" stroke-width="1.25"/><path d="M5.5 7.5V5a2.5 2.5 0 0 1 4.9-.7" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></symbol>
+</svg>
+<div class="DetailsHeader-frame">
+	<div class="DetailsHeader">
+		<div class="DetailsHeader-name">
+			<svg class="DetailsHeader-icon"><use href="#DetailsHeader-cube"/></svg>
+			<div class="DetailsHeader-label">Chair</div>
+			<div class="DetailsHeader-actions">
+				<button class="DetailsHeader-btn DetailsHeader-add" title="Adds a new component to this actor"><svg><use href="#DetailsHeader-plus"/></svg><span>Add</span></button>
+				<button class="DetailsHeader-btn DetailsHeader-icon-btn" title="Converts this actor into a reusable Blueprint Class"><svg><use href="#DetailsHeader-bp"/></svg></button>
+				<button class="DetailsHeader-btn DetailsHeader-help" title="Click to open documentation"><svg><use href="#DetailsHeader-help"/></svg></button>
+			</div>
+			<button class="DetailsHeader-btn DetailsHeader-lock" title="Locks the current selection into the Details panel"><svg><use href="#DetailsHeader-unlock"/></svg></button>
+		</div>
+	</div>
+		<div class="DetailsHeader-instanceBox">
+			<div class="DetailsHeader-instance">
+				<svg><use href="#DetailsHeader-cube"/></svg>
+				<span class="name">Chair</span><span class="ctx">(Instance)</span>
+			</div>
+		</div>
+</div>
+</body>
+</html>

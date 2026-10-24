@@ -1,0 +1,104 @@
+<!-- @dsCard group="Outliner" height=410 subtitle="Row states, expander arrow, indentation" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TreeRow</title>
+<style>
+	/* Metrics: StarshipCoreStyle.cpp (SetupTableViewStyles), STableRow.h, SExpanderArrow.cpp, SOutlinerTreeView.cpp, SceneOutlinerPublicTypes.h. See README. */
+	.tr-page { padding: 16px; display: grid; grid-template-columns: 340px 1fr; column-gap: 24px; row-gap: 0; align-items: center; width: max-content; max-width: 100%; }
+	.tr-cap { font-size: 11px; color: var(--foreground); opacity: .6; line-height: 20px; }
+	.tr-head { grid-column: 1 / -1; font: 700 11px/1 var(--font-sans); letter-spacing: .06em; text-transform: uppercase; color: var(--foreground); opacity: .6; margin: 14px 0 6px; }
+	.tr-head:first-child { margin-top: 0; }
+
+	/* Row: min height 20 -- SceneOutlinerPublicTypes.h:222 RowHeight() */
+	.tr-row { display: flex; align-items: center; min-height: 20px; color: var(--foreground); background: var(--recessed); font-size: 13.333px; line-height: 16px; white-space: nowrap; overflow: hidden; }
+	/* AlternatingRow odd = Background -- StarshipCoreStyle.cpp:2069 */
+	.tr-row.is-odd { background: var(--background); }
+	/* EvenRowBackgroundHovered / OddRowBackgroundHovered = SelectHover -- StarshipCoreStyle.cpp:2002,2005 */
+	.tr-row.is-hover { background: var(--select-hover); }
+	/* ActiveBrush = Select; SelectedTextColor = ForegroundHover -- StarshipCoreStyle.cpp:2009,2019 */
+	.tr-row.is-selected { background: var(--select); color: var(--foreground-hover); }
+	/* InactiveBrush = SelectInactive -- StarshipCoreStyle.cpp:2012 */
+	.tr-row.is-selected.is-inactive { background: var(--select-inactive); }
+	/* ActiveHighlightedBrush / InactiveHighlightedBrush = SelectParent -- StarshipCoreStyle.cpp:2015-2016 */
+	.tr-row.is-parent { background: var(--select-parent); }
+	/* FSceneOutlinerCommonLabelData::DarkColor (0.15,0.15,0.15 linear) -- SceneOutlinerStandaloneTypes.cpp:18 */
+	.tr-row.is-dim .tr-text { color: #6c6c6c; }
+
+	/* Indent: SExpanderArrow IndentAmount(12) -- SOutlinerTreeView.cpp:306; label slot padding-left 6 -- SOutlinerTreeView.cpp:304 */
+	.tr-indent { flex: none; width: calc(6px + var(--depth, 0) * 12px); }
+	/* Arrow button: 16x16 image, ContentPadding 0 -- SExpanderArrow.cpp:41; Icon16x16 -- StarshipCoreStyle.cpp:2072 */
+	.tr-arrow { flex: none; width: 16px; height: 16px; display: block; color: color-mix(in srgb, var(--foreground) 75%, #000); opacity: .6; }
+	.tr-row.is-selected .tr-arrow { color: var(--foreground); }
+	/* Hovered arrow uses ForegroundHover tint -- StarshipCoreStyle.cpp:2073,2075; subdued alpha 0.6 -- WidgetStyle.cpp:11 */
+	.tr-arrow.is-hover { color: var(--foreground); }
+	.tr-row.is-selected .tr-arrow.is-hover { color: var(--foreground-hover); }
+	.tr-arrow.is-leaf { visibility: hidden; }
+	/* Icon slot: 16x16, padding (0,1,6,1) -- SceneOutlinerPublicTypes.h:223-224 */
+	.tr-icon { flex: none; width: 16px; height: 16px; margin: 1px 6px 1px 0; display: block; }
+	/* Folder: AccentFolder tint x row foreground -- StarshipStyle.cpp:1140, ActorFolderTreeItem.cpp:70 */
+	.tr-icon.is-folder { color: color-mix(in srgb, var(--accent-folder) 75%, #000); }
+	.tr-row.is-selected .tr-icon.is-folder { color: var(--accent-folder); }
+	.tr-text { flex: 1 1 auto; min-width: 0; overflow: hidden; }
+	.tr-svg { width: 0; height: 0; position: absolute; }
+</style>
+</head>
+<body>
+<!-- Approximated 16x16 stroke/fill icons. The Starship SVG files are not available. -->
+<svg class="tr-svg" aria-hidden="true">
+	<symbol id="tr-caret-right" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z" fill="currentColor"/></symbol>
+	<symbol id="tr-caret-down" viewBox="0 0 16 16"><path d="M4 6h8l-4 4.5z" fill="currentColor"/></symbol>
+	<symbol id="tr-folder" viewBox="0 0 16 16"><path d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z" fill="currentColor"/></symbol>
+	<symbol id="tr-cube" viewBox="0 0 16 16"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></symbol>
+</svg>
+
+<div class="tr-page">
+	<div class="tr-head">Row states</div>
+
+	<div class="tr-row"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow"><use href="#tr-caret-down"/></svg><svg class="tr-icon is-folder"><use href="#tr-folder"/></svg><span class="tr-text">Lights</span></div>
+	<div class="tr-cap">normal, even row -- Recessed</div>
+
+	<div class="tr-row is-odd"><span class="tr-indent" style="--depth:2"></span><svg class="tr-arrow is-leaf"><use href="#tr-caret-right"/></svg><svg class="tr-icon"><use href="#tr-cube"/></svg><span class="tr-text">Light Source</span></div>
+	<div class="tr-cap">normal, odd row -- Background</div>
+
+	<div class="tr-row is-hover"><span class="tr-indent" style="--depth:2"></span><svg class="tr-arrow is-leaf"><use href="#tr-caret-right"/></svg><svg class="tr-icon"><use href="#tr-cube"/></svg><span class="tr-text">SkyLight</span></div>
+	<div class="tr-cap">hovered -- SelectHover</div>
+
+	<div class="tr-row is-selected"><span class="tr-indent" style="--depth:2"></span><svg class="tr-arrow is-leaf"><use href="#tr-caret-right"/></svg><svg class="tr-icon"><use href="#tr-cube"/></svg><span class="tr-text">Chair</span></div>
+	<div class="tr-cap">selected, tree focused -- Select</div>
+
+	<div class="tr-row is-selected is-inactive"><span class="tr-indent" style="--depth:2"></span><svg class="tr-arrow is-leaf"><use href="#tr-caret-right"/></svg><svg class="tr-icon"><use href="#tr-cube"/></svg><span class="tr-text">Chair</span></div>
+	<div class="tr-cap">selected, tree not focused -- SelectInactive</div>
+
+	<div class="tr-row is-parent"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow"><use href="#tr-caret-down"/></svg><svg class="tr-icon is-folder"><use href="#tr-folder"/></svg><span class="tr-text">StaticMeshes</span></div>
+	<div class="tr-cap">parent of selection -- SelectParent</div>
+
+	<div class="tr-row is-odd is-dim"><span class="tr-indent" style="--depth:2"></span><svg class="tr-arrow is-leaf"><use href="#tr-caret-right"/></svg><svg class="tr-icon"><use href="#tr-cube"/></svg><span class="tr-text">Not interactive</span></div>
+	<div class="tr-cap">label that cannot interact -- DarkColor</div>
+
+	<div class="tr-head">Expander arrow</div>
+
+	<div class="tr-row"><span class="tr-indent" style="--depth:0"></span><svg class="tr-arrow"><use href="#tr-caret-right"/></svg><span class="tr-text">collapsed</span></div>
+	<div class="tr-cap">TreeArrow_Collapsed</div>
+	<div class="tr-row is-odd"><span class="tr-indent" style="--depth:0"></span><svg class="tr-arrow"><use href="#tr-caret-down"/></svg><span class="tr-text">expanded</span></div>
+	<div class="tr-cap">TreeArrow_Expanded</div>
+	<div class="tr-row"><span class="tr-indent" style="--depth:0"></span><svg class="tr-arrow is-hover"><use href="#tr-caret-right"/></svg><span class="tr-text">collapsed, arrow hovered</span></div>
+	<div class="tr-cap">TreeArrow_Collapsed_Hovered</div>
+	<div class="tr-row is-odd"><span class="tr-indent" style="--depth:0"></span><svg class="tr-arrow is-hover"><use href="#tr-caret-down"/></svg><span class="tr-text">expanded, arrow hovered</span></div>
+	<div class="tr-cap">TreeArrow_Expanded_Hovered</div>
+
+	<div class="tr-head">Indentation, 12 per level</div>
+
+	<div class="tr-row"><span class="tr-indent" style="--depth:0"></span><svg class="tr-arrow"><use href="#tr-caret-down"/></svg><svg class="tr-icon"><use href="#tr-cube"/></svg><span class="tr-text">level 0</span></div>
+	<div class="tr-cap">6 + 0 x 12</div>
+	<div class="tr-row is-odd"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow"><use href="#tr-caret-down"/></svg><svg class="tr-icon is-folder"><use href="#tr-folder"/></svg><span class="tr-text">level 1</span></div>
+	<div class="tr-cap">6 + 1 x 12</div>
+	<div class="tr-row"><span class="tr-indent" style="--depth:2"></span><svg class="tr-arrow"><use href="#tr-caret-down"/></svg><svg class="tr-icon is-folder"><use href="#tr-folder"/></svg><span class="tr-text">level 2</span></div>
+	<div class="tr-cap">6 + 2 x 12</div>
+	<div class="tr-row is-odd"><span class="tr-indent" style="--depth:3"></span><svg class="tr-arrow is-leaf"><use href="#tr-caret-right"/></svg><svg class="tr-icon"><use href="#tr-cube"/></svg><span class="tr-text">level 3 (leaf keeps the arrow slot)</span></div>
+	<div class="tr-cap">6 + 3 x 12</div>
+</div>
+</body>
+</html>

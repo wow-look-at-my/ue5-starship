@@ -1,0 +1,71 @@
+<!-- @dsCard group="Controls" height=300 subtitle="EditableTextBox and SearchBox: normal, hovered, focused, read-only, with the search glyph and clear button" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TextInput</title>
+<style>
+	/* Slate unit = 1px. Outline is drawn inside the box (inset shadow). */
+	.textinput-page { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+	.textinput-section { display: flex; flex-direction: column; gap: 8px; }
+	.textinput-title, .textinput-cap { font: 400 10.667px/1.2 var(--font-sans); color: var(--foreground); opacity: .7; }
+	.textinput-row { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+	.textinput-item { display: flex; flex-direction: column; gap: 4px; width: 220px; }
+
+	.textinput {
+		display: flex; align-items: center; box-sizing: border-box; width: 100%;
+		border-radius: 4px; /* InputFocusRadius CoreStyle.h:117 */
+		background: var(--input); /* StarshipCoreStyle.cpp:1284 */
+		box-shadow: inset 0 0 0 1px var(--input-outline); /* outline thickness CoreStyle.h:118; :1284 */
+		color: var(--foreground); /* ForegroundColor :1290 */
+		font: 400 13.333px/16px var(--font-sans); /* Normal 10pt :1288 */
+		cursor: text;
+	}
+	.textinput:hover, .textinput--hover { box-shadow: inset 0 0 0 1px var(--hover); } /* :1285 */
+	.textinput--focus, .textinput--focus:hover { box-shadow: inset 0 0 0 1px var(--primary); color: var(--foreground-hover); } /* :1286, FocusedForegroundColor White :1293 */
+	.textinput--readonly, .textinput--readonly:hover { background: var(--header); box-shadow: inset 0 0 0 1px var(--input-outline); cursor: default; } /* :1287 */
+	.textinput__text { flex: 1 1 auto; min-width: 0; padding: 3px 8px 4px; white-space: nowrap; } /* Padding (8,3,8,4) :1289 */
+	.textinput__hint { opacity: .35; } /* hint = foreground at alpha .35 SlateEditableTextLayout.cpp:3563 */
+	.textinput__caret { display: inline-block; width: 1.28px; height: 16px; vertical-align: top; background: var(--white); } /* width clamp(.08 x 16, 1, 2) TextEditHelper.h:18, .cpp:17; brush White :1272 */
+	.textinput__sel { background: var(--highlight); } /* SelectedBackgroundColor Highlight :1174, brush :1264 */
+
+	.textinput--search { border-radius: 999px; box-shadow: inset 0 0 0 1px var(--secondary); } /* no radius given = half height :1303 */
+	.textinput--search:hover, .textinput--search.textinput--hover { box-shadow: inset 0 0 0 1px var(--hover); } /* :1304 */
+	.textinput--search.textinput--focus, .textinput--search.textinput--focus:hover { box-shadow: inset 0 0 0 1px var(--primary); } /* :1305 */
+	.textinput--search.textinput--readonly, .textinput--search.textinput--readonly:hover { box-shadow: inset 0 0 0 1px var(--input-outline); } /* :1306 */
+	.textinput__glyph {
+		flex: none; width: 14px; height: 14px; margin-left: 4px; /* ImageSizeOverride 14 :1316, ImagePadding (4,0,0,0) :1315 */
+		fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; /* approximation of the SVG */
+	}
+	.textinput__tail { flex: none; width: 7px; } /* end spacer SSearchBox.cpp:172-177 */
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+	<symbol id="textinput-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></symbol>
+	<symbol id="textinput-clear" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></symbol>
+</svg>
+<div class="textinput-page">
+	<div class="textinput-section">
+		<span class="textinput-title">EditableTextBox</span>
+		<div class="textinput-row">
+			<div class="textinput-item"><div class="textinput"><span class="textinput__text"><span class="textinput__hint">Enter a name</span></span></div><span class="textinput-cap">Normal, hint text</span></div>
+			<div class="textinput-item"><div class="textinput"><span class="textinput__text">StaticMeshActor</span></div><span class="textinput-cap">Normal</span></div>
+			<div class="textinput-item"><div class="textinput textinput--hover"><span class="textinput__text">StaticMeshActor</span></div><span class="textinput-cap">Hovered</span></div>
+			<div class="textinput-item"><div class="textinput textinput--focus"><span class="textinput__text">Static<span class="textinput__sel">Mesh</span>Actor<span class="textinput__caret"></span></span></div><span class="textinput-cap">Focused, selection and caret</span></div>
+			<div class="textinput-item"><div class="textinput textinput--readonly"><span class="textinput__text">StaticMeshActor</span></div><span class="textinput-cap">Read-only</span></div>
+		</div>
+	</div>
+	<div class="textinput-section">
+		<span class="textinput-title">SearchBox</span>
+		<div class="textinput-row">
+			<div class="textinput-item"><div class="textinput textinput--search"><svg class="textinput__glyph"><use href="#textinput-search"/></svg><span class="textinput__text"><span class="textinput__hint">Search...</span></span><span class="textinput__tail"></span></div><span class="textinput-cap">Normal, glass shown</span></div>
+			<div class="textinput-item"><div class="textinput textinput--search textinput--hover"><svg class="textinput__glyph"><use href="#textinput-search"/></svg><span class="textinput__text"><span class="textinput__hint">Search...</span></span><span class="textinput__tail"></span></div><span class="textinput-cap">Hovered</span></div>
+			<div class="textinput-item"><div class="textinput textinput--search textinput--focus"><svg class="textinput__glyph"><use href="#textinput-clear"/></svg><span class="textinput__text">chair<span class="textinput__caret"></span></span><span class="textinput__tail"></span></div><span class="textinput-cap">Focused with text, clear button replaces the glass</span></div>
+			<div class="textinput-item"><div class="textinput textinput--search textinput--readonly"><svg class="textinput__glyph"><use href="#textinput-search"/></svg><span class="textinput__text">chair</span><span class="textinput__tail"></span></div><span class="textinput-cap">Read-only</span></div>
+		</div>
+	</div>
+</div>
+</body>
+</html>

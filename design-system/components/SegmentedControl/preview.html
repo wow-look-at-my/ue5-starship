@@ -1,0 +1,81 @@
+<!-- @dsCard group="Details" height=96 subtitle="Mobility Static / Stationary / Movable: checked segment in Dropdown on an Input track" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SegmentedControl</title>
+<style>
+	/* Every metric below is cited in README.md. */
+	.SegmentedControl-frame { width: 360px; background: var(--recessed); }
+	/* Property row (see DetailsCategory): 26px min + 1px GridLine; SDetailSingleItemRow.cpp:732-760 */
+	.SegmentedControl-row { display: flex; min-height: 27px; padding-bottom: 1px; background: var(--recessed); }
+	.SegmentedControl-name, .SegmentedControl-value, .SegmentedControl-right { background: var(--panel); display: flex; align-items: center; min-width: 0; }
+	.SegmentedControl-name { flex: 0 0 40%; padding-left: 20px; font: 400 10.667px/1.172 var(--font-sans); color: var(--foreground); } /* PropertyWindow.NormalFont: MobilityCustomization.cpp:65 */
+	.SegmentedControl-value { flex: 1; padding: 0 2px 0 12px; } /* RightRowPadding: SDetailSingleItemRow.cpp:39 */
+	.SegmentedControl-right { flex: 0 0 22px; }
+	.SegmentedControl-split { flex: 0 0 1px; background: var(--recessed); }
+
+	/* Track: SBorder with Style->BackgroundBrush, padding (0,0,UniformPadding.Right,0): SSegmentedControl.h:304-309 */
+	.SegmentedControl { display: flex; flex: 1; min-width: 0; background: var(--input); border-radius: 4px; padding-right: 1px; } /* FSlateRoundedBoxBrush(Input, 4): StarshipCoreStyle.cpp:1684 */
+	/* Cell: slot padding = UniformPadding (1) with Right = 0: SSegmentedControl.h:219-220, StarshipCoreStyle.cpp:1685 */
+	.SegmentedControl-seg {
+		flex: 1 1 0; min-width: 0; overflow: hidden; /* ClipToBounds on each SCheckBox: SSegmentedControl.h:289 */
+		margin: 1px 0 1px 1px; padding: 3px 8px; /* SegmentedControlMargins (8,3): StarshipCoreStyle.cpp:1662 */
+		border: 0; border-radius: 4px; cursor: pointer; text-align: center; white-space: nowrap;
+		background: transparent; color: var(--foreground); /* unchecked: StarshipCoreStyle.cpp:1666, 1672 */
+		font: 400 10.667px/1.172 var(--font-sans); letter-spacing: .1em; /* MobilityFont = Small, LetterSpacing 100 -> 100*8/1000 pt: StarshipStyle.cpp:3127-3128, SlateTextShaper.cpp:412 */
+	}
+	.SegmentedControl-seg:hover { background: var(--hover); color: var(--foreground-hover); } /* StarshipCoreStyle.cpp:1667, 1673 */
+	.SegmentedControl-seg:active { background: var(--header); color: var(--foreground-hover); } /* StarshipCoreStyle.cpp:1668, 1674 */
+	.SegmentedControl-seg.is-checked { background: var(--dropdown); color: var(--foreground-hover); } /* StarshipCoreStyle.cpp:1669, 1675 */
+	.SegmentedControl-seg.is-checked:hover { background: var(--hover); } /* StarshipCoreStyle.cpp:1670 */
+	.SegmentedControl-seg.is-checked:active { background: var(--header); } /* StarshipCoreStyle.cpp:1671 */
+	/* Preview only: rows 1-2 shrink the name column so the full labels fit; row 3 keeps the default 40:60 split (DetailsViewArgs.h:134) where labels clip. */
+	.SegmentedControl-row.is-wide .SegmentedControl-name { flex-basis: 16%; }
+</style>
+</head>
+<body>
+<div class="SegmentedControl-frame">
+	<div class="SegmentedControl-row is-wide">
+		<div class="SegmentedControl-name">Mobility</div>
+		<div class="SegmentedControl-split"></div>
+		<div class="SegmentedControl-value">
+			<div class="SegmentedControl" role="radiogroup">
+				<button class="SegmentedControl-seg is-checked" role="radio" aria-checked="true" title="A static object can't be changed in game.">Static</button>
+				<button class="SegmentedControl-seg" role="radio" aria-checked="false" title="A stationary object can be changed in game but not moved.">Stationary</button>
+				<button class="SegmentedControl-seg" role="radio" aria-checked="false" title="Movable objects can be moved and changed in game.">Movable</button>
+			</div>
+		</div>
+		<div class="SegmentedControl-split"></div>
+		<div class="SegmentedControl-right"></div>
+	</div>
+	<div class="SegmentedControl-row is-wide">
+		<div class="SegmentedControl-name">Mobility</div>
+		<div class="SegmentedControl-split"></div>
+		<div class="SegmentedControl-value">
+			<div class="SegmentedControl" role="radiogroup">
+				<button class="SegmentedControl-seg" role="radio" aria-checked="false">Static</button>
+				<button class="SegmentedControl-seg is-checked" role="radio" aria-checked="true">Stationary</button>
+				<button class="SegmentedControl-seg" role="radio" aria-checked="false" style="background: var(--hover); color: var(--foreground-hover)">Movable</button>
+			</div>
+		</div>
+		<div class="SegmentedControl-split"></div>
+		<div class="SegmentedControl-right"></div>
+	</div>
+	<div class="SegmentedControl-row">
+		<div class="SegmentedControl-name">Mobility</div>
+		<div class="SegmentedControl-split"></div>
+		<div class="SegmentedControl-value">
+			<div class="SegmentedControl" role="radiogroup" title="Narrow column: labels clip, they do not wrap or ellipsize">
+				<button class="SegmentedControl-seg is-checked" role="radio" aria-checked="true">Static</button>
+				<button class="SegmentedControl-seg" role="radio" aria-checked="false">Stationary</button>
+				<button class="SegmentedControl-seg" role="radio" aria-checked="false">Movable</button>
+			</div>
+		</div>
+		<div class="SegmentedControl-split"></div>
+		<div class="SegmentedControl-right"></div>
+	</div>
+</div>
+</body>
+</html>

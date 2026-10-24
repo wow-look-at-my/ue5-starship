@@ -1,0 +1,944 @@
+<!-- @dsCard group="Layout" height=940 width=1280 subtitle="A whole editor window: title and menu, toolbar, Place Actors, viewport placeholder, Details, Outliner, Content Browser and status bar" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EditorLayout</title>
+<style>
+
+	.windowChrome-page { padding: 16px; font: 400 13.333px/1.2 var(--font-sans); color: var(--foreground); }
+	.windowChrome-caption { margin: 6px 0 14px; font: 400 11px/1.2 var(--font-sans); color: var(--hover-2); }
+	.windowChrome-scroll { overflow-x: auto; }
+	.windowChrome-h { margin: 0 0 6px; font: 700 11px/1.2 var(--font-sans); letter-spacing: .04em; text-transform: uppercase; color: var(--hover-2); }
+
+	/* Window frame: BorderBrush = Recessed fill, radius 2, 2px WindowBorder outline (StarshipCoreStyle.cpp:781); main area inset 3px (BorderPadding, :785) */
+	.windowChrome-frame { position: relative; box-sizing: border-box; min-width: 640px;
+		background: var(--recessed); /* BackgroundBrush Recessed, StarshipCoreStyle.cpp:780 */
+		border: 2px solid var(--window-border); border-radius: 2px; /* :781 */
+		padding: 1px; /* 3px border padding minus the 2px stroke: :785 */ }
+	/* OutlineBrush: 1px InputOutline stroke, radius 2, overlay slot Padding(2): StarshipCoreStyle.cpp:782, SWindow.cpp:597-600 */
+	.windowChrome-frame::before { content: ""; position: absolute; inset: 0; border: 1px solid var(--input-outline); border-radius: 2px; pointer-events: none; }
+
+	/* Title area is as tall as the taller of left content (icon 45 + 2x5 padding + 4 bottom = 59) and right content: SWindowTitleBar.cpp:321 (spacer height), :206 (icon Padding 0,0,0,4), StarshipCoreStyle.cpp:284-285 (AppIcon 45x45, AppIconPadding 5) */
+	.windowChrome-title { position: relative; height: 59px; background: var(--title); /* Brushes.Title under the major tab stack, SDockingTabStack.cpp:1234 */ }
+	.windowChrome-icon { position: absolute; left: 0; top: 0; box-sizing: border-box; width: 55px; height: 55px; padding: 5px; color: var(--white); /* AppIcon tint White, StarshipCoreStyle.cpp:284 */ }
+	.windowChrome-icon svg { display: block; width: 45px; height: 45px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
+	/* menu strip slot: SWindowTitleBar WindowMenuSlot, content is consumer-provided; top padding 25 reserves it (SDockingTabStack.cpp:891,897) */
+	.windowChrome-menu { position: absolute; left: 55px; top: 0; height: 25px; display: flex; align-items: center; }
+	.windowChrome-menuItem { padding: 0 8px; /* illustrative; the menu bar owns its own spacing */ color: var(--foreground); }
+
+	/* tab row: major tab placed 25px below the top, 45 + 12 = 57px from the left: SDockingTabStack.cpp:893,898 */
+	.windowChrome-tabRow { position: absolute; left: 57px; top: 25px; }
+	.windowChrome-tab { display: inline-flex; align-items: center; box-sizing: border-box; padding: 3.4px 10px 3.4px 4px; /* MajorTab padding (4,4,10,4) x0.85 vertical: StarshipCoreStyle.cpp:1823, SDockTab.cpp:30 */
+		background: var(--panel); border-radius: 4px 4px 0 0; /* ForegroundBrush, :1816; radius approximated */ color: var(--white); /* :1829 */ }
+	.windowChrome-tabIcon { display: flex; padding: 4px; margin-right: 5px; } /* IconBorderPadding 4: :1832; SDockTab.cpp:646 */
+	.windowChrome-tabIcon svg { display: block; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+	.windowChrome-tabLabel { padding: 2px 0; }
+
+	/* right content: badge then the three buttons, all VAlign top; SBox padding left 2: SWindowTitleBar.cpp:235 */
+	.windowChrome-right { position: absolute; right: 0; top: 0; display: flex; align-items: flex-start; padding-left: 2px; }
+	.windowChrome-badge { margin-right: 10px; /* slot Padding(0,0,8,0) LevelEditor.cpp:247 + SBox Padding(0,0,2,0) LevelEditor.cpp:166 */
+		padding: 6px 32px 7px; /* SProjectBadge.BadgePadding (32,6,32,7): StarshipStyle.cpp:2917 */
+		background: #0f0f0f; /* Colors.Title tint (LevelEditor.cpp:107-108) over Badge.png; the texture is not in the tree, #0f0f0f is what the reference screenshot shows */
+		border-radius: 6px; /* 6/16 slice of the 16px Badge brush: StarshipStyle.cpp:2916 */
+		color: var(--foreground); /* BadgeTextColor, LevelEditor.cpp:123 */ }
+	.windowChrome-btn { display: block; border: 0; background: transparent; font: inherit; cursor: default; flex: none; width: 42px; height: 23px; /* brush size (42,23): StarshipCoreStyle.cpp:749-766 */ padding: 0; /* ContentPadding(0): SWindowTitleBar.cpp:139,155,171 */ color: var(--foreground); /* Normal tint Foreground: :749 */ }
+	.windowChrome-btn svg { display: block; width: 42px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1; }
+	.windowChrome-btn--minmax.windowChrome-btn--hover { background: rgba(255, 255, 255, .157); /* FColor(255,255,255,40): StarshipCoreStyle.cpp:789-790 */ color: var(--foreground-hover); /* :750 */ }
+	.windowChrome-btn--close.windowChrome-btn--hover { background: rgba(255, 79, 79, .588); /* FColor(255,20,20,150) reinterpreted as linear: StarshipCoreStyle.cpp:791-792 (20/255 linear = 79 sRGB) */ color: var(--foreground-hover); /* :765 */ }
+
+	/* window content below the title area; stand-in for the dock area */
+	.windowChrome-content { height: 50px; background: var(--panel); margin-top: 0; padding: 8px 12px; color: var(--foreground); }
+
+	.windowChrome-states { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: flex-start; }
+	.windowChrome-state { display: flex; flex-direction: column; gap: 4px; }
+	.windowChrome-stateBox { background: var(--title); }
+
+
+/* SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp. Style set "WindowMenuBar" (SC:2443-2448), buttons built by SMenuEntryBlock.cpp:247-298. */
+ /* Normal font 10pt = 13.333px (SC:36, SC:2444); 16px line height approximates Roboto metrics */
+.menuBar-note { margin: 14px 0 6px; font: 400 10.667px/12px var(--font-sans); color: var(--foreground); opacity: .7; } /* Small font 8pt (SC:40) */
+.menuBar-note:first-child { margin-top: 0; }
+
+/* Strip: WindowMenuBar.Background is FSlateNoResource (SC:2443); the bar is transparent and sits on the title area */
+.menuBar { display: flex; align-items: stretch; background: transparent; }
+
+/* Item: SBorder (state brush) around an SButton with ContentPadding WindowMenuBar.MenuBar.Padding (12,4) (SC:2448) */
+.menuBar-item { padding: 4px 12px; color: var(--foreground); background: transparent; cursor: default; white-space: nowrap; } /* NormalForeground Foreground (SC:2439), Normal brush none (SC:2419) */
+.menuBar-item:hover, .menuBar-item.is-hover { background: var(--hover); color: var(--foreground-hover); } /* Hovered colour brush Hover (SC:2436), HoveredForeground ForegroundHover (SC:2437) */
+.menuBar-item.is-open { background: var(--primary); color: var(--foreground-hover); } /* menu open = Pressed brush Primary (SC:2420), PressedForeground ForegroundHover (SC:2438); SMenuEntryBlock.cpp:1614-1616 */
+
+
+/* Every px value cites engine source. SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp, SS = Editor/EditorStyle/Private/StarshipStyle.cpp. */
+ /* Normal font 10pt = 13.333px (SC:36); 16px line height approximates Roboto metrics */
+.toolBar-note { margin: 18px 0 6px; font: 400 10.667px/12px var(--font-sans); color: var(--foreground); opacity: .7; } /* Small font 8pt (SC:40) */
+.toolBar-svgdefs { position: absolute; width: 0; height: 0; overflow: hidden; }
+.toolBar-ico { display: block; flex: none; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+.toolBar-ico--16 { width: 16px; height: 16px; } /* Icon16x16 (CoreStyle.h:94) */
+.toolBar-ico--20 { width: 20px; height: 20px; } /* SlimToolBar SetIconSize(Icon20x20) (SC:2240) */
+
+/* Bar: SlimToolBar background Panel, BackgroundPadding (4,6) (SC:2200-2205), applied by MultiBox.cpp:1349-1350 */
+.toolBar { display: flex; align-items: stretch; background: var(--panel); padding: 6px 4px; }
+.toolBar-slot { display: flex; align-items: stretch; }
+.toolBar-spacer { flex: 1; }
+
+/* Plain button block: ButtonPadding (4,0) (SC:2208) around SButton whose style padding is (8,4,8,4) (SC:2193) */
+.toolBar-slot--button { padding: 0 4px; }
+.toolBar-btn { display: flex; align-items: center; padding: 4px 8px; border-radius: 4px; color: var(--foreground); background: transparent; cursor: default; } /* radius 4 hover brush (SC:1391); NormalForeground Foreground (SC:2189) */
+.toolBar-btn:hover, .toolBar-btn.is-hover { background: var(--dropdown); color: var(--foreground-hover); } /* hover brush Dropdown (SC:1391), HoveredForeground ForegroundHover (SC:2191) */
+.toolBar-btn.is-pressed { background: var(--dropdown); color: var(--foreground-hover); padding: 5px 8px 3px; } /* PressedPadding (8,5,8,3) (SC:2194) */
+.toolBar-label { margin-left: 4px; } /* SlimToolBar LabelPadding (4,0,0,0) (SC:2214) */
+
+/* Toggle block: CheckBoxPadding (8,0) (SC:2209); toggle style padding (8,4,8,4) (SC:2217-2218) */
+.toolBar-slot--toggle { padding: 0 8px; }
+.toolBar-btn--toggle.is-checked { background: var(--primary); color: var(--foreground-hover); } /* CheckedImage Primary r4, CheckedForeground ForegroundHover (SC:1627, 1636) */
+.toolBar-btn--toggle.is-checked:hover { background: var(--primary-hover); } /* CheckedHoveredImage PrimaryHover (SC:1628) */
+
+/* Combo block: ComboButtonPadding (0,0) (SC:2207); arrow 16x16 chevron with DownArrowPadding (1,0,2,0) (SC:1517, 2198) */
+.toolBar-slot--combo { padding: 0; }
+.toolBar-arrow { margin: 0 2px 0 1px; }
+
+/* Separator: Recessed brush, thickness 2 (ToolBarStyle.cpp:25), padding (4,-5) (SC:2210-2211) */
+.toolBar-slot--sep { padding: 0 4px; }
+.toolBar-sep { width: 2px; align-self: stretch; margin: -5px 0; background: var(--recessed); }
+
+/* Editor-modes combo is a bare SComboButton: ComboButton style (SC:1470-1494), button padding (8,1,8,1) (CoreStyle.h:114), gap 6 (LevelEditorToolBar.cpp:1407) */
+.toolBar-slot--modes { padding: 0 10px 0 0; }
+.toolBar-modes { display: flex; align-items: center; padding: 1px 8px; border-radius: 4px; background: var(--input); box-shadow: inset 0 0 0 1px var(--input-outline); color: var(--foreground); } /* Input fill, InputOutline 1px, radius 4 (SC:1471, CoreStyle.h:117-118) */
+.toolBar-modes:hover { box-shadow: inset 0 0 0 1px var(--hover); color: var(--foreground-hover); } /* Hover outline (SC:1472) */
+.toolBar-modes .toolBar-ico--16 { margin-right: 6px; }
+.toolBar-modes .toolBar-arrow { margin: 0 0 0 2px; } /* default DownArrowPadding 2 (SlateTypes.cpp:165) */
+
+/* Play group (backplate): SS:5516-5622. All plates use Dropdown fill; hover/press only change the foreground. */
+.toolBar-plate { display: flex; align-items: center; justify-content: center; background: var(--dropdown); }
+.toolBar-plate--left { margin-left: 10px; padding: 2px 6px 2px 8px; border-radius: 4px 0 0 4px; } /* ButtonPadding (10,0,0,0) (SS:5529), padding (8,2,6,2) (SS:5524), corners (SS:5520) */
+.toolBar-plate--center { padding: 2px 6px 2px 2px; border-radius: 0; } /* padding (2,2,6,2) (SS:5558), ButtonPadding 0 (SS:5561) */
+.toolBar-plate--right { position: relative; width: 22px; margin: 0 8px 0 1px; border-radius: 0 4px 4px 0; } /* ComboButtonPadding (1,0,8,0) (SS:5620), corners (SS:5605); width = 7+6 padding + 20 content + 6 arrow - 17 arrow shift (SS:5609, 5613) = 22 */
+.toolBar-plate--play { color: var(--accent-green); } /* NormalForeground AccentGreen (SS:5542) */
+.toolBar-plate--play:hover { color: #a9c296; } /* HSV S*0.5 of AccentGreen in linear space (SS:5536, 5544); computed in dev/hsv.js */
+.toolBar-plate--play.is-pressed { color: #658e34; } /* HSV V*0.5 (SS:5537, 5543) */
+.toolBar-plate--step { color: var(--foreground); }
+.toolBar-plate--step:hover { color: var(--foreground-hover); }
+.toolBar-plate--stop { color: var(--accent-red); } /* NormalForeground AccentRed (SS:5576) */
+.toolBar-plate--stop:hover { color: #ffc0c0; } /* hover (SS:5570, 5578) */
+.toolBar-plate--right { color: var(--foreground); }
+.toolBar-plate--right:hover { color: var(--foreground-hover); }
+.toolBar-dots { position: absolute; left: 8px; top: 50%; width: 6px; height: 24px; margin-top: -12px; fill: currentColor; stroke: none; } /* ellipsis-vertical-narrow 6x24 (SS:5614) */
+
+/* Overflow (wrap) button: SComboButton, slim button style, ContentPadding (4,0), 16x16 expand brush (SClippingHorizontalBox.cpp:116-131, SC:2206) */
+.toolBar-wrap { display: flex; align-items: center; padding: 4px 12px; border-radius: 4px; color: var(--foreground); }
+.toolBar-wrap:hover { background: var(--dropdown); color: var(--foreground-hover); }
+
+/* Settings block: right aligned with 7px right padding (LevelEditorToolBar.cpp:1639); CalloutToolbar shows labels (SC:2278-2283) */
+.toolBar-slot--settings { padding: 0 7px 0 0; }
+
+
+/* SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp, SS = Editor/EditorStyle/Private/StarshipStyle.cpp, PM = Editor/PlacementMode/Private/SPlacementModeTools.cpp, WR = Developer/WidgetRegistration/Private */
+ /* Normal font 10pt = 13.333px (SC:36); 16px line height approximates Roboto metrics */
+.placeActors-note { margin: 0 0 6px; font: 400 10.667px/12px var(--font-sans); color: var(--foreground); opacity: .7; } /* Small font 8pt (SC:40) */
+.placeActors-demo { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+.placeActors-svgdefs { position: absolute; width: 0; height: 0; overflow: hidden; }
+.placeActors-ico { display: block; flex: none; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+.placeActors-ico--14 { width: 14px; height: 14px; } /* search glass ImageSizeOverride 14 (SC:1316) */
+.placeActors-ico--16 { width: 16px; height: 16px; } /* Icons.Help Icon16x16 (SC:297) */
+.placeActors-ico--20 { width: 20px; height: 20px; } /* PlacementBrowser.Icons.* are Icon20x20 (SS:4717-4725) */
+
+.placeActors { width: 240px; background: var(--panel); } /* panel colour Brushes.Panel (PM:705); width is the consumer's dock size */
+
+/* Search: SBorder ToolPanel.GroupBorder = Panel colour (SC:437), Padding 8 (PM:693); SSearchBox with style "SearchBox" (SC:1301-1319) */
+.placeActors-search { padding: 8px; background: var(--panel); }
+.placeActors-searchbox { display: flex; align-items: center; padding: 3px 8px 4px; border-radius: 999px; background: var(--input); box-shadow: inset 0 0 0 1px var(--secondary); color: var(--foreground); } /* pill = HalfHeight rounding (SlateBrush.h:161-167), Input fill, Secondary 1px outline (SC:1303), padding (8,3,8,4) (SC:1289) */
+.placeActors-searchbox:hover { box-shadow: inset 0 0 0 1px var(--hover); } /* SC:1304 */
+.placeActors-searchbox .placeActors-ico { margin-left: 4px; margin-right: 0; } /* ImagePadding (4,0,0,0) (SC:1315), glass left aligned (SC:1318) */
+.placeActors-hint { margin-left: 4px; color: var(--foreground); opacity: .35; } /* hint text = foreground at alpha 0.35 (SlateEditableTextLayout.cpp:3563) */
+
+/* Category toolbar: style CategoryDrivenContentBuilderToolbarWithoutLabels (SS:1768-1787): Panel background (from SlimToolBar, SC:2200), BackgroundPadding 4 (SS:1772) */
+.placeActors-rail { background: var(--panel); padding: 4px; }
+.placeActors-rail--row { display: flex; flex-wrap: wrap; } /* reference-screenshot arrangement; the engine source stacks the rail vertically (PM:708, CategoryDrivenContentBuilderBase.cpp:139-147) */
+.placeActors-rail--col { width: 44px; flex: none; } /* UnlabelledButtonToolbarButtonWidth 44 (CategoryDrivenContentBuilderBase.cpp:18) */
+.placeActors-cat { display: flex; align-items: center; justify-content: center; box-sizing: border-box; width: 36px; height: 36px; margin: 2px 0; padding: 8px; border-radius: 4px; color: var(--foreground); cursor: default; } /* ButtonContentMaxWidth 36 (SS:1786), IconPadding 8 (SS:1784), ButtonPadding (0,2,0,2) (SS:1780), toggle padding 0 (SS:1759), radius 4 (SS:1750) */
+.placeActors-cat:hover { background: var(--dropdown); color: var(--foreground-hover); } /* unchecked hover Dropdown r4 (SC:1631), ForegroundHover (SS:1755) */
+.placeActors-cat.is-active { background: var(--primary); color: var(--foreground-hover); box-shadow: inset 0 0 0 .5px rgba(0, 0, 0, .8); } /* CheckedImage Primary r4 with outline (0,0,0,.8) 0.5px (SS:1750), CheckedForeground ForegroundHover (SS:1756) */
+.placeActors-cat.is-active:hover { background: var(--primary-hover); } /* SS:1751 */
+
+/* Section header: FSimpleTitleContainer (SimpleTitleContainer.cpp:17) in FHeaderAndBodyContainer (HeaderAndBodyContainer.cpp:63-71) */
+.placeActors-header { padding: 4px 0 4px 6px; background: var(--dropdown); color: var(--foreground); } /* Dropdown fill (HeaderAndBodyContainer.cpp:63), Foreground (:64), header margin 4 (:71) + title padding (2,4,0,4) (SimpleTitleContainer.cpp:17) */
+.placeActors-body { background: var(--recessed); } /* Recessed body (HeaderAndBodyContainer.cpp:65) */
+.placeActors-grid { padding: 8px; background: var(--panel); } /* FColumnWrappingContainer: Panel, Padding 8 (ColumnWrappingContainer.cpp:58-59) */
+
+/* Item row: SPlacementAssetEntry (PM:156-306): ThumbnailBackground Dropdown r6 (SS:4626), cell height 32 (ColumnWrappingContainerTemplates.cpp:10), slot padding (4,2,4,2) (ColumnWrappingContainer.cpp:63) */
+.placeActors-row { display: flex; align-items: center; box-sizing: border-box; height: 32px; margin: 2px 4px; border-radius: 6px; background: var(--dropdown); box-shadow: inset 0 0 0 1px var(--dropdown); cursor: grab; } /* normal outline Dropdown 1px r6 (SS:4617) */
+.placeActors-row:hover, .placeActors-row.is-hover { box-shadow: inset 0 0 0 1px var(--hover); } /* hovered outline Hover (SS:4618) */
+.placeActors-row.is-pressed { box-shadow: inset 0 0 0 1px var(--primary); } /* pressed outline Primary (SS:4619) */
+.placeActors-tile { display: flex; align-items: center; justify-content: center; width: 20px; height: 24px; margin: 4px 0 4px 4px; color: var(--foreground-hover); } /* thumbnail box 20 wide (PM:226), padding (4,4,0,4) (PM:221); cell leaves 24px of height */
+.placeActors-name { flex: 1; min-width: 0; padding: 0 8px 1px 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(255, 255, 255, .9); } /* text padding (4,0,8,1) (PM:222), Regular 10pt white alpha .9 (SS:4649-4650) */
+.placeActors-info { display: flex; align-items: center; justify-content: center; box-sizing: border-box; width: 24px; height: 20px; margin-right: 4px; border-radius: 4px; color: var(--foreground); } /* SDocumentationAnchor: SSimpleButton, Icons.Help 16 (SDocumentationAnchor.cpp:63), SimpleButton padding (2,1) (SC:1405-1407) + content padding (2,1) (ToolWidgetsStyle.cpp:19, ToolWidgetsStylePrivate.h:24-25) */
+.placeActors-info:hover { background: var(--hover); color: var(--foreground-hover); } /* SimpleButton hover Dropdown (SC:1391) is invisible on a Dropdown row, so the preview uses Hover */
+.placeActors-handle { flex: none; width: 6px; height: 15px; margin-right: 8px; background: radial-gradient(circle, var(--foreground) 1px, transparent 1.2px) 0 0 / 3px 5px; opacity: .6; } /* VerticalBoxDragIndicatorShort 6x15 (SC:466), padding right 8 (PM:211); dot pattern approximates the PNG */
+
+
+	/* Every metric below is cited in README.md. Icons are 16x16 stroke approximations of the Starship SVGs. */
+	.DetailsHeader-frame { width: 360px; background: var(--panel); padding-bottom: 6px; } /* Brushes.Panel: StarshipCoreStyle.cpp:1123 */
+	.DetailsHeader { padding: 4px 0 0 10px; } /* SActorDetails.cpp:336 Padding(10,4,0,0) */
+	.DetailsHeader-name { display: flex; align-items: center; min-height: 22px; }
+	.DetailsHeader-icon { width: 16px; height: 16px; flex: none; color: var(--foreground); } /* class icon 16x16: SDetailNameArea.cpp:112-122 */
+	.DetailsHeader-label {
+		flex: 1; min-width: 0; padding: 0 3px 0 8px; /* SDetailNameArea.cpp:138 Padding(8,0,3,0) */
+		font: 400 14.667px/1.172 var(--font-sans); /* DEFAULT_FONT("Regular", 11): StarshipStyle.cpp:3149-3152 */
+		color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+	}
+	.DetailsHeader-actions { display: flex; align-items: center; flex: none; }
+	.DetailsHeader-btn {
+		display: inline-flex; align-items: center; justify-content: center; flex: none;
+		height: 22px; margin: 0; border: 0; border-radius: 4px; cursor: pointer; font: inherit;
+		color: var(--foreground-hover);
+	}
+	.DetailsHeader-btn svg { width: 16px; height: 16px; flex: none; }
+	/* "Button" style: StarshipCoreStyle.cpp:1372-1382 (Secondary fill, Input 1px outline, radius 4) */
+	.DetailsHeader-add, .DetailsHeader-icon-btn { background: var(--secondary); box-shadow: inset 0 0 0 1px var(--input); }
+	.DetailsHeader-add:hover, .DetailsHeader-icon-btn:hover { background: var(--hover); }
+	.DetailsHeader-add:active, .DetailsHeader-icon-btn:active { background: var(--header); }
+	/* Add: SComboButton content padding (2,1.5) + Button NormalPadding (12,1.5): ToolWidgetsStyle.cpp:16-21, 63, StarshipCoreStyle.cpp:1381 */
+	.DetailsHeader-add { padding: 0 14px; gap: 3px; margin-right: 4px; } /* icon/label gap 3: ToolWidgetsStylePrivate.h:23 */
+	.DetailsHeader-add svg { color: var(--accent-green); } /* PositiveActionButton icon colour: ToolWidgetsStyle.cpp:76 */
+	.DetailsHeader-add span { font: 400 13.333px/1.172 var(--font-sans); } /* SmallButtonText = NormalText 10pt: StarshipCoreStyle.cpp:1433 */
+	/* NameAreaButton: padding (6,3), content padding 0: StarshipStyle.cpp:3325-3328, SSubobjectInstanceEditor.cpp:100-101 */
+	.DetailsHeader-icon-btn { width: 28px; padding: 0; color: var(--white); }
+	/* SDocumentationAnchor -> SSimpleButton: (2,1) content + (2,1) style = (4,2): SSimpleButton.cpp:33-34, ToolWidgetsStyle.cpp:123 */
+	.DetailsHeader-help { width: 24px; height: 20px; margin-left: 4px; padding: 0; background: transparent; color: var(--foreground); }
+	.DetailsHeader-help:hover, .DetailsHeader-lock:hover { background: var(--dropdown); color: var(--foreground-hover); } /* SimpleButton hover: StarshipCoreStyle.cpp:1391 */
+	/* Lock: SimpleButton, ContentPadding(4,2) + style (2,1) = (6,3); slot padding (4,0,4,0): SDetailNameArea.cpp:164-170 */
+	.DetailsHeader-lock { width: 28px; padding: 0; margin: 0 4px; background: transparent; color: var(--foreground); }
+	/* Instance row: SCSEditor.Background Recessed r4 + padding 4: StarshipStyle.cpp:4237, SSubobjectInstanceEditor.cpp:163-164 */
+	.DetailsHeader-instanceBox { margin: 4px 2px 0; padding: 4px; background: var(--recessed); border-radius: 4px; } /* ComponentsBox padding (2,0,2,0): SActorDetails.cpp:269 */
+	.DetailsHeader-instance {
+		display: flex; align-items: center; padding: 4px 0; /* row padding (0,4,0,4): SSubobjectEditor.cpp:721 */
+		background: var(--select-inactive); /* SceneOutliner.TableViewRow inactive brush: StarshipCoreStyle.cpp:2012 */
+		color: var(--foreground-hover); font: 400 13.333px/1.172 var(--font-sans); /* selected text ForegroundHover: StarshipCoreStyle.cpp:2019 */
+	}
+	.DetailsHeader-instance svg { width: 16px; height: 16px; margin-left: 4px; flex: none; } /* root actor icon margin: SSubobjectEditor.cpp:777 */
+	.DetailsHeader-instance .name { margin-left: 6px; } /* SSubobjectEditor.cpp:789 */
+	.DetailsHeader-instance .ctx { margin-left: 4px; } /* SSubobjectEditor.cpp:797 */
+
+
+	/* Every metric below is cited in README.md. Icons are 16x16 stroke approximations of the Starship SVGs. */
+	.DetailsSearchRow-frame { width: 360px; background: var(--panel); } /* SBorder Brushes.Panel: SDetailsView.cpp:391-395 */
+	.DetailsSearchRow { display: flex; align-items: center; } /* SDetailsView.cpp:276 */
+	.DetailsSearchRow + .DetailsSearchRow { margin-top: 2px; }
+	.DetailsSearchRow-searchSlot { flex: 1; min-width: 0; padding: 6px; } /* Padding(6.f), FillWidth(1): SDetailsView.cpp:278-280 */
+	.DetailsSearchRow-search {
+		display: flex; align-items: center;
+		background: var(--input); border-radius: 999px; /* HalfHeightRadius: SlateBrush.h:161-167 */
+		box-shadow: inset 0 0 0 1px var(--secondary); /* SearchBoxEditStyle normal: StarshipCoreStyle.cpp:1303 */
+		cursor: text;
+	}
+	.DetailsSearchRow-search:hover { box-shadow: inset 0 0 0 1px var(--hover); } /* StarshipCoreStyle.cpp:1304 */
+	.DetailsSearchRow-search.is-focused { box-shadow: inset 0 0 0 1px var(--primary); } /* StarshipCoreStyle.cpp:1305 */
+	.DetailsSearchRow-glass { width: 14px; height: 14px; margin-left: 4px; flex: none; color: var(--foreground); } /* ImagePadding(4,0,0,0), ImageSizeOverride 14: StarshipCoreStyle.cpp:1315-1316 */
+	.DetailsSearchRow-text {
+		flex: 1; min-width: 0; padding: 3px 8px 4px; /* NormalEditableTextBox padding (8,3,8,4): StarshipCoreStyle.cpp:1289 */
+		font: 400 13.333px/1.172 var(--font-sans); /* StyleFonts.Normal 10pt: StarshipCoreStyle.cpp:36 */
+		color: var(--foreground); white-space: nowrap; overflow: hidden;
+	}
+	.DetailsSearchRow-search.is-focused .DetailsSearchRow-text, .DetailsSearchRow-text.has-value { color: var(--foreground-hover); } /* focused foreground White: StarshipCoreStyle.cpp:1293 */
+	.DetailsSearchRow-hint { opacity: .35; } /* hint text alpha 0.35: SlateEditableTextLayout.cpp:3563 */
+	.DetailsSearchRow-clear { width: 20px; height: 16px; padding-left: 4px; flex: none; color: var(--foreground); } /* ThinHoverOnlyButton, ContentPadding = ImagePadding: SSearchBox.cpp:156-157 */
+	.DetailsSearchRow-tail { width: 7px; flex: none; } /* SSpacer(7,0): SSearchBox.cpp:176-179 */
+	.DetailsSearchRow-btn {
+		display: inline-flex; align-items: center; justify-content: center; flex: none;
+		border: 0; margin: 0; border-radius: 4px; background: transparent; cursor: pointer;
+		color: var(--foreground); /* SimpleButton normal foreground: StarshipCoreStyle.cpp:1394 */
+	}
+	.DetailsSearchRow-btn:hover { background: var(--dropdown); color: var(--foreground-hover); } /* StarshipCoreStyle.cpp:1391,1395 */
+	.DetailsSearchRow-btn svg { width: 16px; height: 16px; flex: none; }
+	/* SButton default ContentPadding (4,2) + SimpleButton NormalPadding (2,1) = (6,3): SDetailsView.cpp:298-309, StarshipCoreStyle.cpp:1405-1407 */
+	.DetailsSearchRow-btn.is-button { width: 28px; height: 22px; }
+	/* SComboButton ContentPadding(0) + (2,1) = (2,1): SDetailsView.cpp:350 */
+	.DetailsSearchRow-btn.is-combo { width: 20px; height: 18px; }
+	.DetailsSearchRow-btn.is-on { color: var(--accent-blue); } /* GetToggleFavoritesColor: SDetailsView.cpp:1177-1183 */
+
+
+	/* Every metric below is cited in README.md. */
+	.FilterPills-frame { width: 360px; background: var(--panel); padding-bottom: 8px; } /* Brushes.Panel: SDetailsView.cpp:391-395 */
+	.FilterPills-strip {
+		display: flex; flex-wrap: wrap; gap: 4px; /* SWrapBox InnerSlotPadding(4,4): SDetailsView.cpp:379 */
+		padding: 2px 8px 7px; /* Padding(8,2,8,7): SDetailsView.cpp:374 */
+	}
+	.FilterPills-pill {
+		display: inline-flex; align-items: center; justify-content: center;
+		margin: 0; border: 0; cursor: pointer;
+		padding: 4px 16px; /* FMargin(16,4): StarshipStyle.cpp:3252 via StarshipCoreStyle.cpp:929 */
+		border-radius: 4px;
+		background: var(--header); box-shadow: inset 0 0 0 1px var(--input); /* unchecked: StarshipCoreStyle.cpp:923 */
+		color: var(--foreground); /* ToggleButtonCheckbox foreground: StarshipCoreStyle.cpp:1633 */
+		font: 400 10.667px/1.172 var(--font-sans); /* "SmallText" = Small 8pt: SDetailsView.cpp:1371, StarshipCoreStyle.cpp:1215 */
+	}
+	.FilterPills-pill:hover, .FilterPills-pill:active { background: var(--hover); color: var(--foreground-hover); } /* StarshipCoreStyle.cpp:924-925, 1634-1635 */
+	.FilterPills-pill.is-checked { background: var(--primary); color: var(--foreground-hover); } /* StarshipCoreStyle.cpp:926, 1636 */
+	.FilterPills-pill.is-checked:hover, .FilterPills-pill.is-checked:active { background: var(--primary-hover); } /* StarshipCoreStyle.cpp:927-928 */
+
+
+	/* Every metric below is cited in README.md. Icons are simple filled/stroke approximations of the Starship SVGs. */
+	.DetailsCategory-frame { width: 360px; background: var(--recessed); } /* tree sits on DetailsView.GridLine (Recessed): SDetailsView.cpp:430-436 */
+
+	/* Category header row: GridLine border with bottom padding 1 (Classic style: top padding 0): SDetailCategoryTableRow.cpp:139-144, DetailsViewStyle.cpp:241-246 */
+	.DetailsCategory-cat { padding-bottom: 1px; background: var(--recessed); }
+	.DetailsCategory-catRow { display: flex; align-items: center; min-height: 26px; background: var(--header); cursor: pointer; } /* DetailsView.CategoryTop = Header; MinDesiredHeight 26: StarshipStyle.cpp:3188, SDetailCategoryTableRow.cpp:155, PropertyEditorConstants.h:28 */
+	.DetailsCategory-arrow { flex: none; margin-left: 2px; width: 16px; height: 16px; color: color-mix(in srgb, var(--foreground) 60%, transparent); } /* caret 16x16, Foreground tint x SubduedForeground 0.6: StarshipCoreStyle.cpp:2072-2075, SDetailExpanderArrow.cpp:25-31, WidgetStyle.cpp:11 */
+	.DetailsCategory-catRow:hover .DetailsCategory-arrow { color: color-mix(in srgb, var(--foreground-hover) 60%, transparent); } /* *_Hovered brush: StarshipCoreStyle.cpp:2073, 2075 */
+	.DetailsCategory-title { flex: 1; min-width: 0; margin-left: 4px; font: 700 10.667px/1.172 var(--font-sans); color: var(--foreground-header); } /* SmallBold 8pt, ForegroundHeader: StarshipStyle.cpp:3265-3269, SDetailCategoryTableRow.cpp:88-97 */
+
+	/* Property row: 26px min + 1px GridLine bottom padding: SDetailSingleItemRow.cpp:732-738 */
+	.DetailsCategory-row { display: flex; min-height: 27px; padding-bottom: 1px; background: var(--recessed); }
+	.DetailsCategory-indent { flex: none; background: var(--panel); } /* 16px per level, paints GetRowBackgroundColor(i): SDetailRowIndent.cpp:33-48, 56-70 */
+	.DetailsCategory-name, .DetailsCategory-value, .DetailsCategory-right { background: var(--panel); display: flex; align-items: center; min-width: 0; } /* GetRowBackgroundColor(0): PropertyEditorConstants.cpp:25-57 */
+	.DetailsCategory-row.is-hover .DetailsCategory-name, .DetailsCategory-row.is-hover .DetailsCategory-value, .DetailsCategory-row.is-hover .DetailsCategory-right,
+	.DetailsCategory-row:hover .DetailsCategory-name, .DetailsCategory-row:hover .DetailsCategory-value, .DetailsCategory-row:hover .DetailsCategory-right { background: var(--header); } /* hovered: Colors.Header: PropertyEditorConstants.cpp:45-47 */
+	.DetailsCategory-row.is-nested .DetailsCategory-name, .DetailsCategory-row.is-nested .DetailsCategory-value { background: #282828; } /* level 1: Panel #242424 + 4 per channel: PropertyEditorConstants.cpp:40-54 */
+	.DetailsCategory-row.is-nested:hover .DetailsCategory-name, .DetailsCategory-row.is-nested:hover .DetailsCategory-value { background: #333333; } /* Header #2f2f2f + 4 */
+	.DetailsCategory-name { flex: 0 0 40%; font: 400 10.667px/1.172 var(--font-sans); color: var(--foreground); } /* NormalFont 8pt: StarshipStyle.cpp:3122; Name 40%, Value 60%: DetailsViewArgs.h:134 */
+	.DetailsCategory-row.is-nested .DetailsCategory-name { flex-basis: calc(40% - 16px); } /* the indent comes out of the Name column */
+	.DetailsCategory-nameInner { display: flex; align-items: center; min-width: 0; }
+	.DetailsCategory-rowArrow { margin-left: 2px; width: 16px; height: 16px; flex: none; color: color-mix(in srgb, var(--foreground) 60%, transparent); visibility: hidden; } /* slot padding 2, 16px caret, Hidden when no children: SDetailSingleItemRow.cpp:503-510, SDetailExpanderArrow.cpp:36-44 */
+	.DetailsCategory-rowArrow.has-children { visibility: visible; }
+	.DetailsCategory-label { margin-left: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } /* name slot Padding(2,0,0,0): SDetailSingleItemRow.cpp:523-531 */
+	.DetailsCategory-value { flex: 1; padding: 0 2px 0 12px; } /* RightRowPadding (12,0,2,0): SDetailSingleItemRow.cpp:39, 553 */
+	.DetailsCategory-right { flex: 0 0 22px; justify-content: flex-end; } /* RightColumnMinWidth 22: DetailsViewArgs.h:135 */
+	.DetailsCategory-split { flex: 0 0 1px; background: var(--recessed); } /* DetailsView.Splitter, 1px handle: SDetailSingleItemRow.cpp:426-428, StarshipStyle.cpp:3246-3249 */
+
+	/* Value widgets: NormalEditableTextBox (padding 8,3,8,4), Checkbox (18px), ComboButton: StarshipCoreStyle.cpp:1282-1294, 1577-1599, 1470-1494 */
+	.DetailsCategory-text { flex: 1; min-width: 0; padding: 3px 8px 4px; border-radius: 4px; background: var(--input); box-shadow: inset 0 0 0 1px var(--input-outline); color: var(--foreground); font: 400 10.667px/1.172 var(--font-sans); white-space: nowrap; overflow: hidden; }
+	.DetailsCategory-text:hover { box-shadow: inset 0 0 0 1px var(--hover); }
+	.DetailsCategory-check { width: 18px; height: 18px; flex: none; border-radius: 3px; background: var(--input); box-shadow: inset 0 0 0 1px var(--secondary); color: var(--primary); display: inline-flex; align-items: center; justify-content: center; } /* CheckboxCornerRadius 3, outline Secondary: StarshipCoreStyle.cpp:1574, 1597 */
+	.DetailsCategory-check:hover { box-shadow: inset 0 0 0 1px var(--hover); }
+	.DetailsCategory-check svg { width: 16px; height: 16px; }
+	.DetailsCategory-combo { flex: 1; min-width: 0; display: flex; align-items: center; height: 22px; padding: 1px 8px; border-radius: 4px; background: var(--input); box-shadow: inset 0 0 0 1px var(--input-outline); color: var(--foreground); font: 400 10.667px/1.172 var(--font-sans); }
+	.DetailsCategory-combo:hover { box-shadow: inset 0 0 0 1px var(--hover); color: var(--foreground-hover); }
+	.DetailsCategory-combo .label { flex: 1; }
+	.DetailsCategory-combo svg { width: 16px; height: 16px; margin: 2px; flex: none; }
+	.DetailsCategory-reset { width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; color: var(--foreground); } /* StarshipStyle.cpp:3277-3283 */
+	.DetailsCategory-reset svg { width: 16px; height: 16px; }
+
+	/* "Advanced" dropdown row: Panel row, regular-weight Small label, MinHeight 26: DetailAdvancedDropdownNode.cpp:74-111 */
+	.DetailsCategory-adv { padding-bottom: 1px; background: var(--recessed); }
+	.DetailsCategory-advRow { display: flex; align-items: center; min-height: 26px; background: var(--panel); cursor: pointer; }
+	.DetailsCategory-advRow:hover { background: var(--header); }
+	.DetailsCategory-advRow .DetailsCategory-title { font-weight: 400; } /* Font(PropertyFontStyle) wins over the SmallBold TextStyle font: DetailAdvancedDropdownNode.cpp:85-86 */
+
+
+	/* Metrics: SSceneOutliner.cpp:139-335, SOutlinerTreeView.cpp:273-321, StarshipCoreStyle.cpp:2000-2117. See README. */
+	.so-page { padding: 16px; }
+	.so-panel { width: 372px; max-width: 100%; display: flex; flex-direction: column; background: var(--panel); color: var(--foreground); font-size: 13.333px; line-height: 16px; }
+
+	/* Toolbar: padding (8,8,8,4); search fills, 4 gap before the buttons -- SSceneOutliner.cpp:183,220 */
+	.so-toolbar { display: flex; align-items: center; padding: 8px 8px 4px 8px; }
+	/* SearchBox: Input fill, Secondary 1px outline, fully rounded, padding (8,3,8,4) -- StarshipCoreStyle.cpp:1303,1289, CoreStyle.h:118 */
+	.so-search { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; background: var(--input); border: 1px solid var(--secondary); border-radius: 999px; padding: 3px 8px 4px 4px; }
+	.so-search:hover { border-color: var(--hover); }
+	/* Glass image 14x14, left padding 4; text starts 8 after the glass -- StarshipCoreStyle.cpp:1315-1316 */
+	.so-glass { flex: none; width: 14px; height: 14px; margin-right: 8px; }
+	/* Hint text = text colour at alpha 0.35 -- SlateEditableTextLayout.cpp:3563 */
+	.so-hint { color: var(--foreground); opacity: .35; }
+	/* SimpleButton icon only: icon 16 + padding (2,1,2,1); hovered fill Dropdown radius 4 -- StarshipCoreStyle.cpp:1391,1406 */
+	.so-btn { flex: none; width: 20px; height: 18px; padding: 1px 2px; border-radius: 4px; margin-left: 4px; color: var(--foreground); display: block; box-sizing: border-box; }
+	.so-btn:hover { background: var(--dropdown); color: var(--foreground-hover); }
+	.so-icon { width: 16px; height: 16px; display: block; }
+
+	/* Header row: see HeaderRow component. Scrollbar spacer 16 -- SHeaderRow.cpp:734-741 */
+	.so-header { background: var(--recessed); }
+	.so-hcells { display: grid; grid-template-columns: 24px 24px 5fr 2fr 16px; column-gap: 1px; }
+	.so-hcell { display: flex; align-items: center; height: 24px; background: var(--header); padding: 0 3.5px; white-space: nowrap; overflow: hidden; }
+	.so-hcell.is-gutter { padding: 0 0 0 4px; }
+	.so-hcell.is-pinned { padding: 0; justify-content: center; }
+	.so-hspacer { background: var(--recessed); }
+	.so-sort { flex: none; width: 12px; height: 12px; margin-left: 4px; }
+	.so-hrule { height: 2px; background: var(--recessed); }
+
+	/* Tree area: Recessed behind the rows -- SSceneOutliner.cpp:260, StarshipStyle.cpp:827 */
+	.so-tree { display: flex; background: var(--recessed); height: 300px; overflow: hidden; }
+	.so-rows { flex: 1 1 auto; min-width: 0; margin-top: -20px; }
+	/* Scrollbar slot 16 wide, thumb 8 wide radius 4, Hover -- StarshipCoreStyle.cpp:189,192, STableViewBase.cpp:100 */
+	.so-sb { flex: none; position: relative; width: 16px; }
+	.so-thumb { position: absolute; left: 4px; top: 18px; width: 8px; height: 280px; border-radius: 4px; background: var(--hover); }
+	.so-sb:hover .so-thumb { background: var(--hover-2); }
+
+	/* Row: min height 20; even Recessed, odd Background -- SceneOutlinerPublicTypes.h:222, StarshipCoreStyle.cpp:2068-2069 */
+	.so-row { display: grid; grid-template-columns: 24px 24px 5fr 2fr; column-gap: 1px; align-items: center; min-height: 20px; background: var(--recessed); color: var(--foreground); white-space: nowrap; }
+	.so-row.is-odd { background: var(--background); }
+	.so-row.is-hover { background: var(--select-hover); }
+	.so-row.is-parent { background: var(--select-parent); }
+	.so-row.is-selected { background: var(--select); color: var(--foreground-hover); }
+	.so-row.is-selected.is-inactive { background: var(--select-inactive); }
+
+	.so-gutter, .so-pinned { display: flex; align-items: center; justify-content: center; }
+	/* Eye shows only for a hovered or selected row; foreground tint -- SceneOutlinerGutter.cpp:246-256 */
+	.so-eye { width: 16px; height: 16px; display: block; }
+	.so-label { display: flex; align-items: center; min-width: 0; overflow: hidden; }
+	/* Indent: padding-left 6 + depth x 12; arrow 16; icon 16 with padding (0,1,6,1) -- SOutlinerTreeView.cpp:304-306, SceneOutlinerPublicTypes.h:222-224 */
+	.so-indent { flex: none; width: calc(6px + var(--depth, 0) * 12px); }
+	.so-arrow { flex: none; width: 16px; height: 16px; color: color-mix(in srgb, var(--foreground) 75%, #000); opacity: .6; }
+	.so-row.is-selected .so-arrow { color: var(--foreground); }
+	.so-arrow.is-leaf { visibility: hidden; }
+	.so-ico { flex: none; width: 16px; height: 16px; margin: 1px 6px 1px 0; }
+	.so-ico.is-folder { color: color-mix(in srgb, var(--accent-folder) 75%, #000); }
+	.so-row.is-selected .so-ico.is-folder { color: var(--accent-folder); }
+	.so-text { flex: 1 1 auto; min-width: 0; overflow: hidden; }
+	/* Type column: subdued foreground (alpha 0.6), padding-left 8 -- SceneOutlinerActorInfoColumn.cpp:117,122 */
+	.so-type { padding-left: 8px; opacity: .6; overflow: hidden; }
+
+	/* Status line: Header fill, padding (14,9) -- SSceneOutliner.cpp:325-328 */
+	.so-status { background: var(--header); padding: 9px 14px; color: var(--foreground); }
+	.so-svg { width: 0; height: 0; position: absolute; }
+
+
+	.ContentBrowser { width: 1200px; margin: 12px 16px; background: var(--background); font: 400 13.333px/16px var(--font-sans); color: var(--foreground); }
+	.ContentBrowser svg { width: 16px; height: 16px; flex: none; display: block; }
+	.ContentBrowser button { font: inherit; color: inherit; border: 0; background: none; margin: 0; cursor: default; display: flex; align-items: center; }
+
+	/* ===== top row: SContentBrowser.cpp:764-855 (Panel, Padding 3) ===== */
+	.ContentBrowser__top { display: flex; align-items: center; background: var(--panel); padding: 3px; }
+	.ContentBrowser__tools { display: flex; align-items: center; margin-left: 5px; padding: 2px 0 2px 4px; }
+	.ContentBrowser__sep { width: 2px; margin: 0 4px; }
+	.ContentBrowser__add { gap: 3px; padding: 3px 14px; height: 22px; border-radius: 4px; background: var(--secondary); box-shadow: inset 0 0 0 1px var(--input); color: var(--foreground-hover); }
+	.ContentBrowser__add:hover { background: var(--hover); }
+	.ContentBrowser__add svg { color: var(--accent-green); }
+	.ContentBrowser__btn { gap: 3px; padding: 3px 4px; border-radius: 4px; }
+	.ContentBrowser__btn:hover, .ContentBrowser__nav:hover:not(:disabled), .ContentBrowser__crumb:hover, .ContentBrowser__settings:hover { background: var(--dropdown); color: var(--foreground-hover); }
+	.ContentBrowser__nav { padding: 1px 3px; border-radius: 4px; }
+	.ContentBrowser__nav--back { margin-left: 10px; }
+	.ContentBrowser__nav--fwd { margin-left: 2px; }
+	.ContentBrowser__nav:disabled { opacity: .45; }
+	.ContentBrowser__path { flex: 1; min-width: 0; display: flex; align-items: center; margin-left: 2px; }
+	.ContentBrowser__folder { margin: 0 4px 0 6px; }
+	.ContentBrowser__crumb { padding: 3px 4px; border-radius: 4px; }
+	.ContentBrowser__delim { padding: 1px 5px; }
+	.ContentBrowser__settings { margin-left: 5px; padding: 1px 4px; border-radius: 4px; }
+	.ContentBrowser__settings svg, .ContentBrowser__settings span { margin: 0 4px; }
+
+	/* SSeparator Thickness(2), Separator brush = Recessed (SContentBrowser.cpp:861; StarshipCoreStyle.cpp:707) */
+	.ContentBrowser__rule { height: 2px; background: var(--recessed); }
+
+	/* ===== body: SSplitter, handle 2px (SContentBrowser.cpp:871); handle = Splitter normal brush Background (StarshipCoreStyle.cpp:633-635) ===== */
+	.ContentBrowser__body { display: flex; align-items: stretch; background: var(--background); }
+	.ContentBrowser__sources { width: 340px; flex: none; padding: 4px; box-sizing: border-box; }     /* SBox Padding(4) :880 */
+	.ContentBrowser__sourcesFrame { display: flex; flex-direction: column; gap: 2px; background: var(--background); } /* vertical splitter handle 2px :897 */
+	.ContentBrowser__area { background: var(--header); padding-top: 2px; }                            /* :908-909 */
+	.ContentBrowser__head { display: flex; align-items: center; padding: 0 4px; min-height: 24px; }   /* HeaderPadding(4,0) :1473 */
+	.ContentBrowser__arrow { margin-right: 3px; }
+	.ContentBrowser__title { flex: 1; font-weight: 700; }
+	.ContentBrowser__tool { margin: 0 4px; padding: 4px; border-radius: 4px; display: flex; }
+	.ContentBrowser__add2 { margin-left: 4px; padding: 1px 3px; border-radius: 4px; display: flex; }
+	.ContentBrowser__add2 + .ContentBrowser__tool { margin-left: 4px; }
+	.ContentBrowser__tree { background: var(--recessed); }
+	.ContentBrowser__row { display: flex; align-items: center; height: 16px; }
+	.ContentBrowser__row--root { height: 19px; padding-top: 3px; }
+	.ContentBrowser__row--parent { background: var(--select-parent); }
+	.ContentBrowser__row--sel { background: var(--select-inactive); color: var(--foreground-hover); }
+	.ContentBrowser__exp { width: 16px; height: 16px; flex: none; }
+	.ContentBrowser__fi { margin-right: 2px; color: var(--accent-folder); }
+
+	.ContentBrowser__split { width: 2px; background: var(--background); flex: none; }
+
+	/* ===== asset area: Brushes.Panel, Padding(2,2,2,0) (SContentBrowser.cpp:1445-1447) ===== */
+	.ContentBrowser__assets { flex: 1; min-width: 0; margin: 0; display: flex; flex-direction: column; background: var(--panel); padding: 2px 2px 0; }
+	.ContentBrowser__search { display: flex; align-items: flex-start; padding: 4px 0 4px 6px; }   /* :1362 */
+	.ContentBrowser__field { display: flex; align-items: center; width: 500px; max-width: 100%; box-sizing: border-box; border-radius: 999px; background: var(--input); box-shadow: inset 0 0 0 1px var(--secondary); }
+	.ContentBrowser__field svg { margin-left: 4px; width: 14px; height: 14px; }
+	.ContentBrowser__hint { flex: 1; padding: 3px 30px 4px 8px; opacity: .35; }
+	.ContentBrowser__ibtn { display: flex; align-items: center; margin-left: 2px; padding: 1px 2px; border-radius: 4px; height: 18px; align-self: center; }
+	.ContentBrowser__ibtn:hover { background: var(--dropdown); color: var(--foreground-hover); }
+	.ContentBrowser__ibtn--filter { padding: 1px 3px; } .ContentBrowser__ibtn--filter svg + svg { margin-left: 2px; }
+	.ContentBrowser__tiles { display: flex; flex-wrap: wrap; align-content: flex-start; flex: 1; }
+	.ContentBrowser__tile { box-sizing: border-box; width: 82px; height: 130px; padding: 0 9px 9px 0; flex: none; }   /* AssetViewWidgets.cpp:2204,2208; SAssetView.cpp:5727 */
+	.ContentBrowser__card { width: 73px; height: 121px; border-radius: 4px; }
+	.ContentBrowser__thumb { width: 73px; height: 73px; padding: 5px; box-sizing: border-box; }                       /* :173 */
+	.ContentBrowser__thumb svg { width: 100%; height: 100%; padding: 0 2px 2px 0; box-sizing: border-box; color: var(--accent-folder); filter: drop-shadow(1.5px 1.5px 1.5px rgba(0,0,0,.55)); }
+	.ContentBrowser__label { padding: 3px 2px; }
+	.ContentBrowser__label div { padding: 2px 0 0 2px; font: 400 12px/14px var(--font-sans); text-align: center; }    /* 9pt */
+	.ContentBrowser__tile.is-sel .ContentBrowser__card { background: var(--secondary); box-shadow: inset 0 0 0 1px var(--primary), 2px 2px 3px rgba(0,0,0,.5); }
+	.ContentBrowser__tile.is-sel .ContentBrowser__label div { color: var(--white); }
+	/* bottom bar: Text Padding(8,5) (SAssetView.cpp:1383-1387) */
+	.ContentBrowser__status { padding: 5px 8px; }
+
+
+/* SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp, SB = Editor/StatusBar/Private/SStatusBar.cpp, WD = Developer/ToolWidgets/Private/SWidgetDrawer.cpp, SU = Editor/StatusBar/Private/StatusBarSubsystem.cpp */
+ /* Normal font 10pt = 13.333px (SC:36); 16px line height approximates Roboto metrics */
+.statusBar-note { margin: 0 0 6px; font: 400 10.667px/12px var(--font-sans); color: var(--foreground); opacity: .7; } /* Small font 8pt (SC:40) */
+.statusBar-svgdefs { position: absolute; width: 0; height: 0; overflow: hidden; }
+.statusBar-ico { display: block; flex: none; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; } /* drawer, console and source control icons are Icon16x16 (SU:489, SU:546, SC:863) */
+
+/* Bar: SBox HeightOverride StatusBar.Height = 32 (SC:1883, SB:584); segments are Panel (Brushes.Panel, SB:580) separated by 1px gaps (SB:597, 610, 622) */
+.statusBar { display: flex; min-width: 990px; height: 32px; background: var(--background); } /* min-width: the console box alone is at least 300px (SOutputLog.cpp:220) */ /* gap colour is whatever is behind the bar; --background is an assumption, no brush set in SB */
+.statusBar-seg { display: flex; flex: none; align-items: center; background: var(--panel); margin: 0 1px; white-space: nowrap; }
+.statusBar-seg--drawer { padding: 0 2px; } /* SBorder Padding (2,0) (WD:443) */
+.statusBar-seg--message { flex: 1; min-width: 0; padding: 0 6px; } /* SBorder Padding (6,0) (SB:602) */
+.statusBar-seg--joined { margin-right: 0; } /* the Output Log button and its console share one 1px-padded slot (WD:589) */
+.statusBar-seg--console { padding: 0 2px; margin-left: 2px; } /* slot Padding (2,0,0,0) (WD:506), SBorder Padding (2,0) (WD:509) */
+.statusBar-seg--console .statusBar-console { display: flex; align-items: center; align-self: stretch; padding: 0 6px; background: var(--panel); } /* SBorder Panel Padding (6,0) (SU:524-527) */
+.statusBar-seg--tools { padding: 0 4px; } /* StatusBarToolBar BackgroundPadding (4,4) (SC:1897); vertical 4 is absorbed by the 32px bar */
+
+/* StatusBar.StatusBarButton: NoBorder-derived, Foreground, padding (2,2,2,2), pressed (2,3,2,1) (SC:1867-1870); content slots Padding 2 (WD:456, 467) */
+.statusBar-btn { display: flex; align-items: center; padding: 2px; color: var(--foreground); cursor: default; } /* NormalForeground Foreground (SC:1868) */
+.statusBar-btn:hover, .statusBar-btn.is-hover { color: var(--foreground-hover); } /* NoBorder HoveredForeground ForegroundHover (SC:237-239) */
+.statusBar-btn .statusBar-ico, .statusBar-btn .statusBar-txt { margin: 2px; }
+
+/* Combo buttons use SimpleComboButton: SimpleButtonLabelAndIcon padding (4,1,4,1), hover Dropdown r4, 16x16 chevron, arrow padding 2 (SC:1401-1403, 1389-1399, 1514-1521, SlateTypes.cpp:165) */
+.statusBar-combo { display: flex; align-items: center; padding: 1px 4px; border-radius: 4px; color: var(--foreground); background: transparent; cursor: default; }
+.statusBar-combo:hover, .statusBar-combo.is-hover { background: var(--dropdown); color: var(--foreground-hover); } /* SC:1391, 1395 */
+.statusBar-arrow { margin: 2px; }
+
+/* Cmd combo: ContentPadding 0, icon and label slots Padding 2 (SOutputLog.cpp:191-213) */
+.statusBar-cmd .statusBar-ico, .statusBar-cmd .statusBar-txt { margin: 2px; }
+.statusBar-cmd { margin-right: 4px; } /* slot Padding (0,0,4,0) (SOutputLog.cpp:186) */
+
+/* Console text box: NormalEditableTextBox (SC:1282-1294): Input fill, InputOutline 1px, radius 4, padding (8,3,8,4); width 300..600 (SOutputLog.cpp:220-221) */
+.statusBar-input { box-sizing: border-box; width: 300px; padding: 3px 8px 4px; border-radius: 4px; background: var(--input); box-shadow: inset 0 0 0 1px var(--input-outline); font: 400 12px/16px var(--font-mono); color: var(--foreground); } /* Log.Normal is Mono 9pt = 12px (OutputLogStyle.cpp:54, OutputLogSettings.h:40) */
+.statusBar-input:hover { box-shadow: inset 0 0 0 1px var(--hover); }
+.statusBar-input span { color: var(--foreground); opacity: .35; } /* hint text: foreground at alpha 0.35 (SlateEditableTextLayout.cpp:3563) */
+
+/* Derived Data and Source Control: ComboButton ContentPadding (6,0) (SDerivedDataStatusBar.cpp:166, SourceControlMenuHelpers.cpp:432) */
+.statusBar-combo--status { padding: 1px 10px; } /* 6 content + 4 style horizontal */
+.statusBar-dd-ico { margin-right: 3px; } /* icon slot Padding (0,0,3,0) (SDerivedDataStatusBar.cpp:177) */
+.statusBar-dd-txt { margin-right: 10px; } /* label slot Padding (0,0,10,0) (SDerivedDataStatusBar.cpp:224) */
+.statusBar-sc-txt { margin-left: 5px; } /* label slot Padding (5,0,0,0) (SourceControlMenuHelpers.cpp:449) */
+
+
+	.tabWell-page { display: flex; flex-wrap: wrap; gap: 22px; padding: 22px; font: 400 13.333px/1.2 var(--font-sans); color: var(--foreground); }
+	.tabWell-col { display: flex; flex-direction: column; gap: 6px; flex: 1 1 300px; min-width: 0; max-width: 420px; }
+	.tabWell-caption { font: 400 11px/1.2 var(--font-sans); color: var(--hover-2); }
+
+	/* preview mount only: a recessed window ground so a background-coloured area stays visible */
+	.tabWell-stack { display: flex; flex-direction: column; box-shadow: 0 0 0 6px var(--recessed); }
+
+	/* tab well: Brushes.Background for a minor stack, Brushes.Title under the window chrome; SDockingTabStack.cpp:1234-1236 */
+	.tabWell-well { display: flex; align-items: flex-end; gap: 2px; /* OverlapWidth -2 gives a 2px gap: StarshipCoreStyle.cpp:1799, SDockingTabWell.cpp:105 */
+		background: var(--background); padding: 0; /* tab well border Padding(0): SDockingTabStack.cpp:151 */ }
+	.tabWell-well--major { background: var(--title); }
+
+	/* content area: ForegroundTab ContentAreaBrush, SDockingTabStack.cpp:179; Panel for minor (StarshipCoreStyle.cpp:1794), Background for major (:1820) */
+	.tabWell-content { background: var(--panel); padding: 0; /* SDockTab::ContentPadding default 0, SDockTab.h:77 */ min-height: 150px; }
+	.tabWell-content--major { background: var(--background); min-height: 150px; }
+
+	.tabWell-tab { position: relative; display: inline-flex; align-items: center; box-sizing: border-box; flex: none;
+		height: 25px; /* MaxMinorTabSize.Y, SDockingTabWell.cpp:9 */
+		max-width: 160px; /* MaxMinorTabSize.X, SDockingTabWell.cpp:9 */
+		padding: 2.55px 10px 3.4px 4px; /* TabPadding (4,3,10,4), vertical x0.85: StarshipCoreStyle.cpp:1798, SDockTab.cpp:30,811-816 */
+		border-radius: 4px 4px 0 0; /* 4px slice of DockTab_Foreground (StarshipCoreStyle.cpp:1791); texture absent, radius approximated */
+		color: var(--foreground); white-space: nowrap; }
+	.tabWell-tab--foreground { background: var(--panel); /* ForegroundBrush :1791 */ }
+	.tabWell-tab--active { color: var(--foreground-hover); /* ActiveForegroundColor :1802 */ }
+	.tabWell-tab--active::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--primary), transparent); /* SDockTab.cpp:592-616 */ }
+	.tabWell-tab--major { height: auto; max-width: 210px; /* SDockingTabWell.cpp:10 */ padding: 3.4px 10px 3.4px 4px; /* (4,4,10,4), vertical x0.85: StarshipCoreStyle.cpp:1823 */ color: var(--white); }
+	.tabWell-icon { display: flex; flex: none; padding: 1px; margin-right: 5px; /* SDockTab.cpp:646; IconBorderPadding SlateTypes.cpp:713 */ }
+	.tabWell-tab--major .tabWell-icon { padding: 4px; /* StarshipCoreStyle.cpp:1832 */ }
+	.tabWell-icon svg, .tabWell-close svg { display: block; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+	.tabWell-label { padding: 2px 0; overflow: hidden; text-overflow: ellipsis; /* SDockTab.cpp:665,676 */ }
+	.tabWell-close { display: flex; flex: none; padding: 1.5px 0 0; /* SDockTab.cpp:707 */ color: var(--foreground); visibility: hidden; }
+	.tabWell-tab--foreground .tabWell-close { visibility: visible; /* SDockTab.cpp:970-976 */ }
+
+	/* stand-in for consumer content; not part of the component */
+	.tabWell-row { display: flex; align-items: center; gap: 8px; height: 22px; padding: 0 8px; color: var(--foreground); }
+	.tabWell-row:nth-child(even) { background: var(--recessed); }
+	.tabWell-row svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; }
+
+	.el-root { width: 1280px; background: var(--background); font: 400 13.333px/1.2 var(--font-sans); color: var(--foreground); display: flex; flex-direction: column; }
+	.el-root .windowChrome-title { width: 100%; }
+	.el-toolbar { background: var(--panel); }
+	.el-main { display: grid; grid-template-columns: 280px 1fr 372px; gap: 0 2px; height: 520px; background: var(--background); }
+	.el-col { display: flex; flex-direction: column; min-width: 0; min-height: 0; gap: 2px; }
+	.el-root .tabWell-stack { display: flex; flex-direction: column; min-height: 0; flex: 1 1 0; }
+	.el-root .el-body { overflow: hidden; padding: 0; flex: 1 1 auto; min-height: 0; }
+	.el-root .el-body > * { max-width: 100%; }
+	.el-root .DetailsHeader-frame, .el-root .DetailsSearchRow-frame, .el-root .FilterPills-frame, .el-root .DetailsCategory-frame, .el-root .so-panel { width: 100%; }
+	.el-root .ContentBrowser { width: 100%; margin: 0; }
+	.el-root .statusBar { min-width: 0; }
+	.el-viewport { display: block; width: 100%; height: 100%; object-fit: cover; }
+	.el-details { flex: 3 1 0; } .el-outliner { flex: 2 1 0; }
+	.el-bottom { height: 250px; margin-top: 2px; display: flex; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="windowChrome-i-logo" viewBox="0 0 45 45"><circle cx="22.500" cy="22.500" r="20"/><path d="M14.500 12.500v12.500a8 8 0 0 0 16 0V12.500"/></symbol>
+<symbol id="windowChrome-i-world" viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></symbol>
+<symbol id="windowChrome-i-min" viewBox="0 0 42 23"><path d="M16.500 11.500h9"/></symbol>
+<symbol id="windowChrome-i-max" viewBox="0 0 42 23"><rect x="16.500" y="6.500" width="9" height="9"/></symbol>
+<symbol id="windowChrome-i-close" viewBox="0 0 42 23"><path d="M16.500 6.500l9 9 M25.500 6.500l-9 9"/></symbol>
+
+<symbol id="toolBar-i-save" viewBox="0 0 16 16"><path d="M3 2.5h8l2 2V13a.5.5 0 0 1-.5.5h-9A.5.5 0 0 1 3 13z"/><path d="M5 2.5V6h5V2.5M5 13.5v-4h6v4"/></symbol>
+<symbol id="toolBar-i-chev" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></symbol>
+<symbol id="toolBar-i-cursor" viewBox="0 0 16 16"><path d="M4 2.5l8 4.5-3.6 1.1L10.5 13l-1.7.8-2.1-4.8L4 11z"/></symbol>
+<symbol id="toolBar-i-add" viewBox="0 0 16 16"><path d="M8 2l5 2.5v5L8 12 3 9.5v-5z"/><path d="M3 4.5l5 2.5 5-2.5M8 7v5"/></symbol>
+<symbol id="toolBar-i-bp" viewBox="0 0 16 16"><rect x="2" y="3" width="5" height="4" rx="1"/><rect x="9" y="9" width="5" height="4" rx="1"/><path d="M7 5h2.5a1 1 0 0 1 1 1v3"/></symbol>
+<symbol id="toolBar-i-clap" viewBox="0 0 16 16"><rect x="2" y="6.5" width="12" height="7" rx="1"/><path d="M2 6.5l1-3 3 .7-1 2.3M7 3.8l3 .7-1 2M11 4.6l3 .7-.7 1.2"/></symbol>
+<symbol id="toolBar-i-gear" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.3"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4"/></symbol>
+<symbol id="toolBar-i-play" viewBox="0 0 16 16"><path d="M4.5 2.8v10.4L13 8z" fill="currentColor" stroke="none"/></symbol>
+<symbol id="toolBar-i-step" viewBox="0 0 16 16"><path d="M3 3v10l7-5z" fill="currentColor" stroke="none"/><path d="M12.5 3v10"/></symbol>
+<symbol id="toolBar-i-stop" viewBox="0 0 16 16"><rect x="3.5" y="3.5" width="9" height="9" rx="1" fill="currentColor" stroke="none"/></symbol>
+<symbol id="toolBar-i-eject" viewBox="0 0 16 16"><path d="M8 3l5.5 6.5h-11z" fill="currentColor" stroke="none"/><rect x="2.5" y="11" width="11" height="2" fill="currentColor" stroke="none"/></symbol>
+<symbol id="toolBar-i-expand" viewBox="0 0 16 16"><path d="M3 3.5L7.5 8 3 12.5M8.5 3.5L13 8l-4.5 4.5"/></symbol>
+<symbol id="placeActors-i-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></symbol>
+<symbol id="placeActors-i-recent" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l2.5 1.5"/></symbol>
+<symbol id="placeActors-i-basic" viewBox="0 0 16 16"><path d="M5 2.5L8.5 6h-7z"/><circle cx="11.5" cy="5" r="2.5"/><rect x="3" y="9.5" width="5" height="4.5" rx=".5"/></symbol>
+<symbol id="placeActors-i-bulb" viewBox="0 0 16 16"><path d="M5.5 10.5c-1.5-1-2.2-2.3-2.2-3.8a4.7 4.7 0 0 1 9.4 0c0 1.5-.7 2.8-2.2 3.8z"/><path d="M6 12.5h4M6.8 14.2h2.4"/></symbol>
+<symbol id="placeActors-i-shapes" viewBox="0 0 16 16"><path d="M8 2l5.5 2.7v5.6L8 13 2.5 10.3V4.7z"/><path d="M2.5 4.7L8 7.4l5.5-2.7M8 7.4V13"/></symbol>
+<symbol id="placeActors-i-clap" viewBox="0 0 16 16"><rect x="2" y="6.5" width="12" height="7" rx="1"/><path d="M2 6.5l1-3 3 .7-1 2.3M7 3.8l3 .7-1 2M11 4.6l3 .7-.7 1.2"/></symbol>
+<symbol id="placeActors-i-vfx" viewBox="0 0 16 16"><path d="M6 2.5l1.2 3.3 3.3 1.2-3.3 1.2L6 11.5 4.8 8.2 1.5 7l3.3-1.2zM12 9l.8 2.2L15 12l-2.2.8L12 15l-.8-2.2L9 12l2.2-.8z"/></symbol>
+<symbol id="placeActors-i-volumes" viewBox="0 0 16 16"><path d="M8 2l5.5 2.7v5.6L8 13 2.5 10.3V4.7z" stroke-dasharray="2 1.5"/></symbol>
+<symbol id="placeActors-i-all" viewBox="0 0 16 16"><rect x="2" y="5" width="9" height="9" rx="1"/><path d="M5 2.5h8.5V11"/></symbol>
+<symbol id="placeActors-i-sphere" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M3 6.5c3 1.5 7 1.5 10 0M3 9.5c3-1.5 7-1.5 10 0" opacity=".6"/></symbol>
+<symbol id="placeActors-i-person" viewBox="0 0 16 16"><circle cx="8" cy="4.5" r="2.5"/><path d="M3 14c0-3.2 2.2-5 5-5s5 1.8 5 5z"/></symbol>
+<symbol id="placeActors-i-flag" viewBox="0 0 16 16"><path d="M4 14V2.5M4 3h8l-1.8 2.7L12 8.5H4"/></symbol>
+<symbol id="placeActors-i-help" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M6.2 6.3a1.9 1.9 0 0 1 3.6.7c0 1.3-1.8 1.4-1.8 2.7M8 11.6v.1"/></symbol>
+<symbol id="DetailsHeader-cube" viewBox="0 0 16 16"><path d="M8 1.5 14 4.75v6.5L8 14.5 2 11.25v-6.5z M2 4.75 8 8l6-3.25 M8 8v6.5" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/></symbol>
+<symbol id="DetailsHeader-plus" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></symbol>
+<symbol id="DetailsHeader-bp" viewBox="0 0 16 16"><path d="M2.5 3.5h4v3h-4z M9.5 9.5h4v3h-4z M6.5 5h2.5a1.5 1.5 0 0 1 1.5 1.5V9.5 M2.5 11h4" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+<symbol id="DetailsHeader-help" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.25"/><path d="M6.2 6.3a1.9 1.9 0 1 1 2.7 1.7c-.6.3-.9.7-.9 1.3M8 11.4v.1" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></symbol>
+<symbol id="DetailsHeader-unlock" viewBox="0 0 16 16"><rect x="3" y="7.5" width="10" height="6.5" rx="1.25" fill="none" stroke="currentColor" stroke-width="1.25"/><path d="M5.5 7.5V5a2.5 2.5 0 0 1 4.9-.7" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></symbol>
+<symbol id="DetailsSearchRow-glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.75" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m10.6 10.6 3.4 3.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+<symbol id="DetailsSearchRow-close" viewBox="0 0 16 16"><path d="m4 4 8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+<symbol id="DetailsSearchRow-table" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="1.25" fill="none" stroke="currentColor" stroke-width="1.25"/><path d="M2 6.5h12M2 9.75h12M6.5 6.5V13" fill="none" stroke="currentColor" stroke-width="1.25"/></symbol>
+<symbol id="DetailsSearchRow-star" viewBox="0 0 16 16"><path d="m8 2 1.8 3.9 4.2.5-3.1 2.9.8 4.2L8 11.4l-3.7 2.1.8-4.2L2 6.4l4.2-.5z" fill="currentColor"/></symbol>
+<symbol id="DetailsSearchRow-gear" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.25" fill="none" stroke="currentColor" stroke-width="1.25"/><path d="M8 1.75v2M8 12.25v2M1.75 8h2M12.25 8h2M3.6 3.6 5 5M11 11l1.4 1.4M12.4 3.6 11 5M5 11l-1.4 1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+
+<symbol id="DetailsCategory-down" viewBox="0 0 16 16"><path d="M4.5 6h7L8 10.5z" fill="currentColor"/></symbol>
+<symbol id="DetailsCategory-right" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z" fill="currentColor"/></symbol>
+<symbol id="DetailsCategory-chev" viewBox="0 0 16 16"><path d="m4.5 6.5 3.5 3.5 3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="DetailsCategory-tick" viewBox="0 0 16 16"><path d="m3.75 8.5 3 3 5.5-6.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="DetailsCategory-reset" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="so-caret-right" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z" fill="currentColor"/></symbol>
+<symbol id="so-caret-down" viewBox="0 0 16 16"><path d="M4 6h8l-4 4.5z" fill="currentColor"/></symbol>
+<symbol id="so-eye" viewBox="0 0 16 16"><path d="M1.5 8C3 5.2 5.3 3.8 8 3.8s5 1.4 6.5 4.2c-1.5 2.8-3.8 4.2-6.5 4.2S3 10.8 1.5 8z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="8" cy="8" r="2.1" fill="none" stroke="currentColor" stroke-width="1.2"/></symbol>
+<symbol id="so-pin" viewBox="0 0 16 16"><path d="M9.6 2.4l4 4-1.4.7-2.3 2.3.2 2.2-1 1-2.7-2.7-3.7 3.7-.7-.7 3.7-3.7L3.1 7.8l1-1 2.2.2 2.3-2.3z" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></symbol>
+<symbol id="so-up" viewBox="0 0 12 12"><path d="M2 8l4-5 4 5z" fill="currentColor"/></symbol>
+<symbol id="so-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.3" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10.2 10.2l3.6 3.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></symbol>
+<symbol id="so-folder-plus" viewBox="0 0 16 16"><path d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/><path d="M8 7.2v4M6 9.2h4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></symbol>
+<symbol id="so-gear" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.2" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M8 1.8v2M8 12.2v2M1.8 8h2M12.2 8h2M3.6 3.6L5 5M11 11l1.4 1.4M3.6 12.4L5 11M11 5l1.4-1.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></symbol>
+<symbol id="so-folder" viewBox="0 0 16 16"><path d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z" fill="currentColor"/></symbol>
+<symbol id="so-world" viewBox="0 0 16 16"><path d="M1.5 13l4-7 2.5 4 2-3 4.5 6z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="12" cy="4" r="1.3" fill="currentColor"/></symbol>
+<symbol id="so-cube" viewBox="0 0 16 16"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></symbol>
+<symbol id="so-speaker" viewBox="0 0 16 16"><path d="M2 6h2.5L8 3v10L4.5 10H2z" fill="currentColor"/><path d="M10.5 5.5a3.5 3.5 0 0 1 0 5M12.3 3.8a6 6 0 0 1 0 8.4" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></symbol>
+<symbol id="so-flag" viewBox="0 0 16 16"><path d="M4 14V2.5M4 3h8l-2 3 2 3H4" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></symbol>
+<symbol id="so-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.8" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></symbol>
+<symbol id="so-sphere" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.6" fill="none" stroke="currentColor" stroke-width="1.2"/><ellipse cx="8" cy="8" rx="5.6" ry="2.2" fill="none" stroke="currentColor" stroke-width="1"/></symbol>
+<symbol id="cb-plus" viewBox="0 0 16 16"><path d="M8 2.5v11M2.5 8h11" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square"/></symbol>
+<symbol id="cb-import" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"><path d="M2 9v5h12V9"/><path d="M8 1.5v8M5 6.5l3 3 3-3"/><path d="M2 9V6.5h2"/></g></symbol>
+<symbol id="cb-saveall" viewBox="0 0 16 16"><g fill="currentColor"><path d="M4 1h8l3 3v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zm1 1v4h6V2zm1 9v3h5v-3z"/><path d="M1 4h1.5v10H1z" opacity=".6"/></g></symbol>
+<symbol id="cb-back" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><path d="M11.5 8h-7M7.5 5l-3 3 3 3"/></g></symbol>
+<symbol id="cb-fwd" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><path d="M4.5 8h7M8.5 5l3 3-3 3"/></g></symbol>
+<symbol id="cb-chev-r" viewBox="0 0 16 16"><path d="M6 3.5L10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="cb-gear" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><circle cx="8" cy="8" r="2.25"/><path d="M8 1.5l1.2 1.7 2-.5.6 2 2 .7-.5 2 1.7 1.3-1.7 1.3.5 2-2 .7-.6 2-2-.5L8 14.5l-1.2-1.7-2 .5-.6-2-2-.7.5-2L1.5 8l1.7-1.3-.5-2 2-.7.6-2 2 .5z"/></g></symbol>
+<symbol id="cb-fc" viewBox="0 0 16 16"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2H6l1.5 1.5H13.5A1.5 1.5 0 0 1 15 5v7.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5z" fill="currentColor"/></symbol>
+<symbol id="cb-fo" viewBox="0 0 16 16"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2H6l1.5 1.5h6A1.5 1.5 0 0 1 15 5v1H4.2L1 12.5zM4.2 7.2H15.6L12.6 13.8H1.2z" fill="currentColor"/></symbol>
+<symbol id="cb-cr" viewBox="0 0 16 16"><path d="M5.5 3l6 5-6 5z" fill="currentColor"/></symbol>
+<symbol id="cb-cd" viewBox="0 0 16 16"><path d="M3 5.5h10L8 11.5z" fill="currentColor"/></symbol>
+<symbol id="cb-glass" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6.75" cy="6.75" r="4.5"/><path d="M10.2 10.2L14 14"/></g></symbol>
+<symbol id="cb-pc" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.75v6.5M4.75 8h6.5"/></g></symbol>
+<symbol id="cb-save" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"><path d="M2.5 2.5h9l2 2v9h-11z"/><path d="M5 2.5v3.5h5V2.5M5 13.5v-4h6v4"/></g></symbol>
+<symbol id="cb-filter" viewBox="0 0 16 16"><path d="M2 4h12M4 8h8M6.5 12h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+<symbol id="cb-chev-d" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="cb-folder64" viewBox="0 0 64 64">
+			<path d="M2 13a2 2 0 0 1 2-2h18l5 6h33a2 2 0 0 1 2 2v31a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="currentColor"/>
+			<path d="M2 13a2 2 0 0 1 2-2h18l5 6H2z" fill="#fff" opacity=".12"/>
+			<path d="M2 24h60v26a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="#000" opacity=".12"/>
+		</symbol>
+<symbol id="statusBar-i-drawer" viewBox="0 0 16 16"><path d="M2 4.5l1-1.5h4l1 1.5h6V13H2z"/></symbol>
+<symbol id="statusBar-i-log" viewBox="0 0 16 16"><path d="M3.5 2h7l2.5 2.5V14h-9.5z"/><path d="M5.5 7h5M5.5 9.5h5M5.5 12h3"/></symbol>
+<symbol id="statusBar-i-console" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M4.5 6.5l2 1.5-2 1.5M8 10h3.5"/></symbol>
+<symbol id="statusBar-i-chev" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></symbol>
+<symbol id="statusBar-i-ddc" viewBox="0 0 16 16"><ellipse cx="8" cy="4" rx="5" ry="2"/><path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/></symbol>
+<symbol id="statusBar-i-sc" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M4.1 11.9l7.8-7.8"/></symbol>
+<symbol id="tabWell-i-details" viewBox="0 0 16 16"><path d="M2.500 4h11 M2.500 8h11 M2.500 12h7"/><circle cx="12.500" cy="12" r="1.200"/></symbol>
+<symbol id="tabWell-i-outliner" viewBox="0 0 16 16"><path d="M5.500 3.500h8 M5.500 8h8 M5.500 12.500h8 M2.500 3.500h.5 M2.500 8h.5 M2.500 12.500h.5"/></symbol>
+<symbol id="tabWell-i-folder" viewBox="0 0 16 16"><path d="M2 4.500h4l1.500 1.500H14v6.500H2z"/></symbol>
+<symbol id="tabWell-i-world" viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></symbol>
+<symbol id="tabWell-i-close" viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></symbol>
+</defs></svg>
+<div class="el-root">
+<div class="windowChrome-title">
+			<div class="windowChrome-icon"><svg><use href="#windowChrome-i-logo"/></svg></div>
+			<div class="windowChrome-menu"><div class="menuBar">
+	<div class="menuBar-item">File</div>
+	<div class="menuBar-item is-hover">Edit</div>
+	<div class="menuBar-item">Window</div>
+	<div class="menuBar-item">Tools</div>
+	<div class="menuBar-item">Build</div>
+	<div class="menuBar-item">Select</div>
+	<div class="menuBar-item">Actor</div>
+	<div class="menuBar-item">Help</div>
+</div></div>
+			<div class="windowChrome-tabRow">
+				<div class="windowChrome-tab"><span class="windowChrome-tabIcon"><svg><use href="#windowChrome-i-world"/></svg></span><span class="windowChrome-tabLabel">Minimal_Default</span></div>
+			</div>
+			<div class="windowChrome-right">
+				<div class="windowChrome-badge">LevelDesignProject</div>
+				<button class="windowChrome-btn windowChrome-btn--minmax" aria-label="Minimize"><svg><use href="#windowChrome-i-min"/></svg></button>
+				<button class="windowChrome-btn windowChrome-btn--minmax" aria-label="Maximize"><svg><use href="#windowChrome-i-max"/></svg></button>
+				<button class="windowChrome-btn windowChrome-btn--close" aria-label="Close"><svg><use href="#windowChrome-i-close"/></svg></button>
+			</div>
+		</div>
+<div class="el-toolbar"><div class="toolBar">
+	<div class="toolBar-slot toolBar-slot--button"><div class="toolBar-btn"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-save"/></svg></div></div>
+	<div class="toolBar-slot toolBar-slot--sep"><div class="toolBar-sep"></div></div>
+	<div class="toolBar-slot toolBar-slot--modes"><div class="toolBar-modes"><svg class="toolBar-ico toolBar-ico--16"><use href="#toolBar-i-cursor"/></svg>Select Mode<svg class="toolBar-ico toolBar-ico--16 toolBar-arrow"><use href="#toolBar-i-chev"/></svg></div></div>
+	<div class="toolBar-slot toolBar-slot--combo"><div class="toolBar-btn"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-add"/></svg><svg class="toolBar-ico toolBar-ico--16 toolBar-arrow"><use href="#toolBar-i-chev"/></svg></div></div>
+	<div class="toolBar-slot toolBar-slot--combo"><div class="toolBar-btn"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-bp"/></svg><svg class="toolBar-ico toolBar-ico--16 toolBar-arrow"><use href="#toolBar-i-chev"/></svg></div></div>
+	<div class="toolBar-slot toolBar-slot--combo"><div class="toolBar-btn"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-clap"/></svg><svg class="toolBar-ico toolBar-ico--16 toolBar-arrow"><use href="#toolBar-i-chev"/></svg></div></div>
+	<div class="toolBar-slot toolBar-slot--sep"><div class="toolBar-sep"></div></div>
+	<div class="toolBar-slot"><div class="toolBar-plate toolBar-plate--left toolBar-plate--play"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-play"/></svg></div></div>
+	<div class="toolBar-slot"><div class="toolBar-plate toolBar-plate--center toolBar-plate--step"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-step"/></svg></div></div>
+	<div class="toolBar-slot"><div class="toolBar-plate toolBar-plate--center toolBar-plate--stop"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-stop"/></svg></div></div>
+	<div class="toolBar-slot"><div class="toolBar-plate toolBar-plate--center toolBar-plate--step"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-eject"/></svg></div></div>
+	<div class="toolBar-slot"><div class="toolBar-plate toolBar-plate--right"><svg class="toolBar-dots" viewBox="0 0 6 24"><circle cx="3" cy="4" r="1.6"/><circle cx="3" cy="12" r="1.6"/><circle cx="3" cy="20" r="1.6"/></svg></div></div>
+	<div class="toolBar-spacer"></div>
+	<div class="toolBar-slot toolBar-slot--button"><div class="toolBar-wrap"><svg class="toolBar-ico toolBar-ico--16"><use href="#toolBar-i-expand"/></svg></div></div>
+	<div class="toolBar-spacer"></div>
+	<div class="toolBar-slot toolBar-slot--settings"><div class="toolBar-btn"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-gear"/></svg><span class="toolBar-label">Settings</span><svg class="toolBar-ico toolBar-ico--16 toolBar-arrow"><use href="#toolBar-i-chev"/></svg></div></div>
+</div></div>
+<div class="el-main">
+<div class="el-col"><div class="tabWell-stack " style="width:100%"><div class="tabWell-well"><div class="tabWell-tab tabWell-tab--foreground tabWell-tab--active"><span class="tabWell-icon"><svg><use href="#tabWell-i-folder"/></svg></span><span class="tabWell-label">Place Actors</span><span class="tabWell-close"><svg><use href="#tabWell-i-close"/></svg></span></div></div><div class="tabWell-content el-body"><div>
+	
+	<div class="placeActors">
+		<div class="placeActors-search"><div class="placeActors-searchbox"><svg class="placeActors-ico placeActors-ico--14"><use href="#placeActors-i-search"/></svg><span class="placeActors-hint">Search Classes</span></div></div>
+		<div class="placeActors-rail placeActors-rail--row">
+			<div class="placeActors-cat"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-recent"/></svg></div>
+			<div class="placeActors-cat is-active"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-basic"/></svg></div>
+			<div class="placeActors-cat"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-bulb"/></svg></div>
+			<div class="placeActors-cat"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-shapes"/></svg></div>
+			<div class="placeActors-cat"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-clap"/></svg></div>
+			<div class="placeActors-cat"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-vfx"/></svg></div>
+			<div class="placeActors-cat"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-volumes"/></svg></div>
+			<div class="placeActors-cat"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-all"/></svg></div>
+		</div>
+		<div class="placeActors-header">Basic</div>
+		<div class="placeActors-body"><div class="placeActors-grid">
+			<div class="placeActors-row is-hover"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-sphere"/></svg></div><div class="placeActors-name">Actor</div><div class="placeActors-info"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+			<div class="placeActors-row"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-person"/></svg></div><div class="placeActors-name">Character</div><div class="placeActors-info"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+			<div class="placeActors-row"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-person"/></svg></div><div class="placeActors-name">Pawn</div><div class="placeActors-info"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+			<div class="placeActors-row"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-bulb"/></svg></div><div class="placeActors-name">Point Light</div><div class="placeActors-info"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+			<div class="placeActors-row is-pressed"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-flag"/></svg></div><div class="placeActors-name">Player Start</div><div class="placeActors-info"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+		</div></div>
+	</div>
+</div></div></div></div>
+<div class="el-col"><div class="tabWell-stack " style="width:100%"><div class="tabWell-well"><div class="tabWell-tab tabWell-tab--foreground tabWell-tab--active"><span class="tabWell-icon"><svg><use href="#tabWell-i-world"/></svg></span><span class="tabWell-label">Viewport 1</span><span class="tabWell-close"><svg><use href="#tabWell-i-close"/></svg></span></div></div><div class="tabWell-content el-body"><img class="el-viewport" src="/_blob/a5eee8bb3006435518a23e42e3623041" alt="3D viewport placeholder"></div></div></div>
+<div class="el-col"><div class="tabWell-stack el-details" style="width:100%"><div class="tabWell-well"><div class="tabWell-tab tabWell-tab--foreground tabWell-tab--active"><span class="tabWell-icon"><svg><use href="#tabWell-i-details"/></svg></span><span class="tabWell-label">Details</span><span class="tabWell-close"><svg><use href="#tabWell-i-close"/></svg></span></div></div><div class="tabWell-content el-body"><div class="DetailsHeader-frame">
+	<div class="DetailsHeader">
+		<div class="DetailsHeader-name">
+			<svg class="DetailsHeader-icon"><use href="#DetailsHeader-cube"/></svg>
+			<div class="DetailsHeader-label">Chair</div>
+			<div class="DetailsHeader-actions">
+				<button class="DetailsHeader-btn DetailsHeader-add" title="Adds a new component to this actor"><svg><use href="#DetailsHeader-plus"/></svg><span>Add</span></button>
+				<button class="DetailsHeader-btn DetailsHeader-icon-btn" title="Converts this actor into a reusable Blueprint Class"><svg><use href="#DetailsHeader-bp"/></svg></button>
+				<button class="DetailsHeader-btn DetailsHeader-help" title="Click to open documentation"><svg><use href="#DetailsHeader-help"/></svg></button>
+			</div>
+			<button class="DetailsHeader-btn DetailsHeader-lock" title="Locks the current selection into the Details panel"><svg><use href="#DetailsHeader-unlock"/></svg></button>
+		</div>
+	</div>
+		<div class="DetailsHeader-instanceBox">
+			<div class="DetailsHeader-instance">
+				<svg><use href="#DetailsHeader-cube"/></svg>
+				<span class="name">Chair</span><span class="ctx">(Instance)</span>
+			</div>
+		</div>
+</div>
+<div class="DetailsSearchRow-frame"><div class="DetailsSearchRow">
+		<div class="DetailsSearchRow-searchSlot">
+			<div class="DetailsSearchRow-search">
+				<svg class="DetailsSearchRow-glass"><use href="#DetailsSearchRow-glass"/></svg>
+				<div class="DetailsSearchRow-text"><span class="DetailsSearchRow-hint">Search</span></div>
+				<span class="DetailsSearchRow-tail"></span>
+			</div>
+		</div>
+		<button class="DetailsSearchRow-btn is-button" title="Edit Selection in Property Matrix"><svg><use href="#DetailsSearchRow-table"/></svg></button>
+		<button class="DetailsSearchRow-btn is-button" title="Toggle Favorites"><svg><use href="#DetailsSearchRow-star"/></svg></button>
+		<button class="DetailsSearchRow-btn is-combo" title="View options"><svg><use href="#DetailsSearchRow-gear"/></svg></button>
+	</div></div>
+<div class="FilterPills-frame">
+	<div class="FilterPills-strip" role="tablist">
+		<button class="FilterPills-pill" role="tab" aria-selected="false">General</button>
+		<button class="FilterPills-pill" role="tab" aria-selected="false">Actor</button>
+		<button class="FilterPills-pill" role="tab" aria-selected="false">LOD</button>
+		<button class="FilterPills-pill" role="tab" aria-selected="false">Misc</button>
+		<button class="FilterPills-pill" role="tab" aria-selected="false">Physics</button>
+		<button class="FilterPills-pill" role="tab" aria-selected="false">Rendering</button>
+		<button class="FilterPills-pill" role="tab" aria-selected="false">Streaming</button>
+		<button class="FilterPills-pill is-checked" role="tab" aria-selected="true">All</button>
+	</div>
+</div>
+<div class="DetailsCategory-frame">
+
+	<!-- Expanded category -->
+	<div class="DetailsCategory-cat">
+		<div class="DetailsCategory-catRow"><svg class="DetailsCategory-arrow"><use href="#DetailsCategory-down"/></svg><span class="DetailsCategory-title">Rendering</span></div>
+	</div>
+	<div class="DetailsCategory-row">
+		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-label">Visible</span></span></div>
+		<div class="DetailsCategory-split"></div>
+		<div class="DetailsCategory-value"><span class="DetailsCategory-check"><svg><use href="#DetailsCategory-tick"/></svg></span></div>
+		<div class="DetailsCategory-split"></div>
+		<div class="DetailsCategory-right"></div>
+	</div>
+	<div class="DetailsCategory-row">
+		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-label">Actor Label</span></span></div>
+		<div class="DetailsCategory-split"></div>
+		<div class="DetailsCategory-value"><span class="DetailsCategory-text">Chair</span></div>
+		<div class="DetailsCategory-split"></div>
+		<div class="DetailsCategory-right"><span class="DetailsCategory-reset"><svg><use href="#DetailsCategory-reset"/></svg></span></div>
+	</div>
+	<div class="DetailsCategory-row is-hover">
+		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-label">Collision Preset</span></span></div>
+		<div class="DetailsCategory-split"></div>
+		<div class="DetailsCategory-value"><span class="DetailsCategory-combo"><span class="label">BlockAll</span><svg><use href="#DetailsCategory-chev"/></svg></span></div>
+		<div class="DetailsCategory-split"></div>
+		<div class="DetailsCategory-right"></div>
+	</div>
+	<div class="DetailsCategory-row">
+		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow has-children"><use href="#DetailsCategory-down"/></svg><span class="DetailsCategory-label">Lighting</span></span></div>
+		<div class="DetailsCategory-split"></div>
+		<div class="DetailsCategory-value"></div>
+		<div class="DetailsCategory-split"></div>
+		<div class="DetailsCategory-right"></div>
+	</div>
+	<div class="DetailsCategory-row is-nested">
+		<div class="DetailsCategory-indent" style="width: 16px"></div>
+		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-label">Cast Shadow</span></span></div>
+		<div class="DetailsCategory-split"></div>
+		<div class="DetailsCategory-value"><span class="DetailsCategory-check"><svg><use href="#DetailsCategory-tick"/></svg></span></div>
+		<div class="DetailsCategory-split"></div>
+		<div class="DetailsCategory-right"></div>
+	</div>
+
+	<!-- Collapsed category -->
+	<div class="DetailsCategory-cat">
+		<div class="DetailsCategory-catRow"><svg class="DetailsCategory-arrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-title">Static Mesh</span></div>
+	</div>
+
+	<!-- Advanced dropdown row -->
+	<div class="DetailsCategory-adv">
+		<div class="DetailsCategory-advRow"><svg class="DetailsCategory-arrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-title">Advanced</span></div>
+	</div>
+</div></div></div><div class="tabWell-stack el-outliner" style="width:100%"><div class="tabWell-well"><div class="tabWell-tab tabWell-tab--foreground tabWell-tab--active"><span class="tabWell-icon"><svg><use href="#tabWell-i-outliner"/></svg></span><span class="tabWell-label">Outliner</span><span class="tabWell-close"><svg><use href="#tabWell-i-close"/></svg></span></div></div><div class="tabWell-content el-body"><div class="so-panel">
+	<div class="so-toolbar">
+		<div class="so-search"><svg class="so-glass"><use href="#so-search"/></svg><span class="so-hint">Search...</span></div>
+		<div class="so-btn"><svg class="so-icon"><use href="#so-folder-plus"/></svg></div>
+		<div class="so-btn"><svg class="so-icon"><use href="#so-gear"/></svg></div>
+	</div>
+
+	<div class="so-header">
+		<div class="so-hcells">
+			<div class="so-hcell is-gutter"><svg class="so-icon"><use href="#so-eye"/></svg></div>
+			<div class="so-hcell is-pinned"><svg class="so-icon"><use href="#so-pin"/></svg></div>
+			<div class="so-hcell">Item Label<svg class="so-sort"><use href="#so-up"/></svg></div>
+			<div class="so-hcell">Type</div>
+			<div class="so-hspacer"></div>
+		</div>
+		<div class="so-hrule"></div>
+	</div>
+
+	<div class="so-tree">
+		<div class="so-rows">
+			<div class="so-row is-parent"><div class="so-gutter"></div><div class="so-pinned"></div><div class="so-label"><span class="so-indent" style="--depth:0"></span><svg class="so-arrow"><use href="#so-caret-down"/></svg><svg class="so-ico"><use href="#so-world"/></svg><span class="so-text">Minimal_Default</span></div><div class="so-type">World</div></div>
+			<div class="so-row is-odd"><div class="so-gutter"></div><div class="so-pinned"></div><div class="so-label"><span class="so-indent" style="--depth:1"></span><svg class="so-arrow"><use href="#so-caret-down"/></svg><svg class="so-ico is-folder"><use href="#so-folder"/></svg><span class="so-text">Audio</span></div><div class="so-type">Folder</div></div>
+			<div class="so-row"><div class="so-gutter"></div><div class="so-pinned"></div><div class="so-label"><span class="so-indent" style="--depth:2"></span><svg class="so-arrow is-leaf"><use href="#so-caret-right"/></svg><svg class="so-ico"><use href="#so-speaker"/></svg><span class="so-text">Starter_Background</span></div><div class="so-type">AmbientSound</div></div>
+			<div class="so-row is-odd"><div class="so-gutter"></div><div class="so-pinned"></div><div class="so-label"><span class="so-indent" style="--depth:1"></span><svg class="so-arrow"><use href="#so-caret-down"/></svg><svg class="so-ico is-folder"><use href="#so-folder"/></svg><span class="so-text">GamePlayActors</span></div><div class="so-type">Folder</div></div>
+			<div class="so-row is-hover"><div class="so-gutter"><svg class="so-eye"><use href="#so-eye"/></svg></div><div class="so-pinned"></div><div class="so-label"><span class="so-indent" style="--depth:2"></span><svg class="so-arrow is-leaf"><use href="#so-caret-right"/></svg><svg class="so-ico"><use href="#so-flag"/></svg><span class="so-text">Player Start</span></div><div class="so-type">PlayerStart</div></div>
+			<div class="so-row is-odd"><div class="so-gutter"></div><div class="so-pinned"></div><div class="so-label"><span class="so-indent" style="--depth:1"></span><svg class="so-arrow"><use href="#so-caret-down"/></svg><svg class="so-ico is-folder"><use href="#so-folder"/></svg><span class="so-text">Lights</span></div><div class="so-type">Folder</div></div>
+			<div class="so-row"><div class="so-gutter"></div><div class="so-pinned"></div><div class="so-label"><span class="so-indent" style="--depth:2"></span><svg class="so-arrow is-leaf"><use href="#so-caret-right"/></svg><svg class="so-ico"><use href="#so-sun"/></svg><span class="so-text">Light Source</span></div><div class="so-type">DirectionalLight</div></div>
+			<div class="so-row is-odd"><div class="so-gutter"></div><div class="so-pinned"></div><div class="so-label"><span class="so-indent" style="--depth:2"></span><svg class="so-arrow is-leaf"><use href="#so-caret-right"/></svg><svg class="so-ico"><use href="#so-sphere"/></svg><span class="so-text">SkyLight</span></div><div class="so-type">SkyLight</div></div>
+			<div class="so-row"><div class="so-gutter"></div><div class="so-pinned"></div><div class="so-label"><span class="so-indent" style="--depth:1"></span><svg class="so-arrow"><use href="#so-caret-down"/></svg><svg class="so-ico is-folder"><use href="#so-folder"/></svg><span class="so-text">ReflectionCaptures</span></div><div class="so-type">Folder</div></div>
+			<div class="so-row is-odd"><div class="so-gutter"></div><div class="so-pinned"></div><div class="so-label"><span class="so-indent" style="--depth:2"></span><svg class="so-arrow is-leaf"><use href="#so-caret-right"/></svg><svg class="so-ico"><use href="#so-sphere"/></svg><span class="so-text">SphereReflectionCapture</span></div><div class="so-type">SphereReflectionCapture</div></div>
+			<div class="so-row"><div class="so-gutter"></div><div class="so-pinned"></div><div class="so-label"><span class="so-indent" style="--depth:1"></span><svg class="so-arrow"><use href="#so-caret-down"/></svg><svg class="so-ico is-folder"><use href="#so-folder"/></svg><span class="so-text">Sky and Fog</span></div><div class="so-type">Folder</div></div>
+			<div class="so-row is-odd"><div class="so-gutter"></div><div class="so-pinned"></div><div class="so-label"><span class="so-indent" style="--depth:2"></span><svg class="so-arrow is-leaf"><use href="#so-caret-right"/></svg><svg class="so-ico"><use href="#so-cube"/></svg><span class="so-text">AtmosphericFog</span></div><div class="so-type">AtmosphericFog</div></div>
+			<div class="so-row"><div class="so-gutter"></div><div class="so-pinned"></div><div class="so-label"><span class="so-indent" style="--depth:2"></span><svg class="so-arrow is-leaf"><use href="#so-caret-right"/></svg><svg class="so-ico"><use href="#so-sphere"/></svg><span class="so-text">BP_Sky_Sphere</span></div><div class="so-type">BP_Sky_Sphere_C</div></div>
+			<div class="so-row is-parent"><div class="so-gutter"></div><div class="so-pinned"></div><div class="so-label"><span class="so-indent" style="--depth:1"></span><svg class="so-arrow"><use href="#so-caret-down"/></svg><svg class="so-ico is-folder"><use href="#so-folder"/></svg><span class="so-text">StaticMeshes</span></div><div class="so-type">Folder</div></div>
+			<div class="so-row is-odd"><div class="so-gutter"></div><div class="so-pinned"></div><div class="so-label"><span class="so-indent" style="--depth:2"></span><svg class="so-arrow is-leaf"><use href="#so-caret-right"/></svg><svg class="so-ico"><use href="#so-cube"/></svg><span class="so-text">Chair</span></div><div class="so-type">StaticMeshActor</div></div>
+			<div class="so-row is-selected is-inactive"><div class="so-gutter"><svg class="so-eye"><use href="#so-eye"/></svg></div><div class="so-pinned"></div><div class="so-label"><span class="so-indent" style="--depth:2"></span><svg class="so-arrow is-leaf"><use href="#so-caret-right"/></svg><svg class="so-ico"><use href="#so-cube"/></svg><span class="so-text">Chair</span></div><div class="so-type">StaticMeshActor</div></div>
+		</div>
+		<div class="so-sb"><div class="so-thumb"></div></div>
+	</div>
+
+	<div class="so-status">15 actors (1 selected)</div>
+</div></div></div></div>
+</div>
+<div class="el-bottom"><div class="tabWell-stack " style="width:100%"><div class="tabWell-well"><div class="tabWell-tab tabWell-tab--foreground tabWell-tab--active"><span class="tabWell-icon"><svg><use href="#tabWell-i-folder"/></svg></span><span class="tabWell-label">Content Browser</span><span class="tabWell-close"><svg><use href="#tabWell-i-close"/></svg></span></div></div><div class="tabWell-content el-body"><div class="ContentBrowser">
+	<div class="ContentBrowser__top">
+		<div class="ContentBrowser__tools">
+			<button class="ContentBrowser__add"><svg><use href="#cb-plus"/></svg><span>Add</span></button>
+			<span class="ContentBrowser__sep"></span>
+			<button class="ContentBrowser__btn"><svg><use href="#cb-import"/></svg><span>Import</span></button>
+			<span class="ContentBrowser__sep"></span>
+			<button class="ContentBrowser__btn"><svg><use href="#cb-saveall"/></svg><span>Save All</span></button>
+		</div>
+		<button class="ContentBrowser__nav ContentBrowser__nav--back" aria-label="Back"><svg><use href="#cb-back"/></svg></button>
+		<button class="ContentBrowser__nav ContentBrowser__nav--fwd" aria-label="Forward" disabled><svg><use href="#cb-fwd"/></svg></button>
+		<div class="ContentBrowser__path">
+			<svg class="ContentBrowser__folder"><use href="#cb-fc"/></svg>
+			<button class="ContentBrowser__crumb">All</button><span class="ContentBrowser__delim"><svg><use href="#cb-chev-r"/></svg></span>
+			<button class="ContentBrowser__crumb">Content</button><span class="ContentBrowser__delim"><svg><use href="#cb-chev-r"/></svg></span>
+			<button class="ContentBrowser__crumb">StarterContent</button><span class="ContentBrowser__delim"><svg><use href="#cb-chev-r"/></svg></span>
+		</div>
+		<button class="ContentBrowser__settings"><svg><use href="#cb-gear"/></svg><span>Settings</span></button>
+	</div>
+	<div class="ContentBrowser__rule"></div>
+
+	<div class="ContentBrowser__body">
+		<div class="ContentBrowser__sources">
+			<div class="ContentBrowser__sourcesFrame">
+				<div class="ContentBrowser__area"><div class="ContentBrowser__head"><svg class="ContentBrowser__arrow"><use href="#cb-cr"/></svg><span class="ContentBrowser__title">Favorites</span><span class="ContentBrowser__tool"><svg><use href="#cb-glass"/></svg></span></div></div>
+				<div class="ContentBrowser__area">
+					<div class="ContentBrowser__head"><svg class="ContentBrowser__arrow"><use href="#cb-cd"/></svg><span class="ContentBrowser__title">LevelDesignProject</span><span class="ContentBrowser__tool"><svg><use href="#cb-glass"/></svg></span></div>
+					<div class="ContentBrowser__tree">
+						<div class="ContentBrowser__row ContentBrowser__row--parent ContentBrowser__row--root"><span class="ContentBrowser__exp"><svg><use href="#cb-cd"/></svg></span><svg class="ContentBrowser__fi"><use href="#cb-fo"/></svg>All</div>
+						<div class="ContentBrowser__row ContentBrowser__row--parent" style="padding-left:10px"><span class="ContentBrowser__exp"><svg><use href="#cb-cd"/></svg></span><svg class="ContentBrowser__fi"><use href="#cb-fo"/></svg>Content</div>
+						<div class="ContentBrowser__row ContentBrowser__row--sel" style="padding-left:20px"><span class="ContentBrowser__exp"><svg><use href="#cb-cd"/></svg></span><svg class="ContentBrowser__fi"><use href="#cb-fo"/></svg>StarterContent</div>
+						<div class="ContentBrowser__row" style="padding-left:30px"><span class="ContentBrowser__exp"></span><svg class="ContentBrowser__fi"><use href="#cb-fc"/></svg>Architecture</div>
+					</div>
+				</div>
+				<div class="ContentBrowser__area"><div class="ContentBrowser__head"><svg class="ContentBrowser__arrow"><use href="#cb-cr"/></svg><span class="ContentBrowser__title">Collections</span><span class="ContentBrowser__add2"><svg><use href="#cb-pc"/></svg></span><span class="ContentBrowser__tool"><svg><use href="#cb-glass"/></svg></span></div></div>
+			</div>
+		</div>
+
+		<div class="ContentBrowser__split"></div>
+
+		<div class="ContentBrowser__assets">
+			<div class="ContentBrowser__search">
+				<div class="ContentBrowser__field"><svg><use href="#cb-glass"/></svg><span class="ContentBrowser__hint">Search StarterContent</span></div>
+				<span class="ContentBrowser__ibtn"><svg><use href="#cb-save"/></svg></span>
+				<span class="ContentBrowser__ibtn ContentBrowser__ibtn--filter"><svg><use href="#cb-filter"/></svg><svg><use href="#cb-chev-d"/></svg></span>
+			</div>
+			<div class="ContentBrowser__tiles">
+				<div class="ContentBrowser__tile"><div class="ContentBrowser__card"><div class="ContentBrowser__thumb"><svg><use href="#cb-folder64"/></svg></div><div class="ContentBrowser__label"><div>Architecture</div></div></div></div>
+				<div class="ContentBrowser__tile"><div class="ContentBrowser__card"><div class="ContentBrowser__thumb"><svg><use href="#cb-folder64"/></svg></div><div class="ContentBrowser__label"><div>Audio</div></div></div></div>
+				<div class="ContentBrowser__tile is-sel"><div class="ContentBrowser__card"><div class="ContentBrowser__thumb"><svg><use href="#cb-folder64"/></svg></div><div class="ContentBrowser__label"><div>Blueprints</div></div></div></div>
+				<div class="ContentBrowser__tile"><div class="ContentBrowser__card"><div class="ContentBrowser__thumb"><svg><use href="#cb-folder64"/></svg></div><div class="ContentBrowser__label"><div>HDRI</div></div></div></div>
+				<div class="ContentBrowser__tile"><div class="ContentBrowser__card"><div class="ContentBrowser__thumb"><svg><use href="#cb-folder64"/></svg></div><div class="ContentBrowser__label"><div>Maps</div></div></div></div>
+				<div class="ContentBrowser__tile"><div class="ContentBrowser__card"><div class="ContentBrowser__thumb"><svg><use href="#cb-folder64"/></svg></div><div class="ContentBrowser__label"><div>Materials</div></div></div></div>
+				<div class="ContentBrowser__tile"><div class="ContentBrowser__card"><div class="ContentBrowser__thumb"><svg><use href="#cb-folder64"/></svg></div><div class="ContentBrowser__label"><div>Particles</div></div></div></div>
+				<div class="ContentBrowser__tile"><div class="ContentBrowser__card"><div class="ContentBrowser__thumb"><svg><use href="#cb-folder64"/></svg></div><div class="ContentBrowser__label"><div>Props</div></div></div></div>
+				<div class="ContentBrowser__tile"><div class="ContentBrowser__card"><div class="ContentBrowser__thumb"><svg><use href="#cb-folder64"/></svg></div><div class="ContentBrowser__label"><div>Shapes</div></div></div></div>
+				<div class="ContentBrowser__tile"><div class="ContentBrowser__card"><div class="ContentBrowser__thumb"><svg><use href="#cb-folder64"/></svg></div><div class="ContentBrowser__label"><div>Textures</div></div></div></div>
+			</div>
+			<div class="ContentBrowser__status">10 items</div>
+		</div>
+	</div>
+</div></div></div></div>
+<div class="statusBar">
+	<div class="statusBar-seg statusBar-seg--drawer"><div class="statusBar-btn"><svg class="statusBar-ico"><use href="#statusBar-i-drawer"/></svg><span class="statusBar-txt">Content Drawer</span></div></div>
+	<div class="statusBar-seg statusBar-seg--drawer statusBar-seg--joined"><div class="statusBar-btn"><svg class="statusBar-ico"><use href="#statusBar-i-log"/></svg><span class="statusBar-txt">Output Log</span></div></div>
+	<div class="statusBar-seg statusBar-seg--console">
+		<div class="statusBar-console">
+			<div class="statusBar-combo statusBar-cmd"><svg class="statusBar-ico"><use href="#statusBar-i-console"/></svg><span class="statusBar-txt">Cmd</span><svg class="statusBar-ico statusBar-arrow"><use href="#statusBar-i-chev"/></svg></div>
+			<div class="statusBar-input"><span>Enter Console Command</span></div>
+		</div>
+	</div>
+	<div class="statusBar-seg statusBar-seg--message"></div>
+	<div class="statusBar-seg statusBar-seg--tools">
+		<div class="statusBar-combo statusBar-combo--status"><svg class="statusBar-ico statusBar-dd-ico"><use href="#statusBar-i-ddc"/></svg><span class="statusBar-dd-txt">Derived Data</span><svg class="statusBar-ico statusBar-arrow"><use href="#statusBar-i-chev"/></svg></div>
+		<div class="statusBar-combo statusBar-combo--status"><svg class="statusBar-ico"><use href="#statusBar-i-sc"/></svg><span class="statusBar-sc-txt">Source Control Off</span><svg class="statusBar-ico statusBar-arrow"><use href="#statusBar-i-chev"/></svg></div>
+	</div>
+</div>
+</div>
+</body>
+</html>
