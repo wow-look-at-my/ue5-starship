@@ -1,0 +1,48 @@
+<!-- @dsCard group="Controls" height=130 subtitle="Tooltip: dark custom-content form with key binding, and the light text-only form (approximated)" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tooltip</title>
+<style>
+	/* Slate unit = 1px. Outline is drawn inside the box (inset shadow). */
+	.tooltip-page { padding: 16px; display: flex; flex-wrap: wrap; gap: 24px 40px; align-items: flex-start; }
+	.tooltip-col { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+	.tooltip-cap { font: 400 10.667px/1.2 var(--font-sans); color: var(--foreground); opacity: .7; max-width: 300px; }
+
+	.tooltip {
+		display: block; box-sizing: border-box; max-width: 360px;
+		font: 400 12px/14px var(--font-sans); /* ToolTip.Font Regular 9pt StarshipCoreStyle.cpp:493; line box derived */
+	}
+	.tooltip--dark {
+		padding: 8px; /* TextMargin 8 SToolTip.h:30 */
+		background: var(--dropdown); /* ToolTip.Background fill :494 */
+		box-shadow: inset 0 0 0 1px var(--dropdown-outline); /* outline 1px, radius 0 :494 */
+		color: var(--foreground-hover); /* default foreground is white, WidgetStyle.h:21 */
+	}
+	.tooltip__line + .tooltip__line { margin-top: 4px; } /* first line padding-bottom 4 UICommandInfo.cpp:177 */
+	.tooltip__keys { color: var(--foreground-hover); opacity: .6; } /* UseSubduedForeground = foreground x .6 alpha, WidgetStyle.cpp:11 */
+	.tooltip--bright {
+		padding: 11px; /* SToolTip.cpp:76 */
+		background: var(--foreground); /* APPROXIMATION: ToolTip.BrightBackground is a texture, not available. Surface colour not known. */
+		color: var(--black); /* text colour Black SToolTip.cpp:67 */
+	}
+</style>
+</head>
+<body>
+<div class="tooltip-page">
+	<div class="tooltip-col">
+		<span class="tooltip-cap">Custom content (SToolTip with a content widget), as built for a command</span>
+		<div class="tooltip tooltip--dark">
+			<div class="tooltip__line">Saves every modified asset and level.</div>
+			<div class="tooltip__line tooltip__keys">Ctrl+Shift+S</div>
+		</div>
+	</div>
+	<div class="tooltip-col">
+		<span class="tooltip-cap">Text only (SToolTip with Text). The background is a texture that is not available, so the fill is approximated.</span>
+		<div class="tooltip tooltip--bright">Opens the Content Browser drawer.</div>
+	</div>
+</div>
+</body>
+</html>

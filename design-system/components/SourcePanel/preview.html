@@ -1,0 +1,126 @@
+<!-- @dsCard group="Content Browser" height=230 subtitle="Favorites / project / Collections sections with the folder tree" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SourcePanel</title>
+<style>
+	.SourcePanel { width: 340px; padding: 4px; background: var(--background); font: 400 13.333px/16px var(--font-sans); color: var(--foreground); } /* SContentBrowser.cpp:880 SBox Padding(4) */
+	.SourcePanel svg { width: 16px; height: 16px; flex: none; display: block; }
+	/* SContentBrowser.cpp:886 Brushes.Recessed behind the splitter; handle 2px (:897) painted with the Splitter normal brush = Background (StarshipCoreStyle.cpp:633-635) */
+	.SourcePanel__frame { background: var(--background); display: flex; flex-direction: column; gap: 2px; }
+
+	/* SContentBrowser.cpp:908-909 SBorder Brushes.Header, Padding(0,2,0,0) */
+	.SourcePanel__area { background: var(--header); padding-top: 2px; }
+	/* SExpandableArea header: button ContentPadding = HeaderPadding(4,0) (SContentBrowser.cpp:1473); arrow 16px, AreaTitlePadding right 3 (SExpandableArea.h:40) */
+	.SourcePanel__header { display: flex; align-items: center; padding: 0 4px; min-height: 24px; color: var(--foreground); }
+	.SourcePanel__arrow { margin-right: 3px; }
+	/* NormalFontBold = 10pt Bold (StarshipCoreStyle.cpp:38) */
+	.SourcePanel__title { flex: 1; font-weight: 700; }
+	/* SSearchToggleButton.cpp:32-33 ToggleButtonCheckbox Padding(4): 24x24 hit box, hover Dropdown radius 4 (StarshipCoreStyle.cpp:1625-1641) */
+	.SourcePanel__tool { margin: 0 4px; padding: 4px; border-radius: 4px; display: flex; }
+	.SourcePanel__tool:hover { background: var(--dropdown); color: var(--foreground-hover); }
+	/* Add collection: SimpleButton ContentPadding(1,0) + (2,1) = (3,1) (SContentBrowser.cpp:1646-1650), slot Padding(4,0,0,0) */
+	.SourcePanel__add { margin: 0 0 0 4px; padding: 1px 3px; border-radius: 4px; display: flex; }
+	.SourcePanel__add:hover { background: var(--dropdown); color: var(--foreground-hover); }
+	.SourcePanel__add + .SourcePanel__tool { margin-left: 4px; }
+
+	/* SExpandableArea body: Brushes.Recessed (SContentBrowser.cpp:1554) */
+	.SourcePanel__body { background: var(--recessed); }
+	.SourcePanel__tree { background: var(--recessed); padding: 0; }
+
+	/* STableRow default (STableRow.h:94 Padding 0), TableView.Row (StarshipCoreStyle.cpp:2000-2025) */
+	.SourcePanel__row { display: flex; align-items: center; height: 16px; color: var(--foreground); }
+	.SourcePanel__row--root { height: 19px; padding-top: 3px; }               /* SourcesViewWidgets.cpp:138 root top padding 3 */
+	.SourcePanel__row:hover { background: var(--select-hover); }              /* SelectHover */
+	.SourcePanel__row--parent { background: var(--select-parent); }           /* SetActiveHighlightedBrush(SelectParent) :2015 */
+	.SourcePanel__row--selected, .SourcePanel__row--selected:hover { background: var(--select); color: var(--foreground-hover); } /* ActiveBrush Select :2009; SelectedTextColor ForegroundHover :2019 */
+	.SourcePanel__row--inactive, .SourcePanel__row--inactive:hover { background: var(--select-inactive); }  /* InactiveBrush :2012 */
+	.SourcePanel__indent { flex: none; }                                       /* IndentAmount 10 per level (SExpanderArrow.cpp:73,182) */
+	.SourcePanel__exp { width: 16px; height: 16px; flex: none; }
+	.SourcePanel__exp svg { color: var(--foreground); }                        /* TreeArrow_* :2072-2075 */
+	.SourcePanel__folder { margin-right: 2px; color: var(--accent-folder); }   /* SourcesViewWidgets.cpp:144 Padding(0,0,2,0); DefaultFolderColor StarshipStyle.cpp:6348 */
+	.SourcePanel__name { white-space: nowrap; }                                /* ContentBrowser.SourceTreeItemFont = NormalFont 10pt (StarshipStyle.cpp:6331) */
+	.SourcePanel__scroll { height: 5px; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+	<defs>
+		<symbol id="sp-caret-r" viewBox="0 0 16 16"><path d="M5.5 3l6 5-6 5z" fill="currentColor"/></symbol>
+		<symbol id="sp-caret-d" viewBox="0 0 16 16"><path d="M3 5.5h10L8 11.5z" fill="currentColor"/></symbol>
+		<symbol id="sp-search" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6.75" cy="6.75" r="4.5"/><path d="M10.2 10.2L14 14"/></g></symbol>
+		<symbol id="sp-plus-circle" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.75v6.5M4.75 8h6.5"/></g></symbol>
+		<symbol id="sp-fc" viewBox="0 0 16 16"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2H6l1.5 1.5H13.5A1.5 1.5 0 0 1 15 5v7.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5z" fill="currentColor"/></symbol>
+		<symbol id="sp-fo" viewBox="0 0 16 16"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2H6l1.5 1.5h6A1.5 1.5 0 0 1 15 5v1H4.2L1 12.5zM4.2 7.2H15.6L12.6 13.8H1.2z" fill="currentColor"/></symbol>
+	</defs>
+</svg>
+<div style="padding:12px 16px">
+<div class="SourcePanel">
+	<div class="SourcePanel__frame">
+
+		<div class="SourcePanel__area">
+			<div class="SourcePanel__header">
+				<svg class="SourcePanel__arrow"><use href="#sp-caret-r"/></svg>
+				<span class="SourcePanel__title">Favorites</span>
+				<span class="SourcePanel__tool"><svg><use href="#sp-search"/></svg></span>
+			</div>
+		</div>
+
+		<div class="SourcePanel__area">
+			<div class="SourcePanel__header">
+				<svg class="SourcePanel__arrow"><use href="#sp-caret-d"/></svg>
+				<span class="SourcePanel__title">LevelDesignProject</span>
+				<span class="SourcePanel__tool"><svg><use href="#sp-search"/></svg></span>
+			</div>
+			<div class="SourcePanel__body">
+				<div class="SourcePanel__tree">
+					<div class="SourcePanel__row SourcePanel__row--parent SourcePanel__row--root">
+						<span class="SourcePanel__indent" style="width:0"></span>
+						<span class="SourcePanel__exp"><svg><use href="#sp-caret-d"/></svg></span>
+						<svg class="SourcePanel__folder"><use href="#sp-fo"/></svg><span class="SourcePanel__name">All</span>
+					</div>
+					<div class="SourcePanel__row SourcePanel__row--parent">
+						<span class="SourcePanel__indent" style="width:10px"></span>
+						<span class="SourcePanel__exp"><svg><use href="#sp-caret-d"/></svg></span>
+						<svg class="SourcePanel__folder"><use href="#sp-fo"/></svg><span class="SourcePanel__name">Content</span>
+					</div>
+					<div class="SourcePanel__row SourcePanel__row--selected">
+						<span class="SourcePanel__indent" style="width:20px"></span>
+						<span class="SourcePanel__exp"><svg><use href="#sp-caret-d"/></svg></span>
+						<svg class="SourcePanel__folder"><use href="#sp-fo"/></svg><span class="SourcePanel__name">StarterContent</span>
+					</div>
+					<div class="SourcePanel__row">
+						<span class="SourcePanel__indent" style="width:30px"></span>
+						<span class="SourcePanel__exp"></span>
+						<svg class="SourcePanel__folder"><use href="#sp-fc"/></svg><span class="SourcePanel__name">Architecture</span>
+					</div>
+					<div class="SourcePanel__row">
+						<span class="SourcePanel__indent" style="width:30px"></span>
+						<span class="SourcePanel__exp"><svg><use href="#sp-caret-r"/></svg></span>
+						<svg class="SourcePanel__folder"><use href="#sp-fc"/></svg><span class="SourcePanel__name">Audio</span>
+					</div>
+					<div class="SourcePanel__row" style="background:var(--select-hover)">
+						<span class="SourcePanel__indent" style="width:30px"></span>
+						<span class="SourcePanel__exp"></span>
+						<svg class="SourcePanel__folder"><use href="#sp-fc"/></svg><span class="SourcePanel__name">Blueprints (hovered)</span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="SourcePanel__area">
+			<div class="SourcePanel__header">
+				<svg class="SourcePanel__arrow"><use href="#sp-caret-r"/></svg>
+				<span class="SourcePanel__title">Collections</span>
+				<span class="SourcePanel__add"><svg><use href="#sp-plus-circle"/></svg></span>
+				<span class="SourcePanel__tool"><svg><use href="#sp-search"/></svg></span>
+			</div>
+		</div>
+
+	</div>
+</div>
+</div>
+</body>
+</html>

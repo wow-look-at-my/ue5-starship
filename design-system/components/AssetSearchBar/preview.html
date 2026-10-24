@@ -1,0 +1,73 @@
+<!-- @dsCard group="Content Browser" height=170 subtitle="Pill search field, save-search icon, filter dropdown; empty, typed and focused" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AssetSearchBar</title>
+<style>
+	/* SContentBrowser.cpp:1445-1447 asset-area border: Brushes.Panel, Padding(2,2,2,0) */
+	.AssetSearchBarDemo { background: var(--panel); padding: 2px 2px 0; font: 400 13.333px/16px var(--font-sans); color: var(--foreground); margin: 12px 16px; width: 640px; }
+	.AssetSearchBarDemo small { display: block; color: var(--hover-2); font: 400 10.667px/1 var(--font-sans); padding: 6px 6px 0; }
+	.AssetSearchBar svg { width: 16px; height: 16px; flex: none; display: block; }
+
+	/* vertical filter layout slot: Padding(6,4,0,0) (SContentBrowser.cpp:1362), height from the text box */
+	.AssetSearchBar { display: flex; align-items: flex-start; padding: 4px 0 4px 6px; }
+
+	/* SSearchBox, style FilterBar.SearchBox (StarshipCoreStyle.cpp:893-900, 1301-1318): pill brush, Input fill, 1px Secondary outline, hover Hover, focus Primary.
+	   Text padding (8,3,30,4) (:896); glass left, ImagePadding(4,0,0,0), image 14px (:1316-1317). Width 500 (SContentBrowser.cpp:1249). */
+	.AssetSearchBar__field { position: relative; display: flex; align-items: center; width: 500px; box-sizing: border-box; border-radius: 999px;
+		background: var(--input); box-shadow: inset 0 0 0 1px var(--secondary); }
+	.AssetSearchBar__field:hover { box-shadow: inset 0 0 0 1px var(--hover); }
+	.AssetSearchBar__field:focus-within, .AssetSearchBar__field.is-focused { box-shadow: inset 0 0 0 1px var(--primary); }
+	.AssetSearchBar__glass { margin-left: 4px; width: 14px !important; height: 14px !important; color: var(--foreground); }
+	.AssetSearchBar__input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; color: var(--foreground); font: inherit; padding: 3px 30px 4px 8px; }
+	.AssetSearchBar__input::placeholder { color: var(--foreground); opacity: .35; }     /* hint = text colour at alpha 0.35 (SlateEditableTextLayout.cpp:3563) */
+	.AssetSearchBar__input:focus, .is-focused .AssetSearchBar__input { color: var(--white); }  /* FocusedForegroundColor White (StarshipCoreStyle.cpp:1285) */
+	.AssetSearchBar__inputText { flex: 1; padding: 3px 30px 4px 8px; color: var(--foreground); }
+	/* clear X: ThinHoverOnlyButton, ContentPadding = ImagePadding (SSearchBox.cpp:153-166); shown only with text */
+	.AssetSearchBar__clear { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); display: flex; padding: 0 0 0 4px; color: var(--foreground); }
+	/* in-field plus-circle (5.5.3): HoverOnlyButton, ContentPadding(0) + (2,0); only when text is non-empty (SFilterSearchBox.cpp:171-189) */
+	.AssetSearchBar__plus { position: absolute; right: 30px; top: 50%; transform: translateY(-50%); display: flex; padding: 0 2px; color: var(--foreground); border-radius: 4px; }
+
+	/* external icon buttons: SimpleButton icon-only padding (2,1) (StarshipCoreStyle.cpp:1405-1407) */
+	.AssetSearchBar__btn { display: flex; align-items: center; margin-left: 2px; padding: 1px 2px; border-radius: 4px; color: var(--foreground); height: 18px; align-self: center; }
+	.AssetSearchBar__btn:hover { background: var(--dropdown); color: var(--foreground-hover); }   /* SimpleButton hovered Dropdown r4 (:1391) */
+	/* filter: SComboButton SimpleComboButtonWithIcon (StarshipCoreStyle.cpp:1522-1524), ContentPadding(1,0) (SBasicFilterBar.h:265) => padding (3,1); icon 16 + wide chevron 16 */
+	.AssetSearchBar__filter { padding: 1px 3px; margin-left: 2px; }
+	.AssetSearchBar__filter svg + svg { margin-left: 2px; }   /* FComboButtonStyle DownArrowPadding default 2 (SlateTypes.cpp:165) */
+	.AssetSearchBar__filter--lead { margin: 0 2px 0 0; }   /* SContentBrowser.cpp:1369 Padding(0,0,2,0) */
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+	<defs>
+		<symbol id="asb-glass" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6.75" cy="6.75" r="4.5"/><path d="M10.2 10.2L14 14"/></g></symbol>
+		<symbol id="asb-save" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"><path d="M2.5 2.5h9l2 2v9h-11z"/><path d="M5 2.5v3.5h5V2.5M5 13.5v-4h6v4"/></g></symbol>
+		<symbol id="asb-filter" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4h12M4 8h8M6.5 12h3"/></g></symbol>
+		<symbol id="asb-chev" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+		<symbol id="asb-x" viewBox="0 0 16 16"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+		<symbol id="asb-plus" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.75v6.5M4.75 8h6.5"/></g></symbol>
+	</defs>
+</svg>
+<div class="AssetSearchBarDemo">
+	<small>Reference layout: field, save, filter dropdown (empty)</small>
+	<div class="AssetSearchBar">
+		<label class="AssetSearchBar__field"><svg class="AssetSearchBar__glass"><use href="#asb-glass"/></svg><input class="AssetSearchBar__input" placeholder="Search StarterContent"></label>
+		<span class="AssetSearchBar__btn"><svg><use href="#asb-save"/></svg></span>
+		<span class="AssetSearchBar__btn AssetSearchBar__filter"><svg><use href="#asb-filter"/></svg><svg><use href="#asb-chev"/></svg></span>
+	</div>
+	<small>Focused with text (clear X shown)</small>
+	<div class="AssetSearchBar">
+		<div class="AssetSearchBar__field is-focused"><svg class="AssetSearchBar__glass"><use href="#asb-glass"/></svg><span class="AssetSearchBar__inputText" style="color:var(--white)">chair</span><span class="AssetSearchBar__clear"><svg><use href="#asb-x"/></svg></span></div>
+		<span class="AssetSearchBar__btn"><svg><use href="#asb-save"/></svg></span>
+		<span class="AssetSearchBar__btn AssetSearchBar__filter"><svg><use href="#asb-filter"/></svg><svg><use href="#asb-chev"/></svg></span>
+	</div>
+	<small>5.5.3 source layout: filter button first, then the field with the plus-circle save-search button (text typed)</small>
+	<div class="AssetSearchBar">
+		<span class="AssetSearchBar__btn AssetSearchBar__filter AssetSearchBar__filter--lead"><svg><use href="#asb-filter"/></svg><svg><use href="#asb-chev"/></svg></span>
+		<div class="AssetSearchBar__field"><svg class="AssetSearchBar__glass"><use href="#asb-glass"/></svg><span class="AssetSearchBar__inputText">chair</span><span class="AssetSearchBar__plus"><svg><use href="#asb-plus"/></svg></span><span class="AssetSearchBar__clear"><svg><use href="#asb-x"/></svg></span></div>
+	</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!-- @dsCard group="Controls" height=200 subtitle="Slider with 8px round thumb on a 4px bar: normal, hovered, disabled, at 0, 50 and 100 percent" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Slider</title>
+<style>
+	/* Slate unit = 1px. Shown on --panel, the usual tool panel fill. */
+	.slider-page { padding: 16px; }
+	.slider-panel { background: var(--panel); padding: 16px; display: grid; grid-template-columns: 110px 230px 230px; gap: 16px 24px; align-items: center; }
+	.slider-name, .slider-head { font: 400 10.667px/1.2 var(--font-sans); color: var(--foreground); opacity: .7; }
+
+	.slider { --slider-value: .5; position: relative; width: 200px; height: 8px; } /* desired height = max(BarThickness 4, thumb 8) SSlider.cpp:151-159 */
+	.slider__bar {
+		position: absolute; left: 4px; right: 4px; top: 2px; height: 4px; /* BarThickness 4 StarshipCoreStyle.cpp:580; bar spans handle-half to width minus handle-half SSlider.cpp:93-94, 114-115 */
+		border-radius: 2px; /* :574 */
+		background: var(--input); /* fill Input :574 */
+		box-shadow: inset 0 0 0 1px var(--input); /* outline Input 1px :574 */
+	}
+	.slider__thumb {
+		position: absolute; top: 0; width: 8px; height: 8px; /* Icon8x8 :577 */
+		left: calc(4px + var(--slider-value) * (100% - 16px)); /* IndentHandle on: track = width - 2 x handle, offset + handle/2 SSlider.cpp:84-91, SSlider.h:29 */
+		border-radius: 50%; /* no radius given = half height :577 */
+		background: var(--foreground); /* Foreground :577 */
+	}
+	.slider:hover .slider__thumb, .slider--hover .slider__thumb { background: var(--foreground-hover); } /* :578 */
+	.slider--disabled { opacity: .45; } /* alpha x .45 SlateElementPixelShader.usf:535 */
+	.slider--disabled .slider__bar { box-shadow: inset 0 0 0 1px var(--recessed); } /* DisabledBarImage outline Recessed :576 */
+	.slider--disabled:hover .slider__thumb { background: var(--foreground); } /* :579 */
+</style>
+</head>
+<body>
+<div class="slider-page">
+	<div class="slider-panel">
+		<span></span><span class="slider-head">Normal</span><span class="slider-head">Hovered</span>
+
+		<span class="slider-name">0%</span>
+		<div class="slider" style="--slider-value:0"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
+		<div class="slider slider--hover" style="--slider-value:0"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
+
+		<span class="slider-name">50%</span>
+		<div class="slider" style="--slider-value:.5"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
+		<div class="slider slider--hover" style="--slider-value:.5"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
+
+		<span class="slider-name">100%</span>
+		<div class="slider" style="--slider-value:1"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
+		<div class="slider slider--hover" style="--slider-value:1"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
+
+		<span class="slider-name">Disabled, 50%</span>
+		<div class="slider slider--disabled" style="--slider-value:.5"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
+		<span></span>
+	</div>
+</div>
+</body>
+</html>

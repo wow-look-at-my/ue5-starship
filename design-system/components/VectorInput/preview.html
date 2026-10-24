@@ -1,0 +1,100 @@
+<!-- @dsCard group="Details" height=96 subtitle="Transform rows: type dropdown, X/Y/Z spin boxes with coloured edge, reset arrow, scale lock" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VectorInput</title>
+<style>
+	/* Every metric below is cited in README.md. Icons are 16x16 stroke approximations of the Starship SVGs. */
+	.VectorInput-frame { width: 360px; background: var(--recessed); } /* GridLine brush behind rows: StarshipStyle.cpp:3251 */
+	/* Property row: SDetailSingleItemRow.cpp:732-760. Row = 26px min + 1px GridLine bottom padding. */
+	.VectorInput-row { display: flex; min-height: 27px; padding-bottom: 1px; background: var(--recessed); }
+	.VectorInput-name, .VectorInput-value, .VectorInput-right { background: var(--panel); display: flex; align-items: center; min-width: 0; } /* GetRowBackgroundColor(0): PropertyEditorConstants.cpp:25-57 */
+	.VectorInput-row:hover .VectorInput-name, .VectorInput-row:hover .VectorInput-value, .VectorInput-row:hover .VectorInput-right { background: var(--header); } /* hovered row = Colors.Header */
+	.VectorInput-name { flex: 0 0 40%; padding-left: 20px; } /* indent 0 + arrow slot 2+16 + name slot pad 2: SDetailSingleItemRow.cpp:503-531 */
+	.VectorInput-value { flex: 1; padding: 0 2px 0 12px; } /* RightRowPadding (12,0,2,0): SDetailSingleItemRow.cpp:39 */
+	.VectorInput-right { flex: 0 0 22px; justify-content: flex-end; width: 22px; } /* RightColumnMinWidth 22: DetailsViewArgs.h:135 */
+	.VectorInput-split { flex: 0 0 1px; background: var(--recessed); } /* DetailsView.Splitter 1px: SDetailSingleItemRow.cpp:426-428, StarshipStyle.cpp:3246-3249 */
+	/* Name combo: ComboButton style, ContentPadding 0 + button padding (8,1,8,1): ComponentTransformDetails.cpp:212-229, StarshipCoreStyle.cpp:1470-1480 */
+	.VectorInput-combo {
+		display: inline-flex; align-items: center; height: 22px; padding: 1px 8px; border: 0; margin: 0; cursor: pointer;
+		background: var(--input); border-radius: 4px; box-shadow: inset 0 0 0 1px var(--input-outline);
+		color: var(--foreground); font: 400 10.667px/1.172 var(--font-sans); /* PropertyWindow.NormalFont = Small 8pt: StarshipStyle.cpp:3122 */
+	}
+	.VectorInput-combo:hover { box-shadow: inset 0 0 0 1px var(--hover); color: var(--foreground-hover); } /* StarshipCoreStyle.cpp:1472,1476 */
+	.VectorInput-combo .label { min-width: 50px; padding-right: 2px; text-align: left; } /* SBox MinDesiredWidth(50), Padding(0,0,2,0): ComponentTransformDetails.cpp:221-223 */
+	.VectorInput-combo svg { width: 16px; height: 16px; margin: 2px; flex: none; } /* wide-chevron-down 16x16 + DownArrowPadding 2: StarshipCoreStyle.cpp:1491, SlateTypes.cpp:165 */
+	/* Scale lock: TransparentCheckBox, style padding (2,0,0,0), slot padding left 4: ComponentTransformDetails.cpp:237-244, SlateTypes.cpp:24 */
+	.VectorInput-lock { display: inline-flex; margin-left: 4px; padding: 0 0 0 2px; border: 0; background: transparent; cursor: pointer; color: var(--foreground); }
+	.VectorInput-lock:hover, .VectorInput-lock.is-locked { color: var(--foreground-hover); } /* StarshipCoreStyle.cpp:1615-1620 */
+	.VectorInput-lock svg { width: 16px; height: 16px; }
+	/* Three SNumericEntryBox slots, no gap: SVectorInputBox.h:425-464 */
+	.VectorInput-fields { display: flex; flex: 1; min-width: 0; }
+	.VectorInput-field {
+		position: relative; flex: 1 1 0; min-width: 0; display: flex; align-items: center;
+		background: var(--input); border-radius: 4px; /* NumericEntrySpinBox: StarshipCoreStyle.cpp:598, 'InputFocusRadius' CoreStyle.h:117 */
+		box-shadow: inset 0 0 0 1px var(--input-outline); /* StarshipCoreStyle.cpp:598 */
+	}
+	.VectorInput-field:hover { box-shadow: inset 0 0 0 1px var(--hover); } /* StarshipCoreStyle.cpp:599 */
+	.VectorInput-field.is-active { box-shadow: inset 0 0 0 1px var(--primary); } /* StarshipCoreStyle.cpp:600 */
+	.VectorInput-value-text {
+		flex: 1; min-width: 0; padding: 2.5px 7px; /* SpinBox TextPadding (7,2.5,7,2.5): StarshipCoreStyle.cpp:606 */
+		font: 400 10.667px/1.172 var(--font-sans); color: var(--foreground-hover); /* SpinBox ForegroundHover: StarshipCoreStyle.cpp:605 */
+		white-space: nowrap; overflow: hidden;
+	}
+	/* Narrow decorator: LabelPadding(3) + 2px wide bar: SVectorInputBox.h:454, SNumericEntryBox.h:448-457, StarshipCoreStyle.cpp:626 */
+	.VectorInput-edge { position: absolute; left: 3px; top: 3px; bottom: 3px; width: 2px; border-radius: 1px; }
+	.VectorInput-edge.x { background: #cb2600; } /* RedLabelBackgroundColor (0.594,0.0197,0.0) linear: SNumericEntryBox.h:813 */
+	.VectorInput-edge.y { background: #67a900; } /* GreenLabelBackgroundColor (0.1349,0.3959,0.0): SNumericEntryBox.h:816 */
+	.VectorInput-edge.z { background: #2c7eed; } /* BlueLabelBackgroundColor (0.0251,0.207,0.85): SNumericEntryBox.h:819 */
+	/* Reset to default: DetailsView.ExtensionToolBar button, padding (2,2), 16px icon: StarshipStyle.cpp:3277-3283, 3302 */
+	.VectorInput-reset { width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; border: 0; padding: 0; background: transparent; color: var(--foreground); cursor: pointer; }
+	.VectorInput-reset:hover { color: var(--foreground-hover); }
+	.VectorInput-reset svg { width: 16px; height: 16px; }
+	.VectorInput-reset.is-placeholder { visibility: hidden; } /* NoBrush icon still reserves the slot: SDetailSingleItemRow.cpp:640-650 */
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+	<symbol id="VectorInput-chev" viewBox="0 0 16 16"><path d="m4.5 6.5 3.5 3.5 3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+	<symbol id="VectorInput-reset" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+	<symbol id="VectorInput-unlock" viewBox="0 0 16 16"><rect x="3" y="7.5" width="10" height="6.5" rx="1.25" fill="none" stroke="currentColor" stroke-width="1.25"/><path d="M5.5 7.5V5a2.5 2.5 0 0 1 4.9-.7" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></symbol>
+</svg>
+<div class="VectorInput-frame">
+	<div class="VectorInput-row">
+		<div class="VectorInput-name"><button class="VectorInput-combo"><span class="label">Location</span><svg><use href="#VectorInput-chev"/></svg></button></div>
+		<div class="VectorInput-split"></div>
+		<div class="VectorInput-value"><div class="VectorInput-fields">
+			<div class="VectorInput-field"><i class="VectorInput-edge x"></i><div class="VectorInput-value-text">-215.0</div></div>
+			<div class="VectorInput-field"><i class="VectorInput-edge y"></i><div class="VectorInput-value-text">-126.5</div></div>
+			<div class="VectorInput-field is-active"><i class="VectorInput-edge z"></i><div class="VectorInput-value-text">32.0</div></div>
+		</div></div>
+		<div class="VectorInput-split"></div>
+		<div class="VectorInput-right"><button class="VectorInput-reset" title="Reset this property to its default value."><svg><use href="#VectorInput-reset"/></svg></button></div>
+	</div>
+	<div class="VectorInput-row">
+		<div class="VectorInput-name"><button class="VectorInput-combo"><span class="label">Rotation</span><svg><use href="#VectorInput-chev"/></svg></button></div>
+		<div class="VectorInput-split"></div>
+		<div class="VectorInput-value"><div class="VectorInput-fields">
+			<div class="VectorInput-field"><i class="VectorInput-edge x"></i><div class="VectorInput-value-text">0.0 &deg;</div></div>
+			<div class="VectorInput-field"><i class="VectorInput-edge y"></i><div class="VectorInput-value-text">0.0 &deg;</div></div>
+			<div class="VectorInput-field"><i class="VectorInput-edge z"></i><div class="VectorInput-value-text">63.7 &deg;</div></div>
+		</div></div>
+		<div class="VectorInput-split"></div>
+		<div class="VectorInput-right"><button class="VectorInput-reset" title="Reset this property to its default value."><svg><use href="#VectorInput-reset"/></svg></button></div>
+	</div>
+	<div class="VectorInput-row">
+		<div class="VectorInput-name"><button class="VectorInput-combo"><span class="label">Scale</span><svg><use href="#VectorInput-chev"/></svg></button><button class="VectorInput-lock" title="Scale uniformly (unlocked)"><svg><use href="#VectorInput-unlock"/></svg></button></div>
+		<div class="VectorInput-split"></div>
+		<div class="VectorInput-value"><div class="VectorInput-fields">
+			<div class="VectorInput-field"><i class="VectorInput-edge x"></i><div class="VectorInput-value-text">1.0</div></div>
+			<div class="VectorInput-field"><i class="VectorInput-edge y"></i><div class="VectorInput-value-text">1.0</div></div>
+			<div class="VectorInput-field"><i class="VectorInput-edge z"></i><div class="VectorInput-value-text">1.0</div></div>
+		</div></div>
+		<div class="VectorInput-split"></div>
+		<div class="VectorInput-right"><button class="VectorInput-reset is-placeholder" tabindex="-1"><svg><use href="#VectorInput-reset"/></svg></button></div>
+	</div>
+</div>
+</body>
+</html>

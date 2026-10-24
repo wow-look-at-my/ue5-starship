@@ -1,0 +1,105 @@
+<!-- @dsCard group="Docking" height=280 subtitle="Window frame with app icon, menu strip slot, project badge and minimize, maximize and close buttons" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WindowChrome</title>
+<style>
+	.windowChrome-page { padding: 16px; font: 400 13.333px/1.2 var(--font-sans); color: var(--foreground); }
+	.windowChrome-caption { margin: 6px 0 14px; font: 400 11px/1.2 var(--font-sans); color: var(--hover-2); }
+	.windowChrome-scroll { overflow-x: auto; }
+	.windowChrome-h { margin: 0 0 6px; font: 700 11px/1.2 var(--font-sans); letter-spacing: .04em; text-transform: uppercase; color: var(--hover-2); }
+
+	/* Window frame: BorderBrush = Recessed fill, radius 2, 2px WindowBorder outline (StarshipCoreStyle.cpp:781); main area inset 3px (BorderPadding, :785) */
+	.windowChrome-frame { position: relative; box-sizing: border-box; min-width: 640px;
+		background: var(--recessed); /* BackgroundBrush Recessed, StarshipCoreStyle.cpp:780 */
+		border: 2px solid var(--window-border); border-radius: 2px; /* :781 */
+		padding: 1px; /* 3px border padding minus the 2px stroke: :785 */ }
+	/* OutlineBrush: 1px InputOutline stroke, radius 2, overlay slot Padding(2): StarshipCoreStyle.cpp:782, SWindow.cpp:597-600 */
+	.windowChrome-frame::before { content: ""; position: absolute; inset: 0; border: 1px solid var(--input-outline); border-radius: 2px; pointer-events: none; }
+
+	/* Title area is as tall as the taller of left content (icon 45 + 2x5 padding + 4 bottom = 59) and right content: SWindowTitleBar.cpp:321 (spacer height), :206 (icon Padding 0,0,0,4), StarshipCoreStyle.cpp:284-285 (AppIcon 45x45, AppIconPadding 5) */
+	.windowChrome-title { position: relative; height: 59px; background: var(--title); /* Brushes.Title under the major tab stack, SDockingTabStack.cpp:1234 */ }
+	.windowChrome-icon { position: absolute; left: 0; top: 0; box-sizing: border-box; width: 55px; height: 55px; padding: 5px; color: var(--white); /* AppIcon tint White, StarshipCoreStyle.cpp:284 */ }
+	.windowChrome-icon svg { display: block; width: 45px; height: 45px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
+	/* menu strip slot: SWindowTitleBar WindowMenuSlot, content is consumer-provided; top padding 25 reserves it (SDockingTabStack.cpp:891,897) */
+	.windowChrome-menu { position: absolute; left: 55px; top: 0; height: 25px; display: flex; align-items: center; }
+	.windowChrome-menuItem { padding: 0 8px; /* illustrative; the menu bar owns its own spacing */ color: var(--foreground); }
+
+	/* tab row: major tab placed 25px below the top, 45 + 12 = 57px from the left: SDockingTabStack.cpp:893,898 */
+	.windowChrome-tabRow { position: absolute; left: 57px; top: 25px; }
+	.windowChrome-tab { display: inline-flex; align-items: center; box-sizing: border-box; padding: 3.4px 10px 3.4px 4px; /* MajorTab padding (4,4,10,4) x0.85 vertical: StarshipCoreStyle.cpp:1823, SDockTab.cpp:30 */
+		background: var(--panel); border-radius: 4px 4px 0 0; /* ForegroundBrush, :1816; radius approximated */ color: var(--white); /* :1829 */ }
+	.windowChrome-tabIcon { display: flex; padding: 4px; margin-right: 5px; } /* IconBorderPadding 4: :1832; SDockTab.cpp:646 */
+	.windowChrome-tabIcon svg { display: block; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+	.windowChrome-tabLabel { padding: 2px 0; }
+
+	/* right content: badge then the three buttons, all VAlign top; SBox padding left 2: SWindowTitleBar.cpp:235 */
+	.windowChrome-right { position: absolute; right: 0; top: 0; display: flex; align-items: flex-start; padding-left: 2px; }
+	.windowChrome-badge { margin-right: 10px; /* slot Padding(0,0,8,0) LevelEditor.cpp:247 + SBox Padding(0,0,2,0) LevelEditor.cpp:166 */
+		padding: 6px 32px 7px; /* SProjectBadge.BadgePadding (32,6,32,7): StarshipStyle.cpp:2917 */
+		background: #0f0f0f; /* Colors.Title tint (LevelEditor.cpp:107-108) over Badge.png; the texture is not in the tree, #0f0f0f is what the reference screenshot shows */
+		border-radius: 6px; /* 6/16 slice of the 16px Badge brush: StarshipStyle.cpp:2916 */
+		color: var(--foreground); /* BadgeTextColor, LevelEditor.cpp:123 */ }
+	.windowChrome-btn { display: block; border: 0; background: transparent; font: inherit; cursor: default; flex: none; width: 42px; height: 23px; /* brush size (42,23): StarshipCoreStyle.cpp:749-766 */ padding: 0; /* ContentPadding(0): SWindowTitleBar.cpp:139,155,171 */ color: var(--foreground); /* Normal tint Foreground: :749 */ }
+	.windowChrome-btn svg { display: block; width: 42px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1; }
+	.windowChrome-btn--minmax.windowChrome-btn--hover { background: rgba(255, 255, 255, .157); /* FColor(255,255,255,40): StarshipCoreStyle.cpp:789-790 */ color: var(--foreground-hover); /* :750 */ }
+	.windowChrome-btn--close.windowChrome-btn--hover { background: rgba(255, 79, 79, .588); /* FColor(255,20,20,150) reinterpreted as linear: StarshipCoreStyle.cpp:791-792 (20/255 linear = 79 sRGB) */ color: var(--foreground-hover); /* :765 */ }
+
+	/* window content below the title area; stand-in for the dock area */
+	.windowChrome-content { height: 50px; background: var(--panel); margin-top: 0; padding: 8px 12px; color: var(--foreground); }
+
+	.windowChrome-states { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: flex-start; }
+	.windowChrome-state { display: flex; flex-direction: column; gap: 4px; }
+	.windowChrome-stateBox { background: var(--title); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+	<defs>
+		<!-- Approximations of the Starship SVG icons (the real files are not in the tree). -->
+		<symbol id="windowChrome-i-logo" viewBox="0 0 45 45"><circle cx="22.500" cy="22.500" r="20"/><path d="M14.500 12.500v12.500a8 8 0 0 0 16 0V12.500"/></symbol>
+		<symbol id="windowChrome-i-world" viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></symbol>
+		<symbol id="windowChrome-i-min" viewBox="0 0 42 23"><path d="M16.500 11.500h9"/></symbol>
+		<symbol id="windowChrome-i-max" viewBox="0 0 42 23"><rect x="16.500" y="6.500" width="9" height="9"/></symbol>
+		<symbol id="windowChrome-i-close" viewBox="0 0 42 23"><path d="M16.500 6.500l9 9 M25.500 6.500l-9 9"/></symbol>
+	</defs>
+</svg>
+
+<div class="windowChrome-page">
+	<h3 class="windowChrome-h">Window with menu bar and major tab</h3>
+<div class="windowChrome-scroll">
+	<div class="windowChrome-frame">
+		<div class="windowChrome-title">
+			<div class="windowChrome-icon"><svg><use href="#windowChrome-i-logo"/></svg></div>
+			<div class="windowChrome-menu">
+				<span class="windowChrome-menuItem">File</span><span class="windowChrome-menuItem">Edit</span><span class="windowChrome-menuItem">Window</span><span class="windowChrome-menuItem">Tools</span><span class="windowChrome-menuItem">Build</span><span class="windowChrome-menuItem">Select</span><span class="windowChrome-menuItem">Actor</span><span class="windowChrome-menuItem">Help</span>
+			</div>
+			<div class="windowChrome-tabRow">
+				<div class="windowChrome-tab"><span class="windowChrome-tabIcon"><svg><use href="#windowChrome-i-world"/></svg></span><span class="windowChrome-tabLabel">Minimal_Default</span></div>
+			</div>
+			<div class="windowChrome-right">
+				<div class="windowChrome-badge">LevelDesignProject</div>
+				<button class="windowChrome-btn windowChrome-btn--minmax" aria-label="Minimize"><svg><use href="#windowChrome-i-min"/></svg></button>
+				<button class="windowChrome-btn windowChrome-btn--minmax" aria-label="Maximize"><svg><use href="#windowChrome-i-max"/></svg></button>
+				<button class="windowChrome-btn windowChrome-btn--close" aria-label="Close"><svg><use href="#windowChrome-i-close"/></svg></button>
+			</div>
+		</div>
+		<div class="windowChrome-content">Window content (dock area)</div>
+	</div>
+</div>
+	<div class="windowChrome-caption">Title area 59px tall; frame = 2px window-border stroke + 1px input-outline stroke, content inset 3px</div>
+
+	<h3 class="windowChrome-h">Button states (42 x 23)</h3>
+	<div class="windowChrome-states">
+		<div class="windowChrome-state"><div class="windowChrome-stateBox"><button class="windowChrome-btn windowChrome-btn--minmax"><svg><use href="#windowChrome-i-min"/></svg></button></div><span class="windowChrome-caption" style="margin:0">minimize</span></div>
+		<div class="windowChrome-state"><div class="windowChrome-stateBox"><button class="windowChrome-btn windowChrome-btn--minmax windowChrome-btn--hover"><svg><use href="#windowChrome-i-min"/></svg></button></div><span class="windowChrome-caption" style="margin:0">min / max hover</span></div>
+		<div class="windowChrome-state"><div class="windowChrome-stateBox"><button class="windowChrome-btn windowChrome-btn--minmax windowChrome-btn--hover"><svg><use href="#windowChrome-i-max"/></svg></button></div><span class="windowChrome-caption" style="margin:0">maximize hover</span></div>
+		<div class="windowChrome-state"><div class="windowChrome-stateBox"><button class="windowChrome-btn windowChrome-btn--close"><svg><use href="#windowChrome-i-close"/></svg></button></div><span class="windowChrome-caption" style="margin:0">close</span></div>
+		<div class="windowChrome-state"><div class="windowChrome-stateBox"><button class="windowChrome-btn windowChrome-btn--close windowChrome-btn--hover"><svg><use href="#windowChrome-i-close"/></svg></button></div><span class="windowChrome-caption" style="margin:0">close hover</span></div>
+	</div>
+</div>
+</body>
+</html>

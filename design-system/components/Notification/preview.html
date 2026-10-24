@@ -1,0 +1,100 @@
+<!-- @dsCard group="Controls" height=270 subtitle="Notification toast: pending with throbber, success, failure with buttons" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notification</title>
+<style>
+	/* Slate unit = 1px. Outline is drawn inside the box (inset shadow). */
+	.notification-page { padding: 16px; display: flex; flex-wrap: wrap; gap: 20px 28px; align-items: flex-start; }
+	.notification-col { display: flex; flex-direction: column; gap: 6px; }
+	.notification-cap { font: 400 10.667px/1.2 var(--font-sans); color: var(--foreground); opacity: .7; }
+
+	.notification {
+		position: relative; overflow: hidden; box-sizing: border-box; width: 352px; /* WidthOverride 320 SNotificationList.h:146 + padding 2 x 16 */
+		padding: 8px 16px; /* SNotificationBackground padding (16,8) SNotificationList.cpp:429 */
+		border-radius: 5px; /* ItemBackground_Border radius 5 StarshipCoreStyle.cpp:686 */
+		background: var(--notifications); /* fill Notifications :686 */
+		box-shadow: inset 0 0 0 1px var(--black); /* outline Black 1px :686 */
+		color: var(--foreground-hover); /* inherited default foreground, white WidgetStyle.h:21 */
+		font: 400 13.333px/16px var(--font-sans); /* sub text uses NormalText 10pt */
+	}
+	.notification__mark { position: absolute; inset: 2px; overflow: hidden; pointer-events: none; } /* watermark clipped 2px inside SNotificationBackground.cpp:45 */
+	.notification__mark svg { position: absolute; left: 2px; top: 2px; width: 130px; height: 130px; fill: none; stroke: #4b5056; stroke-width: 3; } /* offset (4,4); size clamp(h x 2.5, 130, 220) :34, :50; tint Notifications x 1.15 :13; ring shape approximates the SVG */
+	.notification__body { position: relative; display: flex; align-items: flex-start; }
+	.notification__icon { position: relative; flex: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; } /* icon 32x32 SNotificationList.cpp:566 */
+	.notification__icon svg { width: 32px; height: 32px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; } /* approximation of the Starship SVGs */
+	.notification__icon--pending { width: 40px; height: 40px; margin-left: -6px; } /* throbber 40x40 :555; icon padding -6 :267 */
+	.notification__icon--pending .notification__throbber { position: absolute; inset: 0; width: 40px; height: 40px; stroke: var(--primary-hover); stroke-width: 3; } /* PrimaryHover is only a stand-in: the throbber is a texture */
+	.notification__icon--success { color: var(--success); } /* SuccessWithColor.Large :325 */
+	.notification__icon--fail { color: var(--error); } /* ErrorWithColor.Large :309 */
+	.notification__icon--idle { color: var(--foreground); } /* UnrealCircle.Thick tint Foreground :288 */
+	.notification__text { flex: 1 1 auto; min-width: 0; margin-left: 10px; display: flex; flex-direction: column; } /* text slot padding left 10 :570 */
+	.notification__title { font: 700 16px/19px var(--font-sans); } /* NotificationList.FontBold Bold 12pt :682; line box derived */
+	.notification__sub { margin: 10px 0 2px; } /* padding (0,10,0,2) :461 */
+	.notification__buttons { display: flex; justify-content: flex-end; margin-top: 5px; } /* padding top 5, right aligned :530-533 */
+	.notification__buttons .notification__btn { margin-right: 4px; } /* padding right 4 per button :516 */
+
+	.notification__btn {
+		display: inline-flex; align-items: center; margin: 0; border: 0;
+		padding: 3.5px 16px; /* Button padding (12,1.5) + (4,2), see Button component */
+		border-radius: 4px; background: var(--secondary); box-shadow: inset 0 0 0 1px var(--input); /* StarshipCoreStyle.cpp:1373 */
+		color: var(--foreground-hover); font: 400 13.333px/16px var(--font-sans); cursor: default;
+	}
+	.notification__btn:hover { background: var(--hover); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+	<symbol id="notification-ring" viewBox="0 0 130 130"><circle cx="65" cy="65" r="63"/></symbol>
+	<symbol id="notification-check" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12"/><path d="M10.5 16.5l4 4 7-8"/></symbol>
+	<symbol id="notification-alert" viewBox="0 0 32 32"><path d="M16 5.5L28 26H4z"/><path d="M16 13v6M16 22.5v.5"/></symbol>
+	<symbol id="notification-circle" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12"/><path d="M11 12v6a5 5 0 0 0 10 0v-6"/></symbol>
+	<symbol id="notification-arc" viewBox="0 0 40 40"><path d="M20 3a17 17 0 1 1-12 5"/></symbol>
+</svg>
+<div class="notification-page">
+	<div class="notification-col">
+		<span class="notification-cap">Pending, with throbber</span>
+		<div class="notification">
+			<div class="notification__mark"><svg><use href="#notification-ring"/></svg></div>
+			<div class="notification__body">
+				<div class="notification__icon notification__icon--pending notification__icon--idle"><svg class="notification__throbber"><use href="#notification-arc"/></svg><svg style="position:relative"><use href="#notification-circle"/></svg></div>
+				<div class="notification__text">
+					<div class="notification__title">Compiling shaders</div>
+					<div class="notification__sub">1,204 remaining</div>
+					<div class="notification__buttons"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="notification-col">
+		<span class="notification-cap">Success</span>
+		<div class="notification">
+			<div class="notification__mark"><svg><use href="#notification-ring"/></svg></div>
+			<div class="notification__body">
+				<div class="notification__icon notification__icon--success"><svg><use href="#notification-check"/></svg></div>
+				<div class="notification__text">
+					<div class="notification__title">Saved 3 assets</div>
+					<div class="notification__buttons"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="notification-col">
+		<span class="notification-cap">Failure with sub text and buttons</span>
+		<div class="notification">
+			<div class="notification__mark"><svg><use href="#notification-ring"/></svg></div>
+			<div class="notification__body">
+				<div class="notification__icon notification__icon--fail"><svg><use href="#notification-alert"/></svg></div>
+				<div class="notification__text">
+					<div class="notification__title">Import failed</div>
+					<div class="notification__sub">Chair.fbx could not be read.</div>
+					<div class="notification__buttons"><span class="notification__btn">Retry</span><span class="notification__btn">Dismiss</span></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!-- @dsCard group="Docking" height=330 subtitle="Tab stack: Background tab well over a Panel content area, minor and major variants" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TabWell</title>
+<style>
+	.tabWell-page { display: flex; flex-wrap: wrap; gap: 22px; padding: 22px; font: 400 13.333px/1.2 var(--font-sans); color: var(--foreground); }
+	.tabWell-col { display: flex; flex-direction: column; gap: 6px; flex: 1 1 300px; min-width: 0; max-width: 420px; }
+	.tabWell-caption { font: 400 11px/1.2 var(--font-sans); color: var(--hover-2); }
+
+	/* preview mount only: a recessed window ground so a background-coloured area stays visible */
+	.tabWell-stack { display: flex; flex-direction: column; box-shadow: 0 0 0 6px var(--recessed); }
+
+	/* tab well: Brushes.Background for a minor stack, Brushes.Title under the window chrome; SDockingTabStack.cpp:1234-1236 */
+	.tabWell-well { display: flex; align-items: flex-end; gap: 2px; /* OverlapWidth -2 gives a 2px gap: StarshipCoreStyle.cpp:1799, SDockingTabWell.cpp:105 */
+		background: var(--background); padding: 0; /* tab well border Padding(0): SDockingTabStack.cpp:151 */ }
+	.tabWell-well--major { background: var(--title); }
+
+	/* content area: ForegroundTab ContentAreaBrush, SDockingTabStack.cpp:179; Panel for minor (StarshipCoreStyle.cpp:1794), Background for major (:1820) */
+	.tabWell-content { background: var(--panel); padding: 0; /* SDockTab::ContentPadding default 0, SDockTab.h:77 */ min-height: 150px; }
+	.tabWell-content--major { background: var(--background); min-height: 150px; }
+
+	.tabWell-tab { position: relative; display: inline-flex; align-items: center; box-sizing: border-box; flex: none;
+		height: 25px; /* MaxMinorTabSize.Y, SDockingTabWell.cpp:9 */
+		max-width: 160px; /* MaxMinorTabSize.X, SDockingTabWell.cpp:9 */
+		padding: 2.55px 10px 3.4px 4px; /* TabPadding (4,3,10,4), vertical x0.85: StarshipCoreStyle.cpp:1798, SDockTab.cpp:30,811-816 */
+		border-radius: 4px 4px 0 0; /* 4px slice of DockTab_Foreground (StarshipCoreStyle.cpp:1791); texture absent, radius approximated */
+		color: var(--foreground); white-space: nowrap; }
+	.tabWell-tab--foreground { background: var(--panel); /* ForegroundBrush :1791 */ }
+	.tabWell-tab--active { color: var(--foreground-hover); /* ActiveForegroundColor :1802 */ }
+	.tabWell-tab--active::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--primary), transparent); /* SDockTab.cpp:592-616 */ }
+	.tabWell-tab--major { height: auto; max-width: 210px; /* SDockingTabWell.cpp:10 */ padding: 3.4px 10px 3.4px 4px; /* (4,4,10,4), vertical x0.85: StarshipCoreStyle.cpp:1823 */ color: var(--white); }
+	.tabWell-icon { display: flex; flex: none; padding: 1px; margin-right: 5px; /* SDockTab.cpp:646; IconBorderPadding SlateTypes.cpp:713 */ }
+	.tabWell-tab--major .tabWell-icon { padding: 4px; /* StarshipCoreStyle.cpp:1832 */ }
+	.tabWell-icon svg, .tabWell-close svg { display: block; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+	.tabWell-label { padding: 2px 0; overflow: hidden; text-overflow: ellipsis; /* SDockTab.cpp:665,676 */ }
+	.tabWell-close { display: flex; flex: none; padding: 1.5px 0 0; /* SDockTab.cpp:707 */ color: var(--foreground); visibility: hidden; }
+	.tabWell-tab--foreground .tabWell-close { visibility: visible; /* SDockTab.cpp:970-976 */ }
+
+	/* stand-in for consumer content; not part of the component */
+	.tabWell-row { display: flex; align-items: center; gap: 8px; height: 22px; padding: 0 8px; color: var(--foreground); }
+	.tabWell-row:nth-child(even) { background: var(--recessed); }
+	.tabWell-row svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+	<defs>
+		<!-- Approximations of the Starship SVG icons (the real files are not in the tree). -->
+		<symbol id="tabWell-i-details" viewBox="0 0 16 16"><path d="M2.500 4h11 M2.500 8h11 M2.500 12h7"/><circle cx="12.500" cy="12" r="1.200"/></symbol>
+		<symbol id="tabWell-i-outliner" viewBox="0 0 16 16"><path d="M5.500 3.500h8 M5.500 8h8 M5.500 12.500h8 M2.500 3.500h.5 M2.500 8h.5 M2.500 12.500h.5"/></symbol>
+		<symbol id="tabWell-i-folder" viewBox="0 0 16 16"><path d="M2 4.500h4l1.500 1.500H14v6.500H2z"/></symbol>
+		<symbol id="tabWell-i-world" viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></symbol>
+		<symbol id="tabWell-i-close" viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></symbol>
+	</defs>
+</svg>
+
+<div class="tabWell-page">
+	<div class="tabWell-col">
+		<div class="tabWell-stack">
+			<div class="tabWell-well">
+				<div class="tabWell-tab tabWell-tab--foreground tabWell-tab--active"><span class="tabWell-icon"><svg><use href="#tabWell-i-details"/></svg></span><span class="tabWell-label">Details</span><span class="tabWell-close"><svg><use href="#tabWell-i-close"/></svg></span></div>
+				<div class="tabWell-tab"><span class="tabWell-icon"><svg><use href="#tabWell-i-outliner"/></svg></span><span class="tabWell-label">Outliner</span><span class="tabWell-close"><svg><use href="#tabWell-i-close"/></svg></span></div>
+				<div class="tabWell-tab"><span class="tabWell-icon"><svg><use href="#tabWell-i-folder"/></svg></span><span class="tabWell-label">Content Browser</span><span class="tabWell-close"><svg><use href="#tabWell-i-close"/></svg></span></div>
+			</div>
+			<div class="tabWell-content">
+				<div class="tabWell-row"><svg><use href="#tabWell-i-folder"/></svg>Panel content area (consumer-provided)</div>
+				<div class="tabWell-row"><svg><use href="#tabWell-i-folder"/></svg>Row on a recessed ground</div>
+				<div class="tabWell-row"><svg><use href="#tabWell-i-folder"/></svg>Row on a panel ground</div>
+			</div>
+		</div>
+		<span class="tabWell-caption">minor stack: well = background, content = panel, active tab joins the content</span>
+	</div>
+
+	<div class="tabWell-col">
+		<div class="tabWell-stack">
+			<div class="tabWell-well tabWell-well--major">
+				<div class="tabWell-tab tabWell-tab--major tabWell-tab--foreground"><span class="tabWell-icon"><svg><use href="#tabWell-i-world"/></svg></span><span class="tabWell-label">Minimal_Default</span><span class="tabWell-close"><svg><use href="#tabWell-i-close"/></svg></span></div>
+			</div>
+			<div class="tabWell-content tabWell-content--major">
+				<div class="tabWell-row"><svg><use href="#tabWell-i-world"/></svg>Major content area (background)</div>
+			</div>
+		</div>
+		<span class="tabWell-caption">major stack under window chrome: well = title, content = background</span>
+	</div>
+</div>
+</body>
+</html>

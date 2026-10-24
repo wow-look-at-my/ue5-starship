@@ -1,0 +1,57 @@
+<!-- @dsCard group="Docking" height=250 subtitle="5px splitter handle between panels: normal and highlighted, horizontal and vertical" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Splitter</title>
+<style>
+	.splitter-page { display: flex; flex-wrap: wrap; gap: 20px; padding: 16px; font: 400 13.333px/1.2 var(--font-sans); color: var(--foreground); }
+	.splitter-cell { display: flex; flex-direction: column; gap: 6px; }
+	.splitter-caption { font: 400 11px/1.2 var(--font-sans); color: var(--hover-2); }
+
+	/* Two docked panels with the splitter handle between them. The handle is drawn over the gap the SSplitter reserves (PhysicalSplitterHandleSize). */
+	.splitter-demo { display: flex; background: var(--panel); }
+	.splitter-demo--row { flex-direction: row; width: 190px; height: 100px; }
+	.splitter-demo--col { flex-direction: column; width: 190px; height: 100px; }
+	.splitter-pane { flex: 1 1 0; display: flex; align-items: center; justify-content: center; color: var(--foreground); }
+
+	.splitter-handle { flex: none; background: var(--background); /* HandleNormalBrush Background: StarshipCoreStyle.cpp:634 */ }
+	.splitter-demo--row .splitter-handle { width: 5px; /* PhysicalSplitterHandleSize default 5: SSplitter.h:179 */ }
+	.splitter-demo--col .splitter-handle { height: 5px; /* same size on the vertical axis: SSplitter.cpp:291 */ }
+	.splitter-handle--highlight { background: var(--secondary); /* HandleHighlightBrush Secondary: StarshipCoreStyle.cpp:635; used while hovered or dragged, SSplitter.cpp:295-304 */ }
+
+	/* SplitterPanel variant, StarshipCoreStyle.cpp:637-640 */
+	.splitter-handle--panelNormal { background: var(--panel); }
+	.splitter-handle--panelHighlight { background: #606060; /* FLinearColor(FColor(96,96,96)), StarshipCoreStyle.cpp:639 literal */ }
+</style>
+</head>
+<body>
+<div class="splitter-page">
+	<div class="splitter-cell">
+		<div class="splitter-demo splitter-demo--row"><div class="splitter-pane">A</div><div class="splitter-handle"></div><div class="splitter-pane">B</div></div>
+		<span class="splitter-caption">horizontal, normal (background)</span>
+	</div>
+	<div class="splitter-cell">
+		<div class="splitter-demo splitter-demo--row"><div class="splitter-pane">A</div><div class="splitter-handle splitter-handle--highlight"></div><div class="splitter-pane">B</div></div>
+		<span class="splitter-caption">horizontal, highlighted (secondary)</span>
+	</div>
+	<div class="splitter-cell">
+		<div class="splitter-demo splitter-demo--col"><div class="splitter-pane">A</div><div class="splitter-handle"></div><div class="splitter-pane">B</div></div>
+		<span class="splitter-caption">vertical, normal</span>
+	</div>
+	<div class="splitter-cell">
+		<div class="splitter-demo splitter-demo--col"><div class="splitter-pane">A</div><div class="splitter-handle splitter-handle--highlight"></div><div class="splitter-pane">B</div></div>
+		<span class="splitter-caption">vertical, highlighted</span>
+	</div>
+	<div class="splitter-cell">
+		<div class="splitter-demo splitter-demo--row"><div class="splitter-pane">A</div><div class="splitter-handle splitter-handle--panelNormal"></div><div class="splitter-pane">B</div></div>
+		<span class="splitter-caption">SplitterPanel normal (panel)</span>
+	</div>
+	<div class="splitter-cell">
+		<div class="splitter-demo splitter-demo--row"><div class="splitter-pane">A</div><div class="splitter-handle splitter-handle--panelHighlight"></div><div class="splitter-pane">B</div></div>
+		<span class="splitter-caption">SplitterPanel highlighted (#606060)</span>
+	</div>
+</div>
+</body>
+</html>

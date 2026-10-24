@@ -1,0 +1,82 @@
+<!-- @dsCard group="Details" height=88 subtitle="Pill search box with property-matrix, favorites and view-options buttons" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DetailsSearchRow</title>
+<style>
+	/* Every metric below is cited in README.md. Icons are 16x16 stroke approximations of the Starship SVGs. */
+	.DetailsSearchRow-frame { width: 360px; background: var(--panel); } /* SBorder Brushes.Panel: SDetailsView.cpp:391-395 */
+	.DetailsSearchRow { display: flex; align-items: center; } /* SDetailsView.cpp:276 */
+	.DetailsSearchRow + .DetailsSearchRow { margin-top: 2px; }
+	.DetailsSearchRow-searchSlot { flex: 1; min-width: 0; padding: 6px; } /* Padding(6.f), FillWidth(1): SDetailsView.cpp:278-280 */
+	.DetailsSearchRow-search {
+		display: flex; align-items: center;
+		background: var(--input); border-radius: 999px; /* HalfHeightRadius: SlateBrush.h:161-167 */
+		box-shadow: inset 0 0 0 1px var(--secondary); /* SearchBoxEditStyle normal: StarshipCoreStyle.cpp:1303 */
+		cursor: text;
+	}
+	.DetailsSearchRow-search:hover { box-shadow: inset 0 0 0 1px var(--hover); } /* StarshipCoreStyle.cpp:1304 */
+	.DetailsSearchRow-search.is-focused { box-shadow: inset 0 0 0 1px var(--primary); } /* StarshipCoreStyle.cpp:1305 */
+	.DetailsSearchRow-glass { width: 14px; height: 14px; margin-left: 4px; flex: none; color: var(--foreground); } /* ImagePadding(4,0,0,0), ImageSizeOverride 14: StarshipCoreStyle.cpp:1315-1316 */
+	.DetailsSearchRow-text {
+		flex: 1; min-width: 0; padding: 3px 8px 4px; /* NormalEditableTextBox padding (8,3,8,4): StarshipCoreStyle.cpp:1289 */
+		font: 400 13.333px/1.172 var(--font-sans); /* StyleFonts.Normal 10pt: StarshipCoreStyle.cpp:36 */
+		color: var(--foreground); white-space: nowrap; overflow: hidden;
+	}
+	.DetailsSearchRow-search.is-focused .DetailsSearchRow-text, .DetailsSearchRow-text.has-value { color: var(--foreground-hover); } /* focused foreground White: StarshipCoreStyle.cpp:1293 */
+	.DetailsSearchRow-hint { opacity: .35; } /* hint text alpha 0.35: SlateEditableTextLayout.cpp:3563 */
+	.DetailsSearchRow-clear { width: 20px; height: 16px; padding-left: 4px; flex: none; color: var(--foreground); } /* ThinHoverOnlyButton, ContentPadding = ImagePadding: SSearchBox.cpp:156-157 */
+	.DetailsSearchRow-tail { width: 7px; flex: none; } /* SSpacer(7,0): SSearchBox.cpp:176-179 */
+	.DetailsSearchRow-btn {
+		display: inline-flex; align-items: center; justify-content: center; flex: none;
+		border: 0; margin: 0; border-radius: 4px; background: transparent; cursor: pointer;
+		color: var(--foreground); /* SimpleButton normal foreground: StarshipCoreStyle.cpp:1394 */
+	}
+	.DetailsSearchRow-btn:hover { background: var(--dropdown); color: var(--foreground-hover); } /* StarshipCoreStyle.cpp:1391,1395 */
+	.DetailsSearchRow-btn svg { width: 16px; height: 16px; flex: none; }
+	/* SButton default ContentPadding (4,2) + SimpleButton NormalPadding (2,1) = (6,3): SDetailsView.cpp:298-309, StarshipCoreStyle.cpp:1405-1407 */
+	.DetailsSearchRow-btn.is-button { width: 28px; height: 22px; }
+	/* SComboButton ContentPadding(0) + (2,1) = (2,1): SDetailsView.cpp:350 */
+	.DetailsSearchRow-btn.is-combo { width: 20px; height: 18px; }
+	.DetailsSearchRow-btn.is-on { color: var(--accent-blue); } /* GetToggleFavoritesColor: SDetailsView.cpp:1177-1183 */
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+	<symbol id="DetailsSearchRow-glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.75" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m10.6 10.6 3.4 3.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+	<symbol id="DetailsSearchRow-close" viewBox="0 0 16 16"><path d="m4 4 8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+	<symbol id="DetailsSearchRow-table" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="1.25" fill="none" stroke="currentColor" stroke-width="1.25"/><path d="M2 6.5h12M2 9.75h12M6.5 6.5V13" fill="none" stroke="currentColor" stroke-width="1.25"/></symbol>
+	<symbol id="DetailsSearchRow-star" viewBox="0 0 16 16"><path d="m8 2 1.8 3.9 4.2.5-3.1 2.9.8 4.2L8 11.4l-3.7 2.1.8-4.2L2 6.4l4.2-.5z" fill="currentColor"/></symbol>
+	<symbol id="DetailsSearchRow-gear" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.25" fill="none" stroke="currentColor" stroke-width="1.25"/><path d="M8 1.75v2M8 12.25v2M1.75 8h2M12.25 8h2M3.6 3.6 5 5M11 11l1.4 1.4M12.4 3.6 11 5M5 11l-1.4 1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+</svg>
+<div class="DetailsSearchRow-frame">
+	<div class="DetailsSearchRow">
+		<div class="DetailsSearchRow-searchSlot">
+			<div class="DetailsSearchRow-search">
+				<svg class="DetailsSearchRow-glass"><use href="#DetailsSearchRow-glass"/></svg>
+				<div class="DetailsSearchRow-text"><span class="DetailsSearchRow-hint">Search</span></div>
+				<span class="DetailsSearchRow-tail"></span>
+			</div>
+		</div>
+		<button class="DetailsSearchRow-btn is-button" title="Edit Selection in Property Matrix"><svg><use href="#DetailsSearchRow-table"/></svg></button>
+		<button class="DetailsSearchRow-btn is-button" title="Toggle Favorites"><svg><use href="#DetailsSearchRow-star"/></svg></button>
+		<button class="DetailsSearchRow-btn is-combo" title="View options"><svg><use href="#DetailsSearchRow-gear"/></svg></button>
+	</div>
+	<div class="DetailsSearchRow">
+		<div class="DetailsSearchRow-searchSlot">
+			<div class="DetailsSearchRow-search is-focused">
+				<svg class="DetailsSearchRow-glass"><use href="#DetailsSearchRow-glass"/></svg>
+				<div class="DetailsSearchRow-text has-value">scale</div>
+				<svg class="DetailsSearchRow-clear"><use href="#DetailsSearchRow-close"/></svg>
+				<span class="DetailsSearchRow-tail"></span>
+			</div>
+		</div>
+		<button class="DetailsSearchRow-btn is-button" title="Edit Selection in Property Matrix"><svg><use href="#DetailsSearchRow-table"/></svg></button>
+		<button class="DetailsSearchRow-btn is-button is-on" title="Toggle Favorites (on)"><svg><use href="#DetailsSearchRow-star"/></svg></button>
+		<button class="DetailsSearchRow-btn is-combo" title="View options"><svg><use href="#DetailsSearchRow-gear"/></svg></button>
+	</div>
+</div>
+</body>
+</html>
