@@ -48,14 +48,21 @@ export const classes = async (target: Locator): Promise<string[]> => ((await tar
 export const widthOf = (target: Locator): Promise<number> => target.evaluate((el) => el.getBoundingClientRect().width);
 export const settle = (page: Page): Promise<void> => page.waitForTimeout(80);
 // Moves the pointer to the empty page margin, which takes the hover off any row.
-export const away = (page: Page): Promise<void> => page.mouse.move(2, 2);
+export const parkPointer = (page: Page): Promise<void> => page.mouse.move(2, 2);
 
-export const clickAway = (page: Page): Promise<void> => page.mouse.click(2, 2);
-export const press = (page: Page, ...keys: string[]): Promise<void> => keys.reduce((chain, key) => chain.then(() => page.keyboard.press(key)), Promise.resolve());
-export const pointerTo = (page: Page, x: number, y: number, steps = 1): Promise<void> => page.mouse.move(x, y, { steps });
-export const pointerDown = (page: Page): Promise<void> => page.mouse.down();
-export const pointerUp = (page: Page): Promise<void> => page.mouse.up();
-export const wheel = (page: Page, dx: number, dy: number): Promise<void> => page.mouse.wheel(dx, dy);
+export const shown = (target: Locator): Promise<boolean> => target.isVisible();
+export interface Box { x: number; y: number; width: number; height: number }
+// The middle point of a bounding box.
+export const centre = (b: Box | null): { x: number; y: number } => {
+	assert.ok(b, 'bounding box');
+	return { x: b.x + b.width / 2, y: b.y + b.height / 2 };
+};
+export const clickBlank = (page: Page): Promise<void> => page.mouse.click(2, 2);
+export const keys = (page: Page, ...keys: string[]): Promise<void> => keys.reduce((chain, key) => chain.then(() => page.keyboard.press(key)), Promise.resolve());
+export const movePointer = (page: Page, x: number, y: number, steps = 1): Promise<void> => page.mouse.move(x, y, { steps });
+export const holdPointer = (page: Page): Promise<void> => page.mouse.down();
+export const releasePointer = (page: Page): Promise<void> => page.mouse.up();
+export const spin = (page: Page, dx: number, dy: number): Promise<void> => page.mouse.wheel(dx, dy);
 
 function escapeRegExp(text: string): string {
 	return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

@@ -43,7 +43,7 @@ function wireMenu(wiring) {
   const open = () => {
     setOpen(true);
     const list = items();
-    const start = list.find((item) => item.getAttribute("aria-checked") === "true") ?? list[0];
+    const start = list.find((item) => item.getAttribute("aria-checked") === "true" || item.getAttribute("aria-selected") === "true") ?? list[0];
     start?.focus();
   };
   const close = (returnFocus) => {
