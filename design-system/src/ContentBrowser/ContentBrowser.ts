@@ -339,8 +339,22 @@ class ContentBrowserElement extends UeElement {
 			this.#picked = new Set([folder]);
 			this.#anchor = folder;
 		}
-		this.#renderTiles();
+		this.#syncTiles();
 		this.#tileOf(folder)?.focus();
+	}
+
+	// Updates the selection marks in place. The tiles must stay the same elements, or a double-click would lose its target.
+	#syncTiles(): void {
+		const shown = this.#shownKids();
+		const stop = shown.find((folder) => this.#picked.has(folder)) ?? shown[0];
+		for (const tile of this.#tiles.querySelectorAll<HTMLElement>('.ContentBrowser__tile')) {
+			const folder = this.#tileFolder.get(tile);
+			const picked = folder !== undefined && this.#picked.has(folder);
+			tile.classList.toggle('is-sel', picked);
+			tile.setAttribute('aria-selected', String(picked));
+			tile.tabIndex = folder === stop ? 0 : -1;
+		}
+		this.#renderStatus(shown);
 	}
 
 	#setSourcesWidth(width: number): void {
