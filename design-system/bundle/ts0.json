@@ -1,0 +1,8 @@
+{
+	"entry": "main.ts",
+	"outfile": "../components/bundle.js",
+	"target": "browser",
+	"format": "iife",
+	"sourcemap": false,
+	"esbuild": { "banner": { "js": "/* @ds-bundle: {\"format\":4,\"namespace\":\"UEStarship\",\"components\":[]} */" } }
+}

@@ -37,3 +37,26 @@ for (const name of names.filter((n) => !STATIC.has(n))) {
 		});
 	});
 }
+
+// The design system page marks every preview static with "components/bundle.js is missing" when no bundle exists. The page preloads it into each preview.
+test('components/bundle.js exists, is a classic script, and defines every ue-* element the previews use', async () => {
+	const bundle = path.join(components, 'bundle.js');
+	assert.ok(fs.existsSync(bundle), 'components/bundle.js exists');
+	const source = fs.readFileSync(bundle, 'utf8');
+	assert.match(source.split('\n')[0], /^\/\* @ds-bundle: \{"format":4,"namespace":"UEStarship"/);
+	assert.doesNotMatch(source, /\bimport\b|<\/script|<!--/, 'no import, no closing script tag, no HTML comment');
+	const used = new Set<string>();
+	for (const name of names) {
+		const html = fs.readFileSync(path.join(components, name, 'preview.html'), 'utf8');
+		for (const m of html.slice(html.indexOf('<body')).matchAll(/<(ue-[a-z0-9-]+)/g)) used.add(m[1]);
+		assert.doesNotMatch(html, /src="[^"]*bundle\.js"/, name + ' must not load bundle.js itself');
+	}
+	await withBrowser(async (browser) => {
+		const { page, errors } = await openPreview(browser, 'Cover');
+		await page.addScriptTag({ content: source });
+		const missing = await page.evaluate((tags) => tags.filter((tag) => !customElements.get(tag)), Array.from(used));
+		assert.deepEqual(missing, []);
+		assert.deepEqual(errors, []);
+		await page.close();
+	});
+});

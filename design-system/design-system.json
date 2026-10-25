@@ -4,7 +4,7 @@
 	"createdOnFiles": { "v": 1, "at": "2026-10-24T18:20:00Z" },
 	"title": "UE5.5 Editor UI (Starship)",
 	"namespace": "UEStarship",
-	"libraries": [],
+	"libraries": [{ "name": "react", "version": "18" }, { "name": "react-dom", "version": "18" }],
 	"sections": {},
 	"groups": ["Placeholders"],
 	"assetGroups": {
