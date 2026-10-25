@@ -1,4 +1,4 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   connectedCallback() {
@@ -30,7 +30,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/_shared/drag.ts
+// design-system/src/_shared/drag.ts
 var THRESHOLD = 3;
 function drag(target, handlers) {
   let originX = 0;
@@ -72,7 +72,7 @@ function drag(target, handlers) {
   };
 }
 
-// src/_shared/scroll-thumb.ts
+// design-system/src/_shared/scroll-thumb.ts
 var MIN_THUMB = 35;
 var BAR_PADDING = 2;
 function thumbLayout(slot, viewport, content, offset) {
@@ -161,7 +161,7 @@ function bindBar(view, bar, thumb, vertical, onFits) {
   };
 }
 
-// src/Scrollbar/Scrollbar.ts
+// design-system/src/Scrollbar/Scrollbar.ts
 var Scrollbar = class extends UeElement {
   setup() {
     for (const box of this.all(".sb-scroll")) {

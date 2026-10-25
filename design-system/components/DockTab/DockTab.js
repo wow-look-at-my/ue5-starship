@@ -1,4 +1,4 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   connectedCallback() {
@@ -30,7 +30,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/_shared/tabstack.ts
+// design-system/src/_shared/tabstack.ts
 var TARGET_KEYS = ["ArrowRight", "ArrowLeft", "Home", "End"];
 function targetElement(event) {
   return event.target instanceof Element ? event.target : null;
@@ -154,7 +154,7 @@ var TabStackElement = class extends UeElement {
   }
 };
 
-// src/DockTab/DockTab.ts
+// design-system/src/DockTab/DockTab.ts
 var DockTabElement = class extends TabStackElement {
   names = {
     stack: "dockTab-stack",

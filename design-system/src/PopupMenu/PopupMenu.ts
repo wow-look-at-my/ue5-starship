@@ -73,7 +73,7 @@ export class UePopupMenuElement extends UeElement {
 		this.on(this, 'mouseout', (event) => {
 			const root = rootOf(event.target instanceof Element ? event.target : null);
 			if (!root || (event.relatedTarget instanceof Node && root.contains(event.relatedTarget))) return;
-			if (document.activeElement !== root) this.#show(root, null, null);
+			if (!root.classList.contains(KEYS)) this.#show(root, null, null);
 		});
 
 		this.on(this, 'keydown', (event) => {

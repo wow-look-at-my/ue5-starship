@@ -50,6 +50,18 @@ function extract(html: string, tag: string, cls: string, nth = 0): string {
 	throw new Error('not found: ' + tag + '.' + cls + ' #' + nth);
 }
 
+// Returns the nth custom element named `tag`, whole.
+function element(page: string, tag: string, nth = 0): string {
+	const html = page.slice(page.indexOf('<body'));
+	const open = new RegExp('<' + tag + '\\b[^>]*>', 'g');
+	let seen = 0;
+	for (let m = open.exec(html); m; m = open.exec(html)) {
+		if (seen++ < nth) continue;
+		return balancedFrom(html, m.index, tag);
+	}
+	throw new Error('not found: ' + tag + ' #' + nth);
+}
+
 const blocks = (html: string, tag: string): string => [...html.matchAll(new RegExp('<' + tag + '>([\\s\\S]*?)</' + tag + '>', 'g'))].map((m) => m[1]).join('\n');
 const symbols = (html: string): string => [...html.matchAll(/<symbol[\s\S]*?<\/symbol>/g)].map((m) => m[0]).join('\n');
 const stripPage = (css: string): string => css.replace(/(^|\n)\s*(html\s*,\s*)?body\s*\{[^}]*\}/g, '\n');
@@ -58,22 +70,20 @@ const modules = (name: string, html: string): string[] => [...html.matchAll(/<sc
 const names = ['WindowChrome', 'MenuBar', 'ToolBar', 'PlaceActorsPanel', 'DetailsHeader', 'DetailsSearchRow', 'FilterPills', 'DetailsCategory', 'SceneOutliner', 'ContentBrowser', 'StatusBar', 'TabWell'];
 const html = Object.fromEntries(names.map((n) => [n, read(n)]));
 
-const menu = extract(html.MenuBar, 'div', 'menuBar');
+// The live instance of each component is its custom element, whole, so the composed window keeps the behaviour.
+const menu = element(html.MenuBar, 'ue-menu-bar');
 let title = extract(html.WindowChrome, 'div', 'windowChrome-title');
 title = title.replace(extract(title, 'div', 'windowChrome-menu'), '<div class="windowChrome-menu">' + menu + '</div>');
 
-const toolbar = extract(html.ToolBar, 'div', 'toolBar');
-const placeInner = html.PlaceActorsPanel.slice(html.PlaceActorsPanel.indexOf('class="placeActors-demo"'));
-const placeRaw = balancedFrom(placeInner, placeInner.indexOf('<div>'), 'div');
-const place = placeRaw.replace(extract(placeRaw, 'div', 'placeActors-note'), '');
-const searchRow = '<div class="DetailsSearchRow-frame">' + extract(html.DetailsSearchRow, 'div', 'DetailsSearchRow', 0) + '</div>';
-const details = [extract(html.DetailsHeader, 'div', 'DetailsHeader-frame'), searchRow, extract(html.FilterPills, 'div', 'FilterPills-frame'), extract(html.DetailsCategory, 'div', 'DetailsCategory-frame')].join('\n');
-const outliner = extract(html.SceneOutliner, 'div', 'so-panel');
-const browser = extract(html.ContentBrowser, 'div', 'ContentBrowser');
-const status = extract(html.StatusBar, 'div', 'statusBar');
+const toolbar = element(html.ToolBar, 'ue-tool-bar');
+const place = element(html.PlaceActorsPanel, 'ue-place-actors-panel');
+const details = element(html.DetailsCategory, 'ue-details-category', 1);
+const outliner = element(html.SceneOutliner, 'ue-scene-outliner');
+const browser = element(html.ContentBrowser, 'ue-content-browser');
+const status = element(html.StatusBar, 'ue-status-bar');
 
-const tab = (icon: string, label: string): string => '<div class="tabWell-tab tabWell-tab--foreground tabWell-tab--active"><span class="tabWell-icon"><svg><use href="#tabWell-i-' + icon + '"/></svg></span><span class="tabWell-label">' + label + '</span><span class="tabWell-close"><svg><use href="#tabWell-i-close"/></svg></span></div>';
-const stack = (cls: string, icon: string, label: string, body: string): string => '<div class="tabWell-stack ' + cls + '" style="width:100%"><div class="tabWell-well">' + tab(icon, label) + '</div><div class="tabWell-content el-body">' + body + '</div></div>';
+const tab = (id: string, icon: string, label: string): string => '<div class="tabWell-tab tabWell-tab--foreground tabWell-tab--active" role="tab" tabindex="0" aria-selected="true" data-tab="' + id + '"><span class="tabWell-icon"><svg><use href="#tabWell-i-' + icon + '"/></svg></span><span class="tabWell-label">' + label + '</span><span class="tabWell-close"><svg><use href="#tabWell-i-close"/></svg></span></div>';
+const stack = (cls: string, id: string, icon: string, label: string, body: string): string => '<ue-tab-well><div class="tabWell-stack ' + cls + '" style="width:100%"><div class="tabWell-well" role="tablist" aria-label="' + label + '">' + tab(id, icon, label) + '</div><div class="tabWell-content el-body"><div role="tabpanel" data-panel="' + id + '">' + body + '</div></div></div></ue-tab-well>';
 
 const viewport = '<img class="el-viewport" src="' + (local ? LOCAL : BLOB) + '" alt="3D viewport placeholder">';
 
@@ -89,7 +99,8 @@ const layoutCss = `
 	.el-col { display: flex; flex-direction: column; min-width: 0; min-height: 0; gap: 2px; }
 	.el-root .tabWell-stack { display: flex; flex-direction: column; min-height: 0; flex: 1 1 0; }
 	.el-root .el-body { overflow: hidden; padding: 0; flex: 1 1 auto; min-height: 0; }
-	.el-root .el-body > * { max-width: 100%; }
+	.el-root .el-body > [role="tabpanel"] { height: 100%; overflow: auto; }
+	.el-root .menuBar-stage, .el-root .toolBar-stage, .el-root .statusBar-stage { margin: 0; padding: 0; }
 	.el-root .DetailsHeader-frame, .el-root .DetailsSearchRow-frame, .el-root .FilterPills-frame, .el-root .DetailsCategory-frame, .el-root .so-panel { width: 100%; }
 	.el-root .ContentBrowser { width: 100%; margin: 0; }
 	.el-root .statusBar { min-width: 0; }
@@ -103,10 +114,10 @@ const out = marker
 	+ '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>EditorLayout</title>\n<style>\n' + css + layoutCss + '</style>\n</head>\n<body>\n'
 	+ '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>\n' + defs + '\n</defs></svg>\n'
 	+ '<div class="el-root">\n' + title + '\n<div class="el-toolbar">' + toolbar + '</div>\n<div class="el-main">\n'
-	+ '<div class="el-col">' + stack('', 'folder', 'Place Actors', place) + '</div>\n'
-	+ '<div class="el-col">' + stack('', 'world', 'Viewport 1', viewport) + '</div>\n'
-	+ '<div class="el-col">' + stack('el-details', 'details', 'Details', details) + stack('el-outliner', 'outliner', 'Outliner', outliner) + '</div>\n'
-	+ '</div>\n<div class="el-bottom">' + stack('', 'folder', 'Content Browser', browser) + '</div>\n' + status + '\n</div>\n'
+	+ '<div class="el-col">' + stack('', 'place', 'folder', 'Place Actors', place) + '</div>\n'
+	+ '<div class="el-col">' + stack('', 'viewport', 'world', 'Viewport 1', viewport) + '</div>\n'
+	+ '<div class="el-col">' + stack('el-details', 'details', 'details', 'Details', details) + stack('el-outliner', 'outliner', 'outliner', 'Outliner', outliner) + '</div>\n'
+	+ '</div>\n<div class="el-bottom">' + stack('', 'content', 'folder', 'Content Browser', browser) + '</div>\n' + status + '\n</div>\n'
 	+ scripts + '\n</body>\n</html>\n';
 
 const dir = path.join(root, 'components', 'EditorLayout');

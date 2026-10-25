@@ -1,4 +1,4 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   connectedCallback() {
@@ -30,7 +30,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/Button/Button.ts
+// design-system/src/Button/Button.ts
 var PRESSED = "button--pressed";
 function buttonOf(target) {
   return target instanceof Element ? target.closest(".button") : null;

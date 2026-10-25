@@ -1,4 +1,4 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   connectedCallback() {
@@ -30,7 +30,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/PlaceActorsPanel/PlaceActorsPanel.ts
+// design-system/src/PlaceActorsPanel/PlaceActorsPanel.ts
 var CAT = ".placeActors-cat";
 var GROUP = ".placeActors-group";
 var ROW = ".placeActors-row";

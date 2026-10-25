@@ -1,4 +1,4 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   connectedCallback() {
@@ -30,7 +30,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/_shared/drag.ts
+// design-system/src/_shared/drag.ts
 var THRESHOLD = 3;
 function drag(target, handlers) {
   let originX = 0;
@@ -72,7 +72,7 @@ function drag(target, handlers) {
   };
 }
 
-// src/Splitter/Splitter.ts
+// design-system/src/Splitter/Splitter.ts
 var MIN_PANE = 20;
 var KEY_STEP = 5;
 var KEY_STEP_LARGE = 20;

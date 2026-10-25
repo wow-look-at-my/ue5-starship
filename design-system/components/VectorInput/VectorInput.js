@@ -1,4 +1,4 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   connectedCallback() {
@@ -30,7 +30,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/_shared/drag.ts
+// design-system/src/_shared/drag.ts
 var THRESHOLD = 3;
 function drag(target, handlers) {
   let originX = 0;
@@ -72,7 +72,7 @@ function drag(target, handlers) {
   };
 }
 
-// src/_shared/popupmenu.ts
+// design-system/src/_shared/popupmenu.ts
 function wireMenu(wiring) {
   const { trigger, menu, itemSelector } = wiring;
   const items = () => Array.from(menu.querySelectorAll(itemSelector));
@@ -150,7 +150,7 @@ function wireMenu(wiring) {
   };
 }
 
-// src/VectorInput/VectorInput.ts
+// design-system/src/VectorInput/VectorInput.ts
 var round = (value, places) => Math.round(value * 10 ** places) / 10 ** places;
 function format(value, unit) {
   let text = String(round(value, 4));

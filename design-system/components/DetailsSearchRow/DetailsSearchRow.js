@@ -1,4 +1,4 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   connectedCallback() {
@@ -30,7 +30,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/_shared/popupmenu.ts
+// design-system/src/_shared/popupmenu.ts
 function wireMenu(wiring) {
   const { trigger, menu, itemSelector } = wiring;
   const items = () => Array.from(menu.querySelectorAll(itemSelector));
@@ -108,7 +108,7 @@ function wireMenu(wiring) {
   };
 }
 
-// src/DetailsSearchRow/DetailsSearchRow.ts
+// design-system/src/DetailsSearchRow/DetailsSearchRow.ts
 var UeDetailsSearchRow = class extends UeElement {
   setup() {
     const input = this.one(".DetailsSearchRow-text");

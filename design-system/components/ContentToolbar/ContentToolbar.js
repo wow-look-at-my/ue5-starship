@@ -1,4 +1,4 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   connectedCallback() {
@@ -30,7 +30,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/_shared/contentMenu.ts
+// design-system/src/_shared/contentMenu.ts
 var TICK = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l3 3 6-7"/></svg>';
 function openMenu(host, anchor, options) {
   const menu = document.createElement("div");
@@ -117,7 +117,7 @@ function openMenu(host, anchor, options) {
   return { element: menu, anchor, close };
 }
 
-// src/ContentToolbar/ContentToolbar.ts
+// design-system/src/ContentToolbar/ContentToolbar.ts
 var CHEVRON = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"/></svg>';
 var PREFIX = "ContentToolbar";
 var CHILDREN = {

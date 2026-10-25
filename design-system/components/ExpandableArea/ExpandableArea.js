@@ -1,4 +1,4 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   connectedCallback() {
@@ -30,7 +30,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/ExpandableArea/ExpandableArea.ts
+// design-system/src/ExpandableArea/ExpandableArea.ts
 function headerOf(target) {
   return target instanceof Element ? target.closest('.expandablearea__header[role="button"]') : null;
 }

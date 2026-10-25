@@ -1,4 +1,4 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   connectedCallback() {
@@ -30,7 +30,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/_shared/tileGrid.ts
+// design-system/src/_shared/tileGrid.ts
 function nearestInRow(tiles, from, down) {
   const tops = new Map(tiles.map((tile) => [tile, tile.getBoundingClientRect()]));
   const box = from.getBoundingClientRect();
@@ -50,7 +50,7 @@ function nearestInRow(tiles, from, down) {
   return line.reduce((best, tile) => distance(tile) < distance(best) ? tile : best);
 }
 
-// src/AssetTile/AssetTile.ts
+// design-system/src/AssetTile/AssetTile.ts
 var SELECTED = "is-selected";
 var AssetTileElement = class extends UeElement {
   #anchor = null;

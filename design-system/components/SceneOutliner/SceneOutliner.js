@@ -1,4 +1,4 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   connectedCallback() {
@@ -30,7 +30,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/_shared/tree-controller.ts
+// design-system/src/_shared/tree-controller.ts
 var TreeController = class {
   root;
   parts;
@@ -222,7 +222,7 @@ var TreeController = class {
   }
 };
 
-// src/_shared/drag.ts
+// design-system/src/_shared/drag.ts
 var THRESHOLD = 3;
 function drag(target, handlers) {
   let originX = 0;
@@ -264,7 +264,7 @@ function drag(target, handlers) {
   };
 }
 
-// src/_shared/scroll-thumb.ts
+// design-system/src/_shared/scroll-thumb.ts
 var MIN_THUMB = 35;
 var BAR_PADDING = 2;
 function thumbLayout(slot, viewport, content, offset) {
@@ -353,7 +353,7 @@ function bindBar(view, bar, thumb, vertical, onFits) {
   };
 }
 
-// src/SceneOutliner/SceneOutliner.ts
+// design-system/src/SceneOutliner/SceneOutliner.ts
 var ROW = ".so-row";
 var SORTABLE = ".so-hcell[aria-sort]";
 var collator = new Intl.Collator(void 0, { numeric: true, sensitivity: "base" });

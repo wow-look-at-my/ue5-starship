@@ -1,4 +1,4 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   connectedCallback() {
@@ -27,7 +27,7 @@ var UeElement = class extends HTMLElement {
   }
 };
 
-// src/_shared/tabstack.ts
+// design-system/src/_shared/tabstack.ts
 var TARGET_KEYS = ["ArrowRight", "ArrowLeft", "Home", "End"];
 function targetElement(event) {
   return event.target instanceof Element ? event.target : null;

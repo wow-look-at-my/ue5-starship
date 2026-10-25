@@ -1,4 +1,4 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   connectedCallback() {
@@ -30,7 +30,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/_shared/popup.ts
+// design-system/src/_shared/popup.ts
 function enabledRows(menu, rowSelector) {
   return Array.from(menu.querySelectorAll(rowSelector)).filter((row) => row.getAttribute("aria-disabled") !== "true");
 }
@@ -39,7 +39,7 @@ function rowLabel(row, labelSelector) {
   return (label ?? row).textContent?.trim() ?? "";
 }
 
-// src/PopupMenu/PopupMenu.ts
+// design-system/src/PopupMenu/PopupMenu.ts
 var ROW = ".popupmenu__row";
 var CURRENT = "popupmenu__row--hover";
 var OPEN = "popupmenu__row--open";
@@ -101,7 +101,7 @@ var UePopupMenuElement = class extends UeElement {
     this.on(this, "mouseout", (event) => {
       const root = rootOf(event.target instanceof Element ? event.target : null);
       if (!root || event.relatedTarget instanceof Node && root.contains(event.relatedTarget)) return;
-      if (document.activeElement !== root) this.#show(root, null, null);
+      if (!root.classList.contains(KEYS)) this.#show(root, null, null);
     });
     this.on(this, "keydown", (event) => {
       const root = event.target instanceof HTMLElement && event.target.matches(".popupmenu[tabindex]") ? event.target : null;
