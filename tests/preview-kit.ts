@@ -50,6 +50,13 @@ export const settle = (page: Page): Promise<void> => page.waitForTimeout(80);
 // Moves the pointer to the empty page margin, which takes the hover off any row.
 export const away = (page: Page): Promise<void> => page.mouse.move(2, 2);
 
+export const clickAway = (page: Page): Promise<void> => page.mouse.click(2, 2);
+export const press = (page: Page, ...keys: string[]): Promise<void> => keys.reduce((chain, key) => chain.then(() => page.keyboard.press(key)), Promise.resolve());
+export const pointerTo = (page: Page, x: number, y: number, steps = 1): Promise<void> => page.mouse.move(x, y, { steps });
+export const pointerDown = (page: Page): Promise<void> => page.mouse.down();
+export const pointerUp = (page: Page): Promise<void> => page.mouse.up();
+export const wheel = (page: Page, dx: number, dy: number): Promise<void> => page.mouse.wheel(dx, dy);
+
 function escapeRegExp(text: string): string {
 	return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

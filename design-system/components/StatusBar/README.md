@@ -41,6 +41,16 @@ Citations: `SC` is `Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp`, `S
 - Do not give drawer buttons a hover fill. They only turn white.
 - Do not set the console box narrower than 300px.
 
+## Live behaviour
+
+`<ue-status-bar>` (`src/StatusBar/StatusBar.ts`, built to `StatusBar.js`) wraps a `.statusBar` and the `.statusBar-history` above it.
+
+- A drawer button toggles `.is-open` and `aria-expanded`. One drawer is open at a time (`SWidgetDrawer.cpp:527`, `:618`). The source has no open style for the button, so `.is-open` reuses the pressed look: ForegroundHover and padding 2, 3, 2, 1 (`SC:1867-1870`).
+- The Cmd combo opens a `.statusBar-menu` upward, because the bar is at the bottom of the window. Choosing a row renames the combo. The engine fills this menu with the command executors (`SOutputLog.cpp:192`, `:733`). Cmd and Python are illustrative.
+- The console box is a real `<input>`. Focus draws the Primary outline and white text (`SC:1285`, `SC:1292`). Enter appends `> command` to the history (a few lines at most) and empties the box. Up and Down recall earlier commands. A blank line does nothing.
+- Derived Data and Source Control show hover and pressed through `:hover` and `:active`.
+- Events: `ue-drawer-change`, `ue-executor-change`, `ue-command`. A bar with `data-pinned` stays plain HTML.
+
 ## Not found in source
 
 - The colour of the 1px gaps (they show what is behind the bar).

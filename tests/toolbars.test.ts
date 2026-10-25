@@ -285,7 +285,7 @@ scenario('PlaceActorsPanel: the filter follows the category and Escape clears it
 });
 
 scenario('PlaceActorsPanel: rows show hover and pressed outlines, the info button fills on hover', 'PlaceActorsPanel', async (page) => {
-	const row = page.locator(PA + '.placeActors-row').nth(1);
+	const row = page.locator(PA + '.placeActors-group[data-category="Basic"] .placeActors-row').nth(1);
 	const info = row.locator('.placeActors-info');
 	assert.ok((await prop(row, 'box-shadow')).includes(await token(page, 'dropdown')));
 	await row.hover({ position: { x: 60, y: 10 } });

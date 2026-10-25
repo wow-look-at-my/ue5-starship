@@ -2,7 +2,7 @@
 import { UeElement, define } from '../_shared/element.ts';
 
 const DRAG_TRIGGER = 5; // FSlateApplication::DragTriggerDistance on desktop, SlateApplication.cpp:926
-const MIN_SLIDER_WIDTH = 100; // SSpinBox.h:597 (MinSliderWidth)
+const MIN_SLIDER_WIDTH = 100; // SSpinBox.h:607 (MinSliderWidth)
 
 interface Range {
 	min: number;

@@ -10,6 +10,10 @@
 	.slider-page { padding: 16px; }
 	.slider-panel { background: var(--panel); padding: 16px; display: grid; grid-template-columns: 110px 230px 230px; gap: 16px 24px; align-items: center; }
 	.slider-name, .slider-head { font: 400 10.667px/1.2 var(--font-sans); color: var(--foreground); opacity: .7; }
+	.slider-panel--live { grid-template-columns: 110px 230px 90px; margin-bottom: 12px; }
+	.slider-panel--live > .slider-head { grid-column: 1 / -1; }
+	.slider-value { font: 400 10.667px/1.2 var(--font-sans); color: var(--foreground-hover); }
+	[data-pinned] { pointer-events: none; } /* a pinned specimen shows one forced state and ignores the pointer */
 
 	.slider { --slider-value: .5; position: relative; width: 200px; height: 8px; } /* desired height = max(BarThickness 4, thumb 8) SSlider.cpp:151-159 */
 	.slider__bar {
@@ -25,32 +29,54 @@
 		background: var(--foreground); /* Foreground :577 */
 	}
 	.slider:hover .slider__thumb, .slider--hover .slider__thumb { background: var(--foreground-hover); } /* :578 */
-	.slider--disabled { opacity: .45; } /* alpha x .45 SlateElementPixelShader.usf:535 */
-	.slider--disabled .slider__bar { box-shadow: inset 0 0 0 1px var(--recessed); } /* DisabledBarImage outline Recessed :576 */
-	.slider--disabled:hover .slider__thumb { background: var(--foreground); } /* :579 */
+	.slider:active .slider__thumb { background: var(--foreground-hover); } /* the pointer stays over the captured slider, so the hovered brush shows while dragging; the style has no pressed brush :571-580 */
+	.slider--disabled, .slider[aria-disabled="true"] { opacity: .45; } /* alpha x .45 SlateElementPixelShader.usf:535 */
+	.slider--disabled .slider__bar, .slider[aria-disabled="true"] .slider__bar { box-shadow: inset 0 0 0 1px var(--recessed); } /* DisabledBarImage outline Recessed :576 */
+	.slider--disabled:hover .slider__thumb, .slider[aria-disabled="true"]:hover .slider__thumb, .slider[aria-disabled="true"]:active .slider__thumb { background: var(--foreground); } /* :579 */
+	.slider[role="slider"] { cursor: default; outline: 0; touch-action: none; }
+	.slider[role="slider"]::before { content: ""; position: absolute; inset: -6px 0; } /* taller hit area for the pointer; not part of the style */
+	.slider[role="slider"]:focus-visible { outline: 1px solid var(--primary); outline-offset: 3px; border-radius: 4px; } /* FocusRectangle 1px Primary r4 StarshipCoreStyle.cpp:218 */
 </style>
 </head>
 <body>
 <div class="slider-page">
+	<ue-slider>
+		<div class="slider-panel slider-panel--live">
+			<span class="slider-head">Live: drag the thumb or click the bar. Arrow keys step, Page Up and Page Down jump, Home and End go to the ends.</span>
+
+			<span class="slider-name">0 to 1, step 0.01</span>
+			<div class="slider" role="slider" tabindex="0" aria-label="Opacity" data-min="0" data-max="1" data-step="0.01" data-value="0.5" style="--slider-value:.5"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
+			<span class="slider-value">0.50</span>
+
+			<span class="slider-name">0 to 100, step 5</span>
+			<div class="slider" role="slider" tabindex="0" aria-label="Volume" data-min="0" data-max="100" data-step="5" data-value="25" style="--slider-value:.25"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
+			<span class="slider-value">25</span>
+
+			<span class="slider-name">Disabled</span>
+			<div class="slider" role="slider" aria-disabled="true" aria-label="Locked" data-min="0" data-max="1" data-step="0.01" data-value="0.5" style="--slider-value:.5"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
+			<span class="slider-value">0.50</span>
+		</div>
+	</ue-slider>
 	<div class="slider-panel">
 		<span></span><span class="slider-head">Normal</span><span class="slider-head">Hovered</span>
 
 		<span class="slider-name">0%</span>
-		<div class="slider" style="--slider-value:0"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
-		<div class="slider slider--hover" style="--slider-value:0"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
+		<div class="slider" data-pinned style="--slider-value:0"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
+		<div class="slider slider--hover" data-pinned style="--slider-value:0"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
 
 		<span class="slider-name">50%</span>
-		<div class="slider" style="--slider-value:.5"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
-		<div class="slider slider--hover" style="--slider-value:.5"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
+		<div class="slider" data-pinned style="--slider-value:.5"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
+		<div class="slider slider--hover" data-pinned style="--slider-value:.5"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
 
 		<span class="slider-name">100%</span>
-		<div class="slider" style="--slider-value:1"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
-		<div class="slider slider--hover" style="--slider-value:1"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
+		<div class="slider" data-pinned style="--slider-value:1"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
+		<div class="slider slider--hover" data-pinned style="--slider-value:1"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
 
 		<span class="slider-name">Disabled, 50%</span>
-		<div class="slider slider--disabled" style="--slider-value:.5"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
+		<div class="slider slider--disabled" data-pinned style="--slider-value:.5"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
 		<span></span>
 	</div>
 </div>
+<script type="module" src="./Slider.js"></script>
 </body>
 </html>
