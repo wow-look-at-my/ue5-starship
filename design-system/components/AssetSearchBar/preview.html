@@ -37,6 +37,36 @@
 	.AssetSearchBar__filter { padding: 1px 3px; margin-left: 2px; }
 	.AssetSearchBar__filter svg + svg { margin-left: 2px; }   /* FComboButtonStyle DownArrowPadding default 2 (SlateTypes.cpp:165) */
 	.AssetSearchBar__filter--lead { margin: 0 2px 0 0; }   /* SContentBrowser.cpp:1369 Padding(0,0,2,0) */
+
+	/* ---- live rows (inside <ue-asset-search-bar>); the pinned row is plain HTML and skips these ---- */
+	.AssetSearchBar { position: relative; }
+	.AssetSearchBar button { border: 0; background: none; font: inherit; cursor: default; }
+	.AssetSearchBar button.AssetSearchBar__btn:hover, ue-asset-search-bar .AssetSearchBar__btn:focus-visible { background: var(--dropdown); color: var(--foreground-hover); outline: 0; }
+	/* SimpleButton pressed = Dropdown r4, content padding shifts 1px down (StarshipCoreStyle.cpp:1389-1407) */
+	ue-asset-search-bar .AssetSearchBar__btn:active { background: var(--dropdown); color: var(--foreground-hover); padding: 2px 2px 0; }
+	.AssetSearchBar button.AssetSearchBar__filter:active { padding: 2px 3px 0; }
+	.AssetSearchBar__clear[hidden], .AssetSearchBar__plus[hidden] { display: none; }
+	/* clear X and plus: HoverOnlyButton = SimpleButtonIconOnly, hover/press Dropdown r4 (StarshipCoreStyle.cpp:1456,1389-1394) */
+	ue-asset-search-bar .AssetSearchBar__clear, ue-asset-search-bar .AssetSearchBar__plus { border-radius: 4px; }
+	ue-asset-search-bar .AssetSearchBar__clear:hover, ue-asset-search-bar .AssetSearchBar__plus:hover, ue-asset-search-bar .AssetSearchBar__clear:active, ue-asset-search-bar .AssetSearchBar__plus:active,
+	ue-asset-search-bar .AssetSearchBar__clear:focus-visible, ue-asset-search-bar .AssetSearchBar__plus:focus-visible { background: var(--dropdown); color: var(--foreground-hover); outline: 0; }
+
+	/* filter pill: FilterBar.FilterBackground Secondary r3 with the 8 x 22 colour segment (StarshipCoreStyle.cpp:916-917) */
+	.AssetSearchBar__pills { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 0 4px 6px; }
+	.AssetSearchBar__pills:empty { display: none; }
+	.AssetSearchBar__pill { display: flex; align-items: center; height: 22px; border-radius: 3px; background: var(--secondary); overflow: hidden; color: var(--foreground); }
+	.AssetSearchBar__pillColor { width: 8px; align-self: stretch; flex: none; }
+	.AssetSearchBar__pillName { padding: 0 6px 0 6px; }
+	.AssetSearchBar .AssetSearchBar__pillRemove, .AssetSearchBar__pills .AssetSearchBar__pillRemove { display: flex; align-items: center; margin: 0 3px 0 0; padding: 1px; border: 0; border-radius: 4px; background: none; color: var(--foreground); cursor: default; }
+	.AssetSearchBar__pills .AssetSearchBar__pillRemove:hover, .AssetSearchBar__pills .AssetSearchBar__pillRemove:focus-visible { background: var(--dropdown); color: var(--foreground-hover); outline: 0; }
+	.AssetSearchBar__pills svg { width: 16px; height: 16px; flex: none; display: block; }
+	.AssetSearchBar__pill:hover { color: var(--foreground-hover); }
+
+	/* filter menu: same declarations as PopupMenu/preview.html */
+	.AssetSearchBar__menu { position: absolute; z-index: 20; box-sizing: border-box; min-width: 180px; padding: 8px 0; background: var(--dropdown); box-shadow: inset 0 0 0 1px var(--dropdown-outline); color: var(--foreground-hover); }
+	.AssetSearchBar .AssetSearchBar__menuitem { display: flex; align-items: center; width: 100%; padding: 3px 5px 3px 12px; gap: 8px; color: var(--foreground-hover); text-align: left; white-space: nowrap; border-radius: 0; height: auto; margin: 0; }
+	.AssetSearchBar .AssetSearchBar__menuitem:hover, .AssetSearchBar .AssetSearchBar__menuitem:focus { background: var(--primary); outline: 0; }
+	.AssetSearchBar__menucheck { display: flex; width: 16px; height: 16px; margin-left: 2px; flex: none; }
 </style>
 </head>
 <body>
@@ -51,23 +81,33 @@
 	</defs>
 </svg>
 <div class="AssetSearchBarDemo">
-	<small>Reference layout: field, save, filter dropdown (empty)</small>
+	<small>Live, reference layout: field, save, filter dropdown (empty). Type for the clear X, Escape clears, the filter menu adds pills.</small>
+	<ue-asset-search-bar>
 	<div class="AssetSearchBar">
-		<label class="AssetSearchBar__field"><svg class="AssetSearchBar__glass"><use href="#asb-glass"/></svg><input class="AssetSearchBar__input" placeholder="Search StarterContent"></label>
-		<span class="AssetSearchBar__btn"><svg><use href="#asb-save"/></svg></span>
-		<span class="AssetSearchBar__btn AssetSearchBar__filter"><svg><use href="#asb-filter"/></svg><svg><use href="#asb-chev"/></svg></span>
+		<label class="AssetSearchBar__field"><svg class="AssetSearchBar__glass"><use href="#asb-glass"/></svg><input class="AssetSearchBar__input" placeholder="Search StarterContent" aria-label="Search"><button type="button" class="AssetSearchBar__clear" aria-label="Clear search" hidden><svg><use href="#asb-x"/></svg></button></label>
+		<button type="button" class="AssetSearchBar__btn" aria-label="Save search"><svg><use href="#asb-save"/></svg></button>
+		<button type="button" class="AssetSearchBar__btn AssetSearchBar__filter" aria-label="Filters" aria-expanded="false"><svg><use href="#asb-filter"/></svg><svg><use href="#asb-chev"/></svg></button>
 	</div>
-	<small>Focused with text (clear X shown)</small>
+	</ue-asset-search-bar>
+	<small>Focused with text (clear X shown), pinned</small>
 	<div class="AssetSearchBar">
 		<div class="AssetSearchBar__field is-focused"><svg class="AssetSearchBar__glass"><use href="#asb-glass"/></svg><span class="AssetSearchBar__inputText" style="color:var(--white)">chair</span><span class="AssetSearchBar__clear"><svg><use href="#asb-x"/></svg></span></div>
 		<span class="AssetSearchBar__btn"><svg><use href="#asb-save"/></svg></span>
 		<span class="AssetSearchBar__btn AssetSearchBar__filter"><svg><use href="#asb-filter"/></svg><svg><use href="#asb-chev"/></svg></span>
 	</div>
-	<small>5.5.3 source layout: filter button first, then the field with the plus-circle save-search button (text typed)</small>
+	<small>Live, 5.5.3 source layout: filter button first, then the field with the plus-circle save-search button. The plus and X show only while text is typed.</small>
+	<ue-asset-search-bar>
+	<div class="AssetSearchBar">
+		<button type="button" class="AssetSearchBar__btn AssetSearchBar__filter AssetSearchBar__filter--lead" aria-label="Filters" aria-expanded="false"><svg><use href="#asb-filter"/></svg><svg><use href="#asb-chev"/></svg></button>
+		<div class="AssetSearchBar__field"><svg class="AssetSearchBar__glass"><use href="#asb-glass"/></svg><input class="AssetSearchBar__input" value="chair" aria-label="Search"><button type="button" class="AssetSearchBar__plus" aria-label="Save search"><svg><use href="#asb-plus"/></svg></button><button type="button" class="AssetSearchBar__clear" aria-label="Clear search"><svg><use href="#asb-x"/></svg></button></div>
+	</div>
+	</ue-asset-search-bar>
+	<small>Source layout with a static field, pinned</small>
 	<div class="AssetSearchBar">
 		<span class="AssetSearchBar__btn AssetSearchBar__filter AssetSearchBar__filter--lead"><svg><use href="#asb-filter"/></svg><svg><use href="#asb-chev"/></svg></span>
 		<div class="AssetSearchBar__field"><svg class="AssetSearchBar__glass"><use href="#asb-glass"/></svg><span class="AssetSearchBar__inputText">chair</span><span class="AssetSearchBar__plus"><svg><use href="#asb-plus"/></svg></span><span class="AssetSearchBar__clear"><svg><use href="#asb-x"/></svg></span></div>
 	</div>
 </div>
+<script type="module" src="./AssetSearchBar.js"></script>
 </body>
 </html>

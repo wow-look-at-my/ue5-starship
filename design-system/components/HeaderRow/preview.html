@@ -14,11 +14,17 @@
 	/* Header: Recessed background, Foreground text -- StarshipCoreStyle.cpp:2113-2114 */
 	.hr-row { background: var(--recessed); color: var(--foreground); font-size: 13.333px; }
 	/* Cells: 1px splitter handle drawn as the Recessed gap between slots -- StarshipCoreStyle.cpp:2112 */
-	.hr-cells { display: grid; grid-template-columns: 24px 24px 5fr 2fr; column-gap: 1px; }
-	.hr-cells.has-scrollbar { grid-template-columns: 24px 24px 5fr 2fr 16px; }
-	/* Cell fill = Header, hovered = Dropdown -- StarshipCoreStyle.cpp:2083-2084 */
-	.hr-cell { display: flex; align-items: center; min-width: 0; height: 24px; background: var(--header); overflow: hidden; white-space: nowrap; }
-	.hr-cell.is-hover { background: var(--dropdown); }
+	.hr-cells { display: grid; grid-template-columns: 24px 24px minmax(0, var(--hr-a, 5fr)) minmax(0, var(--hr-b, 2fr)); column-gap: 1px; }
+	.hr-cells.has-scrollbar { grid-template-columns: 24px 24px minmax(0, var(--hr-a, 5fr)) minmax(0, var(--hr-b, 2fr)) 16px; }
+	/* Cell fill = Header, hovered = Dropdown, only for a column that can sort -- StarshipCoreStyle.cpp:2083-2084, SHeaderRow.cpp:302-309 */
+	.hr-cell { position: relative; display: flex; align-items: center; min-width: 0; height: 24px; background: var(--header); overflow: hidden; white-space: nowrap; }
+	.hr-cell.is-hover, .hr-cell[aria-sort]:hover { background: var(--dropdown); }
+	.hr-cell[aria-sort] { cursor: default; user-select: none; -webkit-user-select: none; }
+	.hr-cell[aria-sort]:focus-visible { outline: 1px solid var(--primary); outline-offset: -1px; }
+	.hr-sort[hidden] { display: none; }
+	/* Splitter hit area: 5px = the 1px handle plus 4 -- SHeaderRow.cpp:716. The grip covers the last 4px of the cell and the handle gap. */
+	.hr-grip { position: absolute; top: 0; right: 0; width: 4px; height: 100%; cursor: col-resize; touch-action: none; }
+	.hr-grip:focus-visible { background: var(--primary); outline: none; }
 	/* Default cell padding (5 + 2) / 2 = 3.5 each side -- SHeaderRow.cpp:716,745,769; label box height 24 -- SHeaderRow.cpp:88 */
 	.hr-cell.is-text { padding: 0 3.5px; }
 	/* Gutter header: HeaderContentPadding(4,0,0,0), icon left -- SceneOutlinerGutter.cpp:322-334 */
@@ -47,7 +53,21 @@
 </svg>
 
 <div class="hr-page">
-	<div class="hr-cap">Primary sort, ascending (outliner default)</div>
+	<div class="hr-cap">Live. Click Item Label or Type to sort: ascending, then descending. Shift-click adds a secondary key. Drag the splitter between the two columns (minimum 20px), or focus it and press Left or Right. Hover a sortable cell for the Dropdown fill.</div>
+	<ue-header-row>
+		<div class="hr-row">
+			<div class="hr-cells has-scrollbar">
+				<div class="hr-cell is-gutter"><svg class="hr-icon"><use href="#hr-eye"/></svg></div>
+				<div class="hr-cell is-pinned"><svg class="hr-icon"><use href="#hr-pin"/></svg></div>
+				<div class="hr-cell is-text" role="columnheader" tabindex="0" aria-sort="ascending" data-column="label">Item Label<svg class="hr-sort"><use href="#hr-up"/></svg><span class="hr-grip" role="separator" aria-orientation="vertical" aria-label="Resize Item Label" tabindex="0"></span></div>
+				<div class="hr-cell is-text" role="columnheader" tabindex="0" aria-sort="none" data-column="type">Type<svg class="hr-sort" hidden><use href="#hr-up"/></svg></div>
+				<div class="hr-spacer"></div>
+			</div>
+			<div class="hr-rule"></div>
+		</div>
+	</ue-header-row>
+
+	<div class="hr-cap">Primary sort, ascending (outliner default), pinned</div>
 	<div class="hr-row">
 		<div class="hr-cells has-scrollbar">
 			<div class="hr-cell is-gutter"><svg class="hr-icon"><use href="#hr-eye"/></svg></div>
@@ -59,7 +79,7 @@
 		<div class="hr-rule"></div>
 	</div>
 
-	<div class="hr-cap">Primary sort, descending, sortable cell hovered (Dropdown)</div>
+	<div class="hr-cap">Primary sort, descending, sortable cell hovered (Dropdown), pinned</div>
 	<div class="hr-row">
 		<div class="hr-cells">
 			<div class="hr-cell is-gutter"><svg class="hr-icon"><use href="#hr-eye"/></svg></div>
@@ -70,7 +90,7 @@
 		<div class="hr-rule"></div>
 	</div>
 
-	<div class="hr-cap">Secondary sort arrows on Type</div>
+	<div class="hr-cap">Secondary sort arrows on Type, pinned</div>
 	<div class="hr-row">
 		<div class="hr-cells">
 			<div class="hr-cell is-gutter"><svg class="hr-icon"><use href="#hr-eye"/></svg></div>
@@ -81,7 +101,7 @@
 		<div class="hr-rule"></div>
 	</div>
 
-	<div class="hr-cap">Secondary, descending</div>
+	<div class="hr-cap">Secondary, descending, pinned</div>
 	<div class="hr-row">
 		<div class="hr-cells">
 			<div class="hr-cell is-gutter"><svg class="hr-icon"><use href="#hr-eye"/></svg></div>
@@ -92,5 +112,6 @@
 		<div class="hr-rule"></div>
 	</div>
 </div>
+<script type="module" src="./HeaderRow.js"></script>
 </body>
 </html>

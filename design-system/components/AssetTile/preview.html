@@ -56,6 +56,22 @@
 	.AssetTile.is-selected .AssetTile__card::after { box-shadow: inset 0 0 0 1px var(--primary); }                  /* SelectedBorder StarshipStyle.cpp:6567 */
 	.AssetTile.is-selected.is-hover .AssetTile__card::after { box-shadow: inset 0 0 0 1px var(--primary-hover); }   /* SelectedHoverBorder :6571 */
 	.AssetTile--asset .AssetTile__card { box-shadow: 2px 2px 3px rgba(0,0,0,.45); }                                  /* AssetTileItem.DropShadow (StarshipStyle.cpp:6578), approximated */
+
+	/* ---- live tiles (inside <ue-asset-tile>): real :hover reproduces the is-hover declarations above; pinned tiles are plain HTML and skip these ---- */
+	ue-asset-tile .AssetTile { cursor: default; user-select: none; outline: 0; }
+	ue-asset-tile .AssetTile--folder:hover .AssetTile__card { background: var(--secondary); box-shadow: 2px 2px 3px rgba(0,0,0,.5); overflow: visible; }
+	ue-asset-tile .AssetTile--asset:hover .AssetTile__nameArea { background: var(--hover); }
+	ue-asset-tile .AssetTile--asset.is-selected .AssetTile__nameArea { background: var(--primary); }
+	ue-asset-tile .AssetTile--asset.is-selected:hover .AssetTile__nameArea { background: var(--primary-hover); }
+	ue-asset-tile .AssetTile--asset:hover .AssetTile__card::after { box-shadow: inset 0 0 0 1px var(--hover); }
+	ue-asset-tile .AssetTile.is-selected .AssetTile__card::after { box-shadow: inset 0 0 0 1px var(--primary); }
+	ue-asset-tile .AssetTile.is-selected:hover .AssetTile__card::after { box-shadow: inset 0 0 0 1px var(--primary-hover); }
+	ue-asset-tile .AssetTile:hover .AssetTile__name { color: var(--white); }
+	ue-asset-tile .AssetTile:hover .AssetTile__class { color: var(--white); opacity: 1; }
+	/* keyboard focus selector: SelectorFocusedBrush 1px, SelectorColor linear (0.701, 0.225, 0.003) = #da820a (StarshipCoreStyle.cpp:62,2007) */
+	ue-asset-tile .AssetTile:focus-visible .AssetTile__card { outline: 1px solid #da820a; outline-offset: 1px; }
+	.AssetTilePreview__grid { display: flex; flex-wrap: wrap; width: 328px; margin-bottom: 8px; }
+	.AssetTilePreview__status { margin-top: 4px; font: 400 10.667px/1.3 var(--font-sans); color: var(--hover-2); min-height: 14px; }
 </style>
 </head>
 <body>
@@ -71,14 +87,28 @@
 	</defs>
 </svg>
 <div class="AssetTilePreview">
-	<h4>Folder tile: normal / hovered / selected / selected + hovered</h4>
+	<h4>Live: hover a tile. Click selects, Ctrl/Cmd+click toggles, Shift+click selects a range. Double-click or Enter opens. Arrow keys, Home and End move.</h4>
+	<ue-asset-tile>
+		<div class="AssetTilePreview__grid">
+			<div class="AssetTile AssetTile--folder"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon"><use href="#at-folder"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Architecture</div></div></div></div>
+			<div class="AssetTile AssetTile--folder"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon"><use href="#at-folder"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Audio</div></div></div></div>
+			<div class="AssetTile AssetTile--folder"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon"><use href="#at-folder"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Blueprints</div></div></div></div>
+			<div class="AssetTile AssetTile--folder"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon"><use href="#at-folder"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Materials</div></div></div></div>
+			<div class="AssetTile AssetTile--asset"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg><use href="#at-mesh"/></svg><span class="AssetTile__strip" style="--strip:var(--accent-blue)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">SM_Chair</div><div class="AssetTile__class">Static Mesh</div></div></div></div>
+			<div class="AssetTile AssetTile--asset"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg><use href="#at-mesh"/></svg><span class="AssetTile__strip" style="--strip:var(--accent-blue)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">SM_Table</div><div class="AssetTile__class">Static Mesh</div></div></div></div>
+			<div class="AssetTile AssetTile--asset"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg><use href="#at-mesh"/></svg><span class="AssetTile__strip" style="--strip:var(--accent-green)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">M_Wood_Floor_Walnut_Polished</div><div class="AssetTile__class">Material</div></div></div></div>
+			<div class="AssetTile AssetTile--asset"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg><use href="#at-mesh"/></svg><span class="AssetTile__strip" style="--strip:var(--accent-orange)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">T_Brick_Clay_D</div><div class="AssetTile__class">Texture</div></div></div></div>
+		</div>
+		<div class="AssetTilePreview__status" role="status"></div>
+	</ue-asset-tile>
+	<h4>Folder tile: normal / hovered / selected / selected + hovered (pinned)</h4>
 	<div class="AssetTilePreview__row">
 		<div class="AssetTile AssetTile--folder"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon"><use href="#at-folder"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Architecture</div></div></div></div>
 		<div class="AssetTile AssetTile--folder is-hover"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon"><use href="#at-folder"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Audio</div></div></div></div>
 		<div class="AssetTile AssetTile--folder is-selected"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon"><use href="#at-folder"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Blueprints</div></div></div></div>
 		<div class="AssetTile AssetTile--folder is-selected is-hover"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon"><use href="#at-folder"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Materials</div></div></div></div>
 	</div>
-	<h4>Asset tile: normal / hovered / selected / selected + hovered</h4>
+	<h4>Asset tile: normal / hovered / selected / selected + hovered (pinned)</h4>
 	<div class="AssetTilePreview__row">
 		<div class="AssetTile AssetTile--asset"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg><use href="#at-mesh"/></svg><span class="AssetTile__strip" style="--strip:var(--accent-blue)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">SM_Chair</div><div class="AssetTile__class">Static Mesh</div></div></div></div>
 		<div class="AssetTile AssetTile--asset is-hover"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg><use href="#at-mesh"/></svg><span class="AssetTile__strip" style="--strip:var(--accent-blue)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">SM_Table</div><div class="AssetTile__class">Static Mesh</div></div></div></div>
@@ -86,5 +116,6 @@
 		<div class="AssetTile AssetTile--asset is-selected is-hover"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg><use href="#at-mesh"/></svg><span class="AssetTile__strip" style="--strip:var(--accent-orange)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">T_Brick_Clay_D</div><div class="AssetTile__class">Texture</div></div></div></div>
 	</div>
 </div>
+<script type="module" src="./AssetTile.js"></script>
 </body>
 </html>

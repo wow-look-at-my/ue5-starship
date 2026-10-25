@@ -26,25 +26,44 @@
 	.AssetPicker-thumbBorder { position: absolute; inset: 0; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--input-outline); pointer-events: none; } /* PropertyEditor.AssetThumbnailBorder: StarshipStyle.cpp:3021 */
 	.AssetPicker-thumbFrame:hover .AssetPicker-thumbBorder { box-shadow: inset 0 0 0 1px var(--hover-2); } /* StarshipStyle.cpp:3022 */
 
-	.AssetPicker-col { flex: 1; min-width: 0; align-self: center; display: flex; flex-direction: column; } /* VBox, VAlign center: SPropertyEditorAsset.cpp:651-677 */
+	.AssetPicker-col { position: relative; flex: 1; min-width: 0; align-self: center; display: flex; flex-direction: column; } /* VBox, VAlign center: SPropertyEditorAsset.cpp:651-677 */
 	/* Combo: ComboButton style, content padding 0 + button padding (8,1,8,1), 16px arrow + padding 2: StarshipCoreStyle.cpp:1470-1494 */
 	.AssetPicker-combo {
 		display: flex; align-items: center; height: 22px; padding: 1px 8px; border: 0; margin: 0; cursor: pointer; text-align: left;
 		background: var(--input); border-radius: 4px; box-shadow: inset 0 0 0 1px var(--input-outline);
 		color: var(--foreground); font: 400 10.667px/1.172 var(--font-sans); /* PropertyFontStyle: SPropertyEditorAsset.cpp:570 */
 	}
-	.AssetPicker-combo:hover { box-shadow: inset 0 0 0 1px var(--hover); color: var(--foreground-hover); }
+	.AssetPicker-combo:hover, .AssetPicker-combo.is-hover, .AssetPicker-combo[aria-expanded="true"] { box-shadow: inset 0 0 0 1px var(--hover); color: var(--foreground-hover); }
+	.AssetPicker-combo:focus-visible, .AssetPicker-btn:focus-visible, .AssetPicker-reset:focus-visible { outline: 1px solid var(--primary-hover); outline-offset: 1px; } /* browser keyboard ring: Slate draws none */
+	.AssetPicker-combo:disabled, .AssetPicker-btn:disabled { opacity: .45; cursor: default; } /* alpha x .45: SlateElementPixelShader.usf:535 */
 	.AssetPicker-combo .label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.AssetPicker-combo svg { width: 16px; height: 16px; margin: 2px; flex: none; }
 	/* Button strip: SBox Padding(0,2,4,2), each button a 22x22 SBox with slot padding (2,0): SPropertyEditorAsset.cpp:670-673, 721-748 */
 	.AssetPicker-buttons { display: flex; padding: 2px 4px 2px 0; }
 	.AssetPicker-btnBox { width: 22px; height: 22px; margin: 0 2px; display: flex; align-items: center; justify-content: center; } /* PropertyCustomizationHelpers.cpp:74-79 */
 	.AssetPicker-btn { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 18px; padding: 0; border: 0; border-radius: 4px; background: transparent; cursor: pointer; color: var(--foreground); } /* SimpleButton, ContentPadding 0 + (2,1): PropertyCustomizationHelpers.cpp:81-85 */
-	.AssetPicker-btn:hover { background: var(--dropdown); color: var(--foreground-hover); } /* StarshipCoreStyle.cpp:1391, 1395 */
+	.AssetPicker-btn:hover, .AssetPicker-btn:active, .AssetPicker-btn.is-hover, .AssetPicker-btn.is-pressed { background: var(--dropdown); color: var(--foreground-hover); } /* hover and pressed: StarshipCoreStyle.cpp:1391-1396 */
 	.AssetPicker-btn svg { width: 16px; height: 16px; }
 	.AssetPicker-reset { width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; border: 0; padding: 0; background: transparent; color: var(--foreground); cursor: pointer; align-self: center; } /* StarshipStyle.cpp:3277-3283 */
-	.AssetPicker-reset:hover { color: var(--foreground-hover); }
+	.AssetPicker-reset:hover, .AssetPicker-reset.is-hover { color: var(--foreground-hover); }
 	.AssetPicker-reset svg { width: 16px; height: 16px; }
+	.AssetPicker-reset.is-idle { visibility: hidden; } /* the slot keeps its width when the value equals the default: SDetailSingleItemRow.cpp:640-650 */
+
+	/* Asset list popup: the PopupMenu look. The real picker is a searchable asset view; this is a short fixed list. */
+	.AssetPicker-menu {
+		display: none; position: absolute; z-index: 10; left: 0; right: 0; top: 24px; box-sizing: border-box; padding: 8px 0;
+		background: var(--dropdown); box-shadow: inset 0 0 0 1px var(--dropdown-outline); /* Menu.Background and Menu.Outline: StarshipCoreStyle.cpp:2302-2303 */
+		font: 400 10.667px/16px var(--font-sans); color: var(--foreground-hover); user-select: none;
+	}
+	.AssetPicker-menu.is-open { display: block; }
+	.AssetPicker-menuItem { display: flex; align-items: center; padding: 3px 5px 3px 12px; outline: 0; cursor: pointer; } /* Menu.Block.Padding: StarshipCoreStyle.cpp:2314-2316 */
+	.AssetPicker-menuItem:hover, .AssetPicker-menuItem:focus, .AssetPicker-menuItem.is-hover { background: var(--primary); } /* hovered brush Primary: StarshipCoreStyle.cpp:2420-2421 */
+	.AssetPicker-menuMark { position: relative; flex: none; width: 16px; height: 16px; margin: 0 6px 0 2px; }
+	.AssetPicker-menuItem[aria-selected="true"] .AssetPicker-menuMark::after { content: ""; position: absolute; left: 5px; top: 1px; width: 4px; height: 9px; border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); }
+	/* Preview captions only */
+	.AssetPicker-cap { width: 360px; box-sizing: border-box; margin: 0; padding: 6px 8px 12px; font: 400 10.667px/1.4 var(--font-sans); color: var(--foreground); opacity: .8; }
+	.AssetPicker-cap b { color: var(--foreground-hover); }
+	.AssetPicker-frame.is-menuRoom { margin-bottom: 150px; }
 </style>
 </head>
 <body>
@@ -55,7 +74,42 @@
 	<symbol id="AssetPicker-reset" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 	<symbol id="AssetPicker-cube" viewBox="0 0 16 16"><path d="M8 1.5 14 4.75v6.5L8 14.5 2 11.25v-6.5z M2 4.75 8 8l6-3.25 M8 8v6.5" fill="none" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/></symbol>
 </svg>
+<ue-asset-picker>
 <div class="AssetPicker-frame">
+	<div class="AssetPicker-row" data-default="None" data-selection="SM_Table">
+		<div class="AssetPicker-name" style="align-self: stretch">Static Mesh</div>
+		<div class="AssetPicker-split"></div>
+		<div class="AssetPicker-value">
+			<div class="AssetPicker-thumbSlot">
+				<div class="AssetPicker-thumbFrame" title="/Game/Props/SM_Chair.SM_Chair" aria-label="SM_Chair">
+					<div class="AssetPicker-thumb"><svg><use href="#AssetPicker-cube"/></svg><i class="AssetPicker-strip"></i></div>
+					<i class="AssetPicker-thumbBorder"></i>
+				</div>
+			</div>
+			<div class="AssetPicker-col">
+				<button class="AssetPicker-combo" aria-haspopup="listbox" aria-expanded="false"><span class="label">SM_Chair</span><svg><use href="#AssetPicker-chev"/></svg></button>
+				<div class="AssetPicker-buttons">
+					<span class="AssetPicker-btnBox"><button class="AssetPicker-btn" data-role="use" title="Use Selected Asset from Content Browser"><svg><use href="#AssetPicker-use"/></svg></button></span>
+					<span class="AssetPicker-btnBox"><button class="AssetPicker-btn" data-role="browse" title="Browse to Asset in Content Browser"><svg><use href="#AssetPicker-browse"/></svg></button></span>
+				</div>
+				<div class="AssetPicker-menu" role="listbox" aria-label="Assets">
+					<div class="AssetPicker-menuItem" role="option" aria-selected="false" tabindex="-1" data-asset="None"><span class="AssetPicker-menuMark"></span>None</div>
+					<div class="AssetPicker-menuItem" role="option" aria-selected="true" tabindex="-1" data-asset="SM_Chair"><span class="AssetPicker-menuMark"></span>SM_Chair</div>
+					<div class="AssetPicker-menuItem" role="option" aria-selected="false" tabindex="-1" data-asset="SM_Table"><span class="AssetPicker-menuMark"></span>SM_Table</div>
+					<div class="AssetPicker-menuItem" role="option" aria-selected="false" tabindex="-1" data-asset="SM_Couch"><span class="AssetPicker-menuMark"></span>SM_Couch</div>
+					<div class="AssetPicker-menuItem" role="option" aria-selected="false" tabindex="-1" data-asset="SM_Lamp"><span class="AssetPicker-menuMark"></span>SM_Lamp</div>
+					<div class="AssetPicker-menuItem" role="option" aria-selected="false" tabindex="-1" data-asset="SM_Bookshelf"><span class="AssetPicker-menuMark"></span>SM_Bookshelf</div>
+				</div>
+			</div>
+		</div>
+		<div class="AssetPicker-split"></div>
+		<div class="AssetPicker-right"><button class="AssetPicker-reset" title="Reset this property to its default value."><svg><use href="#AssetPicker-reset"/></svg></button></div>
+	</div>
+</div>
+</ue-asset-picker>
+<p class="AssetPicker-cap"><b>Live.</b> Click the combo (or press Down) to open the asset list, choose with the pointer or Up, Down, Enter, Escape. The label and the thumbnail tooltip follow the choice. The use-selected button picks SM_Table, the stand-in for a Content Browser selection. The reset arrow shows when the value is not None and puts it back.</p>
+
+<div class="AssetPicker-frame is-menuRoom">
 	<div class="AssetPicker-row">
 		<div class="AssetPicker-name" style="align-self: stretch">Static Mesh</div>
 		<div class="AssetPicker-split"></div>
@@ -67,16 +121,25 @@
 				</div>
 			</div>
 			<div class="AssetPicker-col">
-				<button class="AssetPicker-combo"><span class="label">SM_Chair</span><svg><use href="#AssetPicker-chev"/></svg></button>
+				<button class="AssetPicker-combo is-hover" tabindex="-1"><span class="label">SM_Table</span><svg><use href="#AssetPicker-chev"/></svg></button>
 				<div class="AssetPicker-buttons">
-					<span class="AssetPicker-btnBox"><button class="AssetPicker-btn" title="Use Selected Asset from Content Browser"><svg><use href="#AssetPicker-use"/></svg></button></span>
-					<span class="AssetPicker-btnBox"><button class="AssetPicker-btn" title="Browse to Asset in Content Browser"><svg><use href="#AssetPicker-browse"/></svg></button></span>
+					<span class="AssetPicker-btnBox"><button class="AssetPicker-btn is-pressed" tabindex="-1"><svg><use href="#AssetPicker-use"/></svg></button></span>
+					<span class="AssetPicker-btnBox"><button class="AssetPicker-btn is-hover" tabindex="-1"><svg><use href="#AssetPicker-browse"/></svg></button></span>
+				</div>
+				<div class="AssetPicker-menu is-open">
+					<div class="AssetPicker-menuItem" aria-selected="false"><span class="AssetPicker-menuMark"></span>None</div>
+					<div class="AssetPicker-menuItem" aria-selected="false"><span class="AssetPicker-menuMark"></span>SM_Chair</div>
+					<div class="AssetPicker-menuItem is-hover" aria-selected="true"><span class="AssetPicker-menuMark"></span>SM_Table</div>
+					<div class="AssetPicker-menuItem" aria-selected="false"><span class="AssetPicker-menuMark"></span>SM_Couch</div>
 				</div>
 			</div>
 		</div>
 		<div class="AssetPicker-split"></div>
-		<div class="AssetPicker-right"><button class="AssetPicker-reset" title="Reset this property to its default value."><svg><use href="#AssetPicker-reset"/></svg></button></div>
+		<div class="AssetPicker-right"><button class="AssetPicker-reset is-hover" tabindex="-1"><svg><use href="#AssetPicker-reset"/></svg></button></div>
 	</div>
 </div>
+<p class="AssetPicker-cap"><b>Pinned.</b> Forced states: combo hovered with the list open, use-selected pressed, browse and reset hovered.</p>
+
+<script type="module" src="./AssetPicker.js"></script>
 </body>
 </html>

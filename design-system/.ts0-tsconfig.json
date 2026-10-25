@@ -1,0 +1,27 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"lib": [
+			"ESNext",
+			"DOM",
+			"DOM.Iterable"
+		],
+		"strict": true,
+		"skipLibCheck": true,
+		"esModuleInterop": true,
+		"allowImportingTsExtensions": true,
+		"noEmit": true
+	},
+	"include": [
+		"**/*.ts",
+		"**/*.tsx",
+		"**/*.mts",
+		"**/*.cts",
+		"src/SpinBox/SpinBox.ts"
+	],
+	"exclude": [
+		"node_modules"
+	]
+}

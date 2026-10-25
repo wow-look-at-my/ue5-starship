@@ -11,6 +11,10 @@
 	.checkbox-grid { display: grid; grid-template-columns: 130px repeat(4, minmax(110px, auto)); gap: 12px 14px; align-items: center; }
 	.checkbox-head, .checkbox-name, .checkbox-note { font: 400 10.667px/1.2 var(--font-sans); color: var(--foreground); opacity: .7; }
 	.checkbox-note { line-height: 1.4; max-width: 720px; }
+	.checkbox-live { display: flex; flex-direction: column; gap: 10px; }
+	.checkbox-live-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px; }
+	.checkbox-status { color: var(--foreground-hover); opacity: 1; }
+	[data-pinned] { pointer-events: none; } /* a pinned specimen shows one forced state and ignores the pointer */
 
 	.checkbox { display: inline-flex; align-items: center; cursor: default; user-select: none; font: 400 13.333px/16px var(--font-sans); color: var(--foreground-hover); } /* label fg ForegroundHover StarshipCoreStyle.cpp:1580-1586 */
 	.checkbox__box {
@@ -23,8 +27,14 @@
 	.checkbox__glyph { position: absolute; left: 1px; top: 1px; width: 16px; height: 16px; fill: none; stroke: var(--primary); stroke-width: 2; stroke-linecap: square; stroke-linejoin: miter; } /* glyph 16x16 :1591, tint Primary */
 	.checkbox:hover .checkbox__glyph, .checkbox--hover .checkbox__glyph { stroke: var(--primary-hover); } /* :1592, :1595 */
 	.checkbox--pressed .checkbox__glyph { stroke: var(--primary-press); } /* :1593, :1596 */
+	.checkbox:active .checkbox__box, .checkbox.checkbox--pressed .checkbox__box { box-shadow: inset 0 0 0 1px var(--hover); } /* :1598-1599 */
+	.checkbox:active .checkbox__glyph, .checkbox.checkbox--pressed .checkbox__glyph { stroke: var(--primary-press); } /* :1593, :1596 */
 	.checkbox__label { margin-left: 2px; } /* FCheckBoxStyle Padding (2,0,0,0) SlateTypes.cpp:24 */
-	.checkbox--disabled { opacity: .45; } /* alpha x .45 SlateElementPixelShader.usf:535 */
+	.checkbox--disabled, .checkbox[aria-disabled="true"] { opacity: .45; } /* alpha x .45 SlateElementPixelShader.usf:535 */
+	.checkbox[aria-disabled="true"]:hover .checkbox__box { box-shadow: inset 0 0 0 1px var(--secondary); }
+	.checkbox[aria-disabled="true"]:hover .checkbox__glyph { stroke: var(--primary); }
+	.checkbox[aria-checked="false"] .checkbox__glyph, .checkbox[aria-checked="true"] .checkbox__glyph--mixed, .checkbox[aria-checked="mixed"] .checkbox__glyph--check { display: none; } /* a live checkbox draws the glyph of its state */
+	.checkbox:focus-visible, .checkbox-toggle:focus-visible { outline: 1px solid var(--primary); outline-offset: 1px; border-radius: 4px; } /* FocusRectangle 1px Primary r4 StarshipCoreStyle.cpp:218 */
 
 	.checkbox-toggle {
 		display: inline-flex; align-items: center; justify-content: center; justify-self: start; cursor: default; user-select: none;
@@ -39,7 +49,11 @@
 	.checkbox-toggle--checked { background: var(--primary); color: var(--foreground-hover); } /* :1627, :1636 */
 	.checkbox-toggle--checked:hover, .checkbox-toggle--checked.checkbox-toggle--hover { background: var(--primary-hover); } /* :1628 */
 	.checkbox-toggle--checked.checkbox-toggle--pressed { background: var(--dropdown); } /* :1629 */
+	.checkbox-toggle:active, .checkbox-toggle.checkbox-toggle--pressed { background: var(--dropdown); color: var(--foreground-hover); } /* :1632, :1635 */
+	.checkbox-toggle--checked:active, .checkbox-toggle--checked.checkbox-toggle--pressed { background: var(--dropdown); } /* :1629 */
 	.checkbox-toggle--disabled, .checkbox-toggle--disabled:hover { opacity: .45; }
+	.checkbox-toggle[aria-disabled="true"], .checkbox-toggle[aria-disabled="true"]:hover, .checkbox-toggle[aria-disabled="true"]:active { opacity: .45; background: transparent; color: var(--foreground); }
+	.checkbox-toggle--checked[aria-disabled="true"], .checkbox-toggle--checked[aria-disabled="true"]:hover, .checkbox-toggle--checked[aria-disabled="true"]:active { background: var(--primary); color: var(--foreground-hover); }
 </style>
 </head>
 <body>
@@ -48,6 +62,22 @@
 	<symbol id="checkbox-mixed" viewBox="0 0 16 16"><path d="M4 8h8"/></symbol>
 </svg>
 <div class="checkbox-page">
+	<ue-checkbox>
+		<div class="checkbox-live">
+			<span class="checkbox-name">Live: click or press Space or Enter to toggle, hover, hold the mouse down. The tri-state box cycles unchecked, checked, undetermined.</span>
+			<div class="checkbox-live-row">
+				<span class="checkbox" role="checkbox" tabindex="0" aria-checked="false" data-label="Simulate Physics"><span class="checkbox__box"><svg class="checkbox__glyph checkbox__glyph--check"><use href="#checkbox-check"/></svg><svg class="checkbox__glyph checkbox__glyph--mixed"><use href="#checkbox-mixed"/></svg></span><span class="checkbox__label">Simulate Physics</span></span>
+				<span class="checkbox" role="checkbox" tabindex="0" aria-checked="true" data-label="Enable Gravity"><span class="checkbox__box"><svg class="checkbox__glyph checkbox__glyph--check"><use href="#checkbox-check"/></svg><svg class="checkbox__glyph checkbox__glyph--mixed"><use href="#checkbox-mixed"/></svg></span><span class="checkbox__label">Enable Gravity</span></span>
+				<span class="checkbox checkbox--tristate" role="checkbox" tabindex="0" aria-checked="mixed" data-label="Show All"><span class="checkbox__box"><svg class="checkbox__glyph checkbox__glyph--check"><use href="#checkbox-check"/></svg><svg class="checkbox__glyph checkbox__glyph--mixed"><use href="#checkbox-mixed"/></svg></span><span class="checkbox__label">Show All (tri-state)</span></span>
+				<span class="checkbox" role="checkbox" aria-disabled="true" aria-checked="true" data-label="Locked"><span class="checkbox__box"><svg class="checkbox__glyph checkbox__glyph--check"><use href="#checkbox-check"/></svg><svg class="checkbox__glyph checkbox__glyph--mixed"><use href="#checkbox-mixed"/></svg></span><span class="checkbox__label">Locked</span></span>
+				<span class="checkbox-toggle" role="button" tabindex="0" aria-pressed="false" data-label="Physics">Physics</span>
+				<span class="checkbox-toggle checkbox-toggle--checked" role="button" tabindex="0" aria-pressed="true" data-label="Collision">Collision</span>
+				<span class="checkbox-toggle" role="button" aria-disabled="true" aria-pressed="false" data-label="Locked toggle">Locked</span>
+			</div>
+			<span class="checkbox-name checkbox-status">Last change: none yet</span>
+		</div>
+	</ue-checkbox>
+	<span class="checkbox-name">Pinned: forced states for reference, not interactive</span>
 	<div class="checkbox-grid">
 		<span class="checkbox-head"></span>
 		<span class="checkbox-head">Normal</span>
@@ -56,36 +86,37 @@
 		<span class="checkbox-head">Disabled</span>
 
 		<span class="checkbox-name">Unchecked</span>
-		<span class="checkbox"><span class="checkbox__box"></span><span class="checkbox__label">Option</span></span>
-		<span class="checkbox checkbox--hover"><span class="checkbox__box"></span><span class="checkbox__label">Option</span></span>
-		<span class="checkbox checkbox--pressed"><span class="checkbox__box"></span><span class="checkbox__label">Option</span></span>
-		<span class="checkbox checkbox--disabled"><span class="checkbox__box"></span><span class="checkbox__label">Option</span></span>
+		<span class="checkbox" data-pinned><span class="checkbox__box"></span><span class="checkbox__label">Option</span></span>
+		<span class="checkbox checkbox--hover" data-pinned><span class="checkbox__box"></span><span class="checkbox__label">Option</span></span>
+		<span class="checkbox checkbox--pressed" data-pinned><span class="checkbox__box"></span><span class="checkbox__label">Option</span></span>
+		<span class="checkbox checkbox--disabled" data-pinned><span class="checkbox__box"></span><span class="checkbox__label">Option</span></span>
 
 		<span class="checkbox-name">Checked</span>
-		<span class="checkbox"><span class="checkbox__box"><svg class="checkbox__glyph"><use href="#checkbox-check"/></svg></span><span class="checkbox__label">Option</span></span>
-		<span class="checkbox checkbox--hover"><span class="checkbox__box"><svg class="checkbox__glyph"><use href="#checkbox-check"/></svg></span><span class="checkbox__label">Option</span></span>
-		<span class="checkbox checkbox--pressed"><span class="checkbox__box"><svg class="checkbox__glyph"><use href="#checkbox-check"/></svg></span><span class="checkbox__label">Option</span></span>
-		<span class="checkbox checkbox--disabled"><span class="checkbox__box"><svg class="checkbox__glyph"><use href="#checkbox-check"/></svg></span><span class="checkbox__label">Option</span></span>
+		<span class="checkbox" data-pinned><span class="checkbox__box"><svg class="checkbox__glyph"><use href="#checkbox-check"/></svg></span><span class="checkbox__label">Option</span></span>
+		<span class="checkbox checkbox--hover" data-pinned><span class="checkbox__box"><svg class="checkbox__glyph"><use href="#checkbox-check"/></svg></span><span class="checkbox__label">Option</span></span>
+		<span class="checkbox checkbox--pressed" data-pinned><span class="checkbox__box"><svg class="checkbox__glyph"><use href="#checkbox-check"/></svg></span><span class="checkbox__label">Option</span></span>
+		<span class="checkbox checkbox--disabled" data-pinned><span class="checkbox__box"><svg class="checkbox__glyph"><use href="#checkbox-check"/></svg></span><span class="checkbox__label">Option</span></span>
 
 		<span class="checkbox-name">Undetermined</span>
-		<span class="checkbox"><span class="checkbox__box"><svg class="checkbox__glyph"><use href="#checkbox-mixed"/></svg></span><span class="checkbox__label">Option</span></span>
-		<span class="checkbox checkbox--hover"><span class="checkbox__box"><svg class="checkbox__glyph"><use href="#checkbox-mixed"/></svg></span><span class="checkbox__label">Option</span></span>
-		<span class="checkbox checkbox--pressed"><span class="checkbox__box"><svg class="checkbox__glyph"><use href="#checkbox-mixed"/></svg></span><span class="checkbox__label">Option</span></span>
-		<span class="checkbox checkbox--disabled"><span class="checkbox__box"><svg class="checkbox__glyph"><use href="#checkbox-mixed"/></svg></span><span class="checkbox__label">Option</span></span>
+		<span class="checkbox" data-pinned><span class="checkbox__box"><svg class="checkbox__glyph"><use href="#checkbox-mixed"/></svg></span><span class="checkbox__label">Option</span></span>
+		<span class="checkbox checkbox--hover" data-pinned><span class="checkbox__box"><svg class="checkbox__glyph"><use href="#checkbox-mixed"/></svg></span><span class="checkbox__label">Option</span></span>
+		<span class="checkbox checkbox--pressed" data-pinned><span class="checkbox__box"><svg class="checkbox__glyph"><use href="#checkbox-mixed"/></svg></span><span class="checkbox__label">Option</span></span>
+		<span class="checkbox checkbox--disabled" data-pinned><span class="checkbox__box"><svg class="checkbox__glyph"><use href="#checkbox-mixed"/></svg></span><span class="checkbox__label">Option</span></span>
 
 		<span class="checkbox-name">ToggleButtonCheckbox, off</span>
-		<span class="checkbox-toggle">Physics</span>
-		<span class="checkbox-toggle checkbox-toggle--hover">Physics</span>
-		<span class="checkbox-toggle checkbox-toggle--pressed">Physics</span>
-		<span class="checkbox-toggle checkbox-toggle--disabled">Physics</span>
+		<span class="checkbox-toggle" data-pinned>Physics</span>
+		<span class="checkbox-toggle checkbox-toggle--hover" data-pinned>Physics</span>
+		<span class="checkbox-toggle checkbox-toggle--pressed" data-pinned>Physics</span>
+		<span class="checkbox-toggle checkbox-toggle--disabled" data-pinned>Physics</span>
 
 		<span class="checkbox-name">ToggleButtonCheckbox, on</span>
-		<span class="checkbox-toggle checkbox-toggle--checked">Physics</span>
-		<span class="checkbox-toggle checkbox-toggle--checked checkbox-toggle--hover">Physics</span>
-		<span class="checkbox-toggle checkbox-toggle--checked checkbox-toggle--pressed">Physics</span>
-		<span class="checkbox-toggle checkbox-toggle--checked checkbox-toggle--disabled">Physics</span>
+		<span class="checkbox-toggle checkbox-toggle--checked" data-pinned>Physics</span>
+		<span class="checkbox-toggle checkbox-toggle--checked checkbox-toggle--hover" data-pinned>Physics</span>
+		<span class="checkbox-toggle checkbox-toggle--checked checkbox-toggle--pressed" data-pinned>Physics</span>
+		<span class="checkbox-toggle checkbox-toggle--checked checkbox-toggle--disabled" data-pinned>Physics</span>
 	</div>
-	<div class="checkbox-note">Checkbox glyphs are approximations of the Starship SVGs. Disabled is the normal look at 45% alpha.</div>
+	<div class="checkbox-note">Checkbox glyphs are approximations of the Starship SVGs. Disabled is the normal look at 45% alpha. The engine toggles only unchecked and checked (SCheckBox.cpp:364-390). The owner sets undetermined, so the tri-state cycle here is a demonstration.</div>
 </div>
+<script type="module" src="./Checkbox.js"></script>
 </body>
 </html>

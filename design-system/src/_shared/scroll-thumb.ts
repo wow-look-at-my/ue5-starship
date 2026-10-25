@@ -33,7 +33,14 @@ export function offsetForPointer(pointer: number, grab: number, slot: number, co
 }
 
 // Keeps a bar, its thumb and a scrollable view in step. Returns a function that removes everything it added.
-export function bindBar(view: HTMLElement, bar: HTMLElement, thumb: HTMLElement, vertical: boolean): () => void {
+export interface BarBinding {
+	// Re-reads the sizes after the content changed without the view resizing.
+	update: () => void;
+	dispose: () => void;
+}
+
+// The bar hides while the content fits (SScrollBar.cpp:323-343). `onFits` runs when that state changes.
+export function bindBar(view: HTMLElement, bar: HTMLElement, thumb: HTMLElement, vertical: boolean, onFits?: (fits: boolean) => void): BarBinding {
 	const slotLength = (): number => (vertical ? bar.clientHeight : bar.clientWidth);
 	const viewport = (): number => (vertical ? view.clientHeight : view.clientWidth);
 	const content = (): number => (vertical ? view.scrollHeight : view.scrollWidth);
@@ -50,17 +57,15 @@ export function bindBar(view: HTMLElement, bar: HTMLElement, thumb: HTMLElement,
 	};
 
 	const update = (): void => {
-		const layout = thumbLayout(slotLength(), viewport(), content(), offset());
-		bar.hidden = false;
 		const fits = !(content() > viewport() + 0.5);
-		bar.toggleAttribute('data-fits', fits);
-		bar.setAttribute('aria-valuenow', String(Math.round(offset())));
-		bar.setAttribute('aria-valuemax', String(Math.max(0, Math.round(content() - viewport()))));
-		if (!layout.needed) {
-			thumb.style.display = 'none';
-			return;
+		if (bar.hidden !== fits) {
+			bar.hidden = fits;
+			onFits?.(fits);
 		}
-		thumb.style.display = '';
+		if (fits) return;
+		const layout = thumbLayout(slotLength(), viewport(), content(), offset());
+		thumb.style.display = layout.needed ? '' : 'none';
+		if (!layout.needed) return;
 		if (vertical) {
 			thumb.style.top = layout.start + 'px';
 			thumb.style.height = layout.size + 'px';
@@ -98,10 +103,13 @@ export function bindBar(view: HTMLElement, bar: HTMLElement, thumb: HTMLElement,
 	observer.observe(bar);
 	update();
 
-	return () => {
-		stopDrag();
-		view.removeEventListener('scroll', onScroll);
-		bar.removeEventListener('wheel', onWheel);
-		observer.disconnect();
+	return {
+		update,
+		dispose: () => {
+			stopDrag();
+			view.removeEventListener('scroll', onScroll);
+			bar.removeEventListener('wheel', onWheel);
+			observer.disconnect();
+		},
 	};
 }

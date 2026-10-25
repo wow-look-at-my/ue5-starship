@@ -1,4 +1,4 @@
-// design-system/src/_shared/popup.ts
+// src/_shared/popup.ts
 function enabledRows(menu, rowSelector) {
   return Array.from(menu.querySelectorAll(rowSelector)).filter((row) => row.getAttribute("aria-disabled") !== "true");
 }
