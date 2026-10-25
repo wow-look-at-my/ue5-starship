@@ -28,7 +28,7 @@
 	.dockTab-icon svg, .dockTab-close svg { display: block; width: 16px; height: 16px; /* Icon16x16, FDockTabStyle::IconSize SlateTypes.cpp:707; close-small StarshipCoreStyle.cpp:1777 */ fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
 	.dockTab-label { padding: 2px 0; /* outer 0,1 and inner 0,1: SDockTab.cpp:665,676 */ overflow: hidden; text-overflow: ellipsis; }
 	.dockTab-close { display: flex; flex: none; padding: 1.5px 0 0; /* ContentPadding (0,1.5,0,0): SDockTab.cpp:707 */ color: var(--foreground); /* CloseButton Normal, StarshipCoreStyle.cpp:1777 */ visibility: hidden; /* HandleIsCloseButtonVisible: SDockTab.cpp:970-976 */ }
-	.dockTab-close:hover, .dockTab-close--hot { color: var(--foreground-hover); /* CloseButton Hovered, StarshipCoreStyle.cpp:1779 */ }
+	.dockTab-close--hot { color: var(--foreground-hover); /* CloseButton Hovered, StarshipCoreStyle.cpp:1779 */ }
 
 	.dockTab--hovered { background: color-mix(in srgb, var(--panel) 80%, transparent); /* HoveredBrush Panel at 0.8, StarshipCoreStyle.cpp:1790 */ color: var(--foreground-hover); /* HoveredForegroundColor :1804 */ }
 	.dockTab--hovered .dockTab-close, .dockTab--foreground .dockTab-close { visibility: visible; }
@@ -44,6 +44,33 @@
 	.dockTab--major .dockTab-icon { padding: 4px; /* SetIconBorderPadding(4), StarshipCoreStyle.cpp:1832 */ border-radius: 4px; /* ColorOverlayIconBrush radius 4, :1819 */ }
 	.dockTab--major.dockTab--hovered, .dockTab--major.dockTab--foreground, .dockTab--major.dockTab--active { color: var(--white); /* Hovered/Foreground/ActiveForegroundColor White, StarshipCoreStyle.cpp:1828-1830 */ }
 	.dockTab--major .dockTab-icon--tinted { background: var(--accent-orange); /* TabColorScale tint on a Foreground-coloured brush; value is consumer-provided, orange is illustrative */ }
+	.dockTab--major.dockTab--active::before { content: none; /* no active line on a major tab: GetActiveTabIndicatorVisibility, SDockTab.cpp:833-836 */ }
+
+	/* Live states. Each rule repeats the declarations of the forced-state class above. A tab with data-pinned opts out. */
+	.dockTab:not([data-pinned]):not(.dockTab--foreground):hover { background: color-mix(in srgb, var(--panel) 80%, transparent); /* same as .dockTab--hovered */ }
+	.dockTab:not([data-pinned]):hover { color: var(--foreground-hover); /* HoveredForegroundColor beats ForegroundForegroundColor: SDockTab.cpp:233-256 */ }
+	.dockTab--major:not([data-pinned]):hover { color: var(--white); /* same as .dockTab--major.dockTab--hovered */ }
+	.dockTab:not([data-pinned]):hover .dockTab-close, .dockTab:not([data-pinned]):focus-visible .dockTab-close { visibility: visible; /* same as .dockTab--hovered .dockTab-close */ }
+	.dockTab:not([data-pinned]) .dockTab-close:hover { color: var(--foreground-hover); /* CloseButton Hovered, StarshipCoreStyle.cpp:1779 */ }
+	.dockTab:not([data-pinned]) .dockTab-close:active { color: var(--foreground); /* CloseButton Pressed keeps the Foreground tint, StarshipCoreStyle.cpp:1778 */ }
+	.dockTab:not([data-pinned]):focus-visible { outline: 1px solid var(--primary); outline-offset: -2px; /* keyboard focus ring; the engine tab is not keyboard focusable */ }
+
+	/* live tab stack: a tab well over a content area, one panel per tab. The 2px gap is OverlapWidth -2: StarshipCoreStyle.cpp:1799 */
+	.dockTab-stack { display: flex; flex-direction: column; width: 420px; max-width: 100%; }
+	.dockTab-stack .dockTab-well { gap: 2px; min-height: 33px; /* 8px padding + 25px tab: an emptied well keeps its height */ }
+	.dockTab-stack .dockTab-well--major { min-height: 38.8px; /* 8px padding + 30.8px major tab */ }
+	.dockTab-stack .dockTab { flex: 0 1 auto; min-width: 0; }
+	.dockTab-stack .dockTab-body { height: auto; min-height: 84px; box-sizing: border-box; }
+	.dockTab-stack .dockTab-well--major + .dockTab-body { background: var(--background); /* major ContentAreaBrush, StarshipCoreStyle.cpp:1820 */ }
+	.dockTab-panel { padding: 8px 10px; color: var(--foreground); }
+	.dockTab-panelRow { height: 22px; line-height: 22px; }
+	.dockTab-reset { align-self: flex-start; padding: 2px 8px; font: 400 11px/1.2 var(--font-sans); color: var(--foreground); background: transparent; border: 1px solid var(--input-outline); border-radius: 2px; cursor: default; }
+	.dockTab-reset:hover { color: var(--foreground-hover); background: var(--recessed); }
+	.dockTab-reset:active { color: var(--foreground); background: var(--background); }
+	.dockTab-reset:focus-visible { outline: 1px solid var(--primary); outline-offset: 1px; }
+	.dockTab-live { margin: 0 0 12px; max-width: 760px; line-height: 1.45; }
+	.dockTab-live b { color: var(--foreground); }
+	.dockTab-pinned { margin-bottom: 8px; }
 </style>
 </head>
 <body>
@@ -53,59 +80,118 @@
 		<symbol id="dockTab-i-place" viewBox="0 0 16 16"><path d="M2.5 5.5 8 2.5l5.500 3v5L8 13.500l-5.500-3z M2.500 5.500 8 8.500l5.500-3 M8 8.500v5"/></symbol>
 		<symbol id="dockTab-i-details" viewBox="0 0 16 16"><path d="M2.500 4h11 M2.500 8h11 M2.500 12h7"/><circle cx="12.500" cy="12" r="1.200"/></symbol>
 		<symbol id="dockTab-i-outliner" viewBox="0 0 16 16"><path d="M5.500 3.500h8 M5.500 8h8 M5.500 12.500h8 M2.500 3.500h.5 M2.500 8h.5 M2.500 12.500h.5"/></symbol>
-		<symbol id="dockTab-i-world" viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></symbol>
+		<symbol id="dockTab-i-folder" viewBox="0 0 16 16"><path d="M2 4.500h4l1.500 1.500H14v6.500H2z"/></symbol>
+		<symbol id="dockTab-i-world"viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></symbol>
 		<symbol id="dockTab-i-close" viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></symbol>
 	</defs>
 </svg>
 
 <div class="dockTab-page">
-	<h3 class="dockTab-h">Minor tab (Docking.Tab)</h3>
+	<h3 class="dockTab-h">Live</h3>
+	<div class="dockTab-caption dockTab-live"><b>Live.</b> Try: hover a tab (fill and close button appear), click a tab (it becomes the foreground tab and its panel shows; the stack you click becomes the active one and gets the primary line), click the x or middle-click a tab to close it (the left neighbour takes over), close the last tab to leave an empty well. Keyboard: focus a tab, then Left, Right, Home, End move and select, Enter or Space selects, Delete closes.</div>
 	<div class="dockTab-row">
 		<div class="dockTab-cell">
-			<div><div class="dockTab-well"><div class="dockTab"><span class="dockTab-icon"><svg><use href="#dockTab-i-details"/></svg></span><span class="dockTab-label">Details</span><span class="dockTab-close"><svg><use href="#dockTab-i-close"/></svg></span></div></div><div class="dockTab-body"></div></div>
+			<ue-dock-tab>
+				<div class="dockTab-stack">
+					<div class="dockTab-well" role="tablist" aria-label="Minor tabs, left stack">
+						<div class="dockTab dockTab--foreground dockTab--active" role="tab" tabindex="0" aria-selected="true" data-tab="details"><span class="dockTab-icon"><svg><use href="#dockTab-i-details"/></svg></span><span class="dockTab-label">Details</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg><use href="#dockTab-i-close"/></svg></span></div>
+						<div class="dockTab" role="tab" tabindex="-1" aria-selected="false" data-tab="outliner"><span class="dockTab-icon"><svg><use href="#dockTab-i-outliner"/></svg></span><span class="dockTab-label">Outliner</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg><use href="#dockTab-i-close"/></svg></span></div>
+						<div class="dockTab" role="tab" tabindex="-1" aria-selected="false" data-tab="content"><span class="dockTab-icon"><svg><use href="#dockTab-i-folder"/></svg></span><span class="dockTab-label">Content Browser</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg><use href="#dockTab-i-close"/></svg></span></div>
+					</div>
+					<div class="dockTab-body">
+						<div class="dockTab-panel" role="tabpanel" data-panel="details"><div class="dockTab-panelRow">Details panel: Transform</div><div class="dockTab-panelRow">Static Mesh</div><div class="dockTab-panelRow">Materials</div></div>
+						<div class="dockTab-panel" role="tabpanel" data-panel="outliner" hidden><div class="dockTab-panelRow">Outliner panel: PersistentLevel</div><div class="dockTab-panelRow">SM_Rock_01</div><div class="dockTab-panelRow">PointLight_2</div></div>
+						<div class="dockTab-panel" role="tabpanel" data-panel="content" hidden><div class="dockTab-panelRow">Content Browser panel: Content</div><div class="dockTab-panelRow">Maps</div><div class="dockTab-panelRow">Materials</div></div>
+					</div>
+				</div>
+				<span class="dockTab-caption">live minor stack, three tabs</span>
+				<button class="dockTab-reset" type="button">Restore tabs</button>
+			</ue-dock-tab>
+		</div>
+		<div class="dockTab-cell">
+			<ue-dock-tab>
+				<div class="dockTab-stack">
+					<div class="dockTab-well" role="tablist" aria-label="Minor tabs, right stack">
+						<div class="dockTab dockTab--foreground" role="tab" tabindex="0" aria-selected="true" data-tab="place"><span class="dockTab-icon"><svg><use href="#dockTab-i-place"/></svg></span><span class="dockTab-label">Place Actors</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg><use href="#dockTab-i-close"/></svg></span></div>
+						<div class="dockTab" role="tab" tabindex="-1" aria-selected="false" data-tab="layers"><span class="dockTab-icon"><svg><use href="#dockTab-i-outliner"/></svg></span><span class="dockTab-label">Layers</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg><use href="#dockTab-i-close"/></svg></span></div>
+					</div>
+					<div class="dockTab-body">
+						<div class="dockTab-panel" role="tabpanel" data-panel="place"><div class="dockTab-panelRow">Place Actors panel: Basic</div><div class="dockTab-panelRow">Lights</div><div class="dockTab-panelRow">Cinematic</div></div>
+						<div class="dockTab-panel" role="tabpanel" data-panel="layers" hidden><div class="dockTab-panelRow">Layers panel: Layer_Default</div><div class="dockTab-panelRow">Layer_Lighting</div><div class="dockTab-panelRow">Layer_Props</div></div>
+					</div>
+				</div>
+				<span class="dockTab-caption">second live stack: clicking here moves the active line</span>
+				<button class="dockTab-reset" type="button">Restore tabs</button>
+			</ue-dock-tab>
+		</div>
+		<div class="dockTab-cell">
+			<ue-dock-tab>
+				<div class="dockTab-stack">
+					<div class="dockTab-well dockTab-well--major" role="tablist" aria-label="Major tabs">
+						<div class="dockTab dockTab--major dockTab--foreground" role="tab" tabindex="0" aria-selected="true" data-tab="level1"><span class="dockTab-icon"><svg><use href="#dockTab-i-world"/></svg></span><span class="dockTab-label">Minimal_Default</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg><use href="#dockTab-i-close"/></svg></span></div>
+						<div class="dockTab dockTab--major" role="tab" tabindex="-1" aria-selected="false" data-tab="level2"><span class="dockTab-icon"><svg><use href="#dockTab-i-world"/></svg></span><span class="dockTab-label">Second_Level</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg><use href="#dockTab-i-close"/></svg></span></div>
+					</div>
+					<div class="dockTab-body">
+						<div class="dockTab-panel" role="tabpanel" data-panel="level1"><div class="dockTab-panelRow">Minimal_Default: level editor</div></div>
+						<div class="dockTab-panel" role="tabpanel" data-panel="level2" hidden><div class="dockTab-panelRow">Second_Level: level editor</div></div>
+					</div>
+				</div>
+				<span class="dockTab-caption">live major stack (no active line)</span>
+				<button class="dockTab-reset" type="button">Restore tabs</button>
+			</ue-dock-tab>
+		</div>
+	</div>
+
+	<h3 class="dockTab-h">Minor tab (Docking.Tab)</h3>
+	<div class="dockTab-caption dockTab-pinned">pinned: forced states, they do not react to the pointer</div>
+	<div class="dockTab-row">
+		<div class="dockTab-cell">
+			<div><div class="dockTab-well"><div class="dockTab" data-pinned><span class="dockTab-icon"><svg><use href="#dockTab-i-details"/></svg></span><span class="dockTab-label">Details</span><span class="dockTab-close"><svg><use href="#dockTab-i-close"/></svg></span></div></div><div class="dockTab-body"></div></div>
 			<span class="dockTab-caption">normal</span>
 		</div>
 		<div class="dockTab-cell">
-			<div><div class="dockTab-well"><div class="dockTab dockTab--hovered"><span class="dockTab-icon"><svg><use href="#dockTab-i-details"/></svg></span><span class="dockTab-label">Details</span><span class="dockTab-close"><svg><use href="#dockTab-i-close"/></svg></span></div></div><div class="dockTab-body"></div></div>
+			<div><div class="dockTab-well"><div class="dockTab dockTab--hovered" data-pinned><span class="dockTab-icon"><svg><use href="#dockTab-i-details"/></svg></span><span class="dockTab-label">Details</span><span class="dockTab-close"><svg><use href="#dockTab-i-close"/></svg></span></div></div><div class="dockTab-body"></div></div>
 			<span class="dockTab-caption">hovered</span>
 		</div>
 		<div class="dockTab-cell">
-			<div><div class="dockTab-well"><div class="dockTab dockTab--foreground"><span class="dockTab-icon"><svg><use href="#dockTab-i-outliner"/></svg></span><span class="dockTab-label">Outliner</span><span class="dockTab-close"><svg><use href="#dockTab-i-close"/></svg></span></div></div><div class="dockTab-body"></div></div>
+			<div><div class="dockTab-well"><div class="dockTab dockTab--foreground" data-pinned><span class="dockTab-icon"><svg><use href="#dockTab-i-outliner"/></svg></span><span class="dockTab-label">Outliner</span><span class="dockTab-close"><svg><use href="#dockTab-i-close"/></svg></span></div></div><div class="dockTab-body"></div></div>
 			<span class="dockTab-caption">foreground (selected)</span>
 		</div>
 		<div class="dockTab-cell">
-			<div><div class="dockTab-well"><div class="dockTab dockTab--foreground dockTab--active"><span class="dockTab-icon"><svg><use href="#dockTab-i-place"/></svg></span><span class="dockTab-label">Place Actors</span><span class="dockTab-close"><svg><use href="#dockTab-i-close"/></svg></span></div></div><div class="dockTab-body"></div></div>
+			<div><div class="dockTab-well"><div class="dockTab dockTab--foreground dockTab--active" data-pinned><span class="dockTab-icon"><svg><use href="#dockTab-i-place"/></svg></span><span class="dockTab-label">Place Actors</span><span class="dockTab-close"><svg><use href="#dockTab-i-close"/></svg></span></div></div><div class="dockTab-body"></div></div>
 			<span class="dockTab-caption">active (+ 1px primary line)</span>
 		</div>
 		<div class="dockTab-cell">
-			<div><div class="dockTab-well"><div class="dockTab dockTab--foreground"><span class="dockTab-icon"><svg><use href="#dockTab-i-details"/></svg></span><span class="dockTab-label">Details</span><span class="dockTab-close dockTab-close--hot"><svg><use href="#dockTab-i-close"/></svg></span></div></div><div class="dockTab-body"></div></div>
+			<div><div class="dockTab-well"><div class="dockTab dockTab--foreground" data-pinned><span class="dockTab-icon"><svg><use href="#dockTab-i-details"/></svg></span><span class="dockTab-label">Details</span><span class="dockTab-close dockTab-close--hot"><svg><use href="#dockTab-i-close"/></svg></span></div></div><div class="dockTab-body"></div></div>
 			<span class="dockTab-caption">close button hovered</span>
 		</div>
 		<div class="dockTab-cell">
-			<div><div class="dockTab-well"><div class="dockTab dockTab--flash"><span class="dockTab-icon"><svg><use href="#dockTab-i-outliner"/></svg></span><span class="dockTab-label">Outliner</span><span class="dockTab-close"><svg><use href="#dockTab-i-close"/></svg></span></div></div><div class="dockTab-body"></div></div>
+			<div><div class="dockTab-well"><div class="dockTab dockTab--flash" data-pinned><span class="dockTab-icon"><svg><use href="#dockTab-i-outliner"/></svg></span><span class="dockTab-label">Outliner</span><span class="dockTab-close"><svg><use href="#dockTab-i-close"/></svg></span></div></div><div class="dockTab-body"></div></div>
 			<span class="dockTab-caption">flash (peak; see README)</span>
 		</div>
 	</div>
 
 	<h3 class="dockTab-h">Major tab (Docking.MajorTab)</h3>
+	<div class="dockTab-caption dockTab-pinned">pinned: forced states, they do not react to the pointer</div>
 	<div class="dockTab-row">
 		<div class="dockTab-cell">
-			<div class="dockTab-well dockTab-well--major"><div class="dockTab dockTab--major"><span class="dockTab-icon"><svg><use href="#dockTab-i-world"/></svg></span><span class="dockTab-label">Minimal_Default</span><span class="dockTab-close"><svg><use href="#dockTab-i-close"/></svg></span></div></div>
+			<div class="dockTab-well dockTab-well--major"><div class="dockTab dockTab--major" data-pinned><span class="dockTab-icon"><svg><use href="#dockTab-i-world"/></svg></span><span class="dockTab-label">Minimal_Default</span><span class="dockTab-close"><svg><use href="#dockTab-i-close"/></svg></span></div></div>
 			<span class="dockTab-caption">normal</span>
 		</div>
 		<div class="dockTab-cell">
-			<div class="dockTab-well dockTab-well--major"><div class="dockTab dockTab--major dockTab--hovered"><span class="dockTab-icon"><svg><use href="#dockTab-i-world"/></svg></span><span class="dockTab-label">Minimal_Default</span><span class="dockTab-close"><svg><use href="#dockTab-i-close"/></svg></span></div></div>
+			<div class="dockTab-well dockTab-well--major"><div class="dockTab dockTab--major dockTab--hovered" data-pinned><span class="dockTab-icon"><svg><use href="#dockTab-i-world"/></svg></span><span class="dockTab-label">Minimal_Default</span><span class="dockTab-close"><svg><use href="#dockTab-i-close"/></svg></span></div></div>
 			<span class="dockTab-caption">hovered</span>
 		</div>
 		<div class="dockTab-cell">
-			<div class="dockTab-well dockTab-well--major"><div class="dockTab dockTab--major dockTab--foreground dockTab--active"><span class="dockTab-icon"><svg><use href="#dockTab-i-world"/></svg></span><span class="dockTab-label">Minimal_Default</span><span class="dockTab-close"><svg><use href="#dockTab-i-close"/></svg></span></div></div>
+			<div class="dockTab-well dockTab-well--major"><div class="dockTab dockTab--major dockTab--foreground dockTab--active" data-pinned><span class="dockTab-icon"><svg><use href="#dockTab-i-world"/></svg></span><span class="dockTab-label">Minimal_Default</span><span class="dockTab-close"><svg><use href="#dockTab-i-close"/></svg></span></div></div>
 			<span class="dockTab-caption">foreground / active (no top line)</span>
 		</div>
 		<div class="dockTab-cell">
-			<div class="dockTab-well dockTab-well--major"><div class="dockTab dockTab--major dockTab--foreground"><span class="dockTab-icon dockTab-icon--tinted"><svg style="color:var(--foreground-inverted)"><use href="#dockTab-i-world"/></svg></span><span class="dockTab-label">Minimal_Default</span><span class="dockTab-close"><svg><use href="#dockTab-i-close"/></svg></span></div></div>
+			<div class="dockTab-well dockTab-well--major"><div class="dockTab dockTab--major dockTab--foreground" data-pinned><span class="dockTab-icon dockTab-icon--tinted"><svg style="color:var(--foreground-inverted)"><use href="#dockTab-i-world"/></svg></span><span class="dockTab-label">Minimal_Default</span><span class="dockTab-close"><svg><use href="#dockTab-i-close"/></svg></span></div></div>
 			<span class="dockTab-caption">colour-coded icon cell</span>
 		</div>
 	</div>
 </div>
+<script type="module" src="./DockTab.js"></script>
 </body>
 </html>

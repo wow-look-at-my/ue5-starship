@@ -1,0 +1,7 @@
+{
+	"entry": "lib.ts",
+	"outdir": "../.build/tests",
+	"target": "node",
+	"sourcemap": false,
+	"test": { "pattern": "**/*.test.ts" }
+}

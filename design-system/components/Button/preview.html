@@ -11,9 +11,13 @@
 	.button-grid { display: grid; grid-template-columns: 150px repeat(6, minmax(86px, auto)); gap: 10px 12px; align-items: center; }
 	.button-head, .button-name { font: 400 10.667px/1.2 var(--font-sans); color: var(--foreground); opacity: .7; }
 	.button-note { font: 400 10.667px/1.4 var(--font-sans); color: var(--foreground); opacity: .7; max-width: 720px; }
+	.button-live { display: flex; flex-direction: column; gap: 8px; }
+	.button-live-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; }
+	.button-count { color: var(--foreground-hover); }
+	[data-pinned] { pointer-events: none; } /* a pinned specimen shows one forced state and ignores the pointer */
 
 	.button {
-		display: inline-flex; align-items: center; justify-content: center; margin: 0; border: 0;
+		display: inline-flex; align-items: center; justify-content: center; margin: 0; border: 0; outline: 0;
 		padding: 3.5px 16px; /* ButtonMargins (12,1.5) CoreStyle.h:110 + SButton ContentPadding (4,2) SButton.h:42 */
 		border-radius: 4px; /* StarshipCoreStyle.cpp:1373 */
 		background: var(--secondary); /* :1373 */
@@ -23,15 +27,15 @@
 		white-space: nowrap; cursor: default; user-select: none;
 	}
 	.button:hover, .button--hover { background: var(--hover); } /* :1374 */
-	.button:active, .button--pressed { background: var(--header); padding: 4.5px 16px 2.5px; } /* :1375, PressedButtonMargins (12,2.5,12,0.5) CoreStyle.h:112 */
-	.button--disabled, .button--disabled:hover { background: var(--secondary); opacity: .45; color: var(--foreground); } /* SlateElementPixelShader.usf:535 alpha x .45; DisabledForeground :1380 */
+	.button:active, .button.button--pressed { background: var(--header); padding: 4.5px 16px 2.5px; } /* :1375, PressedButtonMargins (12,2.5,12,0.5) CoreStyle.h:112 */
+	.button--disabled, .button--disabled:hover, .button:disabled, .button:disabled:hover { background: var(--secondary); opacity: .45; color: var(--foreground); } /* SlateElementPixelShader.usf:535 alpha x .45; DisabledForeground :1380 */
 	.button--disabled-brush, .button--disabled-brush:hover { background: var(--dropdown); box-shadow: inset 0 0 0 1px var(--recessed); color: var(--foreground); } /* Disabled brush :1376; used when ShowEffectWhenDisabled=false, SButton.cpp:140 */
-	.button--focus { box-shadow: inset 0 0 0 1px var(--primary); } /* FocusRectangle 1px Primary r4 :218 */
+	.button--focus, .button:focus-visible { box-shadow: inset 0 0 0 1px var(--primary); } /* FocusRectangle 1px Primary r4 :218 */
 
 	.button--primary { background: var(--primary); } /* :1357 */
 	.button--primary:hover, .button--primary.button--hover { background: var(--primary-hover); } /* :1358 */
 	.button--primary:active, .button--primary.button--pressed { background: var(--primary-press); } /* :1359 */
-	.button--primary.button--disabled, .button--primary.button--disabled:hover { background: var(--primary); }
+	.button--primary.button--disabled, .button--primary.button--disabled:hover, .button--primary:disabled, .button--primary:disabled:hover { background: var(--primary); }
 	.button--primary.button--disabled-brush, .button--primary.button--disabled-brush:hover { background: var(--dropdown); } /* :1360 */
 	.button--bold { font-weight: 700; } /* PrimaryButtonText NormalBold :1421 */
 
@@ -41,8 +45,8 @@
 	}
 	.button--simple:hover, .button--simple.button--hover { background: var(--dropdown); color: var(--foreground-hover); } /* :1391, :1395 */
 	.button--simple:active, .button--simple.button--pressed { background: var(--dropdown); color: var(--foreground-hover); padding: 4px 8px 2px; } /* :1392, pressed (4,2,4,0) :1403 */
-	.button--simple.button--disabled, .button--simple.button--disabled:hover { background: transparent; color: var(--foreground); }
-	.button--simple.button--focus { box-shadow: inset 0 0 0 1px var(--primary); }
+	.button--simple.button--disabled, .button--simple.button--disabled:hover, .button--simple:disabled, .button--simple:disabled:hover { background: transparent; color: var(--foreground); }
+	.button--simple.button--focus, .button--simple:focus-visible { box-shadow: inset 0 0 0 1px var(--primary); }
 	.button--icon { padding: 3px 6px; } /* SimpleButton (2,1) :1406 + ContentPadding (4,2) */
 	.button--icon:active, .button--icon.button--pressed { padding: 4px 6px 2px; } /* (2,2,2,0) :1407 */
 
@@ -57,6 +61,22 @@
 	<symbol id="button-gear" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2M3.8 3.8l1.4 1.4M10.8 10.8l1.4 1.4M12.2 3.8l-1.4 1.4M5.2 10.8l-1.4 1.4"/></symbol>
 </svg>
 <div class="button-page">
+	<ue-button>
+		<div class="button-live">
+			<span class="button-head">Live</span>
+			<div class="button-live-row">
+				<button class="button">Import</button>
+				<button class="button button--primary">Create</button>
+				<button class="button button--primary button--bold">Create</button>
+				<button class="button button--simple"><svg class="button__icon"><use href="#button-save"/></svg>Save All</button>
+				<button class="button button--simple button--icon" aria-label="Settings"><svg class="button__icon button__icon--solo"><use href="#button-gear"/></svg></button>
+				<button class="button" disabled>Import</button>
+				<button class="button button--primary" disabled>Create</button>
+			</div>
+			<span class="button-note">Try: hover, hold the mouse down (the label drops 1px), click, Tab to focus then press Space or Enter. <span class="button-count">Clicks: 0</span></span>
+		</div>
+	</ue-button>
+	<span class="button-head">Pinned: each state forced for reference, not interactive</span>
 	<div class="button-grid">
 		<span class="button-head"></span>
 		<span class="button-head">Normal</span>
@@ -67,46 +87,47 @@
 		<span class="button-head">Keyboard focus</span>
 
 		<span class="button-name">Button / SecondaryButton</span>
-		<span><button class="button">Import</button></span>
-		<span><button class="button button--hover">Import</button></span>
-		<span><button class="button button--pressed">Import</button></span>
-		<span><button class="button button--disabled">Import</button></span>
-		<span><button class="button button--disabled-brush">Import</button></span>
-		<span><button class="button button--focus">Import</button></span>
+		<span><button class="button" data-pinned>Import</button></span>
+		<span><button class="button button--hover" data-pinned>Import</button></span>
+		<span><button class="button button--pressed" data-pinned>Import</button></span>
+		<span><button class="button button--disabled" data-pinned>Import</button></span>
+		<span><button class="button button--disabled-brush" data-pinned>Import</button></span>
+		<span><button class="button button--focus" data-pinned>Import</button></span>
 
 		<span class="button-name">PrimaryButton</span>
-		<span><button class="button button--primary">Create</button></span>
-		<span><button class="button button--primary button--hover">Create</button></span>
-		<span><button class="button button--primary button--pressed">Create</button></span>
-		<span><button class="button button--primary button--disabled">Create</button></span>
-		<span><button class="button button--primary button--disabled-brush">Create</button></span>
-		<span><button class="button button--primary button--focus">Create</button></span>
+		<span><button class="button button--primary" data-pinned>Create</button></span>
+		<span><button class="button button--primary button--hover" data-pinned>Create</button></span>
+		<span><button class="button button--primary button--pressed" data-pinned>Create</button></span>
+		<span><button class="button button--primary button--disabled" data-pinned>Create</button></span>
+		<span><button class="button button--primary button--disabled-brush" data-pinned>Create</button></span>
+		<span><button class="button button--primary button--focus" data-pinned>Create</button></span>
 
 		<span class="button-name">PrimaryButton + PrimaryButtonText</span>
-		<span><button class="button button--primary button--bold">Create</button></span>
-		<span><button class="button button--primary button--bold button--hover">Create</button></span>
-		<span><button class="button button--primary button--bold button--pressed">Create</button></span>
-		<span><button class="button button--primary button--bold button--disabled">Create</button></span>
-		<span><button class="button button--primary button--bold button--disabled-brush">Create</button></span>
-		<span><button class="button button--primary button--bold button--focus">Create</button></span>
+		<span><button class="button button--primary button--bold" data-pinned>Create</button></span>
+		<span><button class="button button--primary button--bold button--hover" data-pinned>Create</button></span>
+		<span><button class="button button--primary button--bold button--pressed" data-pinned>Create</button></span>
+		<span><button class="button button--primary button--bold button--disabled" data-pinned>Create</button></span>
+		<span><button class="button button--primary button--bold button--disabled-brush" data-pinned>Create</button></span>
+		<span><button class="button button--primary button--bold button--focus" data-pinned>Create</button></span>
 
 		<span class="button-name">SimpleButtonLabelAndIcon</span>
-		<span><button class="button button--simple"><svg class="button__icon"><use href="#button-save"/></svg>Save All</button></span>
-		<span><button class="button button--simple button--hover"><svg class="button__icon"><use href="#button-save"/></svg>Save All</button></span>
-		<span><button class="button button--simple button--pressed"><svg class="button__icon"><use href="#button-save"/></svg>Save All</button></span>
-		<span><button class="button button--simple button--disabled"><svg class="button__icon"><use href="#button-save"/></svg>Save All</button></span>
+		<span><button class="button button--simple" data-pinned><svg class="button__icon"><use href="#button-save"/></svg>Save All</button></span>
+		<span><button class="button button--simple button--hover" data-pinned><svg class="button__icon"><use href="#button-save"/></svg>Save All</button></span>
+		<span><button class="button button--simple button--pressed" data-pinned><svg class="button__icon"><use href="#button-save"/></svg>Save All</button></span>
+		<span><button class="button button--simple button--disabled" data-pinned><svg class="button__icon"><use href="#button-save"/></svg>Save All</button></span>
 		<span></span>
-		<span><button class="button button--simple button--focus"><svg class="button__icon"><use href="#button-save"/></svg>Save All</button></span>
+		<span><button class="button button--simple button--focus" data-pinned><svg class="button__icon"><use href="#button-save"/></svg>Save All</button></span>
 
 		<span class="button-name">SimpleButton (icon only)</span>
-		<span><button class="button button--simple button--icon"><svg class="button__icon button__icon--solo"><use href="#button-gear"/></svg></button></span>
-		<span><button class="button button--simple button--icon button--hover"><svg class="button__icon button__icon--solo"><use href="#button-gear"/></svg></button></span>
-		<span><button class="button button--simple button--icon button--pressed"><svg class="button__icon button__icon--solo"><use href="#button-gear"/></svg></button></span>
-		<span><button class="button button--simple button--icon button--disabled"><svg class="button__icon button__icon--solo"><use href="#button-gear"/></svg></button></span>
+		<span><button class="button button--simple button--icon" data-pinned><svg class="button__icon button__icon--solo"><use href="#button-gear"/></svg></button></span>
+		<span><button class="button button--simple button--icon button--hover" data-pinned><svg class="button__icon button__icon--solo"><use href="#button-gear"/></svg></button></span>
+		<span><button class="button button--simple button--icon button--pressed" data-pinned><svg class="button__icon button__icon--solo"><use href="#button-gear"/></svg></button></span>
+		<span><button class="button button--simple button--icon button--disabled" data-pinned><svg class="button__icon button__icon--solo"><use href="#button-gear"/></svg></button></span>
 		<span></span>
-		<span><button class="button button--simple button--icon button--focus"><svg class="button__icon button__icon--solo"><use href="#button-gear"/></svg></button></span>
+		<span><button class="button button--simple button--icon button--focus" data-pinned><svg class="button__icon button__icon--solo"><use href="#button-gear"/></svg></button></span>
 	</div>
 	<div class="button-note">Disabled uses the normal brush at 45% alpha (the engine default). The style's own Disabled brush only shows when ShowEffectWhenDisabled is false. Icons are approximations of the Starship SVGs.</div>
 </div>
+<script type="module" src="./Button.js"></script>
 </body>
 </html>

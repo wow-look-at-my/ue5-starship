@@ -48,6 +48,18 @@ Citations: `SC` is `Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp`, `S
 - Do not tint the active category with the orange selection colour. It is Primary.
 - Do not show the info button and the drag handle in the same row. They are alternatives.
 
+## Live behaviour
+
+`<ue-place-actors-panel>` (`src/PlaceActorsPanel/PlaceActorsPanel.ts`, built to `PlaceActorsPanel.js`) wraps a `.placeActors`. Each `.placeActors-cat` carries `data-category`, and each `.placeActors-group` holds the rows of the same category.
+
+- Clicking a category (or Left, Right, Home, End on the strip) sets `.is-active` and `aria-checked`, shows its group and writes the name into the section label.
+- The search field is a real `<input class="placeActors-field">` with the hint as its placeholder. Typing hides the rows of the shown group whose name does not contain the text. The clear X shows while the field text (`SSearchBox.cpp:251-256`). It and Escape empty the field. A message shows when no row matches.
+- Rows show the hover and pressed outlines through `:hover` and `:active`. The info button fills Hover on hover.
+- Double click or Enter on a row fires `ue-place` with `{ name }`.
+- The live panel lists the built-in categories of `PlacementModeModule.cpp:130-290`. The Basic, Lights, Shapes and Visual Effects items are factories registered there (`PlacementModeModule.cpp:150-260`). The Recent, Volumes and All items are illustrative, because the engine fills them at run time. The clapperboard category of the reference screenshot is not in this module and is left out of the live panel.
+- Search filters only the shown category. The engine search spans every category. This is a simplification.
+- A panel with `data-pinned` (the forced-state specimens) stays plain HTML.
+
 ## Not found in source
 
 - The screenshot shows the label as "BASIC" in capitals and bold. The 5.5.3 and 5.8.1 source draws plain Normal text from `FSimpleTitleContainer` (`SimpleTitleContainer.cpp:17`). That is what the preview uses.

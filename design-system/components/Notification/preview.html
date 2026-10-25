@@ -42,7 +42,19 @@
 		border-radius: 4px; background: var(--secondary); box-shadow: inset 0 0 0 1px var(--input); /* StarshipCoreStyle.cpp:1373 */
 		color: var(--foreground-hover); font: 400 13.333px/16px var(--font-sans); cursor: default;
 	}
+	.notification__btn { outline: 0; }
 	.notification__btn:hover { background: var(--hover); }
+	.notification__btn:active { background: var(--header); padding: 4.5px 16px 2.5px; } /* Button pressed: StarshipCoreStyle.cpp:1375, CoreStyle.h:112 */
+	.notification__btn:focus-visible { box-shadow: inset 0 0 0 1px var(--primary); } /* FocusRectangle 1px Primary r4 :218 */
+
+	[data-pinned] { pointer-events: none; } /* a pinned specimen shows one toast and ignores the pointer */
+	.notification-live { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; flex: 1 1 100%; }
+	.notification-stack { display: flex; flex-direction: column; }
+	.notification-slot { display: grid; grid-template-rows: 1fr; opacity: 1; animation: notification-in .25s ease-out; transition: grid-template-rows .25s ease-in, opacity .25s ease-in; }
+	.notification-slot__inner { min-height: 0; overflow: hidden; padding-bottom: 8px; } /* the padding collapses with the toast, so the stack closes up */
+	.notification-slot--closing { grid-template-rows: 0fr; opacity: 0; } /* a shorter fade than the engine's 2 s fade-out, SNotificationList.h:142, so the demo answers at once */
+	@keyframes notification-in { from { grid-template-rows: 0fr; opacity: 0; } to { grid-template-rows: 1fr; opacity: 1; } }
+	@media (prefers-reduced-motion: reduce) { .notification-slot { animation: none; transition: none; } }
 </style>
 </head>
 <body>
@@ -54,9 +66,45 @@
 	<symbol id="notification-arc" viewBox="0 0 40 40"><path d="M20 3a17 17 0 1 1-12 5"/></symbol>
 </svg>
 <div class="notification-page">
+	<ue-notification>
+		<div class="notification-live">
+			<span class="notification-cap">Live: Dismiss closes a toast and the stack closes up, Retry changes the sub text, Show notification adds a new toast. Buttons have hover, pressed and focus looks.</span>
+			<button class="notification__btn" type="button" data-action="show">Show notification</button>
+			<div class="notification-stack">
+				<div class="notification-slot"><div class="notification-slot__inner">
+					<div class="notification" role="status">
+						<div class="notification__mark"><svg><use href="#notification-ring"/></svg></div>
+						<div class="notification__body">
+							<div class="notification__icon notification__icon--fail"><svg><use href="#notification-alert"/></svg></div>
+							<div class="notification__text">
+								<div class="notification__title">Import failed</div>
+								<div class="notification__sub">Chair.fbx could not be read.</div>
+								<div class="notification__buttons"><button class="notification__btn" type="button" data-action="retry">Retry</button><button class="notification__btn" type="button" data-action="dismiss">Dismiss</button></div>
+							</div>
+						</div>
+					</div>
+				</div></div>
+			</div>
+			<template class="notification-template">
+				<div class="notification-slot"><div class="notification-slot__inner">
+					<div class="notification" role="status">
+						<div class="notification__mark"><svg><use href="#notification-ring"/></svg></div>
+						<div class="notification__body">
+							<div class="notification__icon notification__icon--success"><svg><use href="#notification-check"/></svg></div>
+							<div class="notification__text">
+								<div class="notification__title">Saved assets</div>
+								<div class="notification__buttons"><button class="notification__btn" type="button" data-action="dismiss">Dismiss</button></div>
+							</div>
+						</div>
+					</div>
+				</div></div>
+			</template>
+		</div>
+	</ue-notification>
+	<span class="notification-cap" style="flex:1 1 100%;max-width:none">Pinned: the three forms for reference, not interactive</span>
 	<div class="notification-col">
 		<span class="notification-cap">Pending, with throbber</span>
-		<div class="notification">
+		<div class="notification" data-pinned>
 			<div class="notification__mark"><svg><use href="#notification-ring"/></svg></div>
 			<div class="notification__body">
 				<div class="notification__icon notification__icon--pending notification__icon--idle"><svg class="notification__throbber"><use href="#notification-arc"/></svg><svg style="position:relative"><use href="#notification-circle"/></svg></div>
@@ -70,7 +118,7 @@
 	</div>
 	<div class="notification-col">
 		<span class="notification-cap">Success</span>
-		<div class="notification">
+		<div class="notification" data-pinned>
 			<div class="notification__mark"><svg><use href="#notification-ring"/></svg></div>
 			<div class="notification__body">
 				<div class="notification__icon notification__icon--success"><svg><use href="#notification-check"/></svg></div>
@@ -83,7 +131,7 @@
 	</div>
 	<div class="notification-col">
 		<span class="notification-cap">Failure with sub text and buttons</span>
-		<div class="notification">
+		<div class="notification" data-pinned>
 			<div class="notification__mark"><svg><use href="#notification-ring"/></svg></div>
 			<div class="notification__body">
 				<div class="notification__icon notification__icon--fail"><svg><use href="#notification-alert"/></svg></div>
@@ -96,5 +144,6 @@
 		</div>
 	</div>
 </div>
+<script type="module" src="./Notification.js"></script>
 </body>
 </html>

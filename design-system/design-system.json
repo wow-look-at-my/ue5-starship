@@ -24,5 +24,5 @@
 	},
 	"blobs": {},
 	"docs": { "readme": "project/README.md", "sections": [] },
-	"lastChange": { "by": "Claude", "at": "2026-10-24T18:55:00Z", "via": "Claude Code", "note": "Added the Details group, the EditorLayout card, axis tokens and corrected token usage notes." }
+	"lastChange": { "by": "Claude", "at": "2026-10-25T01:30:00Z", "via": "Claude Code", "note": "Every previewed component is now a light-DOM custom element compiled from TypeScript with ts0; the EditorLayout card is live." }
 }

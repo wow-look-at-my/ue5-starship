@@ -42,11 +42,23 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 /* Item row: SPlacementAssetEntry (PM:156-306): ThumbnailBackground Dropdown r6 (SS:4626), cell height 32 (ColumnWrappingContainerTemplates.cpp:10), slot padding (4,2,4,2) (ColumnWrappingContainer.cpp:63) */
 .placeActors-row { display: flex; align-items: center; box-sizing: border-box; height: 32px; margin: 2px 4px; border-radius: 6px; background: var(--dropdown); box-shadow: inset 0 0 0 1px var(--dropdown); cursor: grab; } /* normal outline Dropdown 1px r6 (SS:4617) */
 .placeActors-row:hover, .placeActors-row.is-hover { box-shadow: inset 0 0 0 1px var(--hover); } /* hovered outline Hover (SS:4618) */
-.placeActors-row.is-pressed { box-shadow: inset 0 0 0 1px var(--primary); } /* pressed outline Primary (SS:4619) */
+.placeActors-row.is-pressed, .placeActors-row:active { box-shadow: inset 0 0 0 1px var(--primary); } /* pressed outline Primary (SS:4619) */
 .placeActors-tile { display: flex; align-items: center; justify-content: center; width: 20px; height: 24px; margin: 4px 0 4px 4px; color: var(--foreground-hover); } /* thumbnail box 20 wide (PM:226), padding (4,4,0,4) (PM:221); cell leaves 24px of height */
 .placeActors-name { flex: 1; min-width: 0; padding: 0 8px 1px 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(255, 255, 255, .9); } /* text padding (4,0,8,1) (PM:222), Regular 10pt white alpha .9 (SS:4649-4650) */
 .placeActors-info { display: flex; align-items: center; justify-content: center; box-sizing: border-box; width: 24px; height: 20px; margin-right: 4px; border-radius: 4px; color: var(--foreground); } /* SDocumentationAnchor: SSimpleButton, Icons.Help 16 (SDocumentationAnchor.cpp:63), SimpleButton padding (2,1) (SC:1405-1407) + content padding (2,1) (ToolWidgetsStyle.cpp:19, ToolWidgetsStylePrivate.h:24-25) */
 .placeActors-info:hover { background: var(--hover); color: var(--foreground-hover); } /* SimpleButton hover Dropdown (SC:1391) is invisible on a Dropdown row, so the preview uses Hover */
+/* Live panel: search field, clear button, filtering and keyboard focus */
+.placeActors-row[hidden], .placeActors-group[hidden], .placeActors-empty[hidden] { display: none; }
+.placeActors-row:focus-visible, .placeActors-cat:focus-visible { outline: 1px solid var(--primary-hover); outline-offset: 1px; }
+.placeActors-searchbox:focus-within { box-shadow: inset 0 0 0 1px var(--primary); } /* focused outline Primary (SC:1305) */
+.placeActors-field { flex: 1; min-width: 0; height: 16px; margin: 0 0 0 4px; padding: 0; border: 0; outline: none; background: transparent; color: var(--foreground); font: inherit; } /* the field is the SSearchBox text; placeholder is the hint */
+.placeActors-field::placeholder { color: var(--foreground); opacity: .35; } /* hint text = foreground at alpha 0.35 (SlateEditableTextLayout.cpp:3563) */
+.placeActors-searchbox:focus-within .placeActors-field { color: var(--white); } /* SetFocusedForegroundColor White (SC:1292) */
+.placeActors-clear { display: flex; flex: none; align-items: center; justify-content: center; margin-left: 4px; color: var(--foreground); cursor: default; } /* clear X: ThinHoverOnlyButton, 16x16 close image, padding (4,0,0,0) (SSearchBox.cpp:155-170, SC:1311-1313, 1463) */
+.placeActors-clear:hover { color: var(--foreground-hover); } /* SimpleButton hovered foreground ForegroundHover (SC:1393-1395) */
+.placeActors-field:placeholder-shown ~ .placeActors-clear { display: none; } /* the X shows only while the field has text (SSearchBox.cpp:251-256) */
+.placeActors-grid--live { min-height: 180px; } /* five rows of 32 + 2 + 2 margin at most, so switching category does not resize the panel */
+.placeActors-empty { padding: 8px 4px; color: var(--foreground); opacity: .7; }
 .placeActors-handle { flex: none; width: 6px; height: 15px; margin-right: 8px; background: radial-gradient(circle, var(--foreground) 1px, transparent 1.2px) 0 0 / 3px 5px; opacity: .6; } /* VerticalBoxDragIndicatorShort 6x15 (SC:466), padding right 8 (PM:211); dot pattern approximates the PNG */
 </style>
 </head>
@@ -66,14 +78,15 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 		<symbol id="placeActors-i-sphere" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M3 6.5c3 1.5 7 1.5 10 0M3 9.5c3-1.5 7-1.5 10 0" opacity=".6"/></symbol>
 		<symbol id="placeActors-i-person" viewBox="0 0 16 16"><circle cx="8" cy="4.5" r="2.5"/><path d="M3 14c0-3.2 2.2-5 5-5s5 1.8 5 5z"/></symbol>
 		<symbol id="placeActors-i-flag" viewBox="0 0 16 16"><path d="M4 14V2.5M4 3h8l-1.8 2.7L12 8.5H4"/></symbol>
+		<symbol id="placeActors-i-close" viewBox="0 0 16 16"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></symbol>
 		<symbol id="placeActors-i-help" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M6.2 6.3a1.9 1.9 0 0 1 3.6.7c0 1.3-1.8 1.4-1.8 2.7M8 11.6v.1"/></symbol>
 	</defs>
 </svg>
 
 <div class="placeActors-demo">
 
-<div>
-	<div class="placeActors-note">Arrangement of the reference screenshot: horizontal strip, info button</div>
+<div data-pinned>
+	<div class="placeActors-note">Arrangement of the reference screenshot: horizontal strip, info button (pinned: Actor hovered, Player Start pressed)</div>
 	<div class="placeActors">
 		<div class="placeActors-search"><div class="placeActors-searchbox"><svg class="placeActors-ico placeActors-ico--14"><use href="#placeActors-i-search"/></svg><span class="placeActors-hint">Search Classes</span></div></div>
 		<div class="placeActors-rail placeActors-rail--row">
@@ -97,8 +110,8 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 	</div>
 </div>
 
-<div>
-	<div class="placeActors-note">Arrangement of the 5.5.3 source: vertical rail, drag handle</div>
+<div data-pinned>
+	<div class="placeActors-note">Arrangement of the 5.5.3 source: vertical rail, drag handle (pinned)</div>
 	<div class="placeActors" style="width:260px">
 		<div class="placeActors-search"><div class="placeActors-searchbox"><svg class="placeActors-ico placeActors-ico--14"><use href="#placeActors-i-search"/></svg><span class="placeActors-hint">Search Classes</span></div></div>
 		<div style="display:flex">
@@ -121,7 +134,71 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 	</div>
 </div>
 
+<div>
+	<div class="placeActors-note">Live: click a category to swap the list, type in the search field to filter it (the X clears it, so does Escape), hover and press the rows and the "?" button. Keys: Left and Right in the strip. The categories are the built-in ones of PlacementModeModule.cpp:130-290. Items outside Basic are illustrative.</div>
+	<ue-place-actors-panel>
+		<div class="placeActors">
+			<div class="placeActors-search"><div class="placeActors-searchbox"><svg class="placeActors-ico placeActors-ico--14"><use href="#placeActors-i-search"/></svg><input class="placeActors-field" type="text" placeholder="Search Classes" aria-label="Search Classes" autocomplete="off" spellcheck="false"><div class="placeActors-clear" role="button" tabindex="0" aria-label="Clear search"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-close"/></svg></div></div></div>
+			<div class="placeActors-rail placeActors-rail--row" role="radiogroup" aria-label="Categories">
+				<div class="placeActors-cat" role="radio" aria-checked="false" tabindex="-1" aria-label="Recent" data-category="Recent"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-recent"/></svg></div>
+				<div class="placeActors-cat is-active" role="radio" aria-checked="true" tabindex="0" aria-label="Basic" data-category="Basic"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-basic"/></svg></div>
+				<div class="placeActors-cat" role="radio" aria-checked="false" tabindex="-1" aria-label="Lights" data-category="Lights"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-bulb"/></svg></div>
+				<div class="placeActors-cat" role="radio" aria-checked="false" tabindex="-1" aria-label="Shapes" data-category="Shapes"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-shapes"/></svg></div>
+				<div class="placeActors-cat" role="radio" aria-checked="false" tabindex="-1" aria-label="Visual Effects" data-category="Visual Effects"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-vfx"/></svg></div>
+				<div class="placeActors-cat" role="radio" aria-checked="false" tabindex="-1" aria-label="Volumes" data-category="Volumes"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-volumes"/></svg></div>
+				<div class="placeActors-cat" role="radio" aria-checked="false" tabindex="-1" aria-label="All" data-category="All"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-all"/></svg></div>
+			</div>
+			<div class="placeActors-header">Basic</div>
+			<div class="placeActors-body"><div class="placeActors-grid placeActors-grid--live" role="list">
+				<div class="placeActors-group" data-category="Recent" hidden>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-shapes"/></svg></div><div class="placeActors-name">Cube</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-bulb"/></svg></div><div class="placeActors-name">Point Light</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-sphere"/></svg></div><div class="placeActors-name">Actor</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+				</div>
+				<div class="placeActors-group" data-category="Basic">
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-sphere"/></svg></div><div class="placeActors-name">Actor</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-person"/></svg></div><div class="placeActors-name">Character</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-person"/></svg></div><div class="placeActors-name">Pawn</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-bulb"/></svg></div><div class="placeActors-name">Point Light</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-flag"/></svg></div><div class="placeActors-name">Player Start</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+				</div>
+				<div class="placeActors-group" data-category="Lights" hidden>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-bulb"/></svg></div><div class="placeActors-name">Directional Light</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-bulb"/></svg></div><div class="placeActors-name">Point Light</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-bulb"/></svg></div><div class="placeActors-name">Spot Light</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-bulb"/></svg></div><div class="placeActors-name">Rect Light</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-bulb"/></svg></div><div class="placeActors-name">Sky Light</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+				</div>
+				<div class="placeActors-group" data-category="Shapes" hidden>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-shapes"/></svg></div><div class="placeActors-name">Cube</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-sphere"/></svg></div><div class="placeActors-name">Sphere</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-shapes"/></svg></div><div class="placeActors-name">Cylinder</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-shapes"/></svg></div><div class="placeActors-name">Cone</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-shapes"/></svg></div><div class="placeActors-name">Plane</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+				</div>
+				<div class="placeActors-group" data-category="Visual Effects" hidden>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-vfx"/></svg></div><div class="placeActors-name">Post Process Volume</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-vfx"/></svg></div><div class="placeActors-name">Sky Atmosphere</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-vfx"/></svg></div><div class="placeActors-name">Volumetric Cloud</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-vfx"/></svg></div><div class="placeActors-name">Exponential Height Fog</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+				</div>
+				<div class="placeActors-group" data-category="Volumes" hidden>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-volumes"/></svg></div><div class="placeActors-name">Trigger Volume</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-volumes"/></svg></div><div class="placeActors-name">Blocking Volume</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+				</div>
+				<div class="placeActors-group" data-category="All" hidden>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-sphere"/></svg></div><div class="placeActors-name">Actor</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-person"/></svg></div><div class="placeActors-name">Character</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-person"/></svg></div><div class="placeActors-name">Pawn</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+				</div>
+				<div class="placeActors-empty" hidden>No matching items</div>
+			</div></div>
+		</div>
+	</ue-place-actors-panel>
 </div>
 
+</div>
+
+<script type="module" src="./PlaceActorsPanel.js"></script>
 </body>
 </html>

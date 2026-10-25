@@ -21,23 +21,43 @@
 		color: var(--foreground); /* ToggleButtonCheckbox foreground: StarshipCoreStyle.cpp:1633 */
 		font: 400 10.667px/1.172 var(--font-sans); /* "SmallText" = Small 8pt: SDetailsView.cpp:1371, StarshipCoreStyle.cpp:1215 */
 	}
-	.FilterPills-pill:hover, .FilterPills-pill:active { background: var(--hover); color: var(--foreground-hover); } /* StarshipCoreStyle.cpp:924-925, 1634-1635 */
+	.FilterPills-pill:hover, .FilterPills-pill:active, .FilterPills-pill.is-hover, .FilterPills-pill.is-pressed { background: var(--hover); color: var(--foreground-hover); } /* StarshipCoreStyle.cpp:924-925, 1634-1635 */
 	.FilterPills-pill.is-checked { background: var(--primary); color: var(--foreground-hover); } /* StarshipCoreStyle.cpp:926, 1636 */
-	.FilterPills-pill.is-checked:hover, .FilterPills-pill.is-checked:active { background: var(--primary-hover); } /* StarshipCoreStyle.cpp:927-928 */
+	.FilterPills-pill.is-checked:hover, .FilterPills-pill.is-checked:active, .FilterPills-pill.is-checked.is-hover, .FilterPills-pill.is-checked.is-pressed { background: var(--primary-hover); } /* StarshipCoreStyle.cpp:927-928 */
+	.FilterPills-pill:focus-visible { outline: 1px solid var(--primary-hover); outline-offset: 1px; } /* browser keyboard ring: Slate draws none */
+	.FilterPills-pill:disabled { opacity: .45; cursor: default; } /* alpha x .45: SlateElementPixelShader.usf:535 */
+	/* Preview captions only */
+	.FilterPills-cap { width: 360px; box-sizing: border-box; margin: 0; padding: 6px 8px 12px; font: 400 10.667px/1.4 var(--font-sans); color: var(--foreground); opacity: .8; }
+	.FilterPills-cap b { color: var(--foreground-hover); }
 </style>
 </head>
 <body>
+<ue-filter-pills>
 <div class="FilterPills-frame">
 	<div class="FilterPills-strip" role="tablist">
-		<button class="FilterPills-pill" role="tab" aria-selected="false">General</button>
-		<button class="FilterPills-pill" role="tab" aria-selected="false">Actor</button>
-		<button class="FilterPills-pill" role="tab" aria-selected="false">LOD</button>
-		<button class="FilterPills-pill" role="tab" aria-selected="false">Misc</button>
-		<button class="FilterPills-pill" role="tab" aria-selected="false">Physics</button>
-		<button class="FilterPills-pill" role="tab" aria-selected="false">Rendering</button>
-		<button class="FilterPills-pill" role="tab" aria-selected="false">Streaming</button>
-		<button class="FilterPills-pill is-checked" role="tab" aria-selected="true">All</button>
+		<button class="FilterPills-pill" role="tab" aria-selected="false" tabindex="-1">General</button>
+		<button class="FilterPills-pill" role="tab" aria-selected="false" tabindex="-1">Actor</button>
+		<button class="FilterPills-pill" role="tab" aria-selected="false" tabindex="-1">LOD</button>
+		<button class="FilterPills-pill" role="tab" aria-selected="false" tabindex="-1">Misc</button>
+		<button class="FilterPills-pill" role="tab" aria-selected="false" tabindex="-1">Physics</button>
+		<button class="FilterPills-pill" role="tab" aria-selected="false" tabindex="-1">Rendering</button>
+		<button class="FilterPills-pill" role="tab" aria-selected="false" tabindex="-1">Streaming</button>
+		<button class="FilterPills-pill is-checked" role="tab" aria-selected="true" tabindex="0">All</button>
 	</div>
 </div>
+</ue-filter-pills>
+<p class="FilterPills-cap"><b>Live.</b> Hover and press a pill, click one to make it the only active pill, or Tab in and use Left, Right, Home and End.</p>
+
+<div class="FilterPills-frame">
+	<div class="FilterPills-strip">
+		<span class="FilterPills-pill is-hover">Hover</span>
+		<span class="FilterPills-pill is-pressed">Pressed</span>
+		<span class="FilterPills-pill is-checked">Checked</span>
+		<span class="FilterPills-pill is-checked is-hover">Checked hover</span>
+	</div>
+</div>
+<p class="FilterPills-cap"><b>Pinned.</b> Forced states: hovered, pressed, checked, checked and hovered.</p>
+
+<script type="module" src="./FilterPills.js"></script>
 </body>
 </html>

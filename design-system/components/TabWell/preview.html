@@ -38,6 +38,26 @@
 	.tabWell-label { padding: 2px 0; overflow: hidden; text-overflow: ellipsis; /* SDockTab.cpp:665,676 */ }
 	.tabWell-close { display: flex; flex: none; padding: 1.5px 0 0; /* SDockTab.cpp:707 */ color: var(--foreground); visibility: hidden; }
 	.tabWell-tab--foreground .tabWell-close { visibility: visible; /* SDockTab.cpp:970-976 */ }
+	.tabWell-tab--major.tabWell-tab--active::before { content: none; /* no active line on a major tab: GetActiveTabIndicatorVisibility, SDockTab.cpp:833-836 */ }
+
+	/* Live states. Same declarations as the DockTab forced-state classes (hovered fill StarshipCoreStyle.cpp:1790, hovered text :1804, close glyph :1777-1779). */
+	.tabWell-tab:not(.tabWell-tab--foreground):hover { background: color-mix(in srgb, var(--panel) 80%, transparent); }
+	.tabWell-tab:hover { color: var(--foreground-hover); }
+	.tabWell-tab--major:hover { color: var(--white); }
+	.tabWell-tab:hover .tabWell-close, .tabWell-tab:focus-visible .tabWell-close { visibility: visible; }
+	.tabWell-close:hover { color: var(--foreground-hover); }
+	.tabWell-close:active { color: var(--foreground); }
+	.tabWell-tab:focus-visible { outline: 1px solid var(--primary); outline-offset: -2px; /* keyboard focus ring; the engine tab is not keyboard focusable */ }
+	.tabWell-well { min-height: 25px; /* an emptied well keeps its height: MaxMinorTabSize.Y, SDockingTabWell.cpp:9 */ }
+	.tabWell-well--major { min-height: 30.8px; /* major tab height, derived: README */ }
+	.tabWell-tab { flex: 0 1 auto; min-width: 0; }
+	.tabWell-reset { align-self: flex-start; padding: 2px 8px; font: 400 11px/1.2 var(--font-sans); color: var(--foreground); background: transparent; border: 1px solid var(--input-outline); border-radius: 2px; cursor: default; }
+	.tabWell-reset:hover { color: var(--foreground-hover); background: var(--recessed); }
+	.tabWell-reset:active { color: var(--foreground); background: var(--background); }
+	.tabWell-reset:focus-visible { outline: 1px solid var(--primary); outline-offset: 1px; }
+	.tabWell-live { flex: 1 0 100%; max-width: 760px; line-height: 1.45; }
+	.tabWell-live b { color: var(--foreground); }
+	ue-tab-well { display: contents; }
 
 	/* stand-in for consumer content; not part of the component */
 	.tabWell-row { display: flex; align-items: center; gap: 8px; height: 22px; padding: 0 8px; color: var(--foreground); }
@@ -58,33 +78,59 @@
 </svg>
 
 <div class="tabWell-page">
+	<div class="tabWell-caption tabWell-live"><b>Live.</b> Try: hover a tab (fill and close button appear), click a tab to bring it to the front and swap the content (the stack you click gets the active line; the major stack never does), click the x or middle-click a tab to close it (the left neighbour takes over), close the last tab to leave an empty well. Keyboard: focus a tab, then Left, Right, Home, End move and select, Enter or Space selects, Delete closes.</div>
 	<div class="tabWell-col">
-		<div class="tabWell-stack">
-			<div class="tabWell-well">
-				<div class="tabWell-tab tabWell-tab--foreground tabWell-tab--active"><span class="tabWell-icon"><svg><use href="#tabWell-i-details"/></svg></span><span class="tabWell-label">Details</span><span class="tabWell-close"><svg><use href="#tabWell-i-close"/></svg></span></div>
-				<div class="tabWell-tab"><span class="tabWell-icon"><svg><use href="#tabWell-i-outliner"/></svg></span><span class="tabWell-label">Outliner</span><span class="tabWell-close"><svg><use href="#tabWell-i-close"/></svg></span></div>
-				<div class="tabWell-tab"><span class="tabWell-icon"><svg><use href="#tabWell-i-folder"/></svg></span><span class="tabWell-label">Content Browser</span><span class="tabWell-close"><svg><use href="#tabWell-i-close"/></svg></span></div>
+		<ue-tab-well>
+			<div class="tabWell-stack">
+				<div class="tabWell-well" role="tablist" aria-label="Minor tabs">
+					<div class="tabWell-tab tabWell-tab--foreground tabWell-tab--active" role="tab" tabindex="0" aria-selected="true" data-tab="details"><span class="tabWell-icon"><svg><use href="#tabWell-i-details"/></svg></span><span class="tabWell-label">Details</span><span class="tabWell-close" role="button" aria-label="Close tab"><svg><use href="#tabWell-i-close"/></svg></span></div>
+					<div class="tabWell-tab" role="tab" tabindex="-1" aria-selected="false" data-tab="outliner"><span class="tabWell-icon"><svg><use href="#tabWell-i-outliner"/></svg></span><span class="tabWell-label">Outliner</span><span class="tabWell-close" role="button" aria-label="Close tab"><svg><use href="#tabWell-i-close"/></svg></span></div>
+					<div class="tabWell-tab" role="tab" tabindex="-1" aria-selected="false" data-tab="content"><span class="tabWell-icon"><svg><use href="#tabWell-i-folder"/></svg></span><span class="tabWell-label">Content Browser</span><span class="tabWell-close" role="button" aria-label="Close tab"><svg><use href="#tabWell-i-close"/></svg></span></div>
+				</div>
+				<div class="tabWell-content">
+					<div role="tabpanel" data-panel="details">
+						<div class="tabWell-row"><svg><use href="#tabWell-i-folder"/></svg>Panel content area (consumer-provided)</div>
+						<div class="tabWell-row"><svg><use href="#tabWell-i-folder"/></svg>Row on a recessed ground</div>
+						<div class="tabWell-row"><svg><use href="#tabWell-i-folder"/></svg>Row on a panel ground</div>
+					</div>
+					<div role="tabpanel" data-panel="outliner" hidden>
+						<div class="tabWell-row"><svg><use href="#tabWell-i-outliner"/></svg>Outliner panel: PersistentLevel</div>
+						<div class="tabWell-row"><svg><use href="#tabWell-i-outliner"/></svg>SM_Rock_01</div>
+						<div class="tabWell-row"><svg><use href="#tabWell-i-outliner"/></svg>PointLight_2</div>
+					</div>
+					<div role="tabpanel" data-panel="content" hidden>
+						<div class="tabWell-row"><svg><use href="#tabWell-i-folder"/></svg>Content Browser panel: Content</div>
+						<div class="tabWell-row"><svg><use href="#tabWell-i-folder"/></svg>Maps</div>
+						<div class="tabWell-row"><svg><use href="#tabWell-i-folder"/></svg>Materials</div>
+					</div>
+				</div>
 			</div>
-			<div class="tabWell-content">
-				<div class="tabWell-row"><svg><use href="#tabWell-i-folder"/></svg>Panel content area (consumer-provided)</div>
-				<div class="tabWell-row"><svg><use href="#tabWell-i-folder"/></svg>Row on a recessed ground</div>
-				<div class="tabWell-row"><svg><use href="#tabWell-i-folder"/></svg>Row on a panel ground</div>
-			</div>
-		</div>
-		<span class="tabWell-caption">minor stack: well = background, content = panel, active tab joins the content</span>
+			<span class="tabWell-caption">minor stack: well = background, content = panel, active tab joins the content</span>
+			<button class="tabWell-reset" type="button">Restore tabs</button>
+		</ue-tab-well>
 	</div>
 
 	<div class="tabWell-col">
-		<div class="tabWell-stack">
-			<div class="tabWell-well tabWell-well--major">
-				<div class="tabWell-tab tabWell-tab--major tabWell-tab--foreground"><span class="tabWell-icon"><svg><use href="#tabWell-i-world"/></svg></span><span class="tabWell-label">Minimal_Default</span><span class="tabWell-close"><svg><use href="#tabWell-i-close"/></svg></span></div>
+		<ue-tab-well>
+			<div class="tabWell-stack">
+				<div class="tabWell-well tabWell-well--major" role="tablist" aria-label="Major tabs">
+					<div class="tabWell-tab tabWell-tab--major tabWell-tab--foreground" role="tab" tabindex="0" aria-selected="true" data-tab="level1"><span class="tabWell-icon"><svg><use href="#tabWell-i-world"/></svg></span><span class="tabWell-label">Minimal_Default</span><span class="tabWell-close" role="button" aria-label="Close tab"><svg><use href="#tabWell-i-close"/></svg></span></div>
+					<div class="tabWell-tab tabWell-tab--major" role="tab" tabindex="-1" aria-selected="false" data-tab="level2"><span class="tabWell-icon"><svg><use href="#tabWell-i-world"/></svg></span><span class="tabWell-label">Second_Level</span><span class="tabWell-close" role="button" aria-label="Close tab"><svg><use href="#tabWell-i-close"/></svg></span></div>
+				</div>
+				<div class="tabWell-content tabWell-content--major">
+					<div role="tabpanel" data-panel="level1">
+						<div class="tabWell-row"><svg><use href="#tabWell-i-world"/></svg>Major content area (background)</div>
+					</div>
+					<div role="tabpanel" data-panel="level2" hidden>
+						<div class="tabWell-row"><svg><use href="#tabWell-i-world"/></svg>Second_Level content area</div>
+					</div>
+				</div>
 			</div>
-			<div class="tabWell-content tabWell-content--major">
-				<div class="tabWell-row"><svg><use href="#tabWell-i-world"/></svg>Major content area (background)</div>
-			</div>
-		</div>
-		<span class="tabWell-caption">major stack under window chrome: well = title, content = background</span>
+			<span class="tabWell-caption">major stack under window chrome: well = title, content = background</span>
+			<button class="tabWell-reset" type="button">Restore tabs</button>
+		</ue-tab-well>
 	</div>
 </div>
+<script type="module" src="./TabWell.js"></script>
 </body>
 </html>

@@ -50,12 +50,85 @@
 
 	.demo { padding: 12px 16px; display: grid; gap: 12px; }
 	.demo small { color: var(--hover-2); font: 400 10.667px/1 var(--font-sans); display: block; margin-bottom: 4px; }
+
+	/* ---- live row (inside <ue-content-toolbar>); pinned specimens are plain HTML and skip these ---- */
+	.ContentToolbar { position: relative; }
+	/* SimpleButton pressed = Dropdown r4, foreground ForegroundHover, content padding shifts 1px down (StarshipCoreStyle.cpp:1389-1407) */
+	ue-content-toolbar .ContentToolbar__btn:active,
+	ue-content-toolbar .ContentToolbar__nav:active:not(:disabled),
+	ue-content-toolbar .ContentToolbar__crumb:active,
+	ue-content-toolbar .ContentToolbar__delim:active,
+	ue-content-toolbar .ContentToolbar__settings:active,
+	ue-content-toolbar .ContentToolbar__delim:hover,
+	ue-content-toolbar .ContentToolbar__btn:focus-visible,
+	ue-content-toolbar .ContentToolbar__nav:focus-visible:not(:disabled),
+	ue-content-toolbar .ContentToolbar__crumb:focus-visible,
+	ue-content-toolbar .ContentToolbar__delim:focus-visible,
+	ue-content-toolbar .ContentToolbar__settings:focus-visible { background: var(--dropdown); color: var(--foreground-hover); outline: 0; }
+	ue-content-toolbar .ContentToolbar__btn:active { padding: 4px 4px 2px; }
+	ue-content-toolbar .ContentToolbar__nav:active:not(:disabled) { padding: 2px 3px 0; }
+	ue-content-toolbar .ContentToolbar__crumb:active { padding: 4px 4px 2px; }
+	ue-content-toolbar .ContentToolbar__delim:active { padding: 2px 5px 0; }
+	ue-content-toolbar .ContentToolbar__settings:active { padding: 2px 4px 0; }
+	/* Add is a "Button": pressed fill Header (StarshipCoreStyle.cpp:1374), PressedButtonMargins shift the content 1px down (CoreStyle.h:112) */
+	ue-content-toolbar .ContentToolbar__add:active { background: var(--header); padding: 4px 14px 2px; }
+	ue-content-toolbar .ContentToolbar__add:focus-visible { background: var(--hover); outline: 0; }
+
+	/* popup menu: same declarations as PopupMenu/preview.html (Menu.Background, Menu.Outline, Menu.Button hovered Primary) */
+	.ContentToolbar__menu { position: absolute; z-index: 20; box-sizing: border-box; min-width: 200px; padding: 8px 0; background: var(--dropdown); box-shadow: inset 0 0 0 1px var(--dropdown-outline); color: var(--foreground-hover); }
+	.ContentToolbar .ContentToolbar__menuitem { width: 100%; padding: 3px 5px 3px 12px; gap: 8px; color: var(--foreground-hover); text-align: left; white-space: nowrap; border-radius: 0; }
+	.ContentToolbar .ContentToolbar__menuitem:hover, .ContentToolbar .ContentToolbar__menuitem:focus { background: var(--primary); outline: 0; }
+	.ContentToolbar .ContentToolbar__menuitem:disabled { opacity: .45; }
+	.ContentToolbar__menucheck { display: flex; width: 16px; height: 16px; margin-left: 2px; flex: none; }
+	.ContentToolbar__menusep { height: 1px; margin: 6px 12px; background: var(--white-25); }
 </style>
 </head>
 <body>
 <div class="demo">
 	<div>
-		<small>Default (history: back enabled, forward disabled)</small>
+		<small>Live: hover and press the buttons. Click a crumb to navigate, then Back and Forward walk the history. Click a chevron for sub-folders. Add and Settings open menus (arrow keys, Enter, Escape).</small>
+		<ue-content-toolbar>
+			<div class="ContentToolbar" role="toolbar" aria-label="Content browser toolbar">
+				<div class="ContentToolbar__tools">
+					<button class="ContentToolbar__add" aria-haspopup="menu" aria-expanded="false">
+						<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square"><path d="M8 2.5v11M2.5 8h11"/></svg>
+						<span>Add</span>
+					</button>
+					<span class="ContentToolbar__sep"></span>
+					<button class="ContentToolbar__btn">
+						<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"><path d="M2 9v5h12V9"/><path d="M8 1.5v8M5 6.5l3 3 3-3"/><path d="M2 9V6.5h2"/></svg>
+						<span>Import</span>
+					</button>
+					<span class="ContentToolbar__sep"></span>
+					<button class="ContentToolbar__btn">
+						<svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 1h8l3 3v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zm1 1v4h6V2zm1 9v3h5v-3z"/><path d="M1 4h1.5v10H1z" opacity=".6"/></svg>
+						<span>Save All</span>
+					</button>
+				</div>
+				<button class="ContentToolbar__nav ContentToolbar__nav--back" aria-label="Back" disabled>
+					<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><path d="M11.5 8h-7M7.5 5l-3 3 3 3"/></svg>
+				</button>
+				<button class="ContentToolbar__nav ContentToolbar__nav--fwd" aria-label="Forward" disabled>
+					<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><path d="M4.5 8h7M8.5 5l3 3-3 3"/></svg>
+				</button>
+				<div class="ContentToolbar__path">
+					<svg class="ContentToolbar__folder" viewBox="0 0 16 16" fill="currentColor"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2H6l1.5 1.5H13.5A1.5 1.5 0 0 1 15 5v7.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5z"/></svg>
+					<button class="ContentToolbar__crumb">All</button>
+					<button class="ContentToolbar__delim" aria-label="Sub-folders of All"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"/></svg></button>
+					<button class="ContentToolbar__crumb">Content</button>
+					<button class="ContentToolbar__delim" aria-label="Sub-folders of Content"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"/></svg></button>
+					<button class="ContentToolbar__crumb">StarterContent</button>
+					<button class="ContentToolbar__delim" aria-label="Sub-folders of StarterContent"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"/></svg></button>
+				</div>
+				<button class="ContentToolbar__settings" aria-haspopup="menu" aria-expanded="false">
+					<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><circle cx="8" cy="8" r="2.25"/><path d="M8 1.5l1.2 1.7 2-.5.6 2 2 .7-.5 2 1.7 1.3-1.7 1.3.5 2-2 .7-.6 2-2-.5L8 14.5l-1.2-1.7-2 .5-.6-2-2-.7.5-2L1.5 8l1.7-1.3-.5-2 2-.7.6-2 2 .5z"/></svg>
+					<span>Settings</span>
+				</button>
+			</div>
+		</ue-content-toolbar>
+	</div>
+	<div>
+		<small>Default (history: back enabled, forward disabled), pinned</small>
 		<div class="ContentToolbar">
 			<div class="ContentToolbar__tools">
 				<button class="ContentToolbar__add">
@@ -95,7 +168,7 @@
 		</div>
 	</div>
 	<div>
-		<small>Narrow: breadcrumb takes the remaining width</small>
+		<small>Narrow: breadcrumb takes the remaining width, pinned</small>
 		<div class="ContentToolbar" style="width:520px">
 			<div class="ContentToolbar__tools">
 				<button class="ContentToolbar__add">
@@ -117,5 +190,6 @@
 		</div>
 	</div>
 </div>
+<script type="module" src="./ContentToolbar.js"></script>
 </body>
 </html>

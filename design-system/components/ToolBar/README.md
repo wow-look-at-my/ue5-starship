@@ -57,6 +57,16 @@ Hover and pressed on a plate change only the foreground, because the plate brush
 - Do not add a border to buttons. The look comes from the fill brush only.
 - Do not use the plain `.toolBar-btn` look for the mode combo.
 
+## Live behaviour
+
+`<ue-tool-bar>` (`src/ToolBar/ToolBar.ts`, built to `ToolBar.js`) wraps a `.toolBar` and drives the states with attributes and the existing classes.
+
+- `:hover` and `:active` reproduce `.is-hover` and `.is-pressed` (padding 5, 8, 3 for a button, `PressedComboButtonMargin` 8, 2, 8, 0 for the mode combo, colour only for the plates). A toggle has no pressed padding shift (`SC:2217-2218`). Its pressed fill is Dropdown (`SC:1629`, `SC:1632`).
+- A `.toolBar-btn--toggle` flips `.is-checked` and `aria-pressed` on click, Enter or Space.
+- A control whose slot holds a `.toolBar-menu` opens it. One menu is open at a time. Escape or a press outside closes. Down and Up open and enter the menu, Left and Right move between buttons.
+- Play adds `.is-pressed` (the pressed green) and enables Stop. Stop removes both. Idle Stop carries `.is-disabled` and `aria-disabled`, drawn at alpha .45 (`SlateElementPixelShader.usf:535`). State sits on `data-playing` of the `.toolBar`. `ue-play-change` fires with `{ playing }`, `ue-menu-select` with `{ label }`.
+- The menu entries are illustrative. A strip with `data-pinned` stays plain HTML.
+
 ## Not found in source
 
 - The disabled look of a button (opacity) is not in the files read.

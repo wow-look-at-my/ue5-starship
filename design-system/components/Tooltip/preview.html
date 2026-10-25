@@ -21,6 +21,19 @@
 		box-shadow: inset 0 0 0 1px var(--dropdown-outline); /* outline 1px, radius 0 :494 */
 		color: var(--foreground-hover); /* default foreground is white, WidgetStyle.h:21 */
 	}
+	[data-pinned] { pointer-events: none; } /* a pinned specimen shows one form and ignores the pointer */
+	.tooltip-live { flex: 1 1 100%; display: flex; flex-direction: column; gap: 10px; }
+	.tooltip-row { display: flex; flex-wrap: wrap; gap: 12px; }
+	.tooltip-target {
+		display: inline-flex; align-items: center; outline: 0; cursor: default; user-select: none;
+		padding: 3.5px 16px; border-radius: 4px; /* Button metrics, see the Button component */
+		background: var(--secondary); box-shadow: inset 0 0 0 1px var(--input); color: var(--foreground-hover);
+		font: 400 13.333px/16px var(--font-sans);
+	}
+	.tooltip-target:hover { background: var(--hover); }
+	.tooltip-target:focus-visible { box-shadow: inset 0 0 0 1px var(--primary); } /* FocusRectangle 1px Primary r4 StarshipCoreStyle.cpp:218 */
+	.tooltip-popup { position: fixed; left: 0; top: 0; z-index: 50; width: max-content; pointer-events: none; white-space: normal; opacity: 0; }
+	.tooltip[hidden] { display: none; }
 	.tooltip__line + .tooltip__line { margin-top: 4px; } /* first line padding-bottom 4 UICommandInfo.cpp:177 */
 	.tooltip__keys { color: var(--foreground-hover); opacity: .6; } /* UseSubduedForeground = foreground x .6 alpha, WidgetStyle.cpp:11 */
 	.tooltip--bright {
@@ -32,17 +45,28 @@
 </head>
 <body>
 <div class="tooltip-page">
+	<ue-tooltip>
+		<div class="tooltip-live">
+			<span class="tooltip-cap">Live: hover a target and wait for the tooltip, or Tab to it. It follows the pointer and goes away when you leave, press or hit Escape.</span>
+			<div class="tooltip-row">
+				<span class="tooltip-target" tabindex="0">Save All<span class="tooltip tooltip--dark tooltip-popup" role="tooltip" hidden><div class="tooltip__line">Saves every modified asset and level.</div><div class="tooltip__line tooltip__keys">Ctrl+Shift+S</div></span></span>
+				<span class="tooltip-target" tabindex="0">Content Drawer<span class="tooltip tooltip--bright tooltip-popup" role="tooltip" hidden>Opens the Content Browser drawer.</span></span>
+			</div>
+		</div>
+	</ue-tooltip>
+	<span class="tooltip-cap" style="flex:1 1 100%;max-width:none">Pinned: both forms for reference, not interactive</span>
 	<div class="tooltip-col">
 		<span class="tooltip-cap">Custom content (SToolTip with a content widget), as built for a command</span>
-		<div class="tooltip tooltip--dark">
+		<div class="tooltip tooltip--dark" data-pinned>
 			<div class="tooltip__line">Saves every modified asset and level.</div>
 			<div class="tooltip__line tooltip__keys">Ctrl+Shift+S</div>
 		</div>
 	</div>
 	<div class="tooltip-col">
 		<span class="tooltip-cap">Text only (SToolTip with Text). The background is a texture that is not available, so the fill is approximated.</span>
-		<div class="tooltip tooltip--bright">Opens the Content Browser drawer.</div>
+		<div class="tooltip tooltip--bright" data-pinned>Opens the Content Browser drawer.</div>
 	</div>
 </div>
+<script type="module" src="./Tooltip.js"></script>
 </body>
 </html>

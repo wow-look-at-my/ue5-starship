@@ -74,6 +74,75 @@
 	.ContentBrowser__tile.is-sel .ContentBrowser__label div { color: var(--white); }
 	/* bottom bar: Text Padding(8,5) (SAssetView.cpp:1383-1387) */
 	.ContentBrowser__status { padding: 5px 8px; }
+
+	/* ===== live behaviour (<ue-content-browser>) ===== */
+	.ContentBrowser__top { position: relative; }
+	.ContentBrowser__body { height: 189px; }
+	.ContentBrowser__sources { display: flex; flex-direction: column; overflow: hidden; }
+	.ContentBrowser__sourcesFrame { flex: 1; min-height: 0; }
+	.ContentBrowser__area { display: flex; flex-direction: column; flex: none; }
+	.ContentBrowser__area--fill { flex: 1 1 0; min-height: 0; }
+	.ContentBrowser__area--fill.is-collapsed { flex: none; }
+	.ContentBrowser__tree { overflow-y: auto; min-height: 0; scrollbar-width: thin; scrollbar-color: var(--hover) transparent; }
+	.ContentBrowser__tree[hidden] { display: none; }
+	.ContentBrowser__name { white-space: nowrap; }
+	.ContentBrowser__title, .ContentBrowser__tool, .ContentBrowser__row, .ContentBrowser__tile { user-select: none; }
+	.ContentBrowser__tiles { overflow-y: auto; overflow-x: hidden; min-height: 0; scrollbar-width: thin; scrollbar-color: var(--hover) transparent; }
+
+	/* Pressed: SimpleButton Dropdown r4 and the content shifts 1px down (StarshipCoreStyle.cpp:1389-1407); Add is a Button with Header fill (:1374, CoreStyle.h:112) */
+	.ContentBrowser__btn:active, .ContentBrowser__nav:active:not(:disabled), .ContentBrowser__crumb:active, .ContentBrowser__settings:active, .ContentBrowser__ibtn:active, .ContentBrowser__tool:active, .ContentBrowser__add2:active,
+	.ContentBrowser__btn:focus-visible, .ContentBrowser__nav:focus-visible:not(:disabled), .ContentBrowser__crumb:focus-visible, .ContentBrowser__settings:focus-visible, .ContentBrowser__ibtn:focus-visible, .ContentBrowser__tool:focus-visible { background: var(--dropdown); color: var(--foreground-hover); outline: 0; }
+	.ContentBrowser__btn:active { padding: 4px 4px 2px; }
+	.ContentBrowser__nav:active:not(:disabled) { padding: 2px 3px 0; }
+	.ContentBrowser__crumb:active { padding: 4px 4px 2px; }
+	.ContentBrowser__settings:active { padding: 2px 4px 0; }
+	.ContentBrowser__add:active { background: var(--header); padding: 4px 14px 2px; }
+	.ContentBrowser__add:focus-visible { background: var(--hover); outline: 0; }
+
+	/* source tree: SelectHover on hover; the selected row is SelectInactive until the sources column has focus, then Select (StarshipCoreStyle.cpp:2002-2012) */
+	.ContentBrowser__row:hover { background: var(--select-hover); }
+	.ContentBrowser__row--sel, .ContentBrowser__row--sel:hover { background: var(--select-inactive); color: var(--foreground-hover); }
+	.ContentBrowser__sources:focus-within .ContentBrowser__row--sel, .ContentBrowser__sources:focus-within .ContentBrowser__row--sel:hover { background: var(--select); }
+	/* keyboard focus selector: SelectorFocusedBrush 1px, SelectorColor linear (0.701, 0.225, 0.003) = #da820a (StarshipCoreStyle.cpp:62,2007) */
+	.ContentBrowser__row:focus-visible, .ContentBrowser__title:focus-visible, .ContentBrowser__tool:focus-visible { outline: 1px solid #da820a; outline-offset: -1px; }
+	.ContentBrowser__tool:hover, .ContentBrowser__add2:hover { background: var(--dropdown); color: var(--foreground-hover); }
+	.ContentBrowser__tool[aria-pressed="true"] { background: var(--primary); color: var(--foreground-hover); }
+	.ContentBrowser__tool[aria-pressed="true"]:hover { background: var(--primary-hover); }
+	.ContentBrowser__tool[aria-pressed="true"]:active { background: var(--dropdown); }
+
+	/* splitter handle: Secondary while hovered or dragged (StarshipCoreStyle.cpp:635) */
+	.ContentBrowser__split { position: relative; cursor: col-resize; touch-action: none; outline: 0; }
+	.ContentBrowser__split::before { content: ""; position: absolute; top: 0; bottom: 0; left: -3px; right: -3px; }
+	.ContentBrowser__split:hover, .ContentBrowser__split.is-dragging, .ContentBrowser__split:focus-visible { background: var(--secondary); }
+
+	/* search field: hover outline Hover, focus outline Primary, focused text White (StarshipCoreStyle.cpp:1283-1306) */
+	.ContentBrowser__field { position: relative; }
+	.ContentBrowser__field:hover { box-shadow: inset 0 0 0 1px var(--hover); }
+	.ContentBrowser__field:focus-within { box-shadow: inset 0 0 0 1px var(--primary); }
+	.ContentBrowser__input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; color: var(--foreground); font: inherit; padding: 3px 30px 4px 8px; }
+	.ContentBrowser__input::placeholder { color: var(--foreground); opacity: .35; }
+	.ContentBrowser__input:focus { color: var(--white); }
+	.ContentBrowser__clear { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); padding: 0 0 0 4px; border-radius: 4px; }
+	.ContentBrowser__clear[hidden] { display: none; }
+	.ContentBrowser__field .ContentBrowser__clear svg { margin: 0; width: 16px; height: 16px; }
+	.ContentBrowser__clear:hover, .ContentBrowser__clear:active, .ContentBrowser__clear:focus-visible { background: var(--dropdown); color: var(--foreground-hover); outline: 0; }
+	.ContentBrowser .ContentBrowser__ibtn { margin-left: 2px; }   /* the button reset above would zero it; the span version kept 2px */
+	.ContentBrowser__ibtn:active { padding: 2px 2px 0; }
+	.ContentBrowser__ibtn--filter:active { padding: 2px 3px 0; }
+
+	/* folder tiles: hover and selected reproduce AssetTile folder (Secondary r4 + drop shadow; selected outline Primary, selected + hover PrimaryHover) */
+	.ContentBrowser__tile { outline: 0; cursor: default; }
+	.ContentBrowser__tile:hover .ContentBrowser__card { background: var(--secondary); box-shadow: 2px 2px 3px rgba(0,0,0,.5); }
+	.ContentBrowser__tile:hover .ContentBrowser__label div { color: var(--white); }
+	.ContentBrowser__tile.is-sel:hover .ContentBrowser__card { box-shadow: inset 0 0 0 1px var(--primary-hover), 2px 2px 3px rgba(0,0,0,.5); }
+	.ContentBrowser__tile:focus-visible .ContentBrowser__card { outline: 1px solid #da820a; outline-offset: 1px; }
+
+	/* popup menu: same declarations as PopupMenu/preview.html */
+	.ContentBrowser__menu { position: absolute; z-index: 20; box-sizing: border-box; min-width: 200px; padding: 8px 0; background: var(--dropdown); box-shadow: inset 0 0 0 1px var(--dropdown-outline); color: var(--foreground-hover); }
+	.ContentBrowser .ContentBrowser__menuitem { width: 100%; padding: 3px 5px 3px 12px; gap: 8px; color: var(--foreground-hover); text-align: left; white-space: nowrap; border-radius: 0; }
+	.ContentBrowser .ContentBrowser__menuitem:hover, .ContentBrowser .ContentBrowser__menuitem:focus { background: var(--primary); outline: 0; }
+	.ContentBrowser__menucheck { display: flex; width: 16px; height: 16px; margin-left: 2px; flex: none; }
+	.ContentBrowser__menusep { height: 1px; margin: 6px 12px; background: var(--white-25); }
 </style>
 </head>
 <body>
@@ -92,6 +161,7 @@
 		<symbol id="cb-cd" viewBox="0 0 16 16"><path d="M3 5.5h10L8 11.5z" fill="currentColor"/></symbol>
 		<symbol id="cb-glass" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6.75" cy="6.75" r="4.5"/><path d="M10.2 10.2L14 14"/></g></symbol>
 		<symbol id="cb-pc" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.75v6.5M4.75 8h6.5"/></g></symbol>
+		<symbol id="cb-x" viewBox="0 0 16 16"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
 		<symbol id="cb-save" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"><path d="M2.5 2.5h9l2 2v9h-11z"/><path d="M5 2.5v3.5h5V2.5M5 13.5v-4h6v4"/></g></symbol>
 		<symbol id="cb-filter" viewBox="0 0 16 16"><path d="M2 4h12M4 8h8M6.5 12h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
 		<symbol id="cb-chev-d" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
@@ -103,10 +173,11 @@
 	</defs>
 </svg>
 
+<ue-content-browser>
 <div class="ContentBrowser">
 	<div class="ContentBrowser__top">
 		<div class="ContentBrowser__tools">
-			<button class="ContentBrowser__add"><svg><use href="#cb-plus"/></svg><span>Add</span></button>
+			<button class="ContentBrowser__add" aria-haspopup="menu" aria-expanded="false"><svg><use href="#cb-plus"/></svg><span>Add</span></button>
 			<span class="ContentBrowser__sep"></span>
 			<button class="ContentBrowser__btn"><svg><use href="#cb-import"/></svg><span>Import</span></button>
 			<span class="ContentBrowser__sep"></span>
@@ -120,24 +191,24 @@
 			<button class="ContentBrowser__crumb">Content</button><span class="ContentBrowser__delim"><svg><use href="#cb-chev-r"/></svg></span>
 			<button class="ContentBrowser__crumb">StarterContent</button><span class="ContentBrowser__delim"><svg><use href="#cb-chev-r"/></svg></span>
 		</div>
-		<button class="ContentBrowser__settings"><svg><use href="#cb-gear"/></svg><span>Settings</span></button>
+		<button class="ContentBrowser__settings" aria-haspopup="menu" aria-expanded="false"><svg><use href="#cb-gear"/></svg><span>Settings</span></button>
 	</div>
 	<div class="ContentBrowser__rule"></div>
 
 	<div class="ContentBrowser__body">
 		<div class="ContentBrowser__sources">
 			<div class="ContentBrowser__sourcesFrame">
-				<div class="ContentBrowser__area"><div class="ContentBrowser__head"><svg class="ContentBrowser__arrow"><use href="#cb-cr"/></svg><span class="ContentBrowser__title">Favorites</span><span class="ContentBrowser__tool"><svg><use href="#cb-glass"/></svg></span></div></div>
-				<div class="ContentBrowser__area">
-					<div class="ContentBrowser__head"><svg class="ContentBrowser__arrow"><use href="#cb-cd"/></svg><span class="ContentBrowser__title">LevelDesignProject</span><span class="ContentBrowser__tool"><svg><use href="#cb-glass"/></svg></span></div>
-					<div class="ContentBrowser__tree">
+				<div class="ContentBrowser__area is-collapsed"><div class="ContentBrowser__head"><svg class="ContentBrowser__arrow"><use href="#cb-cr"/></svg><span class="ContentBrowser__title">Favorites</span><span class="ContentBrowser__tool" aria-label="Search Favorites"><svg><use href="#cb-glass"/></svg></span></div><div class="ContentBrowser__tree" hidden></div></div>
+				<div class="ContentBrowser__area ContentBrowser__area--fill">
+					<div class="ContentBrowser__head"><svg class="ContentBrowser__arrow"><use href="#cb-cd"/></svg><span class="ContentBrowser__title">LevelDesignProject</span><span class="ContentBrowser__tool" aria-label="Search LevelDesignProject"><svg><use href="#cb-glass"/></svg></span></div>
+					<div class="ContentBrowser__tree" data-folders>
 						<div class="ContentBrowser__row ContentBrowser__row--parent ContentBrowser__row--root"><span class="ContentBrowser__exp"><svg><use href="#cb-cd"/></svg></span><svg class="ContentBrowser__fi"><use href="#cb-fo"/></svg>All</div>
 						<div class="ContentBrowser__row ContentBrowser__row--parent" style="padding-left:10px"><span class="ContentBrowser__exp"><svg><use href="#cb-cd"/></svg></span><svg class="ContentBrowser__fi"><use href="#cb-fo"/></svg>Content</div>
 						<div class="ContentBrowser__row ContentBrowser__row--sel" style="padding-left:20px"><span class="ContentBrowser__exp"><svg><use href="#cb-cd"/></svg></span><svg class="ContentBrowser__fi"><use href="#cb-fo"/></svg>StarterContent</div>
 						<div class="ContentBrowser__row" style="padding-left:30px"><span class="ContentBrowser__exp"></span><svg class="ContentBrowser__fi"><use href="#cb-fc"/></svg>Architecture</div>
 					</div>
 				</div>
-				<div class="ContentBrowser__area"><div class="ContentBrowser__head"><svg class="ContentBrowser__arrow"><use href="#cb-cr"/></svg><span class="ContentBrowser__title">Collections</span><span class="ContentBrowser__add2"><svg><use href="#cb-pc"/></svg></span><span class="ContentBrowser__tool"><svg><use href="#cb-glass"/></svg></span></div></div>
+				<div class="ContentBrowser__area is-collapsed"><div class="ContentBrowser__head"><svg class="ContentBrowser__arrow"><use href="#cb-cr"/></svg><span class="ContentBrowser__title">Collections</span><span class="ContentBrowser__add2"><svg><use href="#cb-pc"/></svg></span><span class="ContentBrowser__tool" aria-label="Search Collections"><svg><use href="#cb-glass"/></svg></span></div><div class="ContentBrowser__tree" hidden></div></div>
 			</div>
 		</div>
 
@@ -145,9 +216,9 @@
 
 		<div class="ContentBrowser__assets">
 			<div class="ContentBrowser__search">
-				<div class="ContentBrowser__field"><svg><use href="#cb-glass"/></svg><span class="ContentBrowser__hint">Search StarterContent</span></div>
-				<span class="ContentBrowser__ibtn"><svg><use href="#cb-save"/></svg></span>
-				<span class="ContentBrowser__ibtn ContentBrowser__ibtn--filter"><svg><use href="#cb-filter"/></svg><svg><use href="#cb-chev-d"/></svg></span>
+				<div class="ContentBrowser__field"><svg><use href="#cb-glass"/></svg><input class="ContentBrowser__input" placeholder="Search StarterContent" aria-label="Search"><button class="ContentBrowser__clear" aria-label="Clear search" hidden><svg><use href="#cb-x"/></svg></button></div>
+				<button class="ContentBrowser__ibtn" aria-label="Save search"><svg><use href="#cb-save"/></svg></button>
+				<button class="ContentBrowser__ibtn ContentBrowser__ibtn--filter" aria-label="Filters"><svg><use href="#cb-filter"/></svg><svg><use href="#cb-chev-d"/></svg></button>
 			</div>
 			<div class="ContentBrowser__tiles">
 				<div class="ContentBrowser__tile"><div class="ContentBrowser__card"><div class="ContentBrowser__thumb"><svg><use href="#cb-folder64"/></svg></div><div class="ContentBrowser__label"><div>Architecture</div></div></div></div>
@@ -161,9 +232,11 @@
 				<div class="ContentBrowser__tile"><div class="ContentBrowser__card"><div class="ContentBrowser__thumb"><svg><use href="#cb-folder64"/></svg></div><div class="ContentBrowser__label"><div>Shapes</div></div></div></div>
 				<div class="ContentBrowser__tile"><div class="ContentBrowser__card"><div class="ContentBrowser__thumb"><svg><use href="#cb-folder64"/></svg></div><div class="ContentBrowser__label"><div>Textures</div></div></div></div>
 			</div>
-			<div class="ContentBrowser__status">10 items</div>
+			<div class="ContentBrowser__status" role="status">10 items</div>
 		</div>
 	</div>
 </div>
+</ue-content-browser>
+<script type="module" src="./ContentBrowser.js"></script>
 </body>
 </html>

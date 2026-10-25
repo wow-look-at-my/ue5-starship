@@ -33,23 +33,33 @@
 	.SegmentedControl-seg.is-checked:active { background: var(--header); } /* StarshipCoreStyle.cpp:1671 */
 	/* Preview only: rows 1-2 shrink the name column so the full labels fit; row 3 keeps the default 40:60 split (DetailsViewArgs.h:134) where labels clip. */
 	.SegmentedControl-row.is-wide .SegmentedControl-name { flex-basis: 16%; }
+	/* Forced states: the same declarations as the :hover, :active and checked rules above. */
+	.SegmentedControl-seg.is-hover { background: var(--hover); color: var(--foreground-hover); }
+	.SegmentedControl-seg.is-pressed { background: var(--header); color: var(--foreground-hover); }
+	.SegmentedControl-seg:focus-visible { outline: 1px solid var(--primary-hover); outline-offset: -1px; } /* browser keyboard ring: Slate draws none */
+	.SegmentedControl-seg:disabled { opacity: .45; cursor: default; } /* alpha x .45: SlateElementPixelShader.usf:535 */
+	/* Preview captions only */
+	.SegmentedControl-cap { width: 360px; box-sizing: border-box; margin: 0; padding: 6px 8px 12px; font: 400 10.667px/1.4 var(--font-sans); color: var(--foreground); opacity: .8; }
+	.SegmentedControl-cap b { color: var(--foreground-hover); }
 </style>
 </head>
 <body>
 <div class="SegmentedControl-frame">
+	<ue-segmented-control>
 	<div class="SegmentedControl-row is-wide">
 		<div class="SegmentedControl-name">Mobility</div>
 		<div class="SegmentedControl-split"></div>
 		<div class="SegmentedControl-value">
 			<div class="SegmentedControl" role="radiogroup">
-				<button class="SegmentedControl-seg is-checked" role="radio" aria-checked="true" title="A static object can't be changed in game.">Static</button>
-				<button class="SegmentedControl-seg" role="radio" aria-checked="false" title="A stationary object can be changed in game but not moved.">Stationary</button>
-				<button class="SegmentedControl-seg" role="radio" aria-checked="false" title="Movable objects can be moved and changed in game.">Movable</button>
+				<button class="SegmentedControl-seg is-checked" role="radio" aria-checked="true" tabindex="0" title="A static object can't be changed in game.">Static</button>
+				<button class="SegmentedControl-seg" role="radio" aria-checked="false" tabindex="-1" title="A stationary object can be changed in game but not moved.">Stationary</button>
+				<button class="SegmentedControl-seg" role="radio" aria-checked="false" tabindex="-1" title="Movable objects can be moved and changed in game.">Movable</button>
 			</div>
 		</div>
 		<div class="SegmentedControl-split"></div>
 		<div class="SegmentedControl-right"></div>
 	</div>
+	</ue-segmented-control>
 	<div class="SegmentedControl-row is-wide">
 		<div class="SegmentedControl-name">Mobility</div>
 		<div class="SegmentedControl-split"></div>
@@ -63,19 +73,24 @@
 		<div class="SegmentedControl-split"></div>
 		<div class="SegmentedControl-right"></div>
 	</div>
+	<ue-segmented-control>
 	<div class="SegmentedControl-row">
 		<div class="SegmentedControl-name">Mobility</div>
 		<div class="SegmentedControl-split"></div>
 		<div class="SegmentedControl-value">
 			<div class="SegmentedControl" role="radiogroup" title="Narrow column: labels clip, they do not wrap or ellipsize">
-				<button class="SegmentedControl-seg is-checked" role="radio" aria-checked="true">Static</button>
-				<button class="SegmentedControl-seg" role="radio" aria-checked="false">Stationary</button>
-				<button class="SegmentedControl-seg" role="radio" aria-checked="false">Movable</button>
+				<button class="SegmentedControl-seg is-checked" role="radio" aria-checked="true" tabindex="0">Static</button>
+				<button class="SegmentedControl-seg" role="radio" aria-checked="false" tabindex="-1">Stationary</button>
+				<button class="SegmentedControl-seg" role="radio" aria-checked="false" tabindex="-1">Movable</button>
 			</div>
 		</div>
 		<div class="SegmentedControl-split"></div>
 		<div class="SegmentedControl-right"></div>
 	</div>
+	</ue-segmented-control>
 </div>
+<p class="SegmentedControl-cap"><b>Live</b> (rows 1 and 3). Hover and press a segment, click to select Static, Stationary or Movable, or Tab in and use the arrow keys, Home and End. <b>Pinned</b> (row 2): Stationary checked, Movable forced hover.</p>
+
+<script type="module" src="./SegmentedControl.js"></script>
 </body>
 </html>
