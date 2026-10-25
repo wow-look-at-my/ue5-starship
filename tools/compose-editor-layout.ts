@@ -100,7 +100,10 @@ const layoutCss = `
 	.el-root .tabWell-stack { display: flex; flex-direction: column; min-height: 0; flex: 1 1 0; }
 	.el-root .el-body { overflow: hidden; padding: 0; flex: 1 1 auto; min-height: 0; }
 	.el-root .el-body > [role="tabpanel"] { height: 100%; overflow: auto; }
-	.el-root .menuBar-stage, .el-root .toolBar-stage, .el-root .statusBar-stage { margin: 0; padding: 0; }
+	.el-root .menuBar-stage, .el-root .toolBar-stage, .el-root .statusBar-stage { margin: 0; padding: 0; min-height: 0; min-width: 0; }
+	.el-root .statusBar-stage { position: relative; }
+	.el-root .statusBar-history { position: absolute; bottom: 100%; left: 0; min-height: 0; margin: 0; z-index: 5; }
+	.el-root .statusBar-history:empty { display: none; }
 	.el-root .DetailsHeader-frame, .el-root .DetailsSearchRow-frame, .el-root .FilterPills-frame, .el-root .DetailsCategory-frame, .el-root .so-panel { width: 100%; }
 	.el-root .ContentBrowser { width: 100%; margin: 0; }
 	.el-root .statusBar { min-width: 0; }
