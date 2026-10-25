@@ -29,12 +29,21 @@ async function cls(target: Locator, name: string, expected: boolean): Promise<vo
 
 // Checks that the element's fill is the named token.
 async function paints(page: Page, target: Locator, name: string): Promise<void> {
-	assert.equal(await fill(target), await token(page, name), 'fill should be ' + name);
+	const expected = await token(page, name);
+	await settled(() => fill(target), expected);
+	assert.equal(await fill(target), expected, 'fill should be ' + name);
+}
+
+// Waits up to one second for a computed style to reach its value, because a hover change lands a frame after the pointer moves.
+async function settled(read: () => Promise<string>, expected: string): Promise<void> {
+	for (let attempt = 0; attempt < 20 && (await read()) !== expected; attempt++) await new Promise((done) => setTimeout(done, 50));
 }
 
 // Checks that one computed property is the named token colour.
 async function inks(page: Page, target: Locator, property: string, name: string): Promise<void> {
-	assert.equal(await prop(target, property), await token(page, name), property + ' should be ' + name);
+	const expected = await token(page, name);
+	await settled(() => prop(target, property), expected);
+	assert.equal(await prop(target, property), expected, property + ' should be ' + name);
 }
 
 // Checks that the element's inset outline is painted with the named token.
