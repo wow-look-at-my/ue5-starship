@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { openPreview, root, withBrowser } from './lib.ts';
+import { openPreview, root, tokensCss, withBrowser } from './lib.ts';
 
 const SHOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '.build', 'editor-layout.png');
 const TAGS = ['ue-menu-bar', 'ue-tool-bar', 'ue-tab-well', 'ue-place-actors-panel', 'ue-details-category', 'ue-scene-outliner', 'ue-content-browser', 'ue-status-bar'];
@@ -14,6 +14,7 @@ async function openLayout(browser: Parameters<Parameters<typeof withBrowser>[0]>
 	const preview = await openPreview(browser, 'EditorLayout', { width: 1300, height: 960 });
 	await preview.page.route('**/_blob/**', (route) => route.fulfill({ body: png, contentType: 'image/png' }));
 	await preview.page.reload();
+	await preview.page.addStyleTag({ content: tokensCss() });
 	await preview.page.waitForTimeout(300);
 	return preview;
 }
