@@ -51,7 +51,7 @@ const MIME: Record<string, string> = {
 let baseUrl: Promise<string> | undefined;
 
 // Serves design-system over http, because Chromium blocks module scripts on file://. One server per process.
-function serve(): Promise<string> {
+export function serve(): Promise<string> {
 	baseUrl ??= new Promise((resolve, reject) => {
 		const server = http.createServer((req, res) => {
 			const file = path.join(root, decodeURIComponent(new URL(req.url ?? '/', 'http://x').pathname));
