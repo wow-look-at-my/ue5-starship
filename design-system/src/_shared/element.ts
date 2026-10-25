@@ -5,13 +5,32 @@ export type Listener<E extends Event> = (event: E) => void;
 export abstract class UeElement extends HTMLElement {
 	#disposers: Array<() => void> = [];
 
+	#ready = false;
+	#pendingSetup: (() => void) | null = null;
+
+	// The bundle can load before the parser reaches this element's children, so setup waits for the document to finish parsing.
 	connectedCallback(): void {
 		this.style.display = 'contents';
-		this.setup();
+		if (document.readyState !== 'loading') {
+			this.#start();
+			return;
+		}
+		this.#pendingSetup = () => this.#start();
+		document.addEventListener('DOMContentLoaded', this.#pendingSetup, { once: true });
 	}
 
 	disconnectedCallback(): void {
+		if (this.#pendingSetup) document.removeEventListener('DOMContentLoaded', this.#pendingSetup);
+		this.#pendingSetup = null;
+		this.#ready = false;
 		for (const dispose of this.#disposers.splice(0)) dispose();
+	}
+
+	#start(): void {
+		this.#pendingSetup = null;
+		if (this.#ready || !this.isConnected) return;
+		this.#ready = true;
+		this.setup();
 	}
 
 	// Wires the existing markup. Runs on every connect, after the run's listeners are removed.

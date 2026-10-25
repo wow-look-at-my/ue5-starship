@@ -42,9 +42,9 @@ Use `axis-x`, `axis-y` and `axis-z` for the 2px edge bars on vector fields.
 
 ## Live components
 
-Every previewed component is a light-DOM custom element named `ue-<component>`, for example `ue-tab-well`, `ue-tool-bar` and `ue-spin-box`. The element wraps the component markup and keeps its class names. The look is the same and the page CSS still applies. Each preview loads its element with `<script type="module" src="./<Name>.js"></script>`.
+Every previewed component is a light-DOM custom element named `ue-<component>`, for example `ue-tab-well`, `ue-tool-bar` and `ue-spin-box`. The element wraps the component markup and keeps its class names. The look is the same and the page CSS still applies. The design system page preloads `components/bundle.js`, which defines every element, so a preview carries no script tag.
 
-- Write behaviour in TypeScript under `src/<Name>/<Name>.ts` and extend `UeElement` from `src/_shared/element.ts`. Compile with `ts0 build`. By hand, the `.js` files in `components/` are generated and must never be edited.
+- Write behaviour in TypeScript under `src/<Name>/<Name>.ts` and extend `UeElement` from `src/_shared/element.ts`. Compile with `ts0 build`. `components/bundle.js` is generated from `bundle/main.ts` and must never be edited by hand.
 - Set state with `aria-*` and `data-*` attributes and with the same state classes the pinned specimens use. Keep every `:hover`, `:active` and `:focus-visible` rule same to the forced-state class it mirrors.
 - Mark a documentation specimen that shows a forced state with `data-pinned` and leave it outside any custom element.
 - Make every interactive element keyboard operable and give it the matching `role` and `aria-*` attributes.

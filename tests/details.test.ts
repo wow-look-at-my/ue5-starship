@@ -485,10 +485,10 @@ test('DetailsCategory: the live details panel filters rows by search and section
 });
 
 for (const name of ['DetailsHeader', 'DetailsSearchRow', 'FilterPills', 'DetailsCategory', 'VectorInput', 'SegmentedControl', 'AssetPicker']) {
-	test(name + ': one module script, no inline script, captions present', async () => {
+	test(name + ': no script tags, captions present', async () => {
 		await inPreview(name, async (page) => {
 			assert.equal(await page.locator('script:not([src])').count(), 0, 'inline script');
-			assert.equal(await page.locator('script[type="module"]').count(), 1);
+			assert.equal(await page.locator('script:not([src$="bundle.js"])').count(), 0, 'script tag');
 			assert.ok((await page.locator('[class*="-cap"]').count()) >= 1, 'captions');
 		});
 	});

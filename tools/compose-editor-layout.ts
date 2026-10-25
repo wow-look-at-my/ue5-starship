@@ -65,7 +65,6 @@ function element(page: string, tag: string, nth = 0): string {
 const blocks = (html: string, tag: string): string => [...html.matchAll(new RegExp('<' + tag + '>([\\s\\S]*?)</' + tag + '>', 'g'))].map((m) => m[1]).join('\n');
 const symbols = (html: string): string => [...html.matchAll(/<symbol[\s\S]*?<\/symbol>/g)].map((m) => m[0]).join('\n');
 const stripPage = (css: string): string => css.replace(/(^|\n)\s*(html\s*,\s*)?body\s*\{[^}]*\}/g, '\n');
-const modules = (name: string, html: string): string[] => [...html.matchAll(/<script type="module" src="\.\/([^"]+)"><\/script>/g)].map((m) => '../' + name + '/' + m[1]);
 
 const names = ['WindowChrome', 'MenuBar', 'ToolBar', 'PlaceActorsPanel', 'DetailsHeader', 'DetailsSearchRow', 'FilterPills', 'DetailsCategory', 'SceneOutliner', 'ContentBrowser', 'StatusBar', 'TabWell'];
 const html = Object.fromEntries(names.map((n) => [n, read(n)]));
@@ -89,7 +88,6 @@ const viewport = '<img class="el-viewport" src="' + (local ? LOCAL : BLOB) + '" 
 
 const css = names.map((n) => stripPage(blocks(html[n], 'style'))).join('\n');
 const defs = names.map((n) => symbols(html[n])).join('\n');
-const scripts = [...new Set(names.flatMap((n) => modules(n, html[n])))].map((src) => '<script type="module" src="' + src + '"></script>').join('\n');
 
 const layoutCss = `
 	.el-root { width: 1280px; background: var(--background); font: 400 13.333px/1.2 var(--font-sans); color: var(--foreground); display: flex; flex-direction: column; }
@@ -121,7 +119,7 @@ const out = marker
 	+ '<div class="el-col">' + stack('', 'viewport', 'world', 'Viewport 1', viewport) + '</div>\n'
 	+ '<div class="el-col">' + stack('el-details', 'details', 'details', 'Details', details) + stack('el-outliner', 'outliner', 'outliner', 'Outliner', outliner) + '</div>\n'
 	+ '</div>\n<div class="el-bottom">' + stack('', 'content', 'folder', 'Content Browser', browser) + '</div>\n' + status + '\n</div>\n'
-	+ scripts + '\n</body>\n</html>\n';
+	+ '</body>\n</html>\n';
 
 const dir = path.join(root, 'components', 'EditorLayout');
 fs.mkdirSync(dir, { recursive: true });

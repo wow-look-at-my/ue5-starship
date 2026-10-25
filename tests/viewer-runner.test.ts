@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { test } from 'node:test';
-import { root, serve, tokensCss, withBrowser } from './lib.ts';
+import { root, serve, tokensCss, withBrowser, withBundle } from './lib.ts';
 
 // The Design System viewer shows a preview by parking its HTML with the parent and loading a runner frame.
 // The runner rewrites its own URL to the preview's URL and document.write()s the HTML, so relative scripts resolve from the preview's folder.
@@ -17,7 +17,7 @@ const RUNNER = `<!doctype html><meta charset="utf-8"><script>
 const components = path.join(root, 'components');
 const names = fs.readdirSync(components, { withFileTypes: true }).filter((e) => e.isDirectory() && e.name !== 'Cover' && fs.existsSync(path.join(components, e.name, 'preview.html'))).map((e) => e.name).sort();
 
-test('a preview written by the viewer runner keeps its relative module scripts working', async () => {
+test('a preview written by the viewer runner gets live elements from the preloaded bundle', async () => {
 	await withBrowser(async (browser) => {
 		const base = await serve();
 		const failures: string[] = [];
@@ -25,11 +25,14 @@ test('a preview written by the viewer runner keeps its relative module scripts w
 			const page = await browser.newPage({ viewport: { width: 1300, height: 960 } });
 			const errors: string[] = [];
 			page.on('pageerror', (e) => errors.push(String(e)));
+			page.on('console', (m) => {
+				if (m.type() === 'error' && !/fonts\.g|ERR_|Failed to load resource/.test(m.text())) errors.push(m.text());
+			});
 			await page.route('**/__runner.html', (route) => route.fulfill({ body: RUNNER, contentType: 'text/html' }));
 			await page.route('**/_blob/**', (route) => route.fulfill({ status: 204 }));
 			await page.goto(base + '/components/Cover/preview.html');
 			const url = '/components/' + name + '/preview.html';
-			const html = fs.readFileSync(path.join(components, name, 'preview.html'), 'utf8').replace('</head>', '<style>' + tokensCss() + '</style></head>');
+			const html = withBundle(fs.readFileSync(path.join(components, name, 'preview.html'), 'utf8').replace('</head>', '<style>' + tokensCss() + '</style></head>'));
 			await page.evaluate(([target, source]) => {
 				(window as unknown as { __previewRunner: unknown }).__previewRunner = { take: () => ({ url: target, html: source }) };
 				const frame = document.createElement('iframe');

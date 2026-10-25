@@ -13,14 +13,9 @@ test('every component folder is covered by this check', () => {
 });
 
 for (const name of names.filter((n) => !STATIC.has(n))) {
-	test(name + ': scripts are compiled TypeScript modules only', () => {
+	test(name + ': the preview carries no script, the bundle supplies every element', () => {
 		const html = fs.readFileSync(path.join(components, name, 'preview.html'), 'utf8');
-		const body = html.slice(html.indexOf('<body'));
-		const inline = [...body.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)].filter((m) => m[1].trim() !== '');
-		assert.equal(inline.length, 0, 'inline script bodies');
-		const modules = [...body.matchAll(/<script type="module" src="([^"]+)"><\/script>/g)].map((m) => m[1]);
-		assert.ok(modules.length > 0, 'a module script');
-		for (const src of modules) assert.ok(fs.existsSync(path.join(components, name, src)), src + ' exists');
+		assert.doesNotMatch(html, /<script/i, 'script tag');
 	});
 
 	test(name + ': at least one live custom element is defined and upgraded', async () => {

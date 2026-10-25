@@ -72,6 +72,9 @@ export function serve(): Promise<string> {
 	return baseUrl;
 }
 
+// The design system page preloads components/bundle.js as a classic script ahead of the preview markup. Tests do the same.
+export const withBundle = (html: string): string => html.replace('</head>', '<script src="/components/bundle.js"></script></head>');
+
 // Opens a component preview with the tokens injected. Console and page errors collect in `errors`.
 export async function openPreview(browser: Browser, name: string, viewport = { width: 1000, height: 800 }): Promise<Preview> {
 	const page = await browser.newPage({ viewport });
@@ -79,6 +82,10 @@ export async function openPreview(browser: Browser, name: string, viewport = { w
 	page.on('pageerror', (e) => errors.push(String(e)));
 	page.on('console', (m) => {
 		if (m.type() === 'error' && !/fonts\.g|ERR_|Failed to load resource/.test(m.text())) errors.push(m.text());
+	});
+	await page.route('**/components/*/preview.html', async (route) => {
+		const response = await route.fetch();
+		await route.fulfill({ response, body: withBundle(await response.text()) });
 	});
 	await page.goto((await serve()) + '/components/' + name + '/preview.html');
 	await page.addStyleTag({ content: tokensCss() });
