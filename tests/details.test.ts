@@ -488,7 +488,7 @@ for (const name of ['DetailsHeader', 'DetailsSearchRow', 'FilterPills', 'Details
 	test(name + ': no script tags, captions present', async () => {
 		await inPreview(name, async (page) => {
 			assert.equal(await page.locator('script:not([src])').count(), 0, 'inline script');
-			assert.equal(await page.locator('script:not([src$="bundle.js"])').count(), 0, 'script tag');
+			assert.equal(await page.locator('script:not([src$="bundle.js"]):not([src$=".js"])').count(), 0, 'script tag');
 			assert.ok((await page.locator('[class*="-cap"]').count()) >= 1, 'captions');
 		});
 	});

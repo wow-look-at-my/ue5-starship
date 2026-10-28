@@ -72,8 +72,16 @@ export function serve(): Promise<string> {
 	return baseUrl;
 }
 
-// The design system page preloads components/bundle.js as a classic script ahead of the preview markup. Tests do the same.
-export const withBundle = (html: string): string => html.replace('</head>', '<script src="/components/bundle.js"></script></head>');
+// The design system page preloads components/bundle.js as a classic script ahead of the preview markup.
+const pascal = (tag: string): string => tag.split('-').slice(1).map((part) => part[0].toUpperCase() + part.slice(1)).join('');
+
+function loaderTags(html: string): string {
+	if (process.env.UE_MODE !== 'modules') return '<script src="/components/bundle.js"></script>';
+	const tags = new Set(Array.from(html.matchAll(/<(ue-[a-z0-9-]+)/g), (m) => m[1]));
+	return Array.from(tags, (tag) => '<script type="module" src="/components/' + pascal(tag) + '/' + pascal(tag) + '.js"></script>').join('');
+}
+
+export const withBundle = (html: string): string => html.replace('</head>', loaderTags(html) + '</head>');
 
 // Opens a component preview with the tokens injected. Console and page errors collect in `errors`.
 export async function openPreview(browser: Browser, name: string, viewport = { width: 1000, height: 800 }): Promise<Preview> {
