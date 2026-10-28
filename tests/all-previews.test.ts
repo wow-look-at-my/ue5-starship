@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { test } from 'node:test';
-import { openPreview, root, withBrowser } from './lib.ts';
+import { openPreview, root, serve, withBrowser } from './lib.ts';
 
 const components = path.join(root, 'components');
 const names = fs.readdirSync(components, { withFileTypes: true }).filter((e) => e.isDirectory() && fs.existsSync(path.join(components, e.name, 'preview.html'))).map((e) => e.name).sort();
@@ -27,6 +27,30 @@ for (const name of names.filter((n) => !STATIC.has(n))) {
 			});
 			assert.ok(report.length > 0, 'a ue-* element in the page');
 			for (const entry of report) assert.deepEqual(entry, { tag: entry.tag, defined: true, upgraded: true });
+			assert.deepEqual(errors, []);
+			await page.close();
+		});
+	});
+}
+
+const kebab = (name: string): string => 'ue-' + name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+
+for (const name of names.filter((n) => fs.existsSync(path.join(components, n, n + '.js')))) {
+	test(name + ': the standalone ES module defines the element and sets up every instance', async () => {
+		await withBrowser(async (browser) => {
+			const page = await browser.newPage();
+			const errors: string[] = [];
+			page.on('pageerror', (e) => errors.push(String(e)));
+			await page.goto((await serve()) + '/components/' + name + '/preview.html');
+			await page.addScriptTag({ type: 'module', url: '/components/' + name + '/' + name + '.js' });
+			const tag = kebab(name);
+			await page.waitForFunction((t) => customElements.get(t) !== undefined, tag, { timeout: 5000 });
+			const report = await page.evaluate((t) => {
+				const els = Array.from(document.querySelectorAll(t));
+				return { count: els.length, ready: els.filter((el) => (el as HTMLElement).style.display === 'contents').length };
+			}, tag);
+			assert.ok(report.count > 0, 'a ' + tag + ' in the preview');
+			assert.equal(report.ready, report.count, 'every ' + tag + ' ran setup');
 			assert.deepEqual(errors, []);
 			await page.close();
 		});
