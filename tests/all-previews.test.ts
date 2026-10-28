@@ -36,7 +36,7 @@ for (const name of names.filter((n) => !STATIC.has(n))) {
 const kebab = (name: string): string => 'ue-' + name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
 
 for (const name of names.filter((n) => fs.existsSync(path.join(components, n, n + '.js')))) {
-	test(name + ': the standalone ES module defines the element and sets up every instance', { skip: Boolean(process.env.UE_PUBLISHED) }, async () => {
+	test(name + ': the standalone ES module defines the element and sets up every instance', async () => {
 		await withBrowser(async (browser) => {
 			const page = await browser.newPage();
 			const errors: string[] = [];
