@@ -1486,6 +1486,28 @@
   };
   define("ue-content-toolbar", ContentToolbarElement);
 
+  // design-system/src/Cover/Cover.ts
+  var TOKENS = {
+    primary: "primary",
+    panel: "panel",
+    inactive: "select-inactive",
+    folder: "accent-folder",
+    green: "accent-green",
+    header: "header"
+  };
+  var UeCoverElement = class extends UeElement {
+    setup() {
+      for (const strip of this.all("rect.tile")) {
+        const token = Object.keys(TOKENS).find((name) => strip.classList.contains(name));
+        if (!token || strip.querySelector("title")) continue;
+        const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+        title.textContent = TOKENS[token];
+        strip.append(title);
+      }
+    }
+  };
+  define("ue-cover", UeCoverElement);
+
   // design-system/src/DetailsCategory/DetailsCategory.ts
   var DOWN = "#DetailsCategory-down";
   var RIGHT = "#DetailsCategory-right";

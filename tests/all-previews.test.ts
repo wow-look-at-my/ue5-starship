@@ -6,7 +6,7 @@ import { openPreview, root, serve, withBrowser } from './lib.ts';
 
 const components = path.join(root, 'components');
 const names = fs.readdirSync(components, { withFileTypes: true }).filter((e) => e.isDirectory() && fs.existsSync(path.join(components, e.name, 'preview.html'))).map((e) => e.name).sort();
-const STATIC = new Set(['Cover']);
+const STATIC = new Set<string>();
 
 test('every component folder is covered by this check', () => {
 	assert.ok(names.length >= 36, 'found ' + names.length + ' previews');
@@ -56,6 +56,16 @@ for (const name of names.filter((n) => fs.existsSync(path.join(components, n, n 
 		});
 	});
 }
+
+test('Cover: every colour strip carries its token name as a tooltip', async () => {
+	await withBrowser(async (browser) => {
+		const { page, errors } = await openPreview(browser, 'Cover');
+		const titles = await page.$$eval('ue-cover rect.tile > title', (els) => els.map((el) => el.textContent));
+		assert.deepEqual(titles, ['primary', 'panel', 'select-inactive', 'accent-folder', 'accent-green', 'header']);
+		assert.deepEqual(errors, []);
+		await page.close();
+	});
+});
 
 // The design system page marks every preview static with "components/bundle.js is missing" when no bundle exists. The page preloads it into each preview.
 test('components/bundle.js exists, is a classic script, and defines every ue-* element the previews use', async () => {

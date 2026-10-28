@@ -8,6 +8,7 @@ import '../src/Checkbox/Checkbox.ts';
 import '../src/ComboButton/ComboButton.ts';
 import '../src/ContentBrowser/ContentBrowser.ts';
 import '../src/ContentToolbar/ContentToolbar.ts';
+import '../src/Cover/Cover.ts';
 import '../src/DetailsCategory/DetailsCategory.ts';
 import '../src/DetailsHeader/DetailsHeader.ts';
 import '../src/DetailsSearchRow/DetailsSearchRow.ts';
