@@ -54,6 +54,14 @@ let baseUrl: Promise<string> | undefined;
 export function serve(): Promise<string> {
 	baseUrl ??= new Promise((resolve, reject) => {
 		const server = http.createServer((req, res) => {
+			if (process.env.UE_PUBLISHED) {
+				// UE_PUBLISHED is the published artifact's project URL, so the suite runs against the bytes the viewer serves.
+				void fetch(process.env.UE_PUBLISHED + (req.url ?? '/')).then(async (upstream) => {
+					res.writeHead(upstream.status, { 'content-type': upstream.headers.get('content-type') ?? 'application/octet-stream' });
+					res.end(Buffer.from(await upstream.arrayBuffer()));
+				}, () => res.writeHead(502).end());
+				return;
+			}
 			const file = path.join(root, decodeURIComponent(new URL(req.url ?? '/', 'http://x').pathname));
 			if (!file.startsWith(root) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
 				res.writeHead(404).end();
