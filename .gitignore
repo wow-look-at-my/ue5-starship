@@ -1,3 +1,4 @@
 node_modules/
 .build/
 .ts0-tsconfig.json
+*.test.ts0.mjs
