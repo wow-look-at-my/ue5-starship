@@ -1,2 +1,3 @@
 # Compiled by ts0 from design-system/src. Never edit by hand; run `ts0 build` in design-system.
 design-system/components/**/*.js linguist-generated=true -diff
+design-system/components/**/*.css linguist-generated=true -diff

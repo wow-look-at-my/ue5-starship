@@ -1,0 +1,119 @@
+/* design-system/src/ComboButton/ComboButton.css */
+.combobutton {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  border: 0;
+  outline: 0;
+  min-width: 120px;
+  padding: 1px 8px;
+  border-radius: 4px;
+  background: var(--input);
+  box-shadow: inset 0 0 0 1px var(--input-outline);
+  color: var(--foreground);
+  font: 400 13.333px/16px var(--font-sans);
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+}
+.combobutton:hover,
+.combobutton--hover {
+  box-shadow: inset 0 0 0 1px var(--hover);
+  color: var(--foreground-hover);
+}
+.combobutton:active,
+.combobutton--open {
+  box-shadow: inset 0 0 0 1px var(--hover);
+  color: var(--foreground-hover);
+  padding: 2px 8px 0;
+}
+.combobutton--disabled,
+.combobutton--disabled:hover,
+.combobutton[aria-disabled=true],
+.combobutton[aria-disabled=true]:hover,
+.combobutton[aria-disabled=true]:active {
+  opacity: .45;
+  box-shadow: inset 0 0 0 1px var(--input-outline);
+  color: var(--foreground);
+}
+.combobutton__label {
+  flex: 1 1 auto;
+}
+.combobutton__arrow {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 2px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.combobutton--simple {
+  min-width: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--foreground);
+  padding: 1px 4px;
+}
+.combobutton--simple:hover,
+.combobutton--simple.combobutton--hover {
+  background: var(--dropdown);
+  color: var(--foreground-hover);
+  box-shadow: none;
+}
+.combobutton--simple:active,
+.combobutton--simple.combobutton--open {
+  background: var(--dropdown);
+  color: var(--foreground-hover);
+  box-shadow: none;
+  padding: 2px 4px 0;
+}
+.combobutton--simple .combobutton__label {
+  margin-right: 4px;
+}
+.combobutton[aria-disabled=true],
+.combobutton[aria-disabled=true]:hover,
+.combobutton[aria-disabled=true]:active {
+  padding: 1px 8px;
+}
+.combobutton:focus-visible:not(.combobutton--open),
+.combobutton--simple:focus-visible:not(.combobutton--open) {
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+.combobutton-anchor {
+  display: inline-block;
+  position: relative;
+}
+.combobutton-menu {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  min-width: 100%;
+  box-sizing: border-box;
+  z-index: 20;
+  background: var(--dropdown);
+  box-shadow: inset 0 0 0 1px var(--dropdown-outline);
+  padding: 0;
+}
+.combobutton-row-item {
+  position: relative;
+  padding: 3px 8px;
+  font: 400 13.333px/16px var(--font-sans);
+  color: var(--foreground-hover);
+}
+.combobutton-row-item:hover,
+.combobutton-row-item--hover {
+  background: var(--primary);
+}
+.combobutton-menu--keys .combobutton-row-item:hover:not(.combobutton-row-item--hover) {
+  background: transparent;
+}
+.combobutton-row-item--focus::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px var(--select);
+}

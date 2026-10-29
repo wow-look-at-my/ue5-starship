@@ -89,7 +89,8 @@ function loaderTags(html: string): string {
 	return Array.from(tags, (tag) => '<script type="module" src="/components/' + pascal(tag) + '/' + pascal(tag) + '.js"></script>').join('');
 }
 
-export const withBundle = (html: string): string => html.replace('</head>', loaderTags(html) + '</head>');
+// The page also preloads components/bundle.css ahead of the preview's own styles.
+export const withBundle = (html: string): string => html.replace('<head>', '<head><link rel="stylesheet" href="/components/bundle.css">').replace('</head>', loaderTags(html) + '</head>');
 
 // Opens a component preview with the tokens injected. Console and page errors collect in `errors`.
 export async function openPreview(browser: Browser, name: string, viewport = { width: 1000, height: 800 }): Promise<Preview> {

@@ -1,5 +1,6 @@
 // <ue-combo-button> wraps one or more .combobutton-anchor blocks (button plus popup list) and makes them open, navigate and pick.
 import { UeElement, define } from '../_shared/element.ts';
+import './ComboButton.css';
 
 const ITEM = '.combobutton-row-item';
 const HOT = 'combobutton-row-item--hover';

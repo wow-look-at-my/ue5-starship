@@ -1,0 +1,43 @@
+.combobutton {
+	display: inline-flex; align-items: center; margin: 0; border: 0; outline: 0; min-width: 120px;
+	padding: 1px 8px; /* ComboButtonMargin (8,1,8,1) CoreStyle.h:114; ContentPadding 0 StarshipCoreStyle.cpp:1490 */
+	border-radius: 4px; /* InputFocusRadius CoreStyle.h:117 */
+	background: var(--input); /* StarshipCoreStyle.cpp:1471 */
+	box-shadow: inset 0 0 0 1px var(--input-outline); /* :1471, thickness CoreStyle.h:118 */
+	color: var(--foreground); /* NormalForeground :1475 */
+	font: 400 13.333px/16px var(--font-sans); /* NormalText 10pt */
+	white-space: nowrap; cursor: default; user-select: none;
+}
+.combobutton:hover, .combobutton--hover { box-shadow: inset 0 0 0 1px var(--hover); color: var(--foreground-hover); } /* :1472, :1476 */
+.combobutton:active, .combobutton--open { box-shadow: inset 0 0 0 1px var(--hover); color: var(--foreground-hover); padding: 2px 8px 0; } /* :1473, :1477, PressedComboButtonMargin (8,2,8,0) CoreStyle.h:115 */
+.combobutton--disabled, .combobutton--disabled:hover, .combobutton[aria-disabled="true"], .combobutton[aria-disabled="true"]:hover, .combobutton[aria-disabled="true"]:active { opacity: .45; box-shadow: inset 0 0 0 1px var(--input-outline); color: var(--foreground); } /* alpha x .45 SlateElementPixelShader.usf:535 */
+.combobutton__label { flex: 1 1 auto; }
+.combobutton__arrow {
+	flex: none; width: 16px; height: 16px; margin: 2px; /* wide-chevron-down 16x16 :1491, DownArrowPadding 2 SlateTypes.cpp:165 */
+	fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; /* approximation of the SVG */
+}
+
+.combobutton--simple {
+	min-width: 0; background: transparent; box-shadow: none; color: var(--foreground); /* SimpleButtonLabelAndIcon: NoResource :1390, fg :1394 */
+	padding: 1px 4px; /* (4,1,4,1) :1402 */
+}
+.combobutton--simple:hover, .combobutton--simple.combobutton--hover { background: var(--dropdown); color: var(--foreground-hover); box-shadow: none; } /* :1391, :1395 */
+.combobutton--simple:active, .combobutton--simple.combobutton--open { background: var(--dropdown); color: var(--foreground-hover); box-shadow: none; padding: 2px 4px 0; } /* :1392, (4,2,4,0) :1403 */
+.combobutton--simple .combobutton__label { margin-right: 4px; }
+.combobutton[aria-disabled="true"], .combobutton[aria-disabled="true"]:hover, .combobutton[aria-disabled="true"]:active { padding: 1px 8px; }
+.combobutton:focus-visible:not(.combobutton--open), .combobutton--simple:focus-visible:not(.combobutton--open) { box-shadow: inset 0 0 0 1px var(--primary); } /* FocusRectangle 1px Primary r4, StarshipCoreStyle.cpp:218 */
+
+.combobutton-anchor { display: inline-block; position: relative; }
+.combobutton-menu {
+	position: absolute; left: 0; top: 100%; min-width: 100%; box-sizing: border-box; z-index: 20;
+	background: var(--dropdown); /* MenuBorderBrush fill :1492 */
+	box-shadow: inset 0 0 0 1px var(--dropdown-outline); /* outline 1px, radius 0 :1492 */
+	padding: 0; /* MenuBorderPadding :1493 */
+}
+.combobutton-row-item {
+	position: relative; padding: 3px 8px; /* MenuRowPadding (8,3) :1503 */
+	font: 400 13.333px/16px var(--font-sans); color: var(--foreground-hover); /* TextColor White :1549 */
+}
+.combobutton-row-item:hover, .combobutton-row-item--hover { background: var(--primary); } /* hovered brush :1534 */
+.combobutton-menu--keys .combobutton-row-item:hover:not(.combobutton-row-item--hover) { background: transparent; } /* after an arrow key, only the keyboard row is highlighted */
+.combobutton-row-item--focus::after { content: ""; position: absolute; inset: 0; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--select); } /* SelectorFocusedBrush r4 1px Select :1539 */
