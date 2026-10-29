@@ -1,4 +1,4 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   #ready = false;
@@ -51,12 +51,12 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/_shared/own.ts
+// design-system/src/_shared/own.ts
 function ownedBy(host, target) {
   return target instanceof Element && target.closest(host.localName) === host;
 }
 
-// src/Button/Button.ts
+// design-system/src/Button/Button.ts
 var PRESSED = "button--pressed";
 function isDisabled(button) {
   return button.matches(":disabled") || button.getAttribute("aria-disabled") === "true";

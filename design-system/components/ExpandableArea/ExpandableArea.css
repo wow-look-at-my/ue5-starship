@@ -1,9 +1,9 @@
-/* src/_shared/base.css */
+/* design-system/src/_shared/base.css */
 [data-pinned] {
   pointer-events: none;
 }
 
-/* src/ExpandableArea/ExpandableArea.css */
+/* design-system/src/ExpandableArea/ExpandableArea.css */
 .expandablearea {
   border-radius: 4px;
   background: var(--panel);

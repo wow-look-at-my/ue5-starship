@@ -1,0 +1,27 @@
+/* Layout of the Details name area. Every metric is cited in components/DetailsHeader/README.md. The buttons are ue-button elements. */
+.DetailsHeader-frame { background: var(--panel); padding-bottom: 6px; } /* Brushes.Panel: StarshipCoreStyle.cpp:1123 */
+.DetailsHeader { padding: 4px 0 0 10px; } /* SActorDetails.cpp:336 Padding(10,4,0,0) */
+.DetailsHeader-name { display: flex; align-items: center; min-height: 22px; }
+.DetailsHeader-icon { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linejoin: round; color: var(--foreground); } /* class icon 16x16: SDetailNameArea.cpp:112-122 */
+.DetailsHeader-label {
+	flex: 1; min-width: 0; padding: 0 3px 0 8px; /* SDetailNameArea.cpp:138 Padding(8,0,3,0) */
+	font: 400 14.667px/1.172 var(--font-sans); /* DEFAULT_FONT("Regular", 11): StarshipStyle.cpp:3149-3152 */
+	color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+	padding-block: 2px; margin-block: -2px; border-radius: 4px; outline: 0; /* box room for the hover and focus outline; net layout unchanged */
+}
+/* The name is an SEditableTextBox (SDetailNameArea.cpp:131-141): NormalEditableTextBox hovered and focused brushes: StarshipCoreStyle.cpp:1283-1285 */
+.DetailsHeader-label:hover, .DetailsHeader-label.is-hover { background: var(--input); box-shadow: inset 0 0 0 1px var(--hover); }
+.DetailsHeader-label:focus, .DetailsHeader-label.is-focused { background: var(--input); box-shadow: inset 0 0 0 1px var(--primary); }
+.DetailsHeader-actions { display: flex; align-items: center; flex: none; gap: 4px; padding-right: 4px; } /* slot padding 4 around the lock: SDetailNameArea.cpp:164-170 */
+.DetailsHeader-positive { color: var(--accent-green); } /* PositiveActionButton icon colour: ToolWidgetsStyle.cpp:76 */
+.DetailsHeader-actions [data-role="lock"]:not([aria-pressed="true"]) .DetailsHeader-shackle--shut, .DetailsHeader-actions [data-role="lock"][aria-pressed="true"] .DetailsHeader-shackle--open { display: none; } /* the padlock closes while the lock is on */
+/* Instance row: SCSEditor.Background Recessed r4 + padding 4: StarshipStyle.cpp:4237, SSubobjectInstanceEditor.cpp:163-164 */
+.DetailsHeader-instanceBox { margin: 4px 2px 0; padding: 4px; background: var(--recessed); border-radius: 4px; } /* ComponentsBox padding (2,0,2,0): SActorDetails.cpp:269 */
+.DetailsHeader-instance {
+	display: flex; align-items: center; padding: 4px 0; /* row padding (0,4,0,4): SSubobjectEditor.cpp:721 */
+	background: var(--select-inactive); /* SceneOutliner.TableViewRow inactive brush: StarshipCoreStyle.cpp:2012 */
+	color: var(--foreground-hover); font: 400 13.333px/1.172 var(--font-sans); /* selected text ForegroundHover: StarshipCoreStyle.cpp:2019 */
+}
+.DetailsHeader-instance svg { width: 16px; height: 16px; margin-left: 4px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linejoin: round; } /* root actor icon margin: SSubobjectEditor.cpp:777 */
+.DetailsHeader-instance .name { margin-left: 6px; } /* SSubobjectEditor.cpp:789 */
+.DetailsHeader-instance .ctx { margin-left: 4px; } /* SSubobjectEditor.cpp:797 */

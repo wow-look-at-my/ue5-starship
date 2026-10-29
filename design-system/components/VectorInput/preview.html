@@ -8,163 +8,137 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Condensed:wght@400;700&family=Roboto+Mono&display=swap">
 <style>body { font-family: var(--font-sans); }</style>
 <style>
-	/* Every metric below is cited in README.md. Icons are 16x16 stroke approximations of the Starship SVGs. */
-	.VectorInput-frame { width: 360px; background: var(--recessed); } /* GridLine brush behind rows: StarshipStyle.cpp:3251 */
-	/* Property row: SDetailSingleItemRow.cpp:732-760. Row = 26px min + 1px GridLine bottom padding. */
-	.VectorInput-row { display: flex; min-height: 27px; padding-bottom: 1px; background: var(--recessed); }
-	.VectorInput-name, .VectorInput-value, .VectorInput-right { background: var(--panel); display: flex; align-items: center; min-width: 0; } /* GetRowBackgroundColor(0): PropertyEditorConstants.cpp:25-57 */
-	.VectorInput-row:hover .VectorInput-name, .VectorInput-row:hover .VectorInput-value, .VectorInput-row:hover .VectorInput-right { background: var(--header); } /* hovered row = Colors.Header */
-	.VectorInput-name { flex: 0 0 40%; padding-left: 20px; } /* indent 0 + arrow slot 2+16 + name slot pad 2: SDetailSingleItemRow.cpp:503-531 */
-	.VectorInput-value { flex: 1; padding: 0 2px 0 12px; } /* RightRowPadding (12,0,2,0): SDetailSingleItemRow.cpp:39 */
-	.VectorInput-right { flex: 0 0 22px; justify-content: flex-end; width: 22px; } /* RightColumnMinWidth 22: DetailsViewArgs.h:135 */
-	.VectorInput-split { flex: 0 0 1px; background: var(--recessed); } /* DetailsView.Splitter 1px: SDetailSingleItemRow.cpp:426-428, StarshipStyle.cpp:3246-3249 */
-	/* Name combo: ComboButton style, ContentPadding 0 + button padding (8,1,8,1): ComponentTransformDetails.cpp:212-229, StarshipCoreStyle.cpp:1470-1480 */
-	.VectorInput-combo {
-		display: inline-flex; align-items: center; height: 22px; padding: 1px 8px; border: 0; margin: 0; cursor: pointer;
-		background: var(--input); border-radius: 4px; box-shadow: inset 0 0 0 1px var(--input-outline);
-		color: var(--foreground); font: 400 10.667px/1.172 var(--font-sans); /* PropertyWindow.NormalFont = Small 8pt: StarshipStyle.cpp:3122 */
-	}
-	.VectorInput-combo:hover, .VectorInput-combo.is-hover, .VectorInput-combo[aria-expanded="true"] { box-shadow: inset 0 0 0 1px var(--hover); color: var(--foreground-hover); } /* StarshipCoreStyle.cpp:1472,1476 */
-	.VectorInput-combo:focus-visible, .VectorInput-lock:focus-visible, .VectorInput-reset:focus-visible, .VectorInput-field:focus-visible { outline: 1px solid var(--primary-hover); outline-offset: 1px; } /* browser keyboard ring: Slate draws none */
-	.VectorInput-combo:disabled, .VectorInput-reset:disabled { opacity: .45; cursor: default; } /* alpha x .45: SlateElementPixelShader.usf:535 */
-	.VectorInput-combo .label { min-width: 50px; padding-right: 2px; text-align: left; } /* SBox MinDesiredWidth(50), Padding(0,0,2,0): ComponentTransformDetails.cpp:221-223 */
-	.VectorInput-combo svg { width: 16px; height: 16px; margin: 2px; flex: none; } /* wide-chevron-down 16x16 + DownArrowPadding 2: StarshipCoreStyle.cpp:1491, SlateTypes.cpp:165 */
-	/* Scale lock: TransparentCheckBox, style padding (2,0,0,0), slot padding left 4: ComponentTransformDetails.cpp:237-244, SlateTypes.cpp:24 */
-	.VectorInput-lock { display: inline-flex; margin-left: 4px; padding: 0 0 0 2px; border: 0; background: transparent; cursor: pointer; color: var(--foreground); }
-	.VectorInput-lock:hover, .VectorInput-lock.is-locked { color: var(--foreground-hover); } /* StarshipCoreStyle.cpp:1615-1620 */
-	.VectorInput-lock svg { width: 16px; height: 16px; }
-	/* Three SNumericEntryBox slots, no gap: SVectorInputBox.h:425-464 */
-	.VectorInput-fields { display: flex; flex: 1; min-width: 0; }
-	.VectorInput-field {
-		position: relative; flex: 1 1 0; min-width: 0; display: flex; align-items: center;
-		background: var(--input); border-radius: 4px; /* NumericEntrySpinBox: StarshipCoreStyle.cpp:598, 'InputFocusRadius' CoreStyle.h:117 */
-		box-shadow: inset 0 0 0 1px var(--input-outline); /* StarshipCoreStyle.cpp:598 */
-	}
-	.VectorInput-field:hover, .VectorInput-field.is-hover { box-shadow: inset 0 0 0 1px var(--hover); } /* StarshipCoreStyle.cpp:599 */
-	.VectorInput-field.is-active { box-shadow: inset 0 0 0 1px var(--primary); } /* StarshipCoreStyle.cpp:600 */
-	.VectorInput-field.is-spin { cursor: ew-resize; user-select: none; touch-action: none; } /* OnCursorQuery ResizeLeftRight: SSpinBox.h:780-791 */
-	.VectorInput-field.is-editing { cursor: text; user-select: auto; }
-	.VectorInput-field.is-editing .VectorInput-value-text { outline: 0; }
-	.VectorInput-value-text {
-		flex: 1; min-width: 0; padding: 2.5px 7px; /* SpinBox TextPadding (7,2.5,7,2.5): StarshipCoreStyle.cpp:606 */
-		font: 400 10.667px/1.172 var(--font-sans); color: var(--foreground-hover); /* SpinBox ForegroundHover: StarshipCoreStyle.cpp:605 */
-		white-space: nowrap; overflow: hidden;
-	}
-	/* Narrow decorator: LabelPadding(3) + 2px wide bar: SVectorInputBox.h:454, SNumericEntryBox.h:448-457, StarshipCoreStyle.cpp:626 */
-	.VectorInput-edge { position: absolute; left: 3px; top: 3px; bottom: 3px; width: 2px; border-radius: 1px; }
-	.VectorInput-edge.x { background: #cb2600; } /* RedLabelBackgroundColor (0.594,0.0197,0.0) linear: SNumericEntryBox.h:813 */
-	.VectorInput-edge.y { background: #67a900; } /* GreenLabelBackgroundColor (0.1349,0.3959,0.0): SNumericEntryBox.h:816 */
-	.VectorInput-edge.z { background: #2c7eed; } /* BlueLabelBackgroundColor (0.0251,0.207,0.85): SNumericEntryBox.h:819 */
-	/* Reset to default: DetailsView.ExtensionToolBar button, padding (2,2), 16px icon: StarshipStyle.cpp:3277-3283, 3302 */
-	.VectorInput-reset { width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; border: 0; padding: 0; background: transparent; color: var(--foreground); cursor: pointer; }
-	.VectorInput-reset:hover, .VectorInput-reset.is-hover { color: var(--foreground-hover); }
-	.VectorInput-reset svg { width: 16px; height: 16px; }
-	.VectorInput-reset.is-placeholder { visibility: hidden; } /* NoBrush icon still reserves the slot: SDetailSingleItemRow.cpp:640-650 */
-
-	/* Relative / World menu: PopupMenu look; entries and heading: ComponentTransformDetails.cpp:175-210 */
-	.VectorInput-name { position: relative; }
-	.VectorInput-menu {
-		display: none; position: absolute; z-index: 10; left: 20px; top: calc(50% + 12px); width: 150px; box-sizing: border-box; padding: 8px 0;
-		background: var(--dropdown); box-shadow: inset 0 0 0 1px var(--dropdown-outline); /* Menu.Background and Menu.Outline: StarshipCoreStyle.cpp:2302-2303 */
-		font: 400 13.333px/16px var(--font-sans); color: var(--foreground-hover); user-select: none;
-	}
-	.VectorInput-menu.is-open { display: block; }
-	.VectorInput-menuHead { padding: 6px 12px; font: 700 9.333px/11px var(--font-sans); letter-spacing: .25em; text-transform: uppercase; color: var(--white-25); } /* Menu.Heading: StarshipCoreStyle.cpp:2327-2334 */
-	.VectorInput-menuItem { display: flex; align-items: center; padding: 3px 5px 3px 12px; outline: 0; cursor: pointer; } /* Menu.Block.Padding: StarshipCoreStyle.cpp:2314-2316 */
-	.VectorInput-menuItem:hover, .VectorInput-menuItem:focus, .VectorInput-menuItem.is-hover { background: var(--primary); } /* hovered brush Primary: StarshipCoreStyle.cpp:2420-2421 */
-	.VectorInput-menuMark { flex: none; width: 16px; height: 16px; margin: 0 8px 0 2px; display: flex; align-items: center; justify-content: center; }
-	.VectorInput-menuItem[aria-checked="true"] .VectorInput-menuMark::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--white); } /* checked radio White 8x8: StarshipCoreStyle.cpp:2391-2394 */
-	/* Preview captions only */
+	/* Demo layout only. The component layout is src/VectorInput/VectorInput.css. */
+	.VectorInput-frame { width: 360px; }
 	.VectorInput-cap { width: 360px; box-sizing: border-box; margin: 0; padding: 6px 8px 12px; font: 400 10.667px/1.4 var(--font-sans); color: var(--foreground); opacity: .8; }
 	.VectorInput-cap b { color: var(--foreground-hover); }
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-	<symbol id="VectorInput-chev" viewBox="0 0 16 16"><path d="m4.5 6.5 3.5 3.5 3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-	<symbol id="VectorInput-reset" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-	<symbol id="VectorInput-unlock" viewBox="0 0 16 16"><rect x="3" y="7.5" width="10" height="6.5" rx="1.25" fill="none" stroke="currentColor" stroke-width="1.25"/><path d="M5.5 7.5V5a2.5 2.5 0 0 1 4.9-.7" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></symbol>
-	<symbol id="VectorInput-locked" viewBox="0 0 16 16"><rect x="3" y="7.5" width="10" height="6.5" rx="1.25" fill="none" stroke="currentColor" stroke-width="1.25"/><path d="M5.5 7.5V5a2.5 2.5 0 0 1 5 0v2.5" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></symbol>
-</svg>
-
 <ue-vector-input>
 <div class="VectorInput-frame">
-	<div class="VectorInput-row" data-default="0,0,0" data-step="1">
-		<div class="VectorInput-name"><button class="VectorInput-combo" aria-haspopup="menu" aria-expanded="false"><span class="label">Location</span><svg><use href="#VectorInput-chev"/></svg></button>
-			<div class="VectorInput-menu" role="menu"><div class="VectorInput-menuHead">Location Type</div><div class="VectorInput-menuItem" role="menuitemradio" aria-checked="true" tabindex="-1"><span class="VectorInput-menuMark"></span>Relative</div><div class="VectorInput-menuItem" role="menuitemradio" aria-checked="false" tabindex="-1"><span class="VectorInput-menuMark"></span>World</div></div>
+	<div class="VectorInput-row" data-label="Location" data-default="0,0,0">
+		<div class="VectorInput-name">
+			<ue-combo-button mode="action">
+				<div class="combobutton-anchor">
+					<span class="combobutton combobutton--small" role="combobox" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="Location type"><span class="combobutton__label">Location</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
+					<div class="combobutton-menu" style="--combobutton-menu-min-width: 150px" hidden>
+						<ue-popup-menu>
+							<div class="popupmenu" role="menu" tabindex="0" aria-label="Location Type">
+								<div class="popupmenu__heading">Location Type</div>
+								<div class="popupmenu__row" role="menuitemradio" aria-checked="true"><span class="popupmenu__check"><span class="popupmenu__radio"></span></span><span class="popupmenu__body"><span class="popupmenu__label">Relative</span></span></div>
+								<div class="popupmenu__row" role="menuitemradio" aria-checked="false"><span class="popupmenu__check"><span class="popupmenu__radio"></span></span><span class="popupmenu__body"><span class="popupmenu__label">World</span></span></div>
+							</div>
+						</ue-popup-menu>
+					</div>
+				</div>
+			</ue-combo-button>
 		</div>
 		<div class="VectorInput-split"></div>
 		<div class="VectorInput-value"><div class="VectorInput-fields">
-			<div class="VectorInput-field is-spin" tabindex="0" role="spinbutton" aria-label="X" aria-valuenow="-215" data-value="-215"><i class="VectorInput-edge x"></i><div class="VectorInput-value-text">-215.0</div></div>
-			<div class="VectorInput-field is-spin" tabindex="0" role="spinbutton" aria-label="Y" aria-valuenow="-126.5" data-value="-126.5"><i class="VectorInput-edge y"></i><div class="VectorInput-value-text">-126.5</div></div>
-			<div class="VectorInput-field is-spin" tabindex="0" role="spinbutton" aria-label="Z" aria-valuenow="32" data-value="32"><i class="VectorInput-edge z"></i><div class="VectorInput-value-text">32.0</div></div>
+			<ue-spin-box><div class="spinbox spinbox--small" tabindex="0" role="spinbutton" aria-label="X" data-value="-215" data-delta="1"><span class="spinbox__axis spinbox__axis--x"></span><span class="spinbox__text">-215.0</span></div></ue-spin-box>
+			<ue-spin-box><div class="spinbox spinbox--small" tabindex="0" role="spinbutton" aria-label="Y" data-value="-126.5" data-delta="1"><span class="spinbox__axis spinbox__axis--y"></span><span class="spinbox__text">-126.5</span></div></ue-spin-box>
+			<ue-spin-box><div class="spinbox spinbox--small" tabindex="0" role="spinbutton" aria-label="Z" data-value="32" data-delta="1"><span class="spinbox__axis spinbox__axis--z"></span><span class="spinbox__text">32.0</span></div></ue-spin-box>
 		</div></div>
 		<div class="VectorInput-split"></div>
-		<div class="VectorInput-right"><button class="VectorInput-reset" title="Reset this property to its default value."><svg><use href="#VectorInput-reset"/></svg></button></div>
+		<div class="VectorInput-right">
+			<ue-reset-to-default differs><button class="resettodefault" type="button" title="Reset this property to its default value." aria-label="Reset to default"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button></ue-reset-to-default>
+		</div>
 	</div>
-	<div class="VectorInput-row" data-default="0,0,0" data-step="1" data-unit="&deg;">
-		<div class="VectorInput-name"><button class="VectorInput-combo" aria-haspopup="menu" aria-expanded="false"><span class="label">Rotation</span><svg><use href="#VectorInput-chev"/></svg></button>
-			<div class="VectorInput-menu" role="menu"><div class="VectorInput-menuHead">Rotation Type</div><div class="VectorInput-menuItem" role="menuitemradio" aria-checked="true" tabindex="-1"><span class="VectorInput-menuMark"></span>Relative</div><div class="VectorInput-menuItem" role="menuitemradio" aria-checked="false" tabindex="-1"><span class="VectorInput-menuMark"></span>World</div></div>
+	<div class="VectorInput-row" data-label="Rotation" data-default="0,0,0">
+		<div class="VectorInput-name">
+			<ue-combo-button mode="action">
+				<div class="combobutton-anchor">
+					<span class="combobutton combobutton--small" role="combobox" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="Rotation type"><span class="combobutton__label">Rotation</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
+					<div class="combobutton-menu" style="--combobutton-menu-min-width: 150px" hidden>
+						<ue-popup-menu>
+							<div class="popupmenu" role="menu" tabindex="0" aria-label="Rotation Type">
+								<div class="popupmenu__heading">Rotation Type</div>
+								<div class="popupmenu__row" role="menuitemradio" aria-checked="true"><span class="popupmenu__check"><span class="popupmenu__radio"></span></span><span class="popupmenu__body"><span class="popupmenu__label">Relative</span></span></div>
+								<div class="popupmenu__row" role="menuitemradio" aria-checked="false"><span class="popupmenu__check"><span class="popupmenu__radio"></span></span><span class="popupmenu__body"><span class="popupmenu__label">World</span></span></div>
+							</div>
+						</ue-popup-menu>
+					</div>
+				</div>
+			</ue-combo-button>
 		</div>
 		<div class="VectorInput-split"></div>
 		<div class="VectorInput-value"><div class="VectorInput-fields">
-			<div class="VectorInput-field is-spin" tabindex="0" role="spinbutton" aria-label="Roll" aria-valuenow="0" data-value="0"><i class="VectorInput-edge x"></i><div class="VectorInput-value-text">0.0 &deg;</div></div>
-			<div class="VectorInput-field is-spin" tabindex="0" role="spinbutton" aria-label="Pitch" aria-valuenow="0" data-value="0"><i class="VectorInput-edge y"></i><div class="VectorInput-value-text">0.0 &deg;</div></div>
-			<div class="VectorInput-field is-spin" tabindex="0" role="spinbutton" aria-label="Yaw" aria-valuenow="63.7" data-value="63.7"><i class="VectorInput-edge z"></i><div class="VectorInput-value-text">63.7 &deg;</div></div>
+			<ue-spin-box><div class="spinbox spinbox--small" tabindex="0" role="spinbutton" aria-label="Roll" data-value="0" data-delta="1" data-unit="&deg;"><span class="spinbox__axis spinbox__axis--x"></span><span class="spinbox__text">0.0</span></div></ue-spin-box>
+			<ue-spin-box><div class="spinbox spinbox--small" tabindex="0" role="spinbutton" aria-label="Pitch" data-value="0" data-delta="1" data-unit="&deg;"><span class="spinbox__axis spinbox__axis--y"></span><span class="spinbox__text">0.0</span></div></ue-spin-box>
+			<ue-spin-box><div class="spinbox spinbox--small" tabindex="0" role="spinbutton" aria-label="Yaw" data-value="63.7" data-delta="1" data-unit="&deg;"><span class="spinbox__axis spinbox__axis--z"></span><span class="spinbox__text">63.7</span></div></ue-spin-box>
 		</div></div>
 		<div class="VectorInput-split"></div>
-		<div class="VectorInput-right"><button class="VectorInput-reset" title="Reset this property to its default value."><svg><use href="#VectorInput-reset"/></svg></button></div>
+		<div class="VectorInput-right">
+			<ue-reset-to-default differs><button class="resettodefault" type="button" title="Reset this property to its default value." aria-label="Reset to default"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button></ue-reset-to-default>
+		</div>
 	</div>
-	<div class="VectorInput-row" data-default="1,1,1" data-step="0.0025">
-		<div class="VectorInput-name"><button class="VectorInput-combo" aria-haspopup="menu" aria-expanded="false"><span class="label">Scale</span><svg><use href="#VectorInput-chev"/></svg></button><button class="VectorInput-lock" aria-pressed="false" title="Scale uniformly (unlocked)"><svg><use href="#VectorInput-unlock"/></svg></button>
-			<div class="VectorInput-menu" role="menu"><div class="VectorInput-menuHead">Scale Type</div><div class="VectorInput-menuItem" role="menuitemradio" aria-checked="true" tabindex="-1"><span class="VectorInput-menuMark"></span>Relative</div><div class="VectorInput-menuItem" role="menuitemradio" aria-checked="false" tabindex="-1"><span class="VectorInput-menuMark"></span>World</div></div>
+	<div class="VectorInput-row" data-label="Scale" data-default="1,1,1">
+		<div class="VectorInput-name">
+			<ue-combo-button mode="action">
+				<div class="combobutton-anchor">
+					<span class="combobutton combobutton--small" role="combobox" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="Scale type"><span class="combobutton__label">Scale</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
+					<div class="combobutton-menu" style="--combobutton-menu-min-width: 150px" hidden>
+						<ue-popup-menu>
+							<div class="popupmenu" role="menu" tabindex="0" aria-label="Scale Type">
+								<div class="popupmenu__heading">Scale Type</div>
+								<div class="popupmenu__row" role="menuitemradio" aria-checked="true"><span class="popupmenu__check"><span class="popupmenu__radio"></span></span><span class="popupmenu__body"><span class="popupmenu__label">Relative</span></span></div>
+								<div class="popupmenu__row" role="menuitemradio" aria-checked="false"><span class="popupmenu__check"><span class="popupmenu__radio"></span></span><span class="popupmenu__body"><span class="popupmenu__label">World</span></span></div>
+							</div>
+						</ue-popup-menu>
+					</div>
+				</div>
+			</ue-combo-button>
+			<span class="VectorInput-lockSlot"><ue-button><button class="button button--toggle button--icon" data-role="lock" aria-pressed="false" aria-label="Scale uniformly" title="Scale uniformly (unlocked)"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><rect x="3" y="7.5" width="10" height="6.5" rx="1.25"/><path class="VectorInput-shackle VectorInput-shackle--open" d="M5.5 7.5V5a2.5 2.5 0 0 1 4.9-.7"/><path class="VectorInput-shackle VectorInput-shackle--shut" d="M5.5 7.5V5a2.5 2.5 0 0 1 5 0v2.5"/></svg></button></ue-button></span>
 		</div>
 		<div class="VectorInput-split"></div>
 		<div class="VectorInput-value"><div class="VectorInput-fields">
-			<div class="VectorInput-field is-spin" tabindex="0" role="spinbutton" aria-label="X" aria-valuenow="1" data-value="1"><i class="VectorInput-edge x"></i><div class="VectorInput-value-text">1.0</div></div>
-			<div class="VectorInput-field is-spin" tabindex="0" role="spinbutton" aria-label="Y" aria-valuenow="1" data-value="1"><i class="VectorInput-edge y"></i><div class="VectorInput-value-text">1.0</div></div>
-			<div class="VectorInput-field is-spin" tabindex="0" role="spinbutton" aria-label="Z" aria-valuenow="1" data-value="1"><i class="VectorInput-edge z"></i><div class="VectorInput-value-text">1.0</div></div>
+			<ue-spin-box><div class="spinbox spinbox--small" tabindex="0" role="spinbutton" aria-label="X" data-value="1" data-delta="0.0025"><span class="spinbox__axis spinbox__axis--x"></span><span class="spinbox__text">1.0</span></div></ue-spin-box>
+			<ue-spin-box><div class="spinbox spinbox--small" tabindex="0" role="spinbutton" aria-label="Y" data-value="1" data-delta="0.0025"><span class="spinbox__axis spinbox__axis--y"></span><span class="spinbox__text">1.0</span></div></ue-spin-box>
+			<ue-spin-box><div class="spinbox spinbox--small" tabindex="0" role="spinbutton" aria-label="Z" data-value="1" data-delta="0.0025"><span class="spinbox__axis spinbox__axis--z"></span><span class="spinbox__text">1.0</span></div></ue-spin-box>
 		</div></div>
 		<div class="VectorInput-split"></div>
-		<div class="VectorInput-right"><button class="VectorInput-reset is-placeholder" tabindex="-1" title="Reset this property to its default value."><svg><use href="#VectorInput-reset"/></svg></button></div>
+		<div class="VectorInput-right">
+			<ue-reset-to-default><button class="resettodefault" type="button" title="Reset this property to its default value." aria-label="Reset to default"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button></ue-reset-to-default>
+		</div>
 	</div>
 </div>
 </ue-vector-input>
 <p class="VectorInput-cap"><b>Live.</b> Drag a field sideways to change it (Escape cancels the drag, release snaps to the step). Click without dragging to type: Enter commits, Escape cancels. Tab to a field and press Up or Down to step, Enter to type. The reset arrow shows only when a value differs from its default and resets all three. The Scale lock moves the three axes together. The row label opens a Relative / World menu.</p>
 
-<div class="VectorInput-frame">
+<div class="VectorInput-frame" data-pinned>
 	<div class="VectorInput-row">
-		<div class="VectorInput-name"><button class="VectorInput-combo"><span class="label">Location</span><svg><use href="#VectorInput-chev"/></svg></button></div>
+		<div class="VectorInput-name"><span class="combobutton combobutton--small" tabindex="-1"><span class="combobutton__label">Location</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></div>
 		<div class="VectorInput-split"></div>
 		<div class="VectorInput-value"><div class="VectorInput-fields">
-			<div class="VectorInput-field"><i class="VectorInput-edge x"></i><div class="VectorInput-value-text">-215.0</div></div>
-			<div class="VectorInput-field"><i class="VectorInput-edge y"></i><div class="VectorInput-value-text">-126.5</div></div>
-			<div class="VectorInput-field is-active"><i class="VectorInput-edge z"></i><div class="VectorInput-value-text">32.0</div></div>
+			<div class="spinbox spinbox--small spinbox--unbounded"><span class="spinbox__axis spinbox__axis--x"></span><span class="spinbox__text">-215.0</span></div>
+			<div class="spinbox spinbox--small spinbox--unbounded"><span class="spinbox__axis spinbox__axis--y"></span><span class="spinbox__text">-126.5</span></div>
+			<div class="spinbox spinbox--small spinbox--unbounded spinbox--active"><span class="spinbox__axis spinbox__axis--z"></span><span class="spinbox__text">32.0</span></div>
 		</div></div>
 		<div class="VectorInput-split"></div>
-		<div class="VectorInput-right"><button class="VectorInput-reset" title="Reset this property to its default value."><svg><use href="#VectorInput-reset"/></svg></button></div>
+		<div class="VectorInput-right"><button class="resettodefault" type="button" tabindex="-1" aria-label="Reset to default"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button></div>
 	</div>
 	<div class="VectorInput-row">
-		<div class="VectorInput-name"><button class="VectorInput-combo"><span class="label">Rotation</span><svg><use href="#VectorInput-chev"/></svg></button></div>
+		<div class="VectorInput-name"><span class="combobutton combobutton--small" tabindex="-1"><span class="combobutton__label">Rotation</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></div>
 		<div class="VectorInput-split"></div>
 		<div class="VectorInput-value"><div class="VectorInput-fields">
-			<div class="VectorInput-field"><i class="VectorInput-edge x"></i><div class="VectorInput-value-text">0.0 &deg;</div></div>
-			<div class="VectorInput-field"><i class="VectorInput-edge y"></i><div class="VectorInput-value-text">0.0 &deg;</div></div>
-			<div class="VectorInput-field"><i class="VectorInput-edge z"></i><div class="VectorInput-value-text">63.7 &deg;</div></div>
+			<div class="spinbox spinbox--small spinbox--unbounded"><span class="spinbox__axis spinbox__axis--x"></span><span class="spinbox__text">0.0</span><span class="spinbox__unit">&deg;</span></div>
+			<div class="spinbox spinbox--small spinbox--unbounded"><span class="spinbox__axis spinbox__axis--y"></span><span class="spinbox__text">0.0</span><span class="spinbox__unit">&deg;</span></div>
+			<div class="spinbox spinbox--small spinbox--unbounded"><span class="spinbox__axis spinbox__axis--z"></span><span class="spinbox__text">63.7</span><span class="spinbox__unit">&deg;</span></div>
 		</div></div>
 		<div class="VectorInput-split"></div>
-		<div class="VectorInput-right"><button class="VectorInput-reset" title="Reset this property to its default value."><svg><use href="#VectorInput-reset"/></svg></button></div>
+		<div class="VectorInput-right"><button class="resettodefault" type="button" tabindex="-1" aria-label="Reset to default"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button></div>
 	</div>
 	<div class="VectorInput-row">
-		<div class="VectorInput-name"><button class="VectorInput-combo"><span class="label">Scale</span><svg><use href="#VectorInput-chev"/></svg></button><button class="VectorInput-lock" title="Scale uniformly (unlocked)"><svg><use href="#VectorInput-unlock"/></svg></button></div>
+		<div class="VectorInput-name"><span class="combobutton combobutton--small" tabindex="-1"><span class="combobutton__label">Scale</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span><span class="VectorInput-lockSlot"><button class="button button--toggle button--icon" aria-pressed="false" tabindex="-1" aria-label="Scale uniformly"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><rect x="3" y="7.5" width="10" height="6.5" rx="1.25"/><path class="VectorInput-shackle VectorInput-shackle--open" d="M5.5 7.5V5a2.5 2.5 0 0 1 4.9-.7"/></svg></button></span></div>
 		<div class="VectorInput-split"></div>
 		<div class="VectorInput-value"><div class="VectorInput-fields">
-			<div class="VectorInput-field"><i class="VectorInput-edge x"></i><div class="VectorInput-value-text">1.0</div></div>
-			<div class="VectorInput-field"><i class="VectorInput-edge y"></i><div class="VectorInput-value-text">1.0</div></div>
-			<div class="VectorInput-field"><i class="VectorInput-edge z"></i><div class="VectorInput-value-text">1.0</div></div>
+			<div class="spinbox spinbox--small spinbox--unbounded"><span class="spinbox__axis spinbox__axis--x"></span><span class="spinbox__text">1.0</span></div>
+			<div class="spinbox spinbox--small spinbox--unbounded"><span class="spinbox__axis spinbox__axis--y"></span><span class="spinbox__text">1.0</span></div>
+			<div class="spinbox spinbox--small spinbox--unbounded"><span class="spinbox__axis spinbox__axis--z"></span><span class="spinbox__text">1.0</span></div>
 		</div></div>
 		<div class="VectorInput-split"></div>
-		<div class="VectorInput-right"><button class="VectorInput-reset is-placeholder" tabindex="-1"><svg><use href="#VectorInput-reset"/></svg></button></div>
+		<div class="VectorInput-right"><button class="resettodefault resettodefault--idle" type="button" tabindex="-1" aria-label="Reset to default" disabled><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button></div>
 	</div>
 </div>
 <p class="VectorInput-cap"><b>Pinned.</b> Forced state: the Location Z field in its active (dragging or typing) outline.</p>

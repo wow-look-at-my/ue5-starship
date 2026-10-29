@@ -1,4 +1,272 @@
-/* src/_shared/base.css */
+/* design-system/src/_shared/base.css */
 [data-pinned] {
   pointer-events: none;
+}
+
+/* design-system/src/Button/Button.css */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  border: 0;
+  outline: 0;
+  padding: 3.5px 16px;
+  border-radius: 4px;
+  background: var(--secondary);
+  box-shadow: inset 0 0 0 1px var(--input);
+  color: var(--foreground-hover);
+  font: 400 13.333px/16px var(--font-sans);
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+}
+.button:hover,
+.button--hover {
+  background: var(--hover);
+}
+.button:active,
+.button.button--pressed {
+  background: var(--header);
+  padding: 4.5px 16px 2.5px;
+}
+.button--disabled,
+.button--disabled:hover,
+.button:disabled,
+.button:disabled:hover,
+.button[aria-disabled=true],
+.button[aria-disabled=true]:hover {
+  background: var(--secondary);
+  opacity: .45;
+  color: var(--foreground);
+}
+.button--disabled-brush,
+.button--disabled-brush:hover {
+  background: var(--dropdown);
+  box-shadow: inset 0 0 0 1px var(--recessed);
+  color: var(--foreground);
+}
+.button--focus,
+.button:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+.button--primary {
+  background: var(--primary);
+}
+.button--primary:hover,
+.button--primary.button--hover {
+  background: var(--primary-hover);
+}
+.button--primary:active,
+.button--primary.button--pressed {
+  background: var(--primary-press);
+}
+.button--primary.button--disabled,
+.button--primary.button--disabled:hover,
+.button--primary:disabled,
+.button--primary:disabled:hover,
+.button--primary[aria-disabled=true],
+.button--primary[aria-disabled=true]:hover {
+  background: var(--primary);
+}
+.button--primary.button--disabled-brush,
+.button--primary.button--disabled-brush:hover {
+  background: var(--dropdown);
+}
+.button--bold {
+  font-weight: 700;
+}
+.button--simple,
+.button--toggle {
+  background: transparent;
+  box-shadow: none;
+  color: var(--foreground);
+  padding: 3px 8px;
+}
+.button--simple:hover,
+.button--simple.button--hover,
+.button--toggle:hover,
+.button--toggle.button--hover {
+  background: var(--dropdown);
+  color: var(--foreground-hover);
+}
+.button--simple:active,
+.button--simple.button--pressed {
+  background: var(--dropdown);
+  color: var(--foreground-hover);
+  padding: 4px 8px 2px;
+}
+.button--simple.button--disabled,
+.button--simple.button--disabled:hover,
+.button--simple:disabled,
+.button--simple:disabled:hover,
+.button--simple[aria-disabled=true],
+.button--simple[aria-disabled=true]:hover,
+.button--toggle.button--disabled,
+.button--toggle.button--disabled:hover,
+.button--toggle:disabled,
+.button--toggle:disabled:hover,
+.button--toggle[aria-disabled=true],
+.button--toggle[aria-disabled=true]:hover {
+  background: transparent;
+  color: var(--foreground);
+}
+.button--icon {
+  padding: 3px 4px;
+}
+.button--icon:active,
+.button--icon.button--pressed {
+  padding: 4px 4px 2px;
+}
+.button--toggle:active,
+.button--toggle.button--pressed {
+  background: var(--dropdown);
+  color: var(--foreground-hover);
+  padding: 3px 8px;
+}
+.button--toggle.button--icon:active,
+.button--toggle.button--icon.button--pressed {
+  padding: 3px 4px;
+}
+.button--toggle[aria-pressed=true],
+.button--toggle.button--checked {
+  background: var(--primary);
+  color: var(--foreground-hover);
+}
+.button--toggle[aria-pressed=true]:hover,
+.button--toggle.button--checked.button--hover {
+  background: var(--primary-hover);
+}
+.button--toggle[aria-pressed=true]:active,
+.button--toggle[aria-pressed=true].button--pressed {
+  background: var(--dropdown);
+}
+.button--toggle[aria-pressed=true][aria-disabled=true],
+.button--toggle[aria-pressed=true][aria-disabled=true]:hover,
+.button--toggle[aria-pressed=true]:disabled {
+  background: var(--primary);
+  color: var(--foreground-hover);
+}
+.button--toggle[aria-disabled=true]:active {
+  background: transparent;
+  color: var(--foreground);
+}
+.button--toggle[aria-pressed=true][aria-disabled=true]:active {
+  background: var(--primary);
+  color: var(--foreground-hover);
+}
+.button--small {
+  box-sizing: border-box;
+  height: 22px;
+  padding: 0 14px;
+}
+.button--small:active,
+.button--small.button--pressed {
+  padding: 1px 14px 0;
+}
+.button__icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  margin-right: 4px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.button__icon--solo {
+  margin-right: 0;
+}
+
+/* design-system/src/DetailsHeader/DetailsHeader.css */
+.DetailsHeader-frame {
+  background: var(--panel);
+  padding-bottom: 6px;
+}
+.DetailsHeader {
+  padding: 4px 0 0 10px;
+}
+.DetailsHeader-name {
+  display: flex;
+  align-items: center;
+  min-height: 22px;
+}
+.DetailsHeader-icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.25;
+  stroke-linejoin: round;
+  color: var(--foreground);
+}
+.DetailsHeader-label {
+  flex: 1;
+  min-width: 0;
+  padding: 0 3px 0 8px;
+  font: 400 14.667px/1.172 var(--font-sans);
+  color: var(--white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-block: 2px;
+  margin-block: -2px;
+  border-radius: 4px;
+  outline: 0;
+}
+.DetailsHeader-label:hover,
+.DetailsHeader-label.is-hover {
+  background: var(--input);
+  box-shadow: inset 0 0 0 1px var(--hover);
+}
+.DetailsHeader-label:focus,
+.DetailsHeader-label.is-focused {
+  background: var(--input);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+.DetailsHeader-actions {
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: 4px;
+  padding-right: 4px;
+}
+.DetailsHeader-positive {
+  color: var(--accent-green);
+}
+.DetailsHeader-actions [data-role=lock]:not([aria-pressed=true]) .DetailsHeader-shackle--shut,
+.DetailsHeader-actions [data-role=lock][aria-pressed=true] .DetailsHeader-shackle--open {
+  display: none;
+}
+.DetailsHeader-instanceBox {
+  margin: 4px 2px 0;
+  padding: 4px;
+  background: var(--recessed);
+  border-radius: 4px;
+}
+.DetailsHeader-instance {
+  display: flex;
+  align-items: center;
+  padding: 4px 0;
+  background: var(--select-inactive);
+  color: var(--foreground-hover);
+  font: 400 13.333px/1.172 var(--font-sans);
+}
+.DetailsHeader-instance svg {
+  width: 16px;
+  height: 16px;
+  margin-left: 4px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.25;
+  stroke-linejoin: round;
+}
+.DetailsHeader-instance .name {
+  margin-left: 6px;
+}
+.DetailsHeader-instance .ctx {
+  margin-left: 4px;
 }

@@ -13,6 +13,22 @@ export class UeComboButtonElement extends UeElement {
 	#trigger!: HTMLElement;
 	#panel!: HTMLElement;
 
+	// In value mode: the value of the picked row. The setter picks the row whose value or label matches, shows its label and fires no ue-combo-pick. This is because the owner that sets it
+	// already knows.
+	get value(): string {
+		const picked = this.querySelector<HTMLElement>('.popupmenu__row[aria-selected="true"]');
+		return picked?.dataset.value ?? (picked ? rowLabel(picked, '.popupmenu__label') : '');
+	}
+
+	set value(next: string) {
+		const row = this.querySelectorAll<HTMLElement>('.popupmenu[tabindex] > .popupmenu__row');
+		const match = Array.from(row).find((each) => (each.dataset.value ?? rowLabel(each, '.popupmenu__label')) === next);
+		if (!match) throw new Error('ue-combo-button has no row with the value ' + next);
+		const label = this.querySelector<HTMLElement>('.combobutton__label');
+		if (label) label.textContent = rowLabel(match, '.popupmenu__label');
+		for (const each of row) each.setAttribute('aria-selected', String(each === match));
+	}
+
 	protected setup(): void {
 		const trigger = this.one('.combobutton');
 		const panel = this.one('.combobutton-menu');

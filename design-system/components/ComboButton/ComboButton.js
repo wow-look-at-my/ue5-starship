@@ -1,4 +1,4 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   #ready = false;
@@ -51,12 +51,12 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/_shared/own.ts
+// design-system/src/_shared/own.ts
 function ownedBy(host, target) {
   return target instanceof Element && target.closest(host.localName) === host;
 }
 
-// src/_shared/popup.ts
+// design-system/src/_shared/popup.ts
 function enabledRows(menu, rowSelector) {
   return Array.from(menu.querySelectorAll(rowSelector)).filter((row) => row.getAttribute("aria-disabled") !== "true");
 }
@@ -65,7 +65,7 @@ function rowLabel(row, labelSelector) {
   return (label ?? row).textContent?.trim() ?? "";
 }
 
-// src/PopupMenu/PopupMenu.ts
+// design-system/src/PopupMenu/PopupMenu.ts
 var ROW = ".popupmenu__row";
 var CURRENT = "popupmenu__row--hover";
 var OPEN = "popupmenu__row--open";
@@ -262,12 +262,26 @@ var UePopupMenuElement = class extends UeElement {
 };
 define("ue-popup-menu", UePopupMenuElement);
 
-// src/ComboButton/ComboButton.ts
+// design-system/src/ComboButton/ComboButton.ts
 var OPEN2 = "combobutton--open";
 var ACTIVATE_KEYS = ["Enter", " ", "ArrowDown", "ArrowUp"];
 var UeComboButtonElement = class extends UeElement {
   #trigger;
   #panel;
+  // In value mode: the value of the picked row. The setter picks the row whose value or label matches, shows its label and fires no ue-combo-pick. This is because the owner that sets it
+  // already knows.
+  get value() {
+    const picked = this.querySelector('.popupmenu__row[aria-selected="true"]');
+    return picked?.dataset.value ?? (picked ? rowLabel(picked, ".popupmenu__label") : "");
+  }
+  set value(next) {
+    const row = this.querySelectorAll(".popupmenu[tabindex] > .popupmenu__row");
+    const match = Array.from(row).find((each) => (each.dataset.value ?? rowLabel(each, ".popupmenu__label")) === next);
+    if (!match) throw new Error("ue-combo-button has no row with the value " + next);
+    const label = this.querySelector(".combobutton__label");
+    if (label) label.textContent = rowLabel(match, ".popupmenu__label");
+    for (const each of row) each.setAttribute("aria-selected", String(each === match));
+  }
   setup() {
     const trigger = this.one(".combobutton");
     const panel = this.one(".combobutton-menu");

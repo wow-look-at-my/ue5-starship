@@ -1,9 +1,9 @@
-/* src/_shared/base.css */
+/* design-system/src/_shared/base.css */
 [data-pinned] {
   pointer-events: none;
 }
 
-/* src/DockTab/DockTab.css */
+/* design-system/src/DockTab/DockTab.css */
 :is(.dockTab, .tabWell-tab) {
   position: relative;
   display: inline-flex;
@@ -129,7 +129,7 @@
   outline-offset: -2px;
 }
 
-/* src/TabWell/TabWell.css */
+/* design-system/src/TabWell/TabWell.css */
 :is(.dockTab-well, .tabWell-well) {
   display: flex;
   align-items: flex-end;

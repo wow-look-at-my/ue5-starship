@@ -1,4 +1,4 @@
-// src/_shared/contentMenu.ts
+// design-system/src/_shared/contentMenu.ts
 var TICK = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l3 3 6-7"/></svg>';
 function openMenu(host, anchor, options) {
   const menu = document.createElement("div");

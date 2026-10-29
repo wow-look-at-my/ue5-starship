@@ -1,17 +1,13 @@
-// <ue-details-header> wraps the DetailsHeader markup: lock toggle and the editable actor name.
+// <ue-details-header> wraps the Details name area: class icon, editable actor
+// name, Add, Blueprint, help and lock buttons, and the instance row.
 import { UeElement, define } from '../_shared/element.ts';
+import '../Button/Button.ts';
+import './DetailsHeader.css';
 
 class UeDetailsHeader extends UeElement {
 	protected setup(): void {
-		const lock = this.one<HTMLButtonElement>('.DetailsHeader-lock');
 		const label = this.one<HTMLElement>('.DetailsHeader-label');
-		if (lock) this.on(lock, 'click', () => this.setLocked(lock, lock.getAttribute('aria-pressed') !== 'true'));
 		if (label) this.wireLabel(label);
-	}
-
-	private setLocked(lock: HTMLElement, locked: boolean): void {
-		lock.setAttribute('aria-pressed', String(locked));
-		lock.querySelector('use')?.setAttribute('href', locked ? '#DetailsHeader-locked' : '#DetailsHeader-unlock');
 	}
 
 	// Enter commits, Escape restores the text from before the edit. The instance row shows the committed name.

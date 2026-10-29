@@ -11,6 +11,21 @@ The area of the Details panel name: class icon, editable actor name, Add / Bluep
 
 Icons in `preview.html` are 16x16 stroke approximations. The Starship SVG files are not in the source tree.
 
+## Composed from
+
+`src/DetailsHeader/DetailsHeader.css` holds only the layout of the name area. Every button is a primitive. The metrics of those buttons are in the [Button README](../Button/README.md).
+
+| Part | Primitive | Count |
+|---|---|---|
+| Add | `ue-button`, `button--small`, with a plus glyph | 1 |
+| Blueprint | `ue-button`, `button--icon` | 1 |
+| Help | `ue-button`, `button--simple button--icon` | 1 |
+| Lock | `ue-button`, `button--toggle button--icon`. `aria-pressed` is the state | 1 |
+
+Owned by this component: the class icon, the instance row and the editable actor name. The name has no primitive, so `ue-details-header` wires it: Enter commits, Escape restores, and a commit updates the instance row. The padlock glyph carries both shackles, and the component CSS shows one by `aria-pressed` of the lock.
+
+The primitive look wins where it differs from the Slate rows below. A locked padlock is a Primary toggle fill, not a brighter glyph. The Add button uses the `button--small` size.
+
 ## Metrics
 
 | Part | Value | Source |

@@ -1,4 +1,4 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   #ready = false;
@@ -51,7 +51,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/TextInput/TextInput.ts
+// design-system/src/TextInput/TextInput.ts
 var UeTextInputElement = class extends UeElement {
   setup() {
     const box = this.one(".textinput");

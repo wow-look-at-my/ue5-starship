@@ -8,155 +8,57 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Condensed:wght@400;700&family=Roboto+Mono&display=swap">
 <style>body { font-family: var(--font-sans); }</style>
 <style>
-	/* Every metric below is cited in README.md. Icons are simple filled/stroke approximations of the Starship SVGs. */
-	.DetailsCategory-frame { width: 360px; background: var(--recessed); } /* tree sits on DetailsView.GridLine (Recessed): SDetailsView.cpp:430-436 */
-
-	/* Category header row: GridLine border with bottom padding 1 (Classic style: top padding 0): SDetailCategoryTableRow.cpp:139-144, DetailsViewStyle.cpp:241-246 */
-	.DetailsCategory-cat { padding-bottom: 1px; background: var(--recessed); }
-	.DetailsCategory-catRow { display: flex; align-items: center; min-height: 26px; background: var(--header); cursor: pointer; } /* DetailsView.CategoryTop = Header; MinDesiredHeight 26: StarshipStyle.cpp:3188, SDetailCategoryTableRow.cpp:155, PropertyEditorConstants.h:28 */
-	.DetailsCategory-arrow { flex: none; margin-left: 2px; width: 16px; height: 16px; color: color-mix(in srgb, var(--foreground) 60%, transparent); } /* caret 16x16, Foreground tint x SubduedForeground 0.6: StarshipCoreStyle.cpp:2072-2075, SDetailExpanderArrow.cpp:25-31, WidgetStyle.cpp:11 */
-	.DetailsCategory-catRow:hover .DetailsCategory-arrow, .DetailsCategory-catRow.is-hover .DetailsCategory-arrow { color: color-mix(in srgb, var(--foreground-hover) 60%, transparent); } /* *_Hovered brush: StarshipCoreStyle.cpp:2073, 2075 */
-	.DetailsCategory-title { flex: 1; min-width: 0; margin-left: 4px; font: 700 10.667px/1.172 var(--font-sans); color: var(--foreground-header); } /* SmallBold 8pt, ForegroundHeader: StarshipStyle.cpp:3265-3269, SDetailCategoryTableRow.cpp:88-97 */
-
-	/* Property row: 26px min + 1px GridLine bottom padding: SDetailSingleItemRow.cpp:732-738 */
-	.DetailsCategory-row { display: flex; min-height: 27px; padding-bottom: 1px; background: var(--recessed); }
-	.DetailsCategory-indent { flex: none; background: var(--panel); } /* 16px per level, paints GetRowBackgroundColor(i): SDetailRowIndent.cpp:33-48, 56-70 */
-	.DetailsCategory-name, .DetailsCategory-value, .DetailsCategory-right { background: var(--panel); display: flex; align-items: center; min-width: 0; } /* GetRowBackgroundColor(0): PropertyEditorConstants.cpp:25-57 */
-	.DetailsCategory-row.is-hover .DetailsCategory-name, .DetailsCategory-row.is-hover .DetailsCategory-value, .DetailsCategory-row.is-hover .DetailsCategory-right,
-	.DetailsCategory-row:hover .DetailsCategory-name, .DetailsCategory-row:hover .DetailsCategory-value, .DetailsCategory-row:hover .DetailsCategory-right { background: var(--header); } /* hovered: Colors.Header: PropertyEditorConstants.cpp:45-47 */
-	.DetailsCategory-row.is-nested .DetailsCategory-name, .DetailsCategory-row.is-nested .DetailsCategory-value { background: #282828; } /* level 1: Panel #242424 + 4 per channel: PropertyEditorConstants.cpp:40-54 */
-	.DetailsCategory-row.is-nested.is-hover .DetailsCategory-name, .DetailsCategory-row.is-nested.is-hover .DetailsCategory-value,
-	.DetailsCategory-row.is-nested:hover .DetailsCategory-name, .DetailsCategory-row.is-nested:hover .DetailsCategory-value { background: #333333; } /* Header #2f2f2f + 4 */
-	.DetailsCategory-row.is-hidden, .DetailsCategory-cat.is-hidden, .DetailsCategory-adv.is-hidden { display: none; } /* folded by a collapsed parent, the search or the section pill */
-	.DetailsCategory-name { flex: 0 0 40%; font: 400 10.667px/1.172 var(--font-sans); color: var(--foreground); } /* NormalFont 8pt: StarshipStyle.cpp:3122; Name 40%, Value 60%: DetailsViewArgs.h:134 */
-	.DetailsCategory-row.is-nested .DetailsCategory-name { flex-basis: calc(40% - 16px); } /* the indent comes out of the Name column */
-	.DetailsCategory-nameInner { display: flex; align-items: center; min-width: 0; }
-	.DetailsCategory-rowArrow { margin-left: 2px; width: 16px; height: 16px; flex: none; color: color-mix(in srgb, var(--foreground) 60%, transparent); visibility: hidden; } /* slot padding 2, 16px caret, Hidden when no children: SDetailSingleItemRow.cpp:503-510, SDetailExpanderArrow.cpp:36-44 */
-	.DetailsCategory-rowArrow.has-children { visibility: visible; }
-	.DetailsCategory-label { margin-left: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } /* name slot Padding(2,0,0,0): SDetailSingleItemRow.cpp:523-531 */
-	.DetailsCategory-value { flex: 1; padding: 0 2px 0 12px; } /* RightRowPadding (12,0,2,0): SDetailSingleItemRow.cpp:39, 553 */
-	.DetailsCategory-right { flex: 0 0 22px; justify-content: flex-end; } /* RightColumnMinWidth 22: DetailsViewArgs.h:135 */
-	.DetailsCategory-split { flex: 0 0 1px; background: var(--recessed); } /* DetailsView.Splitter, 1px handle: SDetailSingleItemRow.cpp:426-428, StarshipStyle.cpp:3246-3249 */
-
-	/* Value widgets: NormalEditableTextBox (padding 8,3,8,4), Checkbox (18px), ComboButton: StarshipCoreStyle.cpp:1282-1294, 1577-1599, 1470-1494 */
-	.DetailsCategory-text { flex: 1; min-width: 0; padding: 3px 8px 4px; border-radius: 4px; background: var(--input); box-shadow: inset 0 0 0 1px var(--input-outline); color: var(--foreground); font: 400 10.667px/1.172 var(--font-sans); white-space: nowrap; overflow: hidden; }
-	.DetailsCategory-text:hover, .DetailsCategory-text.is-hover { box-shadow: inset 0 0 0 1px var(--hover); }
-	.DetailsCategory-text:focus, .DetailsCategory-text.is-focused { box-shadow: inset 0 0 0 1px var(--primary); color: var(--foreground-hover); outline: 0; } /* NormalEditableTextBox focused brush and White foreground: StarshipCoreStyle.cpp:1285, 1293 */
-	.DetailsCategory-check { width: 18px; height: 18px; flex: none; border-radius: 3px; background: var(--input); box-shadow: inset 0 0 0 1px var(--secondary); color: var(--primary); display: inline-flex; align-items: center; justify-content: center; } /* CheckboxCornerRadius 3, outline Secondary: StarshipCoreStyle.cpp:1574, 1597 */
-	.DetailsCategory-check:hover, .DetailsCategory-check.is-hover { box-shadow: inset 0 0 0 1px var(--hover); }
-	.DetailsCategory-check svg { width: 16px; height: 16px; }
-	.DetailsCategory-check.is-off svg { visibility: hidden; } /* unchecked: the tick is not drawn */
-	.DetailsCategory-check[role="checkbox"] { cursor: pointer; }
-	.DetailsCategory-check:focus-visible, .DetailsCategory-reset:focus-visible, .DetailsCategory-catRow:focus-visible, .DetailsCategory-rowArrow:focus-visible, .DetailsCategory-advRow:focus-visible, .DetailsCategory-pill:focus-visible, .DetailsCategory-tool:focus-visible { outline: 1px solid var(--primary-hover); outline-offset: -1px; } /* browser keyboard ring: Slate draws none */
-	.DetailsCategory-check[aria-disabled="true"] { opacity: .45; cursor: default; } /* alpha x .45: SlateElementPixelShader.usf:535 */
-	.DetailsCategory-combo { flex: 1; min-width: 0; display: flex; align-items: center; height: 22px; padding: 1px 8px; border-radius: 4px; background: var(--input); box-shadow: inset 0 0 0 1px var(--input-outline); color: var(--foreground); font: 400 10.667px/1.172 var(--font-sans); }
-	.DetailsCategory-combo:hover, .DetailsCategory-combo.is-hover { box-shadow: inset 0 0 0 1px var(--hover); color: var(--foreground-hover); }
-	.DetailsCategory-combo .label { flex: 1; }
-	.DetailsCategory-combo svg { width: 16px; height: 16px; margin: 2px; flex: none; }
-	.DetailsCategory-reset { width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; color: var(--foreground); } /* StarshipStyle.cpp:3277-3283 */
-	.DetailsCategory-reset svg { width: 16px; height: 16px; }
-	.DetailsCategory-reset[role="button"] { cursor: pointer; }
-	.DetailsCategory-reset:hover, .DetailsCategory-reset.is-hover { color: var(--foreground-hover); }
-	.DetailsCategory-reset.is-idle { visibility: hidden; } /* the slot keeps its width when the value equals the default: SDetailSingleItemRow.cpp:640-650 */
-
-	/* "Advanced" dropdown row: Panel row, regular-weight Small label, MinHeight 26: DetailAdvancedDropdownNode.cpp:74-111 */
-	.DetailsCategory-adv { padding-bottom: 1px; background: var(--recessed); }
-	.DetailsCategory-advRow { display: flex; align-items: center; min-height: 26px; background: var(--panel); cursor: pointer; }
-	.DetailsCategory-advRow:hover, .DetailsCategory-advRow.is-hover { background: var(--header); }
-	.DetailsCategory-advRow .DetailsCategory-title { font-weight: 400; } /* Font(PropertyFontStyle) wins over the SmallBold TextStyle font: DetailAdvancedDropdownNode.cpp:85-86 */
-	.DetailsCategory-empty { display: none; padding: 10px 12px; background: var(--panel); font: 400 10.667px/1.172 var(--font-sans); color: var(--foreground); }
-	.DetailsCategory-empty.is-shown { display: block; }
-
-	/* Live details panel: a header row, a search row and a pill strip composed above the category tree. Metrics repeat DetailsHeader, DetailsSearchRow and FilterPills. */
-	.DetailsCategory-panel { position: relative; width: 360px; background: var(--panel); }
-	.DetailsCategory-hdr { display: flex; align-items: center; padding: 4px 0 0 10px; min-height: 22px; } /* SActorDetails.cpp:336 */
-	.DetailsCategory-hdrIcon { width: 16px; height: 16px; flex: none; color: var(--foreground); }
-	.DetailsCategory-hdrName { flex: 1; min-width: 0; margin: 0 3px 0 8px; padding: 2px 8px; border-radius: 4px; outline: 0; font: 400 14.667px/1.172 var(--font-sans); color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-	.DetailsCategory-hdrName:hover { background: var(--input); box-shadow: inset 0 0 0 1px var(--hover); }
-	.DetailsCategory-hdrName:focus { background: var(--input); box-shadow: inset 0 0 0 1px var(--primary); }
-	.DetailsCategory-tool { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 28px; height: 22px; margin: 0; padding: 0; border: 0; border-radius: 4px; background: transparent; color: var(--foreground); cursor: pointer; }
-	.DetailsCategory-tool:hover, .DetailsCategory-tool:active, .DetailsCategory-tool.is-hover { background: var(--dropdown); color: var(--foreground-hover); } /* SimpleButton: StarshipCoreStyle.cpp:1391-1396 */
-	.DetailsCategory-tool.is-on { color: var(--accent-blue); } /* SDetailsView.cpp:1177-1183 */
-	.DetailsCategory-tool.is-combo { width: 20px; height: 18px; }
-	.DetailsCategory-tool svg { width: 16px; height: 16px; flex: none; }
-	.DetailsCategory-hdr .DetailsCategory-tool { margin: 0 4px; }
-	.DetailsCategory-sr { position: relative; display: flex; align-items: center; padding: 6px; } /* SDetailsView.cpp:276-280 */
-	.DetailsCategory-srBox { flex: 1; min-width: 0; display: flex; align-items: center; margin-right: 6px; background: var(--input); border-radius: 999px; box-shadow: inset 0 0 0 1px var(--secondary); cursor: text; } /* StarshipCoreStyle.cpp:1303 */
-	.DetailsCategory-srBox:hover { box-shadow: inset 0 0 0 1px var(--hover); }
-	.DetailsCategory-srBox:focus-within { box-shadow: inset 0 0 0 1px var(--primary); }
-	.DetailsCategory-srGlass { width: 14px; height: 14px; margin-left: 4px; flex: none; color: var(--foreground); }
-	.DetailsCategory-srInput { flex: 1; width: 0; min-width: 0; box-sizing: content-box; height: 15.627px; margin: 0; padding: 3px 8px 4px; border: 0; outline: 0; background: transparent; font: 400 13.333px/1.172 var(--font-sans); color: var(--foreground); }
-	.DetailsCategory-srInput::placeholder { color: var(--foreground); opacity: .35; }
-	.DetailsCategory-srBox:focus-within .DetailsCategory-srInput, .DetailsCategory-srInput.has-value { color: var(--foreground-hover); }
-	.DetailsCategory-srClear { width: 20px; height: 16px; padding-left: 4px; flex: none; color: var(--foreground); cursor: pointer; }
-	.DetailsCategory-srClear:hover { color: var(--foreground-hover); }
-	.DetailsCategory-srClear.is-hidden { display: none; }
-	.DetailsCategory-srTail { width: 7px; flex: none; }
-	.DetailsCategory-pills { display: flex; flex-wrap: wrap; gap: 4px; padding: 2px 8px 7px; } /* SDetailsView.cpp:374-379 */
-	.DetailsCategory-pill { display: inline-flex; align-items: center; justify-content: center; margin: 0; border: 0; cursor: pointer; padding: 4px 16px; border-radius: 4px; background: var(--header); box-shadow: inset 0 0 0 1px var(--input); color: var(--foreground); font: 400 10.667px/1.172 var(--font-sans); } /* StarshipCoreStyle.cpp:923, 929 */
-	.DetailsCategory-pill:hover, .DetailsCategory-pill:active { background: var(--hover); color: var(--foreground-hover); }
-	.DetailsCategory-pill.is-checked { background: var(--primary); color: var(--foreground-hover); }
-	.DetailsCategory-pill.is-checked:hover, .DetailsCategory-pill.is-checked:active { background: var(--primary-hover); }
-	.DetailsCategory-menu {
-		display: none; position: absolute; z-index: 10; top: 100%; right: 6px; width: 240px; box-sizing: border-box; padding: 8px 0;
-		background: var(--dropdown); box-shadow: inset 0 0 0 1px var(--dropdown-outline); /* StarshipCoreStyle.cpp:2302-2303 */
-		font: 400 13.333px/16px var(--font-sans); color: var(--foreground-hover); user-select: none;
-	}
-	.DetailsCategory-menu.is-open { display: block; }
-	.DetailsCategory-menuItem { display: flex; align-items: center; padding: 3px 5px 3px 12px; outline: 0; cursor: pointer; }
-	.DetailsCategory-menuItem:hover, .DetailsCategory-menuItem:focus { background: var(--primary); } /* StarshipCoreStyle.cpp:2420-2421 */
-	.DetailsCategory-menuMark { position: relative; flex: none; width: 16px; height: 16px; margin: 0 8px 0 2px; }
-	.DetailsCategory-menuItem[aria-checked="true"] .DetailsCategory-menuMark::after { content: ""; position: absolute; left: 5px; top: 1px; width: 4px; height: 9px; border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); }
-	/* Preview captions only */
+	/* Demo layout only. The component layout is src/DetailsCategory/DetailsCategory.css. */
+	.DetailsCategory-frame, .DetailsCategory-panel { width: 360px; }
 	.DetailsCategory-cap { width: 360px; box-sizing: border-box; margin: 0; padding: 6px 8px 12px; font: 400 10.667px/1.4 var(--font-sans); color: var(--foreground); opacity: .8; }
 	.DetailsCategory-cap b { color: var(--foreground-hover); }
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-	<symbol id="DetailsCategory-down" viewBox="0 0 16 16"><path d="M4.5 6h7L8 10.5z" fill="currentColor"/></symbol>
-	<symbol id="DetailsCategory-right" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z" fill="currentColor"/></symbol>
-	<symbol id="DetailsCategory-chev" viewBox="0 0 16 16"><path d="m4.5 6.5 3.5 3.5 3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-	<symbol id="DetailsCategory-tick" viewBox="0 0 16 16"><path d="m3.75 8.5 3 3 5.5-6.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-	<symbol id="DetailsCategory-reset" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-	<symbol id="DetailsCategory-cube" viewBox="0 0 16 16"><path d="M8 1.5 14 4.75v6.5L8 14.5 2 11.25v-6.5z M2 4.75 8 8l6-3.25 M8 8v6.5" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/></symbol>
-	<symbol id="DetailsCategory-glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.75" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m10.6 10.6 3.4 3.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
-	<symbol id="DetailsCategory-close" viewBox="0 0 16 16"><path d="m4 4 8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
-	<symbol id="DetailsCategory-star" viewBox="0 0 16 16"><path d="m8 2 1.8 3.9 4.2.5-3.1 2.9.8 4.2L8 11.4l-3.7 2.1.8-4.2L2 6.4l4.2-.5z" fill="currentColor"/></symbol>
-	<symbol id="DetailsCategory-gear" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.25" fill="none" stroke="currentColor" stroke-width="1.25"/><path d="M8 1.75v2M8 12.25v2M1.75 8h2M12.25 8h2M3.6 3.6 5 5M11 11l1.4 1.4M12.4 3.6 11 5M5 11l-1.4 1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
-	<symbol id="DetailsCategory-unlock" viewBox="0 0 16 16"><rect x="3" y="7.5" width="10" height="6.5" rx="1.25" fill="none" stroke="currentColor" stroke-width="1.25"/><path d="M5.5 7.5V5a2.5 2.5 0 0 1 4.9-.7" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></symbol>
-	<symbol id="DetailsCategory-locked" viewBox="0 0 16 16"><rect x="3" y="7.5" width="10" height="6.5" rx="1.25" fill="none" stroke="currentColor" stroke-width="1.25"/><path d="M5.5 7.5V5a2.5 2.5 0 0 1 5 0v2.5" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></symbol>
-</svg>
-
 <!-- Live: the same rows as the pinned frame below, now collapsible and editable -->
 <ue-details-category>
 <div class="DetailsCategory-frame">
 	<div class="DetailsCategory-cat" data-section="rendering">
-		<div class="DetailsCategory-catRow" role="button" tabindex="0" aria-expanded="true"><svg class="DetailsCategory-arrow"><use href="#DetailsCategory-down"/></svg><span class="DetailsCategory-title">Rendering</span></div>
+		<div class="DetailsCategory-catRow" role="button" tabindex="0" aria-expanded="true"><svg class="DetailsCategory-arrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-title">Rendering</span></div>
 	</div>
 	<div class="DetailsCategory-row">
-		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-label">Visible</span></span></div>
+		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-label">Visible</span></span></div>
 		<div class="DetailsCategory-split"></div>
-		<div class="DetailsCategory-value"><span class="DetailsCategory-check" role="checkbox" aria-checked="true" tabindex="0" aria-label="Visible"><svg><use href="#DetailsCategory-tick"/></svg></span></div>
+		<div class="DetailsCategory-value"><ue-checkbox><span class="checkbox" role="checkbox" tabindex="0" aria-checked="true" aria-label="Visible"><span class="checkbox__box"><svg class="checkbox__glyph checkbox__glyph--check" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg><svg class="checkbox__glyph checkbox__glyph--mixed" viewBox="0 0 16 16"><path d="M4 8h8"/></svg></span></span></ue-checkbox></div>
 		<div class="DetailsCategory-split"></div>
 		<div class="DetailsCategory-right"></div>
 	</div>
 	<div class="DetailsCategory-row" data-default="StaticMeshActor_0">
-		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-label">Actor Label</span></span></div>
+		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-label">Actor Label</span></span></div>
 		<div class="DetailsCategory-split"></div>
-		<div class="DetailsCategory-value"><span class="DetailsCategory-text" contenteditable="plaintext-only" spellcheck="false" role="textbox" aria-label="Actor Label">Chair</span></div>
+		<div class="DetailsCategory-value"><ue-text-input><div class="textinput textinput--small"><input class="textinput__text textinput__field" type="text" value="Chair" aria-label="Actor Label" spellcheck="false" autocomplete="off"></div></ue-text-input></div>
 		<div class="DetailsCategory-split"></div>
-		<div class="DetailsCategory-right"><span class="DetailsCategory-reset" role="button" tabindex="0" aria-label="Reset to default" title="Reset this property to its default value."><svg><use href="#DetailsCategory-reset"/></svg></span></div>
+		<div class="DetailsCategory-right"><ue-reset-to-default differs><button class="resettodefault" type="button" title="Reset this property to its default value." aria-label="Reset to default"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button></ue-reset-to-default></div>
 	</div>
 	<div class="DetailsCategory-row">
-		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-label">Collision Preset</span></span></div>
+		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-label">Collision Preset</span></span></div>
 		<div class="DetailsCategory-split"></div>
-		<div class="DetailsCategory-value"><span class="DetailsCategory-combo"><span class="label">BlockAll</span><svg><use href="#DetailsCategory-chev"/></svg></span></div>
+		<div class="DetailsCategory-value">
+			<ue-combo-button>
+				<div class="combobutton-anchor combobutton-anchor--fill">
+					<span class="combobutton combobutton--small" role="combobox" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="Collision Preset"><span class="combobutton__label">BlockAll</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
+					<div class="combobutton-menu" hidden>
+						<ue-popup-menu>
+							<div class="popupmenu popupmenu--small popupmenu--combo" role="menu" tabindex="0" aria-label="Collision Preset">
+								<div class="popupmenu__row" role="menuitem" data-value="BlockAll"><span class="popupmenu__body"><span class="popupmenu__label">BlockAll</span></span></div>
+								<div class="popupmenu__row" role="menuitem" data-value="OverlapAll"><span class="popupmenu__body"><span class="popupmenu__label">OverlapAll</span></span></div>
+								<div class="popupmenu__row" role="menuitem" data-value="NoCollision"><span class="popupmenu__body"><span class="popupmenu__label">NoCollision</span></span></div>
+							</div>
+						</ue-popup-menu>
+					</div>
+				</div>
+			</ue-combo-button>
+		</div>
 		<div class="DetailsCategory-split"></div>
 		<div class="DetailsCategory-right"></div>
 	</div>
 	<div class="DetailsCategory-row">
-		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow has-children" role="button" tabindex="0" aria-expanded="true" aria-label="Lighting"><use href="#DetailsCategory-down"/></svg><span class="DetailsCategory-label">Lighting</span></span></div>
+		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow has-children" role="button" tabindex="0" aria-expanded="true" aria-label="Lighting" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-label">Lighting</span></span></div>
 		<div class="DetailsCategory-split"></div>
 		<div class="DetailsCategory-value"></div>
 		<div class="DetailsCategory-split"></div>
@@ -164,102 +66,193 @@
 	</div>
 	<div class="DetailsCategory-row is-nested">
 		<div class="DetailsCategory-indent" style="width: 16px"></div>
-		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-label">Cast Shadow</span></span></div>
+		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-label">Cast Shadow</span></span></div>
 		<div class="DetailsCategory-split"></div>
-		<div class="DetailsCategory-value"><span class="DetailsCategory-check" role="checkbox" aria-checked="true" tabindex="0" aria-label="Cast Shadow"><svg><use href="#DetailsCategory-tick"/></svg></span></div>
+		<div class="DetailsCategory-value"><ue-checkbox><span class="checkbox" role="checkbox" tabindex="0" aria-checked="true" aria-label="Cast Shadow"><span class="checkbox__box"><svg class="checkbox__glyph checkbox__glyph--check" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg><svg class="checkbox__glyph checkbox__glyph--mixed" viewBox="0 0 16 16"><path d="M4 8h8"/></svg></span></span></ue-checkbox></div>
 		<div class="DetailsCategory-split"></div>
 		<div class="DetailsCategory-right"></div>
 	</div>
 	<div class="DetailsCategory-adv">
-		<div class="DetailsCategory-advRow" role="button" tabindex="0" aria-expanded="false"><svg class="DetailsCategory-arrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-title">Advanced</span></div>
+		<div class="DetailsCategory-advRow" role="button" tabindex="0" aria-expanded="false"><svg class="DetailsCategory-arrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-title">Advanced</span></div>
 	</div>
 	<div class="DetailsCategory-row">
-		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-label">Render in Main Pass</span></span></div>
+		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-label">Render in Main Pass</span></span></div>
 		<div class="DetailsCategory-split"></div>
-		<div class="DetailsCategory-value"><span class="DetailsCategory-check" role="checkbox" aria-checked="true" tabindex="0" aria-label="Render in Main Pass"><svg><use href="#DetailsCategory-tick"/></svg></span></div>
+		<div class="DetailsCategory-value"><ue-checkbox><span class="checkbox" role="checkbox" tabindex="0" aria-checked="true" aria-label="Render in Main Pass"><span class="checkbox__box"><svg class="checkbox__glyph checkbox__glyph--check" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg><svg class="checkbox__glyph checkbox__glyph--mixed" viewBox="0 0 16 16"><path d="M4 8h8"/></svg></span></span></ue-checkbox></div>
 		<div class="DetailsCategory-split"></div>
 		<div class="DetailsCategory-right"></div>
 	</div>
 	<div class="DetailsCategory-cat is-collapsed" data-section="rendering">
-		<div class="DetailsCategory-catRow" role="button" tabindex="0" aria-expanded="false"><svg class="DetailsCategory-arrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-title">Static Mesh</span></div>
+		<div class="DetailsCategory-catRow" role="button" tabindex="0" aria-expanded="false"><svg class="DetailsCategory-arrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-title">Static Mesh</span></div>
 	</div>
 	<div class="DetailsCategory-row">
-		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-label">Static Mesh</span></span></div>
+		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-label">Static Mesh</span></span></div>
 		<div class="DetailsCategory-split"></div>
-		<div class="DetailsCategory-value"><span class="DetailsCategory-combo"><span class="label">SM_Chair</span><svg><use href="#DetailsCategory-chev"/></svg></span></div>
+		<div class="DetailsCategory-value">
+			<ue-combo-button>
+				<div class="combobutton-anchor combobutton-anchor--fill">
+					<span class="combobutton combobutton--small" role="combobox" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="Static Mesh"><span class="combobutton__label">SM_Chair</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
+					<div class="combobutton-menu" hidden>
+						<ue-popup-menu>
+							<div class="popupmenu popupmenu--small popupmenu--combo" role="menu" tabindex="0" aria-label="Static Mesh">
+								<div class="popupmenu__row" role="menuitem" data-value="SM_Chair"><span class="popupmenu__body"><span class="popupmenu__label">SM_Chair</span></span></div>
+								<div class="popupmenu__row" role="menuitem" data-value="SM_Table"><span class="popupmenu__body"><span class="popupmenu__label">SM_Table</span></span></div>
+							</div>
+						</ue-popup-menu>
+					</div>
+				</div>
+			</ue-combo-button>
+		</div>
 		<div class="DetailsCategory-split"></div>
 		<div class="DetailsCategory-right"></div>
 	</div>
 </div>
 </ue-details-category>
-<p class="DetailsCategory-cap"><b>Live.</b> Click a category header (or press Enter, Left, Right) to fold its rows. The Lighting row arrow folds its child. Advanced reveals more rows below it. Hover a row, toggle the checkboxes, edit Actor Label (Enter commits, Escape cancels) and use its reset arrow.</p>
+<p class="DetailsCategory-cap"><b>Live.</b> Click a category header (or press Enter, Left, Right) to fold its rows. The Lighting row arrow folds its child. Advanced reveals more rows below it. Hover a row, toggle the checkboxes, pick a Collision Preset, edit Actor Label (Enter commits, Escape cancels) and use its reset arrow.</p>
 
-<!-- Live details: header, search, pills and two categories talk to each other -->
+<!-- Live details: header, search, pills, two categories, a spin box row and a nested vector input talk to each other -->
 <ue-details-category>
 <div class="DetailsCategory-panel">
-	<div class="DetailsCategory-hdr">
-		<svg class="DetailsCategory-hdrIcon"><use href="#DetailsCategory-cube"/></svg>
-		<div class="DetailsCategory-hdrName" contenteditable="plaintext-only" spellcheck="false" role="textbox" aria-label="Actor name">Chair</div>
-		<button class="DetailsCategory-tool" data-role="lock" aria-pressed="false" title="Locks the current selection into the Details panel"><svg><use href="#DetailsCategory-unlock"/></svg></button>
-	</div>
-	<div class="DetailsCategory-sr">
-		<div class="DetailsCategory-srBox">
-			<svg class="DetailsCategory-srGlass"><use href="#DetailsCategory-glass"/></svg>
-			<input class="DetailsCategory-srInput" type="text" placeholder="Search" aria-label="Search properties" spellcheck="false" autocomplete="off">
-			<svg class="DetailsCategory-srClear is-hidden" role="button" aria-label="Clear search"><use href="#DetailsCategory-close"/></svg>
-			<span class="DetailsCategory-srTail"></span>
+	<ue-details-header>
+	<div class="DetailsHeader-frame">
+		<div class="DetailsHeader">
+			<div class="DetailsHeader-name">
+				<svg class="DetailsHeader-icon" viewBox="0 0 16 16"><path d="M8 1.5 14 4.75v6.5L8 14.5 2 11.25v-6.5z M2 4.75 8 8l6-3.25 M8 8v6.5"/></svg>
+				<div class="DetailsHeader-label" contenteditable="plaintext-only" spellcheck="false" role="textbox" aria-label="Actor name">Chair</div>
+				<div class="DetailsHeader-actions">
+					<ue-button><button class="button button--small" data-role="add" title="Adds a new component to this actor"><svg class="button__icon DetailsHeader-positive" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>Add</button></ue-button>
+					<ue-button><button class="button button--icon" data-role="blueprint" aria-label="Blueprint" title="Converts this actor into a reusable Blueprint Class"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M2.5 3.5h4v3h-4z M9.5 9.5h4v3h-4z M6.5 5h2.5a1.5 1.5 0 0 1 1.5 1.5V9.5 M2.5 11h4"/></svg></button></ue-button>
+					<ue-button><button class="button button--simple button--icon" data-role="help" aria-label="Help" title="Click to open documentation"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M6.2 6.3a1.9 1.9 0 1 1 2.7 1.7c-.6.3-.9.7-.9 1.3M8 11.4v.1"/></svg></button></ue-button>
+					<ue-button><button class="button button--toggle button--icon" data-role="lock" aria-pressed="false" aria-label="Lock" title="Locks the current selection into the Details panel"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><rect x="3" y="7.5" width="10" height="6.5" rx="1.25"/><path class="DetailsHeader-shackle DetailsHeader-shackle--open" d="M5.5 7.5V5a2.5 2.5 0 0 1 4.9-.7"/><path class="DetailsHeader-shackle DetailsHeader-shackle--shut" d="M5.5 7.5V5a2.5 2.5 0 0 1 5 0v2.5"/></svg></button></ue-button>
+				</div>
+			</div>
 		</div>
-		<button class="DetailsCategory-tool" data-role="favorites" aria-pressed="false" title="Toggle Favorites"><svg><use href="#DetailsCategory-star"/></svg></button>
-		<button class="DetailsCategory-tool is-combo" data-role="options" aria-haspopup="menu" aria-expanded="false" title="View options"><svg><use href="#DetailsCategory-gear"/></svg></button>
-		<div class="DetailsCategory-menu" role="menu" aria-label="View options">
-			<div class="DetailsCategory-menuItem" role="menuitemcheckbox" aria-checked="false" tabindex="-1" data-option="modified"><span class="DetailsCategory-menuMark"></span>Show Only Modified Properties</div>
-			<div class="DetailsCategory-menuItem" role="menuitem" tabindex="-1" data-option="collapseAll"><span class="DetailsCategory-menuMark"></span>Collapse All Categories</div>
-			<div class="DetailsCategory-menuItem" role="menuitem" tabindex="-1" data-option="expandAll"><span class="DetailsCategory-menuMark"></span>Expand All Categories</div>
+		<div class="DetailsHeader-instanceBox">
+			<div class="DetailsHeader-instance">
+				<svg viewBox="0 0 16 16"><path d="M8 1.5 14 4.75v6.5L8 14.5 2 11.25v-6.5z M2 4.75 8 8l6-3.25 M8 8v6.5"/></svg>
+				<span class="name">Chair</span><span class="ctx">(Instance)</span>
+			</div>
 		</div>
 	</div>
-	<div class="DetailsCategory-pills" role="tablist">
-		<button class="DetailsCategory-pill is-checked" role="tab" aria-selected="true" tabindex="0" data-section="">All</button>
-		<button class="DetailsCategory-pill" role="tab" aria-selected="false" tabindex="-1" data-section="general">General</button>
-		<button class="DetailsCategory-pill" role="tab" aria-selected="false" tabindex="-1" data-section="rendering">Rendering</button>
-		<button class="DetailsCategory-pill" role="tab" aria-selected="false" tabindex="-1" data-section="physics">Physics</button>
+	</ue-details-header>
+	<ue-details-search-row>
+	<div class="DetailsSearchRow">
+		<div class="DetailsSearchRow-searchSlot">
+			<ue-text-input>
+				<div class="textinput textinput--search">
+					<svg class="textinput__glyph textinput__glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+					<svg class="textinput__glyph textinput__clear" role="button" aria-label="Clear search" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+					<input class="textinput__text textinput__field" type="text" placeholder="Search" aria-label="Search properties" spellcheck="false" autocomplete="off">
+					<span class="textinput__tail"></span>
+				</div>
+			</ue-text-input>
+		</div>
+		<ue-button><button class="button button--toggle button--icon" data-role="favorites" aria-pressed="false" aria-label="Toggle Favorites" title="Toggle Favorites"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="m8 2 1.8 3.9 4.2.5-3.1 2.9.8 4.2L8 11.4l-3.7 2.1.8-4.2L2 6.4l4.2-.5z"/></svg></button></ue-button>
+		<ue-combo-button>
+			<div class="combobutton-anchor">
+				<span class="combobutton combobutton--icon" data-role="options" role="combobox" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="View options" title="View options">
+					<svg class="combobutton__icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.25"/><path d="M8 1.75v2M8 12.25v2M1.75 8h2M12.25 8h2M3.6 3.6 5 5M11 11l1.4 1.4M12.4 3.6 11 5M5 11l-1.4 1.4"/></svg>
+					<svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg>
+				</span>
+				<div class="combobutton-menu combobutton-menu--end" style="--combobutton-menu-min-width: 260px" hidden>
+					<ue-popup-menu>
+						<div class="popupmenu" role="menu" tabindex="0" aria-label="View options">
+							<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false" data-value="modified"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Only Modified Properties</span></span></div>
+							<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false" data-value="advanced"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show All Advanced Details</span></span></div>
+							<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false" data-value="childOnMatch"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Child On Category Match</span></span></div>
+							<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="true" data-value="sections"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Sections</span></span></div>
+							<div class="popupmenu__sep"></div>
+							<div class="popupmenu__row" role="menuitem" data-value="collapseAll"><span class="popupmenu__check"></span><span class="popupmenu__body"><span class="popupmenu__label">Collapse All Categories</span></span></div>
+							<div class="popupmenu__row" role="menuitem" data-value="expandAll"><span class="popupmenu__check"></span><span class="popupmenu__body"><span class="popupmenu__label">Expand All Categories</span></span></div>
+						</div>
+					</ue-popup-menu>
+				</div>
+			</div>
+		</ue-combo-button>
 	</div>
+	</ue-details-search-row>
+	<ue-filter-pills>
+		<div class="FilterPills-strip" role="tablist">
+			<button class="FilterPills-pill is-checked" role="tab" aria-selected="true" tabindex="0" data-value="">All</button>
+			<button class="FilterPills-pill" role="tab" aria-selected="false" tabindex="-1" data-value="general">General</button>
+			<button class="FilterPills-pill" role="tab" aria-selected="false" tabindex="-1" data-value="rendering">Rendering</button>
+			<button class="FilterPills-pill" role="tab" aria-selected="false" tabindex="-1" data-value="physics">Physics</button>
+		</div>
+	</ue-filter-pills>
 	<div class="DetailsCategory-frame">
 		<div class="DetailsCategory-cat" data-section="general">
-			<div class="DetailsCategory-catRow" role="button" tabindex="0" aria-expanded="true"><svg class="DetailsCategory-arrow"><use href="#DetailsCategory-down"/></svg><span class="DetailsCategory-title">General</span></div>
+			<div class="DetailsCategory-catRow" role="button" tabindex="0" aria-expanded="true"><svg class="DetailsCategory-arrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-title">General</span></div>
 		</div>
 		<div class="DetailsCategory-row" data-default="StaticMeshActor_0">
-			<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-label">Actor Label</span></span></div>
+			<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-label">Actor Label</span></span></div>
 			<div class="DetailsCategory-split"></div>
-			<div class="DetailsCategory-value"><span class="DetailsCategory-text" contenteditable="plaintext-only" spellcheck="false" role="textbox" aria-label="Actor Label">Chair</span></div>
+			<div class="DetailsCategory-value"><ue-text-input><div class="textinput textinput--small"><input class="textinput__text textinput__field" type="text" value="Chair" aria-label="Actor Label" spellcheck="false" autocomplete="off"></div></ue-text-input></div>
 			<div class="DetailsCategory-split"></div>
-			<div class="DetailsCategory-right"><span class="DetailsCategory-reset" role="button" tabindex="0" aria-label="Reset to default" title="Reset this property to its default value."><svg><use href="#DetailsCategory-reset"/></svg></span></div>
+			<div class="DetailsCategory-right"><ue-reset-to-default differs><button class="resettodefault" type="button" title="Reset this property to its default value." aria-label="Reset to default"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button></ue-reset-to-default></div>
 		</div>
 		<div class="DetailsCategory-row" data-default="">
-			<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-label">Tags</span></span></div>
+			<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-label">Tags</span></span></div>
 			<div class="DetailsCategory-split"></div>
-			<div class="DetailsCategory-value"><span class="DetailsCategory-text" contenteditable="plaintext-only" spellcheck="false" role="textbox" aria-label="Tags">Furniture</span></div>
+			<div class="DetailsCategory-value"><ue-text-input><div class="textinput textinput--small"><input class="textinput__text textinput__field" type="text" value="Furniture" aria-label="Tags" spellcheck="false" autocomplete="off"></div></ue-text-input></div>
 			<div class="DetailsCategory-split"></div>
-			<div class="DetailsCategory-right"><span class="DetailsCategory-reset" role="button" tabindex="0" aria-label="Reset to default" title="Reset this property to its default value."><svg><use href="#DetailsCategory-reset"/></svg></span></div>
+			<div class="DetailsCategory-right"><ue-reset-to-default differs><button class="resettodefault" type="button" title="Reset this property to its default value." aria-label="Reset to default"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button></ue-reset-to-default></div>
 		</div>
 		<div class="DetailsCategory-row">
-			<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-label">Can be Damaged</span></span></div>
+			<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-label">Can be Damaged</span></span></div>
 			<div class="DetailsCategory-split"></div>
-			<div class="DetailsCategory-value"><span class="DetailsCategory-check" role="checkbox" aria-checked="true" tabindex="0" aria-label="Can be Damaged"><svg><use href="#DetailsCategory-tick"/></svg></span></div>
+			<div class="DetailsCategory-value"><ue-checkbox><span class="checkbox" role="checkbox" tabindex="0" aria-checked="true" aria-label="Can be Damaged"><span class="checkbox__box"><svg class="checkbox__glyph checkbox__glyph--check" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg><svg class="checkbox__glyph checkbox__glyph--mixed" viewBox="0 0 16 16"><path d="M4 8h8"/></svg></span></span></ue-checkbox></div>
 			<div class="DetailsCategory-split"></div>
 			<div class="DetailsCategory-right"></div>
 		</div>
+		<div class="DetailsCategory-row" data-default="10">
+			<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-label">Mass</span></span></div>
+			<div class="DetailsCategory-split"></div>
+			<div class="DetailsCategory-value"><ue-spin-box><div class="spinbox spinbox--small" tabindex="0" role="spinbutton" aria-label="Mass" data-value="12.5" data-delta="0.5" data-unit="kg"><span class="spinbox__text">12.5</span></div></ue-spin-box></div>
+			<div class="DetailsCategory-split"></div>
+			<div class="DetailsCategory-right"><ue-reset-to-default differs><button class="resettodefault" type="button" title="Reset this property to its default value." aria-label="Reset to default"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button></ue-reset-to-default></div>
+		</div>
+		<ue-vector-input>
+		<div class="VectorInput-row" data-label="Location" data-default="0,0,0">
+			<div class="VectorInput-name">
+				<ue-combo-button mode="action">
+					<div class="combobutton-anchor">
+						<span class="combobutton combobutton--small" role="combobox" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="Location type"><span class="combobutton__label">Location</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
+						<div class="combobutton-menu" style="--combobutton-menu-min-width: 150px" hidden>
+							<ue-popup-menu>
+								<div class="popupmenu" role="menu" tabindex="0" aria-label="Location Type">
+									<div class="popupmenu__heading">Location Type</div>
+									<div class="popupmenu__row" role="menuitemradio" aria-checked="true"><span class="popupmenu__check"><span class="popupmenu__radio"></span></span><span class="popupmenu__body"><span class="popupmenu__label">Relative</span></span></div>
+									<div class="popupmenu__row" role="menuitemradio" aria-checked="false"><span class="popupmenu__check"><span class="popupmenu__radio"></span></span><span class="popupmenu__body"><span class="popupmenu__label">World</span></span></div>
+								</div>
+							</ue-popup-menu>
+						</div>
+					</div>
+				</ue-combo-button>
+			</div>
+			<div class="VectorInput-split"></div>
+			<div class="VectorInput-value"><div class="VectorInput-fields">
+				<ue-spin-box><div class="spinbox spinbox--small" tabindex="0" role="spinbutton" aria-label="X" data-value="-215" data-delta="1"><span class="spinbox__axis spinbox__axis--x"></span><span class="spinbox__text">-215.0</span></div></ue-spin-box>
+				<ue-spin-box><div class="spinbox spinbox--small" tabindex="0" role="spinbutton" aria-label="Y" data-value="-126.5" data-delta="1"><span class="spinbox__axis spinbox__axis--y"></span><span class="spinbox__text">-126.5</span></div></ue-spin-box>
+				<ue-spin-box><div class="spinbox spinbox--small" tabindex="0" role="spinbutton" aria-label="Z" data-value="32" data-delta="1"><span class="spinbox__axis spinbox__axis--z"></span><span class="spinbox__text">32.0</span></div></ue-spin-box>
+			</div></div>
+			<div class="VectorInput-split"></div>
+			<div class="VectorInput-right">
+				<ue-reset-to-default differs><button class="resettodefault" type="button" title="Reset this property to its default value." aria-label="Reset to default"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button></ue-reset-to-default>
+			</div>
+		</div>
+		</ue-vector-input>
 		<div class="DetailsCategory-cat" data-section="rendering">
-			<div class="DetailsCategory-catRow" role="button" tabindex="0" aria-expanded="true"><svg class="DetailsCategory-arrow"><use href="#DetailsCategory-down"/></svg><span class="DetailsCategory-title">Rendering</span></div>
+			<div class="DetailsCategory-catRow" role="button" tabindex="0" aria-expanded="true"><svg class="DetailsCategory-arrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-title">Rendering</span></div>
 		</div>
 		<div class="DetailsCategory-row">
-			<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-label">Visible</span></span></div>
+			<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-label">Visible</span></span></div>
 			<div class="DetailsCategory-split"></div>
-			<div class="DetailsCategory-value"><span class="DetailsCategory-check" role="checkbox" aria-checked="true" tabindex="0" aria-label="Visible"><svg><use href="#DetailsCategory-tick"/></svg></span></div>
+			<div class="DetailsCategory-value"><ue-checkbox><span class="checkbox" role="checkbox" tabindex="0" aria-checked="true" aria-label="Visible"><span class="checkbox__box"><svg class="checkbox__glyph checkbox__glyph--check" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg><svg class="checkbox__glyph checkbox__glyph--mixed" viewBox="0 0 16 16"><path d="M4 8h8"/></svg></span></span></ue-checkbox></div>
 			<div class="DetailsCategory-split"></div>
 			<div class="DetailsCategory-right"></div>
 		</div>
 		<div class="DetailsCategory-row">
-			<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow has-children" role="button" tabindex="0" aria-expanded="true" aria-label="Lighting"><use href="#DetailsCategory-down"/></svg><span class="DetailsCategory-label">Lighting</span></span></div>
+			<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow has-children" role="button" tabindex="0" aria-expanded="true" aria-label="Lighting" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-label">Lighting</span></span></div>
 			<div class="DetailsCategory-split"></div>
 			<div class="DetailsCategory-value"></div>
 			<div class="DetailsCategory-split"></div>
@@ -267,16 +260,16 @@
 		</div>
 		<div class="DetailsCategory-row is-nested">
 			<div class="DetailsCategory-indent" style="width: 16px"></div>
-			<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-label">Cast Shadow</span></span></div>
+			<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-label">Cast Shadow</span></span></div>
 			<div class="DetailsCategory-split"></div>
-			<div class="DetailsCategory-value"><span class="DetailsCategory-check" role="checkbox" aria-checked="true" tabindex="0" aria-label="Cast Shadow"><svg><use href="#DetailsCategory-tick"/></svg></span></div>
+			<div class="DetailsCategory-value"><ue-checkbox><span class="checkbox" role="checkbox" tabindex="0" aria-checked="true" aria-label="Cast Shadow"><span class="checkbox__box"><svg class="checkbox__glyph checkbox__glyph--check" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg><svg class="checkbox__glyph checkbox__glyph--mixed" viewBox="0 0 16 16"><path d="M4 8h8"/></svg></span></span></ue-checkbox></div>
 			<div class="DetailsCategory-split"></div>
 			<div class="DetailsCategory-right"></div>
 		</div>
 		<div class="DetailsCategory-row">
-			<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-label">Receives Decals</span></span></div>
+			<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-label">Receives Decals</span></span></div>
 			<div class="DetailsCategory-split"></div>
-			<div class="DetailsCategory-value"><span class="DetailsCategory-check" role="checkbox" aria-checked="true" tabindex="0" aria-label="Receives Decals"><svg><use href="#DetailsCategory-tick"/></svg></span></div>
+			<div class="DetailsCategory-value"><ue-checkbox><span class="checkbox" role="checkbox" tabindex="0" aria-checked="true" aria-label="Receives Decals"><span class="checkbox__box"><svg class="checkbox__glyph checkbox__glyph--check" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg><svg class="checkbox__glyph checkbox__glyph--mixed" viewBox="0 0 16 16"><path d="M4 8h8"/></svg></span></span></ue-checkbox></div>
 			<div class="DetailsCategory-split"></div>
 			<div class="DetailsCategory-right"></div>
 		</div>
@@ -284,36 +277,36 @@
 	</div>
 </div>
 </ue-details-category>
-<p class="DetailsCategory-cap"><b>Live details.</b> Type in the search box to filter the rows by name (Escape or the X clears it). The pills show one section: Physics has none. The gear menu collapses or expands all categories, or shows only modified rows (rows with a reset arrow). The star and the lock toggle. Click the actor name to rename it.</p>
+<p class="DetailsCategory-cap"><b>Live details.</b> Type in the search box to filter the rows by name (Escape or the X clears it). The pills show one section: Physics has none. The gear menu collapses or expands all categories, or shows only modified rows (rows with a reset arrow). The Location row is a nested vector input and Mass is a spin box. The star and the lock toggle. Click the actor name to rename it.</p>
 
 <!-- Pinned: the original specimen. Collision Preset is forced to its hover fill. -->
-<div class="DetailsCategory-frame">
+<div class="DetailsCategory-frame" data-pinned>
 	<div class="DetailsCategory-cat">
-		<div class="DetailsCategory-catRow"><svg class="DetailsCategory-arrow"><use href="#DetailsCategory-down"/></svg><span class="DetailsCategory-title">Rendering</span></div>
+		<div class="DetailsCategory-catRow" aria-expanded="true"><svg class="DetailsCategory-arrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-title">Rendering</span></div>
 	</div>
 	<div class="DetailsCategory-row">
-		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-label">Visible</span></span></div>
+		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-label">Visible</span></span></div>
 		<div class="DetailsCategory-split"></div>
-		<div class="DetailsCategory-value"><span class="DetailsCategory-check"><svg><use href="#DetailsCategory-tick"/></svg></span></div>
+		<div class="DetailsCategory-value"><span class="checkbox" aria-checked="true"><span class="checkbox__box"><svg class="checkbox__glyph" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span></span></div>
 		<div class="DetailsCategory-split"></div>
 		<div class="DetailsCategory-right"></div>
 	</div>
 	<div class="DetailsCategory-row">
-		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-label">Actor Label</span></span></div>
+		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-label">Actor Label</span></span></div>
 		<div class="DetailsCategory-split"></div>
-		<div class="DetailsCategory-value"><span class="DetailsCategory-text">Chair</span></div>
+		<div class="DetailsCategory-value"><div class="textinput textinput--small"><span class="textinput__text">Chair</span></div></div>
 		<div class="DetailsCategory-split"></div>
-		<div class="DetailsCategory-right"><span class="DetailsCategory-reset"><svg><use href="#DetailsCategory-reset"/></svg></span></div>
+		<div class="DetailsCategory-right"><button class="resettodefault" type="button" tabindex="-1" aria-label="Reset to default"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button></div>
 	</div>
 	<div class="DetailsCategory-row is-hover">
-		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-label">Collision Preset</span></span></div>
+		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-label">Collision Preset</span></span></div>
 		<div class="DetailsCategory-split"></div>
-		<div class="DetailsCategory-value"><span class="DetailsCategory-combo"><span class="label">BlockAll</span><svg><use href="#DetailsCategory-chev"/></svg></span></div>
+		<div class="DetailsCategory-value"><div class="combobutton-anchor combobutton-anchor--fill"><span class="combobutton combobutton--small" tabindex="-1"><span class="combobutton__label">BlockAll</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></div></div>
 		<div class="DetailsCategory-split"></div>
 		<div class="DetailsCategory-right"></div>
 	</div>
 	<div class="DetailsCategory-row">
-		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow has-children"><use href="#DetailsCategory-down"/></svg><span class="DetailsCategory-label">Lighting</span></span></div>
+		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow has-children" aria-expanded="true" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-label">Lighting</span></span></div>
 		<div class="DetailsCategory-split"></div>
 		<div class="DetailsCategory-value"></div>
 		<div class="DetailsCategory-split"></div>
@@ -321,21 +314,21 @@
 	</div>
 	<div class="DetailsCategory-row is-nested">
 		<div class="DetailsCategory-indent" style="width: 16px"></div>
-		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-label">Cast Shadow</span></span></div>
+		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-label">Cast Shadow</span></span></div>
 		<div class="DetailsCategory-split"></div>
-		<div class="DetailsCategory-value"><span class="DetailsCategory-check"><svg><use href="#DetailsCategory-tick"/></svg></span></div>
+		<div class="DetailsCategory-value"><span class="checkbox" aria-checked="true"><span class="checkbox__box"><svg class="checkbox__glyph" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span></span></div>
 		<div class="DetailsCategory-split"></div>
 		<div class="DetailsCategory-right"></div>
 	</div>
 
 	<!-- Collapsed category -->
 	<div class="DetailsCategory-cat">
-		<div class="DetailsCategory-catRow"><svg class="DetailsCategory-arrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-title">Static Mesh</span></div>
+		<div class="DetailsCategory-catRow" aria-expanded="false"><svg class="DetailsCategory-arrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-title">Static Mesh</span></div>
 	</div>
 
 	<!-- Advanced dropdown row -->
 	<div class="DetailsCategory-adv">
-		<div class="DetailsCategory-advRow"><svg class="DetailsCategory-arrow"><use href="#DetailsCategory-right"/></svg><span class="DetailsCategory-title">Advanced</span></div>
+		<div class="DetailsCategory-advRow" aria-expanded="false"><svg class="DetailsCategory-arrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-title">Advanced</span></div>
 	</div>
 </div>
 <p class="DetailsCategory-cap"><b>Pinned.</b> The reference frame: Collision Preset is forced to its hover fill, Static Mesh stays collapsed.</p>

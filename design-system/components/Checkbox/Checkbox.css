@@ -1,9 +1,9 @@
-/* src/_shared/base.css */
+/* design-system/src/_shared/base.css */
 [data-pinned] {
   pointer-events: none;
 }
 
-/* src/Checkbox/Checkbox.css */
+/* design-system/src/Checkbox/Checkbox.css */
 .checkbox {
   display: inline-flex;
   align-items: center;

@@ -1,4 +1,4 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   #ready = false;
@@ -51,17 +51,55 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/DetailsHeader/DetailsHeader.ts
+// design-system/src/_shared/own.ts
+function ownedBy(host, target) {
+  return target instanceof Element && target.closest(host.localName) === host;
+}
+
+// design-system/src/Button/Button.ts
+var PRESSED = "button--pressed";
+function isDisabled(button) {
+  return button.matches(":disabled") || button.getAttribute("aria-disabled") === "true";
+}
+var UeButtonElement = class extends UeElement {
+  #clicks = 0;
+  setup() {
+    const button = this.one(".button");
+    if (!button) throw new Error("ue-button needs a .button element");
+    this.on(button, "keydown", (event) => {
+      if (!ownedBy(this, event.target) || isDisabled(button) || event.repeat) return;
+      if (event.key !== "Enter" && event.key !== " ") return;
+      button.classList.add(PRESSED);
+      if (button.tagName !== "BUTTON") {
+        event.preventDefault();
+        if (event.key === "Enter") button.click();
+      }
+    });
+    this.on(button, "keyup", (event) => {
+      const wasPressed = button.classList.contains(PRESSED);
+      button.classList.remove(PRESSED);
+      if (wasPressed && button.tagName !== "BUTTON" && event.key === " ") button.click();
+    });
+    this.on(button, "focusout", () => button.classList.remove(PRESSED));
+    this.on(button, "click", () => {
+      if (isDisabled(button)) return;
+      let pressed = null;
+      if (button.hasAttribute("aria-pressed")) {
+        pressed = button.getAttribute("aria-pressed") !== "true";
+        button.setAttribute("aria-pressed", String(pressed));
+      }
+      this.#clicks++;
+      this.emit("ue-button-click", { label: button.getAttribute("aria-label") ?? button.textContent?.trim() ?? "", pressed, count: this.#clicks });
+    });
+  }
+};
+define("ue-button", UeButtonElement);
+
+// design-system/src/DetailsHeader/DetailsHeader.ts
 var UeDetailsHeader = class extends UeElement {
   setup() {
-    const lock = this.one(".DetailsHeader-lock");
     const label = this.one(".DetailsHeader-label");
-    if (lock) this.on(lock, "click", () => this.setLocked(lock, lock.getAttribute("aria-pressed") !== "true"));
     if (label) this.wireLabel(label);
-  }
-  setLocked(lock, locked) {
-    lock.setAttribute("aria-pressed", String(locked));
-    lock.querySelector("use")?.setAttribute("href", locked ? "#DetailsHeader-locked" : "#DetailsHeader-unlock");
   }
   // Enter commits, Escape restores the text from before the edit. The instance row shows the committed name.
   wireLabel(label) {

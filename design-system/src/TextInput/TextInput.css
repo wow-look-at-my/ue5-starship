@@ -29,6 +29,7 @@
 .textinput__tail { flex: none; width: 7px; } /* end spacer SSearchBox.cpp:172-177 */
 .textinput__trail { flex: none; display: flex; align-items: center; gap: 2px; padding-right: 2px; } /* extra trailing buttons inside the field */
 
+.textinput--small { font: 400 10.667px/1.172 var(--font-sans); } /* a details row value: PropertyFontStyle Small 8pt, SPropertyEditorText.h:27 */
 .textinput--console { font: 400 12px/16px var(--font-mono); } /* the status bar command line: Log.Normal Mono 9pt = 12px OutputLogStyle.cpp:54, radius 4 from the base */
 
 .textinput__field { width: 0; margin: 0; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; line-height: 16px; caret-color: var(--white); cursor: inherit; } /* a real <input> inside .textinput__text; caret White :1272 */
