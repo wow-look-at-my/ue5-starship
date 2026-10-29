@@ -5,7 +5,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>EditorLayout</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Condensed:wght@400;700&family=Roboto+Mono&display=swap">
+<style>body { font-family: var(--font-sans); }</style>
 <style>
+
+
 
 	.windowChrome-page { padding: 16px; font: 400 13.333px/1.2 var(--font-sans); color: var(--foreground); }
 	.windowChrome-caption { margin: 6px 0 14px; font: 400 11px/1.2 var(--font-sans); color: var(--hover-2); }
@@ -77,6 +81,8 @@
 	.windowChrome-stateBox { background: var(--title); }
 
 
+
+
 /* SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp. Style set "WindowMenuBar" (SC:2443-2448), buttons built by SMenuEntryBlock.cpp:247-298. */
  /* Normal font 10pt = 13.333px (SC:36, SC:2444); 16px line height approximates Roboto metrics */
 .menuBar-note { margin: 14px 0 6px; font: 400 10.667px/12px var(--font-sans); color: var(--foreground); opacity: .7; } /* Small font 8pt (SC:40) */
@@ -105,6 +111,8 @@
 .menuBar-sep { height: 1px; margin: 6px 12px; background: var(--white-25); } /* Menu.Separator White25, padding (12,6,12,6) (SC:2318-2319); thickness 1 (SMenuSeparatorBlock.cpp:56) */
 
 
+
+
 /* Every px value cites engine source. SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp, SS = Editor/EditorStyle/Private/StarshipStyle.cpp. */
  /* Normal font 10pt = 13.333px (SC:36); 16px line height approximates Roboto metrics */
 .toolBar-note { margin: 18px 0 6px; font: 400 10.667px/12px var(--font-sans); color: var(--foreground); opacity: .7; } /* Small font 8pt (SC:40) */
@@ -115,7 +123,7 @@
 
 /* Bar: SlimToolBar background Panel, BackgroundPadding (4,6) (SC:2200-2205), applied by MultiBox.cpp:1349-1350 */
 .toolBar { display: flex; align-items: stretch; background: var(--panel); padding: 6px 4px; }
-.toolBar-slot { position: relative; display: flex; align-items: stretch; }
+.toolBar-slot { position: relative; display: flex; align-items: stretch; flex-shrink: 0; white-space: nowrap; } /* a combo never wraps its label */
 .toolBar-spacer { flex: 1; }
 
 /* Plain button block: ButtonPadding (4,0) (SC:2208) around SButton whose style padding is (8,4,8,4) (SC:2193) */
@@ -188,6 +196,8 @@
 .toolBar-sep-row { height: 1px; margin: 6px 12px; background: var(--white-25); } /* Menu.Separator White25 (SC:2318-2319) */
 
 
+
+
 /* SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp, SS = Editor/EditorStyle/Private/StarshipStyle.cpp, PM = Editor/PlacementMode/Private/SPlacementModeTools.cpp, WR = Developer/WidgetRegistration/Private */
  /* Normal font 10pt = 13.333px (SC:36); 16px line height approximates Roboto metrics */
 .placeActors-note { margin: 0 0 6px; font: 400 10.667px/12px var(--font-sans); color: var(--foreground); opacity: .7; } /* Small font 8pt (SC:40) */
@@ -244,6 +254,8 @@
 .placeActors-handle { flex: none; width: 6px; height: 15px; margin-right: 8px; background: radial-gradient(circle, var(--foreground) 1px, transparent 1.2px) 0 0 / 3px 5px; opacity: .6; } /* VerticalBoxDragIndicatorShort 6x15 (SC:466), padding right 8 (PM:211); dot pattern approximates the PNG */
 
 
+
+
 	/* Every metric below is cited in README.md. Icons are 16x16 stroke approximations of the Starship SVGs. */
 	.DetailsHeader-frame { width: 360px; background: var(--panel); padding-bottom: 6px; } /* Brushes.Panel: StarshipCoreStyle.cpp:1123 */
 	.DetailsHeader { padding: 4px 0 0 10px; } /* SActorDetails.cpp:336 Padding(10,4,0,0) */
@@ -296,6 +308,8 @@
 	/* Preview captions only */
 	.DetailsHeader-cap { width: 360px; box-sizing: border-box; margin: 0; padding: 6px 10px 12px; font: 400 10.667px/1.4 var(--font-sans); color: var(--foreground); opacity: .8; }
 	.DetailsHeader-cap b { color: var(--foreground-hover); }
+
+
 
 
 	/* Every metric below is cited in README.md. Icons are 16x16 stroke approximations of the Starship SVGs. */
@@ -358,6 +372,8 @@
 	.DetailsSearchRow-cap b { color: var(--foreground-hover); }
 
 
+
+
 	/* Every metric below is cited in README.md. */
 	.FilterPills-frame { width: 360px; background: var(--panel); padding-bottom: 8px; } /* Brushes.Panel: SDetailsView.cpp:391-395 */
 	.FilterPills-strip {
@@ -381,6 +397,8 @@
 	/* Preview captions only */
 	.FilterPills-cap { width: 360px; box-sizing: border-box; margin: 0; padding: 6px 8px 12px; font: 400 10.667px/1.4 var(--font-sans); color: var(--foreground); opacity: .8; }
 	.FilterPills-cap b { color: var(--foreground-hover); }
+
+
 
 
 	/* Every metric below is cited in README.md. Icons are simple filled/stroke approximations of the Starship SVGs. */
@@ -487,6 +505,8 @@
 	.DetailsCategory-cap b { color: var(--foreground-hover); }
 
 
+
+
 	/* Metrics: SSceneOutliner.cpp:139-335, SOutlinerTreeView.cpp:273-321, StarshipCoreStyle.cpp:2000-2117. See README. */
 	.so-page { padding: 16px; display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
 	.so-col { display: flex; flex-direction: column; gap: 8px; width: 372px; max-width: 100%; }
@@ -582,6 +602,8 @@
 	.so-status.is-match { color: var(--accent-green); }
 	.so-status.is-none { color: var(--accent-red); }
 	.so-svg { width: 0; height: 0; position: absolute; }
+
+
 
 
 	.ContentBrowser { width: 1200px; margin: 12px 16px; background: var(--background); font: 400 13.333px/16px var(--font-sans); color: var(--foreground); }
@@ -723,6 +745,8 @@
 	.ContentBrowser__menusep { height: 1px; margin: 6px 12px; background: var(--white-25); }
 
 
+
+
 /* SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp, SB = Editor/StatusBar/Private/SStatusBar.cpp, WD = Developer/ToolWidgets/Private/SWidgetDrawer.cpp, SU = Editor/StatusBar/Private/StatusBarSubsystem.cpp */
  /* Normal font 10pt = 13.333px (SC:36); 16px line height approximates Roboto metrics */
 .statusBar-note { margin: 0 0 6px; font: 400 10.667px/12px var(--font-sans); color: var(--foreground); opacity: .7; } /* Small font 8pt (SC:40) */
@@ -779,6 +803,8 @@
 .statusBar-row { position: relative; padding: 3px 12px 3px 28px; background: transparent; outline: none; }
 .statusBar-row:hover, .statusBar-row:focus { background: var(--primary); } /* hovered brush Primary (SC:2420-2421) */
 .statusBar-row[aria-checked="true"]::before { content: "\2713"; position: absolute; left: 10px; }
+
+
 
 
 

@@ -5,6 +5,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ToolBar</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Condensed:wght@400;700&family=Roboto+Mono&display=swap">
+<style>body { font-family: var(--font-sans); }</style>
 <style>
 /* Every px value cites engine source. SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp, SS = Editor/EditorStyle/Private/StarshipStyle.cpp. */
 body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* Normal font 10pt = 13.333px (SC:36); 16px line height approximates Roboto metrics */
@@ -16,7 +18,7 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 
 /* Bar: SlimToolBar background Panel, BackgroundPadding (4,6) (SC:2200-2205), applied by MultiBox.cpp:1349-1350 */
 .toolBar { display: flex; align-items: stretch; background: var(--panel); padding: 6px 4px; }
-.toolBar-slot { position: relative; display: flex; align-items: stretch; }
+.toolBar-slot { position: relative; display: flex; align-items: stretch; flex-shrink: 0; white-space: nowrap; } /* a combo never wraps its label */
 .toolBar-spacer { flex: 1; }
 
 /* Plain button block: ButtonPadding (4,0) (SC:2208) around SButton whose style padding is (8,4,8,4) (SC:2193) */

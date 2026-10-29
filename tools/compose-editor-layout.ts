@@ -112,7 +112,7 @@ const layoutCss = `
 
 const marker = '<!-- @dsCard group="Layout" height=940 width=1280 subtitle="A whole editor window: title and menu, toolbar, Place Actors, viewport placeholder, Details, Outliner, Content Browser and status bar" -->\n';
 const out = marker
-	+ '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>EditorLayout</title>\n<style>\n' + css + layoutCss + '</style>\n</head>\n<body>\n'
+	+ '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>EditorLayout</title>\n<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Condensed:wght@400;700&family=Roboto+Mono&display=swap">\n<style>body { font-family: var(--font-sans); }</style>\n<style>\n' + css + layoutCss + '</style>\n</head>\n<body>\n'
 	+ '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>\n' + defs + '\n</defs></svg>\n'
 	+ '<div class="el-root">\n' + title + '\n<div class="el-toolbar">' + toolbar + '</div>\n<div class="el-main">\n'
 	+ '<div class="el-col">' + stack('', 'place', 'folder', 'Place Actors', place) + '</div>\n'
