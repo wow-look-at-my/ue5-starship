@@ -75,6 +75,9 @@ The element can be a `button` or any element with `role="button"` and `tabindex=
 | `button--icon` | Icon-only: padding 4 x 3, radius 4. Combine with `button--simple` or `button--toggle`. The icon is `button__icon button__icon--solo` |
 | `button--toggle` | A toggle with `aria-pressed="true\|false"`. Off looks like simple. On fills `--primary` (hover `--primary-hover`, pressed `--dropdown`). A click flips `aria-pressed` |
 | `button--small` | Fixed 22px height, padding 14 on both sides. For the Add button |
+| `button--toolbar` | The slim toolbar button: padding 8 x 4 (pressed 8, 5, 8, 3), 20px icon. Combine with `button--simple` or `button--toggle`. A toggle has no pressed shift (`StarshipCoreStyle.cpp:2193-2194`, `:2217-2218`, `:2240`) |
+| `button--plate` | A button on a backplate, as in the Play group. No fill, no padding, the foreground is inherited and a disabled one is not dimmed. The plate owns the fill, the foreground and the alpha. The icon is 20px (`StarshipStyle.cpp:5520-5578`) |
+| `button--status` | The status bar drawer button: no fill, Foreground, ForegroundHover on hover and press, padding 4 (pressed 5, 4, 3). `aria-pressed="true"` shows the pressed look, the open drawer (`StarshipCoreStyle.cpp:1867-1870`) |
 | disabled | the `disabled` attribute on a `button`, or `aria-disabled="true"` on any element |
 
 The icon class `button__icon` has a 4px gap to the label. Forced state classes for pinned specimens: `button--hover`, `button--pressed`, `button--focus`, `button--disabled`, `button--disabled-brush`.

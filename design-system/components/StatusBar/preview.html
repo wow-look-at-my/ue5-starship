@@ -8,14 +8,15 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Condensed:wght@400;700&family=Roboto+Mono&display=swap">
 <style>body { font-family: var(--font-sans); }</style>
 <style>
-/* SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp, SB = Editor/StatusBar/Private/SStatusBar.cpp, WD = Developer/ToolWidgets/Private/SWidgetDrawer.cpp, SU = Editor/StatusBar/Private/StatusBarSubsystem.cpp */
+/* SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp, SB = Editor/StatusBar/Private/SStatusBar.cpp, WD = Developer/ToolWidgets/Private/SWidgetDrawer.cpp, SU = Editor/StatusBar/Private/StatusBarSubsystem.cpp. */
+/* The drawer buttons are Button status variants. The combos are ComboButton simple variants. The console is a TextInput console variant. */
 body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* Normal font 10pt = 13.333px (SC:36); 16px line height approximates Roboto metrics */
 .statusBar-note { margin: 0 0 6px; font: 400 10.667px/12px var(--font-sans); color: var(--foreground); opacity: .7; } /* Small font 8pt (SC:40) */
-.statusBar-svgdefs { position: absolute; width: 0; height: 0; overflow: hidden; }
-.statusBar-ico { display: block; flex: none; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; } /* drawer, console and source control icons are Icon16x16 (SU:489, SU:546, SC:863) */
 
-/* Bar: SBox HeightOverride StatusBar.Height = 32 (SC:1883, SB:584); segments are Panel (Brushes.Panel, SB:580) separated by 1px gaps (SB:597, 610, 622) */
-.statusBar { display: flex; min-width: 990px; height: 32px; background: var(--background); } /* min-width: the console box alone is at least 300px (SOutputLog.cpp:220) */ /* gap colour is whatever is behind the bar; --background is an assumption, no brush set in SB */
+/* Bar: SBox HeightOverride StatusBar.Height = 32 (SC:1883, SB:584). Segments are Panel (Brushes.Panel, SB:580) with 1px gaps (SB:597, 610, 622). */
+/* The console box alone is at least 300px (SOutputLog.cpp:220), so the bar has a minimum width. */
+/* No brush sets the gap colour in SB. The gap shows what is behind the bar, and --background is an assumption. */
+.statusBar { display: flex; min-width: 990px; height: 32px; background: var(--background); }
 .statusBar-seg { display: flex; flex: none; align-items: center; background: var(--panel); margin: 0 1px; white-space: nowrap; }
 .statusBar-seg--drawer { padding: 0 2px; } /* SBorder Padding (2,0) (WD:443) */
 .statusBar-seg--message { flex: 1; min-width: 0; padding: 0 6px; } /* SBorder Padding (6,0) (SB:602) */
@@ -24,87 +25,52 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 .statusBar-seg--console .statusBar-console { display: flex; align-items: center; align-self: stretch; padding: 0 6px; background: var(--panel); } /* SBorder Panel Padding (6,0) (SU:524-527) */
 .statusBar-seg--tools { padding: 0 4px; } /* StatusBarToolBar BackgroundPadding (4,4) (SC:1897); vertical 4 is absorbed by the 32px bar */
 
-/* StatusBar.StatusBarButton: NoBorder-derived, Foreground, padding (2,2,2,2), pressed (2,3,2,1) (SC:1867-1870); content slots Padding 2 (WD:456, 467) */
-.statusBar-btn { display: flex; align-items: center; padding: 2px; color: var(--foreground); cursor: default; } /* NormalForeground Foreground (SC:1868) */
-.statusBar-btn:hover, .statusBar-btn.is-hover, .statusBar-btn:active, .statusBar-btn.is-open { color: var(--foreground-hover); } /* NoBorder HoveredForeground ForegroundHover (SC:237-239) */
-.statusBar-btn:active, .statusBar-btn.is-open { padding: 3px 2px 1px; } /* pressed padding (2,3,2,1) (SC:1870). The source has no style for an open drawer (one drawer is open at a time, SWidgetDrawer.cpp:527, 618), so .is-open reuses the pressed look. */
-.statusBar-btn .statusBar-ico, .statusBar-btn .statusBar-txt { margin: 2px; }
+/* A combo and its pop-up share an anchor. The Cmd slot has Padding (0,0,4,0) (SOutputLog.cpp:186). */
+.statusBar .statusBar-anchor { display: flex; align-items: center; }
+.statusBar-cmd { margin-right: 4px; }
 
-/* Combo buttons use SimpleComboButton: SimpleButtonLabelAndIcon padding (4,1,4,1), hover Dropdown r4, 16x16 chevron, arrow padding 2 (SC:1401-1403, 1389-1399, 1514-1521, SlateTypes.cpp:165) */
-.statusBar-combo { display: flex; align-items: center; padding: 1px 4px; border-radius: 4px; color: var(--foreground); background: transparent; cursor: default; }
-.statusBar-combo:hover, .statusBar-combo.is-hover, .statusBar-combo:active, .statusBar-combo[aria-expanded="true"] { background: var(--dropdown); color: var(--foreground-hover); } /* SC:1391, 1395 */
-.statusBar-arrow { margin: 2px; }
+/* Console text box: width 300 to 600 (SOutputLog.cpp:220-221) */
+.statusBar .statusBar-input { width: 300px; flex: none; }
 
-/* Cmd combo: ContentPadding 0, icon and label slots Padding 2 (SOutputLog.cpp:191-213) */
-.statusBar-cmd .statusBar-ico, .statusBar-cmd .statusBar-txt { margin: 2px; }
-.statusBar-cmd { margin-right: 4px; } /* slot Padding (0,0,4,0) (SOutputLog.cpp:186) */
+/* Derived Data: icon, 3px gap, label, 10px after the label (SDerivedDataStatusBar.cpp:177, 224). */
+/* Source Control: icon, 5px gap, label (SourceControlMenuHelpers.cpp:449). */
+.statusBar .statusBar-dd-ico { margin-right: 3px; }
+.statusBar .statusBar-dd-txt { margin-right: 10px; }
+.statusBar .statusBar-sc-ico { margin-right: 0; }
+.statusBar .statusBar-sc-txt { margin-left: 5px; }
 
-/* Console text box: NormalEditableTextBox (SC:1282-1294): Input fill, InputOutline 1px, radius 4, padding (8,3,8,4); width 300..600 (SOutputLog.cpp:220-221) */
-.statusBar-input { box-sizing: border-box; width: 300px; padding: 3px 8px 4px; border-radius: 4px; background: var(--input); box-shadow: inset 0 0 0 1px var(--input-outline); font: 400 12px/16px var(--font-mono); color: var(--foreground); } /* Log.Normal is Mono 9pt = 12px (OutputLogStyle.cpp:54, OutputLogSettings.h:40) */
-.statusBar-input:hover { box-shadow: inset 0 0 0 1px var(--hover); }
-.statusBar-input span { color: var(--foreground); opacity: .35; } /* hint text: foreground at alpha 0.35 (SlateEditableTextLayout.cpp:3563) */
-
-/* Derived Data and Source Control: ComboButton ContentPadding (6,0) (SDerivedDataStatusBar.cpp:166, SourceControlMenuHelpers.cpp:432) */
-.statusBar-combo--status { padding: 1px 10px; } /* 6 content + 4 style horizontal */
-.statusBar-dd-ico { margin-right: 3px; } /* icon slot Padding (0,0,3,0) (SDerivedDataStatusBar.cpp:177) */
-.statusBar-dd-txt { margin-right: 10px; } /* label slot Padding (0,0,10,0) (SDerivedDataStatusBar.cpp:224) */
-.statusBar-sc-txt { margin-left: 5px; } /* label slot Padding (5,0,0,0) (SourceControlMenuHelpers.cpp:449) */
-
-/* Live bar: keyboard focus, the console field, the command history and the Cmd menu */
-.statusBar-btn:focus-visible, .statusBar-combo:focus-visible { outline: 1px solid var(--primary-hover); outline-offset: -1px; }
-.statusBar-input:focus-within { box-shadow: inset 0 0 0 1px var(--primary); } /* focused outline Primary (SC:1285) */
-.statusBar-field { display: block; box-sizing: border-box; width: 100%; min-width: 0; height: 16px; margin: 0; padding: 0; border: 0; outline: none; background: transparent; color: var(--foreground); font: inherit; }
-.statusBar-field::placeholder { color: var(--foreground); opacity: .35; } /* hint text: foreground at alpha 0.35 (SlateEditableTextLayout.cpp:3563) */
-.statusBar-input:focus-within .statusBar-field { color: var(--white); } /* SetFocusedForegroundColor White (SC:1292) */
 .statusBar-stage { min-width: 990px; padding-top: 14px; }
-.statusBar-history { display: flex; flex-direction: column; justify-content: flex-end; box-sizing: border-box; width: 300px; min-height: 72px; margin: 0 0 4px 0; padding: 4px 8px; background: var(--recessed); font: 400 12px/16px var(--font-mono); color: var(--foreground); } /* Recessed ground of log text boxes; Log.Normal Mono 12px (OutputLogStyle.cpp:54) */
-.statusBar-anchor { position: relative; display: flex; align-items: center; }
-.statusBar-menu { display: none; position: absolute; z-index: 10; bottom: 100%; left: 0; box-sizing: border-box; min-width: 150px; margin-bottom: 4px; padding: 8px 0; background: var(--dropdown); box-shadow: inset 0 0 0 1px var(--dropdown-outline); color: var(--foreground-hover); white-space: nowrap; user-select: none; cursor: default; } /* PopupMenu look (SC:2302-2303); the bar sits at the window bottom, so the menu opens upward */
-.statusBar-menu.is-open { display: block; }
-.statusBar-row { position: relative; padding: 3px 12px 3px 28px; background: transparent; outline: none; }
-.statusBar-row:hover, .statusBar-row:focus { background: var(--primary); } /* hovered brush Primary (SC:2420-2421) */
-.statusBar-row[aria-checked="true"]::before { content: "\2713"; position: absolute; left: 10px; }
-
+/* Recessed ground of log text boxes. Log.Normal is Mono 12px (OutputLogStyle.cpp:54). */
+.statusBar-history { display: flex; flex-direction: column; justify-content: flex-end; box-sizing: border-box; width: 300px; min-height: 72px; margin: 0 0 4px 0; padding: 4px 8px; background: var(--recessed); font: 400 12px/16px var(--font-mono); color: var(--foreground); }
 </style>
 </head>
 <body>
 
-<svg class="statusBar-svgdefs" aria-hidden="true">
-	<defs>
-		<symbol id="statusBar-i-drawer" viewBox="0 0 16 16"><path d="M2 4.5l1-1.5h4l1 1.5h6V13H2z"/></symbol>
-		<symbol id="statusBar-i-log" viewBox="0 0 16 16"><path d="M3.5 2h7l2.5 2.5V14h-9.5z"/><path d="M5.5 7h5M5.5 9.5h5M5.5 12h3"/></symbol>
-		<symbol id="statusBar-i-console" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M4.5 6.5l2 1.5-2 1.5M8 10h3.5"/></symbol>
-		<symbol id="statusBar-i-chev" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></symbol>
-		<symbol id="statusBar-i-ddc" viewBox="0 0 16 16"><ellipse cx="8" cy="4" rx="5" ry="2"/><path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/></symbol>
-		<symbol id="statusBar-i-sc" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M4.1 11.9l7.8-7.8"/></symbol>
-	</defs>
-</svg>
-
 <div class="statusBar-note">Status bar at rest (Output Log drawer button is followed by the Cmd console) (pinned)</div>
 <div class="statusBar" data-pinned>
-	<div class="statusBar-seg statusBar-seg--drawer"><div class="statusBar-btn"><svg class="statusBar-ico"><use href="#statusBar-i-drawer"/></svg><span class="statusBar-txt">Content Drawer</span></div></div>
-	<div class="statusBar-seg statusBar-seg--drawer statusBar-seg--joined"><div class="statusBar-btn"><svg class="statusBar-ico"><use href="#statusBar-i-log"/></svg><span class="statusBar-txt">Output Log</span></div></div>
+	<div class="statusBar-seg statusBar-seg--drawer"><button class="button button--status"><svg class="button__icon" viewBox="0 0 16 16"><path d="M2 4.5l1-1.5h4l1 1.5h6V13H2z"/></svg>Content Drawer</button></div>
+	<div class="statusBar-seg statusBar-seg--drawer statusBar-seg--joined"><button class="button button--status"><svg class="button__icon" viewBox="0 0 16 16"><path d="M3.5 2h7l2.5 2.5V14h-9.5z"/><path d="M5.5 7h5M5.5 9.5h5M5.5 12h3"/></svg>Output Log</button></div>
 	<div class="statusBar-seg statusBar-seg--console">
 		<div class="statusBar-console">
-			<div class="statusBar-combo statusBar-cmd"><svg class="statusBar-ico"><use href="#statusBar-i-console"/></svg><span class="statusBar-txt">Cmd</span><svg class="statusBar-ico statusBar-arrow"><use href="#statusBar-i-chev"/></svg></div>
-			<div class="statusBar-input"><span>Enter Console Command</span></div>
+			<div class="statusBar-anchor statusBar-cmd"><span class="combobutton combobutton--simple"><svg class="combobutton__icon" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M4.5 6.5l2 1.5-2 1.5M8 10h3.5"/></svg><span class="combobutton__label">Cmd</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></div>
+			<div class="textinput textinput--console statusBar-input"><span class="textinput__text"><span class="textinput__hint">Enter Console Command</span></span></div>
 		</div>
 	</div>
 	<div class="statusBar-seg statusBar-seg--message"></div>
 	<div class="statusBar-seg statusBar-seg--tools">
-		<div class="statusBar-combo statusBar-combo--status"><svg class="statusBar-ico statusBar-dd-ico"><use href="#statusBar-i-ddc"/></svg><span class="statusBar-dd-txt">Derived Data</span><svg class="statusBar-ico statusBar-arrow"><use href="#statusBar-i-chev"/></svg></div>
-		<div class="statusBar-combo statusBar-combo--status"><svg class="statusBar-ico"><use href="#statusBar-i-sc"/></svg><span class="statusBar-sc-txt">Source Control Off</span><svg class="statusBar-ico statusBar-arrow"><use href="#statusBar-i-chev"/></svg></div>
+		<div class="statusBar-anchor"><span class="combobutton combobutton--simple combobutton--wide"><svg class="combobutton__icon statusBar-dd-ico" viewBox="0 0 16 16"><ellipse cx="8" cy="4" rx="5" ry="2"/><path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/></svg><span class="combobutton__label statusBar-dd-txt">Derived Data</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></div>
+		<div class="statusBar-anchor"><span class="combobutton combobutton--simple combobutton--wide"><svg class="combobutton__icon statusBar-sc-ico" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M4.1 11.9l7.8-7.8"/></svg><span class="combobutton__label statusBar-sc-txt">Source Control Off</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></div>
 	</div>
 </div>
 
 <div class="statusBar-note" style="margin-top:14px">Hover on a drawer button and on a status combo (pinned)</div>
 <div class="statusBar" data-pinned>
-	<div class="statusBar-seg statusBar-seg--drawer"><div class="statusBar-btn is-hover"><svg class="statusBar-ico"><use href="#statusBar-i-drawer"/></svg><span class="statusBar-txt">Content Drawer</span></div></div>
-	<div class="statusBar-seg statusBar-seg--drawer"><div class="statusBar-btn"><svg class="statusBar-ico"><use href="#statusBar-i-log"/></svg><span class="statusBar-txt">Output Log</span></div></div>
+	<div class="statusBar-seg statusBar-seg--drawer"><button class="button button--status button--hover"><svg class="button__icon" viewBox="0 0 16 16"><path d="M2 4.5l1-1.5h4l1 1.5h6V13H2z"/></svg>Content Drawer</button></div>
+	<div class="statusBar-seg statusBar-seg--drawer"><button class="button button--status"><svg class="button__icon" viewBox="0 0 16 16"><path d="M3.5 2h7l2.5 2.5V14h-9.5z"/><path d="M5.5 7h5M5.5 9.5h5M5.5 12h3"/></svg>Output Log</button></div>
 	<div class="statusBar-seg statusBar-seg--message"></div>
 	<div class="statusBar-seg statusBar-seg--tools">
-		<div class="statusBar-combo statusBar-combo--status is-hover"><svg class="statusBar-ico statusBar-dd-ico"><use href="#statusBar-i-ddc"/></svg><span class="statusBar-dd-txt">Derived Data</span><svg class="statusBar-ico statusBar-arrow"><use href="#statusBar-i-chev"/></svg></div>
-		<div class="statusBar-combo statusBar-combo--status"><svg class="statusBar-ico"><use href="#statusBar-i-sc"/></svg><span class="statusBar-sc-txt">Source Control Off</span><svg class="statusBar-ico statusBar-arrow"><use href="#statusBar-i-chev"/></svg></div>
+		<div class="statusBar-anchor"><span class="combobutton combobutton--simple combobutton--wide combobutton--hover"><svg class="combobutton__icon statusBar-dd-ico" viewBox="0 0 16 16"><ellipse cx="8" cy="4" rx="5" ry="2"/><path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/></svg><span class="combobutton__label statusBar-dd-txt">Derived Data</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></div>
+		<div class="statusBar-anchor"><span class="combobutton combobutton--simple combobutton--wide"><svg class="combobutton__icon statusBar-sc-ico" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M4.1 11.9l7.8-7.8"/></svg><span class="combobutton__label statusBar-sc-txt">Source Control Off</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></div>
 	</div>
 </div>
 
@@ -113,24 +79,55 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 	<div class="statusBar-stage">
 		<div class="statusBar-history" role="log" aria-label="Command history"></div>
 		<div class="statusBar">
-			<div class="statusBar-seg statusBar-seg--drawer"><div class="statusBar-btn" role="button" tabindex="0" aria-expanded="false"><svg class="statusBar-ico"><use href="#statusBar-i-drawer"/></svg><span class="statusBar-txt">Content Drawer</span></div></div>
-			<div class="statusBar-seg statusBar-seg--drawer statusBar-seg--joined"><div class="statusBar-btn" role="button" tabindex="0" aria-expanded="false"><svg class="statusBar-ico"><use href="#statusBar-i-log"/></svg><span class="statusBar-txt">Output Log</span></div></div>
+			<div class="statusBar-seg statusBar-seg--drawer"><ue-button><button class="button button--status" aria-pressed="false"><svg class="button__icon" viewBox="0 0 16 16"><path d="M2 4.5l1-1.5h4l1 1.5h6V13H2z"/></svg>Content Drawer</button></ue-button></div>
+			<div class="statusBar-seg statusBar-seg--drawer statusBar-seg--joined"><ue-button><button class="button button--status" aria-pressed="false"><svg class="button__icon" viewBox="0 0 16 16"><path d="M3.5 2h7l2.5 2.5V14h-9.5z"/><path d="M5.5 7h5M5.5 9.5h5M5.5 12h3"/></svg>Output Log</button></ue-button></div>
 			<div class="statusBar-seg statusBar-seg--console">
 				<div class="statusBar-console">
-					<div class="statusBar-anchor">
-						<div class="statusBar-combo statusBar-cmd" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false"><svg class="statusBar-ico"><use href="#statusBar-i-console"/></svg><span class="statusBar-txt">Cmd</span><svg class="statusBar-ico statusBar-arrow"><use href="#statusBar-i-chev"/></svg></div>
-						<div class="statusBar-menu" role="menu">
-							<div class="statusBar-row" role="menuitemradio" tabindex="-1" aria-checked="true">Cmd</div>
-							<div class="statusBar-row" role="menuitemradio" tabindex="-1" aria-checked="false">Python</div>
+					<ue-combo-button mode="value">
+						<div class="combobutton-anchor statusBar-anchor statusBar-cmd">
+							<span class="combobutton combobutton--simple" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false"><svg class="combobutton__icon" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M4.5 6.5l2 1.5-2 1.5M8 10h3.5"/></svg><span class="combobutton__label">Cmd</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
+							<div class="combobutton-menu combobutton-menu--up" hidden>
+								<ue-popup-menu>
+									<div class="popupmenu" role="menu" tabindex="0" aria-label="Console executor">
+										<div class="popupmenu__row" role="menuitemradio" aria-checked="true"><span class="popupmenu__check"><span class="popupmenu__radio"></span></span><span class="popupmenu__body"><span class="popupmenu__label">Cmd</span></span></div>
+										<div class="popupmenu__row" role="menuitemradio" aria-checked="false"><span class="popupmenu__check"><span class="popupmenu__radio"></span></span><span class="popupmenu__body"><span class="popupmenu__label">Python</span></span></div>
+									</div>
+								</ue-popup-menu>
+							</div>
 						</div>
-					</div>
-					<div class="statusBar-input"><input class="statusBar-field" type="text" placeholder="Enter Console Command" aria-label="Console command" autocomplete="off" spellcheck="false"></div>
+					</ue-combo-button>
+					<ue-text-input>
+						<div class="textinput textinput--console statusBar-input"><input class="textinput__text textinput__field" type="text" placeholder="Enter Console Command" aria-label="Console command" autocomplete="off" spellcheck="false"></div>
+					</ue-text-input>
 				</div>
 			</div>
 			<div class="statusBar-seg statusBar-seg--message"></div>
 			<div class="statusBar-seg statusBar-seg--tools">
-				<div class="statusBar-combo statusBar-combo--status" role="button" tabindex="0"><svg class="statusBar-ico statusBar-dd-ico"><use href="#statusBar-i-ddc"/></svg><span class="statusBar-dd-txt">Derived Data</span><svg class="statusBar-ico statusBar-arrow"><use href="#statusBar-i-chev"/></svg></div>
-				<div class="statusBar-combo statusBar-combo--status" role="button" tabindex="0"><svg class="statusBar-ico"><use href="#statusBar-i-sc"/></svg><span class="statusBar-sc-txt">Source Control Off</span><svg class="statusBar-ico statusBar-arrow"><use href="#statusBar-i-chev"/></svg></div>
+				<ue-combo-button mode="action">
+					<div class="combobutton-anchor statusBar-anchor">
+						<span class="combobutton combobutton--simple combobutton--wide" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false"><svg class="combobutton__icon statusBar-dd-ico" viewBox="0 0 16 16"><ellipse cx="8" cy="4" rx="5" ry="2"/><path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/></svg><span class="combobutton__label statusBar-dd-txt">Derived Data</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
+						<div class="combobutton-menu combobutton-menu--up combobutton-menu--end" hidden>
+							<ue-popup-menu>
+								<div class="popupmenu" role="menu" tabindex="0" aria-label="Derived Data">
+									<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Derived Data Settings</span></span></div>
+									<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Cache Statistics</span></span></div>
+								</div>
+							</ue-popup-menu>
+						</div>
+					</div>
+				</ue-combo-button>
+				<ue-combo-button mode="action">
+					<div class="combobutton-anchor statusBar-anchor">
+						<span class="combobutton combobutton--simple combobutton--wide" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false"><svg class="combobutton__icon statusBar-sc-ico" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M4.1 11.9l7.8-7.8"/></svg><span class="combobutton__label statusBar-sc-txt">Source Control Off</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
+						<div class="combobutton-menu combobutton-menu--up combobutton-menu--end" hidden>
+							<ue-popup-menu>
+								<div class="popupmenu" role="menu" tabindex="0" aria-label="Source Control">
+									<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Connect to Source Control...</span></span></div>
+								</div>
+							</ue-popup-menu>
+						</div>
+					</div>
+				</ue-combo-button>
 			</div>
 		</div>
 	</div>

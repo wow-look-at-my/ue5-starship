@@ -6,7 +6,7 @@
 	box-shadow: inset 0 0 0 1px var(--input-outline); /* :1471, thickness CoreStyle.h:118 */
 	color: var(--foreground); /* NormalForeground :1475 */
 	font: 400 13.333px/16px var(--font-sans); /* NormalText 10pt */
-	white-space: nowrap; cursor: default; user-select: none;
+	white-space: nowrap; flex-shrink: 0; cursor: default; user-select: none;
 }
 .combobutton:not([aria-disabled="true"]):hover, .combobutton--hover { box-shadow: inset 0 0 0 1px var(--hover); color: var(--foreground-hover); } /* :1472, :1476 */
 .combobutton:not([aria-disabled="true"]):active, .combobutton--open { box-shadow: inset 0 0 0 1px var(--hover); color: var(--foreground-hover); padding: 2px 8px 0; } /* :1473, :1477, PressedComboButtonMargin (8,2,8,0) CoreStyle.h:115 */
@@ -41,9 +41,29 @@
 .combobutton--button:not([aria-disabled="true"]):active, .combobutton--button.combobutton--open { background: var(--header); box-shadow: inset 0 0 0 1px var(--input); padding: 1px 14px 0; } /* :1375 */
 .combobutton--button .combobutton__icon { margin-right: 0; }
 
+.combobutton--simple.combobutton--wide { padding: 1px 10px; } /* SimpleComboButton with ContentPadding (6,0) on top of (4,1): SDerivedDataStatusBar.cpp:166, SourceControlMenuHelpers.cpp:432 */
+.combobutton--simple.combobutton--wide:not([aria-disabled="true"]):active, .combobutton--simple.combobutton--wide.combobutton--open { padding: 2px 10px 0; }
+
+.combobutton--menubar { min-width: 0; padding: 4px 12px; border-radius: 0; background: transparent; box-shadow: none; color: var(--foreground); } /* WindowMenuBar item: padding (12,4) StarshipCoreStyle.cpp:2448, Normal brush none :2419, NormalForeground Foreground :2439 */
+.combobutton--menubar:not([aria-disabled="true"]):hover, .combobutton--menubar.combobutton--hover { background: var(--hover); box-shadow: none; color: var(--foreground-hover); padding: 4px 12px; } /* Hovered brush Hover :2436, HoveredForeground ForegroundHover :2437 */
+.combobutton--menubar:not([aria-disabled="true"]):active, .combobutton--menubar:not([aria-disabled="true"]).combobutton--open { background: var(--primary); box-shadow: none; color: var(--foreground-hover); padding: 4px 12px; } /* open menu = Pressed brush Primary :2420, PressedForeground ForegroundHover :2438; SMenuEntryBlock.cpp:1614-1616 */
+.combobutton--menubar ~ .combobutton-menu { --combobutton-menu-min-width: 220px; }
+
+.combobutton--toolbar { min-width: 0; padding: 4px 8px; background: transparent; box-shadow: none; color: var(--foreground); } /* SlimToolBar button padding (8,4,8,4) StarshipCoreStyle.cpp:2193, hover brush Dropdown r4 :1391 */
+.combobutton--toolbar:not([aria-disabled="true"]):hover, .combobutton--toolbar.combobutton--hover { background: var(--dropdown); box-shadow: none; color: var(--foreground-hover); }
+.combobutton--toolbar:not([aria-disabled="true"]):active, .combobutton--toolbar.combobutton--open { background: var(--dropdown); box-shadow: none; color: var(--foreground-hover); padding: 5px 8px 3px; } /* PressedPadding (8,5,8,3) :2194 */
+.combobutton--toolbar .combobutton__icon { width: 20px; height: 20px; margin-right: 0; } /* SlimToolBar SetIconSize(Icon20x20) :2240 */
+.combobutton--toolbar .combobutton__label { margin-left: 4px; } /* SlimToolBar LabelPadding (4,0,0,0) :2214 */
+.combobutton--toolbar .combobutton__arrow { margin: 0 2px 0 1px; } /* DownArrowPadding (1,0,2,0) :1517, :2198 */
+.combobutton--toolbar.combobutton--overflow { padding: 4px 12px; } /* overflow button: content padding (4,0) + (8,4) SClippingHorizontalBox.cpp:116-131, StarshipCoreStyle.cpp:2206 */
+.combobutton--toolbar.combobutton--overflow:not([aria-disabled="true"]):active, .combobutton--toolbar.combobutton--overflow.combobutton--open { padding: 5px 12px 3px; }
+.combobutton--toolbar.combobutton--overflow .combobutton__icon { width: 16px; height: 16px; } /* 16x16 expand brush */
+
+.combobutton--plate, .combobutton--plate:not([aria-disabled="true"]):hover, .combobutton--plate:not([aria-disabled="true"]):active, .combobutton--plate.combobutton--hover, .combobutton--plate.combobutton--open { flex: 1 0 auto; align-self: stretch; min-width: 0; padding: 0; border-radius: 0; background: transparent; box-shadow: none; color: inherit; } /* the host plate owns the fill and the foreground, StarshipStyle.cpp:5520-5622 */
+
 .combobutton:focus-visible:not(.combobutton--open) { box-shadow: inset 0 0 0 1px var(--primary); } /* FocusRectangle 1px Primary r4, StarshipCoreStyle.cpp:218 */
 
-.combobutton-anchor { display: inline-block; position: relative; }
+.combobutton-anchor { display: inline-block; position: relative; flex-shrink: 0; } /* a trigger and its anchor never shrink or wrap in a flex row */
 .combobutton-anchor--fill { display: flex; flex: 1 1 auto; min-width: 0; } /* a details row value: the trigger takes the row */
 .combobutton-anchor--fill > .combobutton { flex: 1 1 auto; min-width: 0; }
 .combobutton-menu {
@@ -51,4 +71,5 @@
 	width: max-content; min-width: var(--combobutton-menu-min-width, 100%); /* the panel is at least as wide as the trigger */
 }
 .combobutton-menu--end { left: auto; right: 0; } /* for a trigger at the right edge */
+.combobutton-menu--up { top: auto; bottom: 100%; } /* for a trigger at the bottom edge of the window */
 .combobutton-menu[hidden] { display: none; }

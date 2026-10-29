@@ -14,27 +14,15 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 .placeActors-demo { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
 .placeActors-svgdefs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .placeActors-ico { display: block; flex: none; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
-.placeActors-ico--14 { width: 14px; height: 14px; } /* search glass ImageSizeOverride 14 (SC:1316) */
 .placeActors-ico--16 { width: 16px; height: 16px; } /* Icons.Help Icon16x16 (SC:297) */
 .placeActors-ico--20 { width: 20px; height: 20px; } /* PlacementBrowser.Icons.* are Icon20x20 (SS:4717-4725) */
 
 .placeActors { width: 240px; background: var(--panel); } /* panel colour Brushes.Panel (PM:705); width is the consumer's dock size */
 
-/* Search: SBorder ToolPanel.GroupBorder = Panel colour (SC:437), Padding 8 (PM:693); SSearchBox with style "SearchBox" (SC:1301-1319) */
+/* Search block: SBorder ToolPanel.GroupBorder = Panel colour (SC:437), Padding 8 (PM:693). The field is a TextInput search variant. */
 .placeActors-search { padding: 8px; background: var(--panel); }
-.placeActors-searchbox { display: flex; align-items: center; padding: 3px 8px 4px; border-radius: 999px; background: var(--input); box-shadow: inset 0 0 0 1px var(--secondary); color: var(--foreground); } /* pill = HalfHeight rounding (SlateBrush.h:161-167), Input fill, Secondary 1px outline (SC:1303), padding (8,3,8,4) (SC:1289) */
-.placeActors-searchbox:hover { box-shadow: inset 0 0 0 1px var(--hover); } /* SC:1304 */
-.placeActors-searchbox .placeActors-ico { margin-left: 4px; margin-right: 0; } /* ImagePadding (4,0,0,0) (SC:1315), glass left aligned (SC:1318) */
-.placeActors-hint { margin-left: 4px; color: var(--foreground); opacity: .35; } /* hint text = foreground at alpha 0.35 (SlateEditableTextLayout.cpp:3563) */
 
-/* Category toolbar: style CategoryDrivenContentBuilderToolbarWithoutLabels (SS:1768-1787): Panel background (from SlimToolBar, SC:2200), BackgroundPadding 4 (SS:1772) */
-.placeActors-rail { background: var(--panel); padding: 4px; }
-.placeActors-rail--row { display: flex; flex-wrap: wrap; } /* reference-screenshot arrangement; the engine source stacks the rail vertically (PM:708, CategoryDrivenContentBuilderBase.cpp:139-147) */
-.placeActors-rail--col { width: 44px; flex: none; } /* UnlabelledButtonToolbarButtonWidth 44 (CategoryDrivenContentBuilderBase.cpp:18) */
-.placeActors-cat { display: flex; align-items: center; justify-content: center; box-sizing: border-box; width: 36px; height: 36px; margin: 2px 0; padding: 8px; border-radius: 4px; color: var(--foreground); cursor: default; } /* ButtonContentMaxWidth 36 (SS:1786), IconPadding 8 (SS:1784), ButtonPadding (0,2,0,2) (SS:1780), toggle padding 0 (SS:1759), radius 4 (SS:1750) */
-.placeActors-cat:hover { background: var(--dropdown); color: var(--foreground-hover); } /* unchecked hover Dropdown r4 (SC:1631), ForegroundHover (SS:1755) */
-.placeActors-cat.is-active { background: var(--primary); color: var(--foreground-hover); box-shadow: inset 0 0 0 .5px rgba(0, 0, 0, .8); } /* CheckedImage Primary r4 with outline (0,0,0,.8) 0.5px (SS:1750), CheckedForeground ForegroundHover (SS:1756) */
-.placeActors-cat.is-active:hover { background: var(--primary-hover); } /* SS:1751 */
+/* The category rail is a SegmentedControl rail variant, 44px wide (CategoryDrivenContentBuilderBase.cpp:18). */
 
 /* Section header: FSimpleTitleContainer (SimpleTitleContainer.cpp:17) in FHeaderAndBodyContainer (HeaderAndBodyContainer.cpp:63-71) */
 .placeActors-header { padding: 4px 0 4px 6px; background: var(--dropdown); color: var(--foreground); } /* Dropdown fill (HeaderAndBodyContainer.cpp:63), Foreground (:64), header margin 4 (:71) + title padding (2,4,0,4) (SimpleTitleContainer.cpp:17) */
@@ -49,16 +37,8 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 .placeActors-name { flex: 1; min-width: 0; padding: 0 8px 1px 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(255, 255, 255, .9); } /* text padding (4,0,8,1) (PM:222), Regular 10pt white alpha .9 (SS:4649-4650) */
 .placeActors-info { display: flex; align-items: center; justify-content: center; box-sizing: border-box; width: 24px; height: 20px; margin-right: 4px; border-radius: 4px; color: var(--foreground); } /* SDocumentationAnchor: SSimpleButton, Icons.Help 16 (SDocumentationAnchor.cpp:63), SimpleButton padding (2,1) (SC:1405-1407) + content padding (2,1) (ToolWidgetsStyle.cpp:19, ToolWidgetsStylePrivate.h:24-25) */
 .placeActors-info:hover { background: var(--hover); color: var(--foreground-hover); } /* SimpleButton hover Dropdown (SC:1391) is invisible on a Dropdown row, so the preview uses Hover */
-/* Live panel: search field, clear button, filtering and keyboard focus */
 .placeActors-row[hidden], .placeActors-group[hidden], .placeActors-empty[hidden] { display: none; }
-.placeActors-row:focus-visible, .placeActors-cat:focus-visible { outline: 1px solid var(--primary-hover); outline-offset: 1px; }
-.placeActors-searchbox:focus-within { box-shadow: inset 0 0 0 1px var(--primary); } /* focused outline Primary (SC:1305) */
-.placeActors-field { flex: 1; min-width: 0; height: 16px; margin: 0 0 0 4px; padding: 0; border: 0; outline: none; background: transparent; color: var(--foreground); font: inherit; } /* the field is the SSearchBox text; placeholder is the hint */
-.placeActors-field::placeholder { color: var(--foreground); opacity: .35; } /* hint text = foreground at alpha 0.35 (SlateEditableTextLayout.cpp:3563) */
-.placeActors-searchbox:focus-within .placeActors-field { color: var(--white); } /* SetFocusedForegroundColor White (SC:1292) */
-.placeActors-clear { display: flex; flex: none; align-items: center; justify-content: center; margin-left: 4px; color: var(--foreground); cursor: default; } /* clear X: ThinHoverOnlyButton, 16x16 close image, padding (4,0,0,0) (SSearchBox.cpp:155-170, SC:1311-1313, 1463) */
-.placeActors-clear:hover { color: var(--foreground-hover); } /* SimpleButton hovered foreground ForegroundHover (SC:1393-1395) */
-.placeActors-field:placeholder-shown ~ .placeActors-clear { display: none; } /* the X shows only while the field has text (SSearchBox.cpp:251-256) */
+.placeActors-row:focus-visible { outline: 1px solid var(--primary-hover); outline-offset: 1px; }
 .placeActors-grid--live { min-height: 180px; } /* five rows of 32 + 2 + 2 margin at most, so switching category does not resize the panel */
 .placeActors-empty { padding: 8px 4px; color: var(--foreground); opacity: .7; }
 .placeActors-handle { flex: none; width: 6px; height: 15px; margin-right: 8px; background: radial-gradient(circle, var(--foreground) 1px, transparent 1.2px) 0 0 / 3px 5px; opacity: .6; } /* VerticalBoxDragIndicatorShort 6x15 (SC:466), padding right 8 (PM:211); dot pattern approximates the PNG */
@@ -68,19 +48,13 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 
 <svg class="placeActors-svgdefs" aria-hidden="true">
 	<defs>
-		<symbol id="placeActors-i-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></symbol>
-		<symbol id="placeActors-i-recent" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l2.5 1.5"/></symbol>
-		<symbol id="placeActors-i-basic" viewBox="0 0 16 16"><path d="M5 2.5L8.5 6h-7z"/><circle cx="11.5" cy="5" r="2.5"/><rect x="3" y="9.5" width="5" height="4.5" rx=".5"/></symbol>
 		<symbol id="placeActors-i-bulb" viewBox="0 0 16 16"><path d="M5.5 10.5c-1.5-1-2.2-2.3-2.2-3.8a4.7 4.7 0 0 1 9.4 0c0 1.5-.7 2.8-2.2 3.8z"/><path d="M6 12.5h4M6.8 14.2h2.4"/></symbol>
 		<symbol id="placeActors-i-shapes" viewBox="0 0 16 16"><path d="M8 2l5.5 2.7v5.6L8 13 2.5 10.3V4.7z"/><path d="M2.5 4.7L8 7.4l5.5-2.7M8 7.4V13"/></symbol>
-		<symbol id="placeActors-i-clap" viewBox="0 0 16 16"><rect x="2" y="6.5" width="12" height="7" rx="1"/><path d="M2 6.5l1-3 3 .7-1 2.3M7 3.8l3 .7-1 2M11 4.6l3 .7-.7 1.2"/></symbol>
 		<symbol id="placeActors-i-vfx" viewBox="0 0 16 16"><path d="M6 2.5l1.2 3.3 3.3 1.2-3.3 1.2L6 11.5 4.8 8.2 1.5 7l3.3-1.2zM12 9l.8 2.2L15 12l-2.2.8L12 15l-.8-2.2L9 12l2.2-.8z"/></symbol>
 		<symbol id="placeActors-i-volumes" viewBox="0 0 16 16"><path d="M8 2l5.5 2.7v5.6L8 13 2.5 10.3V4.7z" stroke-dasharray="2 1.5"/></symbol>
-		<symbol id="placeActors-i-all" viewBox="0 0 16 16"><rect x="2" y="5" width="9" height="9" rx="1"/><path d="M5 2.5h8.5V11"/></symbol>
 		<symbol id="placeActors-i-sphere" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M3 6.5c3 1.5 7 1.5 10 0M3 9.5c3-1.5 7-1.5 10 0" opacity=".6"/></symbol>
 		<symbol id="placeActors-i-person" viewBox="0 0 16 16"><circle cx="8" cy="4.5" r="2.5"/><path d="M3 14c0-3.2 2.2-5 5-5s5 1.8 5 5z"/></symbol>
 		<symbol id="placeActors-i-flag" viewBox="0 0 16 16"><path d="M4 14V2.5M4 3h8l-1.8 2.7L12 8.5H4"/></symbol>
-		<symbol id="placeActors-i-close" viewBox="0 0 16 16"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></symbol>
 		<symbol id="placeActors-i-help" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M6.2 6.3a1.9 1.9 0 0 1 3.6.7c0 1.3-1.8 1.4-1.8 2.7M8 11.6v.1"/></symbol>
 	</defs>
 </svg>
@@ -90,16 +64,16 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 <div data-pinned>
 	<div class="placeActors-note">Arrangement of the reference screenshot: horizontal strip, info button (pinned: Actor hovered, Player Start pressed)</div>
 	<div class="placeActors">
-		<div class="placeActors-search"><div class="placeActors-searchbox"><svg class="placeActors-ico placeActors-ico--14"><use href="#placeActors-i-search"/></svg><span class="placeActors-hint">Search Classes</span></div></div>
-		<div class="placeActors-rail placeActors-rail--row">
-			<div class="placeActors-cat"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-recent"/></svg></div>
-			<div class="placeActors-cat is-active"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-basic"/></svg></div>
-			<div class="placeActors-cat"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-bulb"/></svg></div>
-			<div class="placeActors-cat"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-shapes"/></svg></div>
-			<div class="placeActors-cat"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-clap"/></svg></div>
-			<div class="placeActors-cat"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-vfx"/></svg></div>
-			<div class="placeActors-cat"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-volumes"/></svg></div>
-			<div class="placeActors-cat"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-all"/></svg></div>
+		<div class="placeActors-search"><div class="textinput textinput--search"><svg class="textinput__glyph textinput__glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><span class="textinput__text"><span class="textinput__hint">Search Classes</span></span><span class="textinput__tail"></span></div></div>
+		<div class="SegmentedControl SegmentedControl--rail SegmentedControl--row">
+			<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l2.5 1.5"/></svg></button>
+			<button class="SegmentedControl-seg is-checked"><svg viewBox="0 0 16 16"><path d="M5 2.5L8.5 6h-7z"/><circle cx="11.5" cy="5" r="2.5"/><rect x="3" y="9.5" width="5" height="4.5" rx=".5"/></svg></button>
+			<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><path d="M5.5 10.5c-1.5-1-2.2-2.3-2.2-3.8a4.7 4.7 0 0 1 9.4 0c0 1.5-.7 2.8-2.2 3.8z"/><path d="M6 12.5h4M6.8 14.2h2.4"/></svg></button>
+			<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><path d="M8 2l5.5 2.7v5.6L8 13 2.5 10.3V4.7z"/><path d="M2.5 4.7L8 7.4l5.5-2.7M8 7.4V13"/></svg></button>
+			<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><rect x="2" y="6.5" width="12" height="7" rx="1"/><path d="M2 6.5l1-3 3 .7-1 2.3M7 3.8l3 .7-1 2M11 4.6l3 .7-.7 1.2"/></svg></button>
+			<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><path d="M6 2.5l1.2 3.3 3.3 1.2-3.3 1.2L6 11.5 4.8 8.2 1.5 7l3.3-1.2zM12 9l.8 2.2L15 12l-2.2.8L12 15l-.8-2.2L9 12l2.2-.8z"/></svg></button>
+			<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><path d="M8 2l5.5 2.7v5.6L8 13 2.5 10.3V4.7z" stroke-dasharray="2 1.5"/></svg></button>
+			<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><rect x="2" y="5" width="9" height="9" rx="1"/><path d="M5 2.5h8.5V11"/></svg></button>
 		</div>
 		<div class="placeActors-header">Basic</div>
 		<div class="placeActors-body"><div class="placeActors-grid">
@@ -115,14 +89,14 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 <div data-pinned>
 	<div class="placeActors-note">Arrangement of the 5.5.3 source: vertical rail, drag handle (pinned)</div>
 	<div class="placeActors" style="width:260px">
-		<div class="placeActors-search"><div class="placeActors-searchbox"><svg class="placeActors-ico placeActors-ico--14"><use href="#placeActors-i-search"/></svg><span class="placeActors-hint">Search Classes</span></div></div>
+		<div class="placeActors-search"><div class="textinput textinput--search"><svg class="textinput__glyph textinput__glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><span class="textinput__text"><span class="textinput__hint">Search Classes</span></span><span class="textinput__tail"></span></div></div>
 		<div style="display:flex">
-			<div class="placeActors-rail placeActors-rail--col">
-				<div class="placeActors-cat"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-recent"/></svg></div>
-				<div class="placeActors-cat is-active"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-basic"/></svg></div>
-				<div class="placeActors-cat"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-bulb"/></svg></div>
-				<div class="placeActors-cat"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-shapes"/></svg></div>
-				<div class="placeActors-cat"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-all"/></svg></div>
+			<div class="SegmentedControl SegmentedControl--rail">
+				<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l2.5 1.5"/></svg></button>
+				<button class="SegmentedControl-seg is-checked"><svg viewBox="0 0 16 16"><path d="M5 2.5L8.5 6h-7z"/><circle cx="11.5" cy="5" r="2.5"/><rect x="3" y="9.5" width="5" height="4.5" rx=".5"/></svg></button>
+				<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><path d="M5.5 10.5c-1.5-1-2.2-2.3-2.2-3.8a4.7 4.7 0 0 1 9.4 0c0 1.5-.7 2.8-2.2 3.8z"/><path d="M6 12.5h4M6.8 14.2h2.4"/></svg></button>
+				<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><path d="M8 2l5.5 2.7v5.6L8 13 2.5 10.3V4.7z"/><path d="M2.5 4.7L8 7.4l5.5-2.7M8 7.4V13"/></svg></button>
+				<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><rect x="2" y="5" width="9" height="9" rx="1"/><path d="M5 2.5h8.5V11"/></svg></button>
 			</div>
 			<div style="flex:1;min-width:0">
 				<div class="placeActors-header">Basic</div>
@@ -140,16 +114,18 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 	<div class="placeActors-note">Live: click a category to swap the list, type in the search field to filter it (the X clears it, so does Escape), hover and press the rows and the "?" button. Keys: Left and Right in the strip. The categories are the built-in ones of PlacementModeModule.cpp:130-290. Items outside Basic are illustrative.</div>
 	<ue-place-actors-panel>
 		<div class="placeActors">
-			<div class="placeActors-search"><div class="placeActors-searchbox"><svg class="placeActors-ico placeActors-ico--14"><use href="#placeActors-i-search"/></svg><input class="placeActors-field" type="text" placeholder="Search Classes" aria-label="Search Classes" autocomplete="off" spellcheck="false"><div class="placeActors-clear" role="button" tabindex="0" aria-label="Clear search"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-close"/></svg></div></div></div>
-			<div class="placeActors-rail placeActors-rail--row" role="radiogroup" aria-label="Categories">
-				<div class="placeActors-cat" role="radio" aria-checked="false" tabindex="-1" aria-label="Recent" data-category="Recent"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-recent"/></svg></div>
-				<div class="placeActors-cat is-active" role="radio" aria-checked="true" tabindex="0" aria-label="Basic" data-category="Basic"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-basic"/></svg></div>
-				<div class="placeActors-cat" role="radio" aria-checked="false" tabindex="-1" aria-label="Lights" data-category="Lights"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-bulb"/></svg></div>
-				<div class="placeActors-cat" role="radio" aria-checked="false" tabindex="-1" aria-label="Shapes" data-category="Shapes"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-shapes"/></svg></div>
-				<div class="placeActors-cat" role="radio" aria-checked="false" tabindex="-1" aria-label="Visual Effects" data-category="Visual Effects"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-vfx"/></svg></div>
-				<div class="placeActors-cat" role="radio" aria-checked="false" tabindex="-1" aria-label="Volumes" data-category="Volumes"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-volumes"/></svg></div>
-				<div class="placeActors-cat" role="radio" aria-checked="false" tabindex="-1" aria-label="All" data-category="All"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-all"/></svg></div>
-			</div>
+			<div class="placeActors-search"><ue-text-input><div class="textinput textinput--search"><svg class="textinput__glyph textinput__glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><svg class="textinput__glyph textinput__clear" role="button" aria-label="Clear search" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg><input class="textinput__text textinput__field" type="text" placeholder="Search Classes" aria-label="Search Classes" autocomplete="off" spellcheck="false"><span class="textinput__tail"></span></div></ue-text-input></div>
+			<ue-segmented-control>
+				<div class="SegmentedControl SegmentedControl--rail SegmentedControl--row" role="radiogroup" aria-label="Categories">
+				<button class="SegmentedControl-seg" role="radio" aria-checked="false" tabindex="-1" aria-label="Recent" data-value="Recent"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l2.5 1.5"/></svg></button>
+				<button class="SegmentedControl-seg is-checked" role="radio" aria-checked="true" tabindex="0" aria-label="Basic" data-value="Basic"><svg viewBox="0 0 16 16"><path d="M5 2.5L8.5 6h-7z"/><circle cx="11.5" cy="5" r="2.5"/><rect x="3" y="9.5" width="5" height="4.5" rx=".5"/></svg></button>
+				<button class="SegmentedControl-seg" role="radio" aria-checked="false" tabindex="-1" aria-label="Lights" data-value="Lights"><svg viewBox="0 0 16 16"><path d="M5.5 10.5c-1.5-1-2.2-2.3-2.2-3.8a4.7 4.7 0 0 1 9.4 0c0 1.5-.7 2.8-2.2 3.8z"/><path d="M6 12.5h4M6.8 14.2h2.4"/></svg></button>
+				<button class="SegmentedControl-seg" role="radio" aria-checked="false" tabindex="-1" aria-label="Shapes" data-value="Shapes"><svg viewBox="0 0 16 16"><path d="M8 2l5.5 2.7v5.6L8 13 2.5 10.3V4.7z"/><path d="M2.5 4.7L8 7.4l5.5-2.7M8 7.4V13"/></svg></button>
+				<button class="SegmentedControl-seg" role="radio" aria-checked="false" tabindex="-1" aria-label="Visual Effects" data-value="Visual Effects"><svg viewBox="0 0 16 16"><path d="M6 2.5l1.2 3.3 3.3 1.2-3.3 1.2L6 11.5 4.8 8.2 1.5 7l3.3-1.2zM12 9l.8 2.2L15 12l-2.2.8L12 15l-.8-2.2L9 12l2.2-.8z"/></svg></button>
+				<button class="SegmentedControl-seg" role="radio" aria-checked="false" tabindex="-1" aria-label="Volumes" data-value="Volumes"><svg viewBox="0 0 16 16"><path d="M8 2l5.5 2.7v5.6L8 13 2.5 10.3V4.7z" stroke-dasharray="2 1.5"/></svg></button>
+				<button class="SegmentedControl-seg" role="radio" aria-checked="false" tabindex="-1" aria-label="All" data-value="All"><svg viewBox="0 0 16 16"><rect x="2" y="5" width="9" height="9" rx="1"/><path d="M5 2.5h8.5V11"/></svg></button>
+				</div>
+			</ue-segmented-control>
 			<div class="placeActors-header">Basic</div>
 			<div class="placeActors-body"><div class="placeActors-grid placeActors-grid--live" role="list">
 				<div class="placeActors-group" data-category="Recent" hidden>

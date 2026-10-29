@@ -8,200 +8,175 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Condensed:wght@400;700&family=Roboto+Mono&display=swap">
 <style>body { font-family: var(--font-sans); }</style>
 <style>
-/* Every px value cites engine source. SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp, SS = Editor/EditorStyle/Private/StarshipStyle.cpp. */
+/* Every px value cites engine source. SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp, SS = Editor/EditorStyle/Private/StarshipStyle.cpp. The buttons are Button toolbar and plate variants, the combos are ComboButton variants. */
 body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* Normal font 10pt = 13.333px (SC:36); 16px line height approximates Roboto metrics */
 .toolBar-note { margin: 18px 0 6px; font: 400 10.667px/12px var(--font-sans); color: var(--foreground); opacity: .7; } /* Small font 8pt (SC:40) */
-.toolBar-svgdefs { position: absolute; width: 0; height: 0; overflow: hidden; }
-.toolBar-ico { display: block; flex: none; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
-.toolBar-ico--16 { width: 16px; height: 16px; } /* Icon16x16 (CoreStyle.h:94) */
-.toolBar-ico--20 { width: 20px; height: 20px; } /* SlimToolBar SetIconSize(Icon20x20) (SC:2240) */
 
 /* Bar: SlimToolBar background Panel, BackgroundPadding (4,6) (SC:2200-2205), applied by MultiBox.cpp:1349-1350 */
 .toolBar { display: flex; align-items: stretch; background: var(--panel); padding: 6px 4px; }
-.toolBar-slot { position: relative; display: flex; align-items: stretch; flex-shrink: 0; white-space: nowrap; } /* a combo never wraps its label */
+.toolBar .toolBar-slot { display: flex; align-items: center; flex-shrink: 0; white-space: nowrap; } /* a combo never wraps its label or shrinks; a slot that holds a menu also positions it */
+.toolBar .toolBar-slot--plate { align-items: stretch; }
 .toolBar-spacer { flex: 1; }
 
-/* Plain button block: ButtonPadding (4,0) (SC:2208) around SButton whose style padding is (8,4,8,4) (SC:2193) */
+/* Button block: ButtonPadding (4,0) (SC:2208); toggle block: CheckBoxPadding (8,0) (SC:2209); combo block: ComboButtonPadding (0,0) (SC:2207) */
 .toolBar-slot--button { padding: 0 4px; }
-.toolBar-btn { display: flex; align-items: center; padding: 4px 8px; border-radius: 4px; color: var(--foreground); background: transparent; cursor: default; } /* radius 4 hover brush (SC:1391); NormalForeground Foreground (SC:2189) */
-.toolBar-btn:hover, .toolBar-btn.is-hover { background: var(--dropdown); color: var(--foreground-hover); } /* hover brush Dropdown (SC:1391), HoveredForeground ForegroundHover (SC:2191) */
-.toolBar-btn.is-pressed, .toolBar-btn:active { background: var(--dropdown); color: var(--foreground-hover); padding: 5px 8px 3px; } /* PressedPadding (8,5,8,3) (SC:2194) */
-.toolBar-label { margin-left: 4px; } /* SlimToolBar LabelPadding (4,0,0,0) (SC:2214) */
-
-/* Toggle block: CheckBoxPadding (8,0) (SC:2209); toggle style padding (8,4,8,4) (SC:2217-2218) */
 .toolBar-slot--toggle { padding: 0 8px; }
-.toolBar-btn--toggle.is-checked { background: var(--primary); color: var(--foreground-hover); } /* CheckedImage Primary r4, CheckedForeground ForegroundHover (SC:1627, 1636) */
-.toolBar-btn--toggle.is-checked:hover { background: var(--primary-hover); } /* CheckedHoveredImage PrimaryHover (SC:1628) */
-.toolBar-btn--toggle:active, .toolBar-btn--toggle.is-checked:active { background: var(--dropdown); color: var(--foreground-hover); padding: 4px 8px; } /* CheckedPressedImage and UncheckedPressedImage Dropdown (SC:1629, 1632), ForegroundHover (SC:1635, 1636); a toggle has no pressed padding shift, only (8,4,8,4) (SC:2217-2218) */
-
-/* Combo block: ComboButtonPadding (0,0) (SC:2207); arrow 16x16 chevron with DownArrowPadding (1,0,2,0) (SC:1517, 2198) */
 .toolBar-slot--combo { padding: 0; }
-.toolBar-arrow { margin: 0 2px 0 1px; }
 
 /* Separator: Recessed brush, thickness 2 (ToolBarStyle.cpp:25), padding (4,-5) (SC:2210-2211) */
 .toolBar-slot--sep { padding: 0 4px; }
 .toolBar-sep { width: 2px; align-self: stretch; margin: -5px 0; background: var(--recessed); }
 
-/* Editor-modes combo is a bare SComboButton: ComboButton style (SC:1470-1494), button padding (8,1,8,1) (CoreStyle.h:114), gap 6 (LevelEditorToolBar.cpp:1407) */
+/* Editor-modes combo is a bare SComboButton, gap 6 between its icon and label (LevelEditorToolBar.cpp:1407) */
 .toolBar-slot--modes { padding: 0 10px 0 0; }
-.toolBar-modes { display: flex; align-items: center; padding: 1px 8px; border-radius: 4px; background: var(--input); box-shadow: inset 0 0 0 1px var(--input-outline); color: var(--foreground); } /* Input fill, InputOutline 1px, radius 4 (SC:1471, CoreStyle.h:117-118) */
-.toolBar-modes:hover, .toolBar-modes:active { box-shadow: inset 0 0 0 1px var(--hover); color: var(--foreground-hover); } /* Hover outline (SC:1472), pressed has the same outline (SC:1473) */
-.toolBar-modes:active { padding: 2px 8px 0; } /* PressedComboButtonMargin (8,2,8,0) (CoreStyle.h:115) */
-.toolBar-modes .toolBar-ico--16 { margin-right: 6px; }
-.toolBar-modes .toolBar-arrow { margin: 0 0 0 2px; } /* default DownArrowPadding 2 (SlateTypes.cpp:165) */
+.toolBar .toolBar-modeIcon { margin-right: 6px; }
 
-/* Play group (backplate): SS:5516-5622. All plates use Dropdown fill; hover/press only change the foreground. */
+/* Play group (backplate): SS:5516-5622. All plates use Dropdown fill; hover and press only change the foreground, which the button inherits. */
 .toolBar-plate { display: flex; align-items: center; justify-content: center; background: var(--dropdown); }
 .toolBar-plate--left { margin-left: 10px; padding: 2px 6px 2px 8px; border-radius: 4px 0 0 4px; } /* ButtonPadding (10,0,0,0) (SS:5529), padding (8,2,6,2) (SS:5524), corners (SS:5520) */
 .toolBar-plate--center { padding: 2px 6px 2px 2px; border-radius: 0; } /* padding (2,2,6,2) (SS:5558), ButtonPadding 0 (SS:5561) */
-.toolBar-plate--right { position: relative; width: 22px; margin: 0 8px 0 1px; border-radius: 0 4px 4px 0; } /* ComboButtonPadding (1,0,8,0) (SS:5620), corners (SS:5605); width = 7+6 padding + 20 content + 6 arrow - 17 arrow shift (SS:5609, 5613) = 22 */
+.toolBar-plate--right { width: 22px; margin: 0 8px 0 1px; border-radius: 0 4px 4px 0; } /* ComboButtonPadding (1,0,8,0) (SS:5620), corners (SS:5605); width = 7+6 padding + 20 content + 6 arrow - 17 arrow shift (SS:5609, 5613) = 22 */
 .toolBar-plate--play { color: var(--accent-green); } /* NormalForeground AccentGreen (SS:5542) */
-.toolBar-plate--play:hover { color: #a9c296; } /* HSV S*0.5 of AccentGreen in linear space (SS:5536, 5544); computed in dev/hsv.js */
-.toolBar-plate--play.is-pressed, .toolBar-plate--play:active { color: #658e34; } /* HSV V*0.5 (SS:5537, 5543) */
-.toolBar-plate--step { color: var(--foreground); }
-.toolBar-plate--step:hover, .toolBar-plate--step:active { color: var(--foreground-hover); } /* pressed foreground ForegroundHover (SC:2190) */
+.toolBar-plate--play:hover { color: #a9c296; } /* HSV S*0.5 of AccentGreen in linear space (SS:5536, 5544) */
+.toolBar-plate--play:active, .toolBar[data-playing="true"] .toolBar-plate--play { color: #658e34; } /* HSV V*0.5 (SS:5537, 5543); a running game keeps the pressed look */
+.toolBar-plate--step, .toolBar-plate--right { color: var(--foreground); }
+.toolBar-plate--step:hover, .toolBar-plate--step:active, .toolBar-plate--right:hover, .toolBar-plate--right:active { color: var(--foreground-hover); } /* pressed foreground ForegroundHover (SC:2190) */
 .toolBar-plate--stop { color: var(--accent-red); } /* NormalForeground AccentRed (SS:5576) */
 .toolBar-plate--stop:hover { color: #ffc0c0; } /* hover (SS:5570, 5578) */
 .toolBar-plate--stop:active { color: #bc2c2c; } /* HSV V*0.5 of AccentRed (SS:5571, 5577) */
-.toolBar-plate--right { color: var(--foreground); }
-.toolBar-plate--right:hover, .toolBar-plate--right:active { color: var(--foreground-hover); }
-.toolBar-plate.is-disabled { opacity: .45; pointer-events: none; } /* disabled widgets draw at alpha .45 (SlateElementPixelShader.usf:535) */
-.toolBar-dots { position: absolute; left: 8px; top: 50%; width: 6px; height: 24px; margin-top: -12px; fill: currentColor; stroke: none; } /* ellipsis-vertical-narrow 6x24 (SS:5614) */
-
-/* Overflow (wrap) button: SComboButton, slim button style, ContentPadding (4,0), 16x16 expand brush (SClippingHorizontalBox.cpp:116-131, SC:2206) */
-.toolBar-wrap { display: flex; align-items: center; padding: 4px 12px; border-radius: 4px; color: var(--foreground); }
-.toolBar-wrap:hover, .toolBar-wrap:active { background: var(--dropdown); color: var(--foreground-hover); }
-.toolBar-wrap:active { padding: 5px 12px 3px; } /* slim button PressedPadding (8,5,8,3) (SC:2194) plus content padding (4,0) */
+.toolBar-plate:has(:disabled) { opacity: .45; pointer-events: none; } /* disabled widgets draw at alpha .45 (SlateElementPixelShader.usf:535) */
+.toolBar-dots { flex: none; width: 6px; height: 24px; margin-left: 8px; fill: currentColor; stroke: none; } /* ellipsis-vertical-narrow 6x24 (SS:5614) */
 
 /* Settings block: right aligned with 7px right padding (LevelEditorToolBar.cpp:1639); CalloutToolbar shows labels (SC:2278-2283) */
 .toolBar-slot--settings { padding: 0 7px 0 0; }
 
-/* Keyboard focus ring on the live controls */
-.toolBar-btn:focus-visible, .toolBar-modes:focus-visible, .toolBar-wrap:focus-visible, .toolBar-plate:focus-visible { outline: 1px solid var(--primary-hover); outline-offset: 1px; }
-
-/* Live pop-up menus use the PopupMenu look: Dropdown ground, DropdownOutline 1px, Primary hovered row (SC:2302-2303, 2420-2421) */
 .toolBar-stage { min-height: 190px; }
-.toolBar-menu { display: none; position: absolute; z-index: 10; top: 100%; left: 0; box-sizing: border-box; min-width: 190px; margin-top: 2px; padding: 8px 0; background: var(--dropdown); box-shadow: inset 0 0 0 1px var(--dropdown-outline); font: 400 13.333px/16px var(--font-sans); color: var(--foreground-hover); white-space: nowrap; user-select: none; cursor: default; } /* menu padding (0,8,0,8) (MultiBox.cpp:1344), Menu.Label NormalText (SC:2321) */
-.toolBar-menu.is-open { display: block; }
-.toolBar-menu--end { left: auto; right: 0; }
-.toolBar-row { padding: 3px 12px; background: transparent; outline: none; } /* Menu.Block.Padding (12,1,5,1) + Menu.Button (0,2) (SC:2314-2316, 2423) */
-.toolBar-row:hover, .toolBar-row:focus { background: var(--primary); }
-.toolBar-row:active { background: var(--primary); padding: 4px 12px 2px; } /* pressed padding (0,3,0,1) (SC:2424) */
-.toolBar-row[aria-disabled="true"] { opacity: .45; pointer-events: none; }
-.toolBar-sep-row { height: 1px; margin: 6px 12px; background: var(--white-25); } /* Menu.Separator White25 (SC:2318-2319) */
 </style>
 </head>
 <body>
 
-<svg class="toolBar-svgdefs" aria-hidden="true">
-	<defs>
-		<symbol id="toolBar-i-save" viewBox="0 0 16 16"><path d="M3 2.5h8l2 2V13a.5.5 0 0 1-.5.5h-9A.5.5 0 0 1 3 13z"/><path d="M5 2.5V6h5V2.5M5 13.5v-4h6v4"/></symbol>
-		<symbol id="toolBar-i-chev" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></symbol>
-		<symbol id="toolBar-i-cursor" viewBox="0 0 16 16"><path d="M4 2.5l8 4.5-3.6 1.1L10.5 13l-1.7.8-2.1-4.8L4 11z"/></symbol>
-		<symbol id="toolBar-i-add" viewBox="0 0 16 16"><path d="M8 2l5 2.5v5L8 12 3 9.5v-5z"/><path d="M3 4.5l5 2.5 5-2.5M8 7v5"/></symbol>
-		<symbol id="toolBar-i-bp" viewBox="0 0 16 16"><rect x="2" y="3" width="5" height="4" rx="1"/><rect x="9" y="9" width="5" height="4" rx="1"/><path d="M7 5h2.5a1 1 0 0 1 1 1v3"/></symbol>
-		<symbol id="toolBar-i-clap" viewBox="0 0 16 16"><rect x="2" y="6.5" width="12" height="7" rx="1"/><path d="M2 6.5l1-3 3 .7-1 2.3M7 3.8l3 .7-1 2M11 4.6l3 .7-.7 1.2"/></symbol>
-		<symbol id="toolBar-i-gear" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.3"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4"/></symbol>
-		<symbol id="toolBar-i-play" viewBox="0 0 16 16"><path d="M4.5 2.8v10.4L13 8z" fill="currentColor" stroke="none"/></symbol>
-		<symbol id="toolBar-i-step" viewBox="0 0 16 16"><path d="M3 3v10l7-5z" fill="currentColor" stroke="none"/><path d="M12.5 3v10"/></symbol>
-		<symbol id="toolBar-i-stop" viewBox="0 0 16 16"><rect x="3.5" y="3.5" width="9" height="9" rx="1" fill="currentColor" stroke="none"/></symbol>
-		<symbol id="toolBar-i-eject" viewBox="0 0 16 16"><path d="M8 3l5.5 6.5h-11z" fill="currentColor" stroke="none"/><rect x="2.5" y="11" width="11" height="2" fill="currentColor" stroke="none"/></symbol>
-		<symbol id="toolBar-i-expand" viewBox="0 0 16 16"><path d="M3 3.5L7.5 8 3 12.5M8.5 3.5L13 8l-4.5 4.5"/></symbol>
-	</defs>
-</svg>
-
 <div class="toolBar-note">Level editor toolbar (AssetEditorToolbar, icon-only) with the Play group and right-aligned Settings (CalloutToolbar) (pinned)</div>
 <div class="toolBar" data-pinned>
-	<div class="toolBar-slot toolBar-slot--button"><div class="toolBar-btn"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-save"/></svg></div></div>
+	<div class="toolBar-slot toolBar-slot--button"><button class="button button--simple button--toolbar"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M3 2.5h8l2 2V13a.5.5 0 0 1-.5.5h-9A.5.5 0 0 1 3 13z"/><path d="M5 2.5V6h5V2.5M5 13.5v-4h6v4"/></svg></button></div>
 	<div class="toolBar-slot toolBar-slot--sep"><div class="toolBar-sep"></div></div>
-	<div class="toolBar-slot toolBar-slot--modes"><div class="toolBar-modes"><svg class="toolBar-ico toolBar-ico--16"><use href="#toolBar-i-cursor"/></svg>Select Mode<svg class="toolBar-ico toolBar-ico--16 toolBar-arrow"><use href="#toolBar-i-chev"/></svg></div></div>
-	<div class="toolBar-slot toolBar-slot--combo"><div class="toolBar-btn"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-add"/></svg><svg class="toolBar-ico toolBar-ico--16 toolBar-arrow"><use href="#toolBar-i-chev"/></svg></div></div>
-	<div class="toolBar-slot toolBar-slot--combo"><div class="toolBar-btn"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-bp"/></svg><svg class="toolBar-ico toolBar-ico--16 toolBar-arrow"><use href="#toolBar-i-chev"/></svg></div></div>
-	<div class="toolBar-slot toolBar-slot--combo"><div class="toolBar-btn"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-clap"/></svg><svg class="toolBar-ico toolBar-ico--16 toolBar-arrow"><use href="#toolBar-i-chev"/></svg></div></div>
+	<div class="toolBar-slot toolBar-slot--modes"><span class="combobutton"><svg class="combobutton__icon toolBar-modeIcon" viewBox="0 0 16 16"><path d="M4 2.5l8 4.5-3.6 1.1L10.5 13l-1.7.8-2.1-4.8L4 11z"/></svg><span class="combobutton__label">Select Mode</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></div>
+	<div class="toolBar-slot toolBar-slot--combo"><span class="combobutton combobutton--toolbar"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M8 2l5 2.5v5L8 12 3 9.5v-5z"/><path d="M3 4.5l5 2.5 5-2.5M8 7v5"/></svg><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></div>
+	<div class="toolBar-slot toolBar-slot--combo"><span class="combobutton combobutton--toolbar"><svg class="combobutton__icon" viewBox="0 0 16 16"><rect x="2" y="3" width="5" height="4" rx="1"/><rect x="9" y="9" width="5" height="4" rx="1"/><path d="M7 5h2.5a1 1 0 0 1 1 1v3"/></svg><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></div>
+	<div class="toolBar-slot toolBar-slot--combo"><span class="combobutton combobutton--toolbar"><svg class="combobutton__icon" viewBox="0 0 16 16"><rect x="2" y="6.5" width="12" height="7" rx="1"/><path d="M2 6.5l1-3 3 .7-1 2.3M7 3.8l3 .7-1 2M11 4.6l3 .7-.7 1.2"/></svg><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></div>
 	<div class="toolBar-slot toolBar-slot--sep"><div class="toolBar-sep"></div></div>
-	<div class="toolBar-slot"><div class="toolBar-plate toolBar-plate--left toolBar-plate--play"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-play"/></svg></div></div>
-	<div class="toolBar-slot"><div class="toolBar-plate toolBar-plate--center toolBar-plate--step"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-step"/></svg></div></div>
-	<div class="toolBar-slot"><div class="toolBar-plate toolBar-plate--center toolBar-plate--stop"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-stop"/></svg></div></div>
-	<div class="toolBar-slot"><div class="toolBar-plate toolBar-plate--center toolBar-plate--step"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-eject"/></svg></div></div>
-	<div class="toolBar-slot"><div class="toolBar-plate toolBar-plate--right"><svg class="toolBar-dots" viewBox="0 0 6 24"><circle cx="3" cy="4" r="1.6"/><circle cx="3" cy="12" r="1.6"/><circle cx="3" cy="20" r="1.6"/></svg></div></div>
+	<div class="toolBar-slot toolBar-slot--plate"><div class="toolBar-plate toolBar-plate--left toolBar-plate--play"><button class="button button--plate"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M4.5 2.8v10.4L13 8z" fill="currentColor" stroke="none"/></svg></button></div></div>
+	<div class="toolBar-slot toolBar-slot--plate"><div class="toolBar-plate toolBar-plate--center toolBar-plate--step"><button class="button button--plate"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M3 3v10l7-5z" fill="currentColor" stroke="none"/><path d="M12.5 3v10"/></svg></button></div></div>
+	<div class="toolBar-slot toolBar-slot--plate"><div class="toolBar-plate toolBar-plate--center toolBar-plate--stop"><button class="button button--plate"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><rect x="3.5" y="3.5" width="9" height="9" rx="1" fill="currentColor" stroke="none"/></svg></button></div></div>
+	<div class="toolBar-slot toolBar-slot--plate"><div class="toolBar-plate toolBar-plate--center toolBar-plate--step"><button class="button button--plate"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M8 3l5.5 6.5h-11z" fill="currentColor" stroke="none"/><rect x="2.5" y="11" width="11" height="2" fill="currentColor" stroke="none"/></svg></button></div></div>
+	<div class="toolBar-slot toolBar-slot--plate"><div class="toolBar-plate toolBar-plate--right"><span class="combobutton combobutton--plate"><svg class="toolBar-dots" viewBox="0 0 6 24"><circle cx="3" cy="4" r="1.6"/><circle cx="3" cy="12" r="1.6"/><circle cx="3" cy="20" r="1.6"/></svg></span></div></div>
 	<div class="toolBar-spacer"></div>
-	<div class="toolBar-slot toolBar-slot--button"><div class="toolBar-wrap"><svg class="toolBar-ico toolBar-ico--16"><use href="#toolBar-i-expand"/></svg></div></div>
+	<div class="toolBar-slot toolBar-slot--button"><span class="combobutton combobutton--toolbar combobutton--overflow"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M3 3.5L7.5 8 3 12.5M8.5 3.5L13 8l-4.5 4.5"/></svg></span></div>
 	<div class="toolBar-spacer"></div>
-	<div class="toolBar-slot toolBar-slot--settings"><div class="toolBar-btn"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-gear"/></svg><span class="toolBar-label">Settings</span><svg class="toolBar-ico toolBar-ico--16 toolBar-arrow"><use href="#toolBar-i-chev"/></svg></div></div>
+	<div class="toolBar-slot toolBar-slot--settings"><span class="combobutton combobutton--toolbar"><svg class="combobutton__icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.3"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4"/></svg><span class="combobutton__label">Settings</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></div>
 </div>
 
 <div class="toolBar-note">Button states: normal, hover, pressed (padding shifts 1px down), checked toggle, checked + hover, icon + label, combo (pinned)</div>
 <div class="toolBar" data-pinned>
-	<div class="toolBar-slot toolBar-slot--button"><div class="toolBar-btn"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-save"/></svg></div></div>
-	<div class="toolBar-slot toolBar-slot--button"><div class="toolBar-btn is-hover"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-save"/></svg></div></div>
-	<div class="toolBar-slot toolBar-slot--button"><div class="toolBar-btn is-pressed"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-save"/></svg></div></div>
+	<div class="toolBar-slot toolBar-slot--button"><button class="button button--simple button--toolbar"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M3 2.5h8l2 2V13a.5.5 0 0 1-.5.5h-9A.5.5 0 0 1 3 13z"/><path d="M5 2.5V6h5V2.5M5 13.5v-4h6v4"/></svg></button></div>
+	<div class="toolBar-slot toolBar-slot--button"><button class="button button--simple button--toolbar button--hover"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M3 2.5h8l2 2V13a.5.5 0 0 1-.5.5h-9A.5.5 0 0 1 3 13z"/><path d="M5 2.5V6h5V2.5M5 13.5v-4h6v4"/></svg></button></div>
+	<div class="toolBar-slot toolBar-slot--button"><button class="button button--simple button--toolbar button--pressed"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M3 2.5h8l2 2V13a.5.5 0 0 1-.5.5h-9A.5.5 0 0 1 3 13z"/><path d="M5 2.5V6h5V2.5M5 13.5v-4h6v4"/></svg></button></div>
 	<div class="toolBar-slot toolBar-slot--sep"><div class="toolBar-sep"></div></div>
-	<div class="toolBar-slot toolBar-slot--toggle"><div class="toolBar-btn toolBar-btn--toggle"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-cursor"/></svg></div></div>
-	<div class="toolBar-slot toolBar-slot--toggle"><div class="toolBar-btn toolBar-btn--toggle is-checked"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-cursor"/></svg></div></div>
-	<div class="toolBar-slot toolBar-slot--toggle"><div class="toolBar-btn toolBar-btn--toggle is-checked" style="background:var(--primary-hover)"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-cursor"/></svg></div></div>
+	<div class="toolBar-slot toolBar-slot--toggle"><button class="button button--toggle button--toolbar" aria-pressed="false"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M4 2.5l8 4.5-3.6 1.1L10.5 13l-1.7.8-2.1-4.8L4 11z"/></svg></button></div>
+	<div class="toolBar-slot toolBar-slot--toggle"><button class="button button--toggle button--toolbar" aria-pressed="true"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M4 2.5l8 4.5-3.6 1.1L10.5 13l-1.7.8-2.1-4.8L4 11z"/></svg></button></div>
+	<div class="toolBar-slot toolBar-slot--toggle"><button class="button button--toggle button--toolbar button--checked button--hover" aria-pressed="true"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M4 2.5l8 4.5-3.6 1.1L10.5 13l-1.7.8-2.1-4.8L4 11z"/></svg></button></div>
 	<div class="toolBar-slot toolBar-slot--sep"><div class="toolBar-sep"></div></div>
-	<div class="toolBar-slot toolBar-slot--button"><div class="toolBar-btn"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-save"/></svg><span class="toolBar-label">Save All</span></div></div>
-	<div class="toolBar-slot toolBar-slot--combo"><div class="toolBar-btn is-hover"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-add"/></svg><span class="toolBar-label">Add</span><svg class="toolBar-ico toolBar-ico--16 toolBar-arrow"><use href="#toolBar-i-chev"/></svg></div></div>
+	<div class="toolBar-slot toolBar-slot--button"><button class="button button--simple button--toolbar"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M3 2.5h8l2 2V13a.5.5 0 0 1-.5.5h-9A.5.5 0 0 1 3 13z"/><path d="M5 2.5V6h5V2.5M5 13.5v-4h6v4"/></svg>Save All</button></div>
+	<div class="toolBar-slot toolBar-slot--combo"><span class="combobutton combobutton--toolbar combobutton--hover"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M8 2l5 2.5v5L8 12 3 9.5v-5z"/><path d="M3 4.5l5 2.5 5-2.5M8 7v5"/></svg><span class="combobutton__label">Add</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></div>
 </div>
 
 <div class="toolBar-note">Live: hover and press any button (pressed shifts the icon 1px down). Click the cursor and Blueprints toggles. Click Select Mode, Add, Settings or the dots to open a menu, then Escape or a click outside closes it. Click Play: it turns to its pressed green and Stop lights up. Click Stop to go idle. Keys: Tab, Left and Right between buttons, Enter or Space presses, Down opens a menu. The menu entries are illustrative.</div>
 <ue-tool-bar>
 	<div class="toolBar-stage">
 		<div class="toolBar" role="toolbar" aria-label="Level editor toolbar" data-playing="false">
-			<div class="toolBar-slot toolBar-slot--button"><div class="toolBar-btn" role="button" tabindex="0" aria-label="Save"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-save"/></svg></div></div>
+			<div class="toolBar-slot toolBar-slot--button"><ue-button><button class="button button--simple button--toolbar" aria-label="Save"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M3 2.5h8l2 2V13a.5.5 0 0 1-.5.5h-9A.5.5 0 0 1 3 13z"/><path d="M5 2.5V6h5V2.5M5 13.5v-4h6v4"/></svg></button></ue-button></div>
 			<div class="toolBar-slot toolBar-slot--sep"><div class="toolBar-sep"></div></div>
-			<div class="toolBar-slot toolBar-slot--toggle"><div class="toolBar-btn toolBar-btn--toggle is-checked" role="button" tabindex="0" aria-pressed="true" aria-label="Select"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-cursor"/></svg></div></div>
-			<div class="toolBar-slot toolBar-slot--toggle"><div class="toolBar-btn toolBar-btn--toggle" role="button" tabindex="0" aria-pressed="false" aria-label="Blueprints"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-bp"/></svg></div></div>
+			<div class="toolBar-slot toolBar-slot--toggle"><ue-button><button class="button button--toggle button--toolbar" aria-pressed="true" aria-label="Select"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M4 2.5l8 4.5-3.6 1.1L10.5 13l-1.7.8-2.1-4.8L4 11z"/></svg></button></ue-button></div>
+			<div class="toolBar-slot toolBar-slot--toggle"><ue-button><button class="button button--toggle button--toolbar" aria-pressed="false" aria-label="Blueprints"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><rect x="2" y="3" width="5" height="4" rx="1"/><rect x="9" y="9" width="5" height="4" rx="1"/><path d="M7 5h2.5a1 1 0 0 1 1 1v3"/></svg></button></ue-button></div>
 			<div class="toolBar-slot toolBar-slot--sep"><div class="toolBar-sep"></div></div>
-			<div class="toolBar-slot toolBar-slot--modes">
-				<div class="toolBar-modes" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false"><svg class="toolBar-ico toolBar-ico--16"><use href="#toolBar-i-cursor"/></svg>Select Mode<svg class="toolBar-ico toolBar-ico--16 toolBar-arrow"><use href="#toolBar-i-chev"/></svg></div>
-				<div class="toolBar-menu" role="menu">
-					<div class="toolBar-row" role="menuitem" tabindex="-1">Select</div>
-					<div class="toolBar-row" role="menuitem" tabindex="-1">Landscape</div>
-					<div class="toolBar-row" role="menuitem" tabindex="-1">Foliage</div>
-					<div class="toolBar-row" role="menuitem" tabindex="-1">Mesh Paint</div>
+			<ue-combo-button mode="action">
+				<div class="toolBar-slot toolBar-slot--modes combobutton-anchor">
+					<span class="combobutton" role="combobox" tabindex="0" aria-haspopup="menu" aria-expanded="false"><svg class="combobutton__icon toolBar-modeIcon" viewBox="0 0 16 16"><path d="M4 2.5l8 4.5-3.6 1.1L10.5 13l-1.7.8-2.1-4.8L4 11z"/></svg><span class="combobutton__label">Select Mode</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
+					<div class="combobutton-menu" hidden>
+						<ue-popup-menu>
+							<div class="popupmenu" role="menu" tabindex="0" aria-label="Modes">
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Select</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Landscape</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Foliage</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Mesh Paint</span></span></div>
+							</div>
+						</ue-popup-menu>
+					</div>
 				</div>
-			</div>
-			<div class="toolBar-slot toolBar-slot--combo">
-				<div class="toolBar-btn" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="Add"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-add"/></svg><svg class="toolBar-ico toolBar-ico--16 toolBar-arrow"><use href="#toolBar-i-chev"/></svg></div>
-				<div class="toolBar-menu" role="menu">
-					<div class="toolBar-row" role="menuitem" tabindex="-1">Cube</div>
-					<div class="toolBar-row" role="menuitem" tabindex="-1">Sphere</div>
-					<div class="toolBar-row" role="menuitem" tabindex="-1">Point Light</div>
-					<div class="toolBar-row" role="menuitem" tabindex="-1">Player Start</div>
+			</ue-combo-button>
+			<ue-combo-button mode="action">
+				<div class="toolBar-slot toolBar-slot--combo combobutton-anchor">
+					<span class="combobutton combobutton--toolbar" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="Add"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M8 2l5 2.5v5L8 12 3 9.5v-5z"/><path d="M3 4.5l5 2.5 5-2.5M8 7v5"/></svg><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
+					<div class="combobutton-menu" hidden>
+						<ue-popup-menu>
+							<div class="popupmenu" role="menu" tabindex="0" aria-label="Add">
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Cube</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Sphere</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Point Light</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Player Start</span></span></div>
+							</div>
+						</ue-popup-menu>
+					</div>
 				</div>
-			</div>
+			</ue-combo-button>
 			<div class="toolBar-slot toolBar-slot--sep"><div class="toolBar-sep"></div></div>
-			<div class="toolBar-slot"><div class="toolBar-plate toolBar-plate--left toolBar-plate--play" role="button" tabindex="0" aria-pressed="false" aria-label="Play"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-play"/></svg></div></div>
-			<div class="toolBar-slot"><div class="toolBar-plate toolBar-plate--center toolBar-plate--step" role="button" tabindex="0" aria-label="Step"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-step"/></svg></div></div>
-			<div class="toolBar-slot"><div class="toolBar-plate toolBar-plate--center toolBar-plate--stop is-disabled" role="button" tabindex="-1" aria-disabled="true" aria-label="Stop"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-stop"/></svg></div></div>
-			<div class="toolBar-slot"><div class="toolBar-plate toolBar-plate--center toolBar-plate--step" role="button" tabindex="0" aria-label="Eject"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-eject"/></svg></div></div>
-			<div class="toolBar-slot">
-				<div class="toolBar-plate toolBar-plate--right" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="Play options"><svg class="toolBar-dots" viewBox="0 0 6 24"><circle cx="3" cy="4" r="1.6"/><circle cx="3" cy="12" r="1.6"/><circle cx="3" cy="20" r="1.6"/></svg></div>
-				<div class="toolBar-menu" role="menu">
-					<div class="toolBar-row" role="menuitem" tabindex="-1">Selected Viewport</div>
-					<div class="toolBar-row" role="menuitem" tabindex="-1">New Editor Window</div>
-					<div class="toolBar-row" role="menuitem" tabindex="-1">Simulate</div>
+			<div class="toolBar-slot toolBar-slot--plate"><div class="toolBar-plate toolBar-plate--left toolBar-plate--play"><ue-button><button class="button button--plate" aria-label="Play" aria-pressed="false"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M4.5 2.8v10.4L13 8z" fill="currentColor" stroke="none"/></svg></button></ue-button></div></div>
+			<div class="toolBar-slot toolBar-slot--plate"><div class="toolBar-plate toolBar-plate--center toolBar-plate--step"><ue-button><button class="button button--plate" aria-label="Step"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M3 3v10l7-5z" fill="currentColor" stroke="none"/><path d="M12.5 3v10"/></svg></button></ue-button></div></div>
+			<div class="toolBar-slot toolBar-slot--plate"><div class="toolBar-plate toolBar-plate--center toolBar-plate--stop"><ue-button><button class="button button--plate" aria-label="Stop" disabled><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><rect x="3.5" y="3.5" width="9" height="9" rx="1" fill="currentColor" stroke="none"/></svg></button></ue-button></div></div>
+			<div class="toolBar-slot toolBar-slot--plate"><div class="toolBar-plate toolBar-plate--center toolBar-plate--step"><ue-button><button class="button button--plate" aria-label="Eject"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M8 3l5.5 6.5h-11z" fill="currentColor" stroke="none"/><rect x="2.5" y="11" width="11" height="2" fill="currentColor" stroke="none"/></svg></button></ue-button></div></div>
+			<ue-combo-button mode="action">
+				<div class="toolBar-slot toolBar-slot--plate combobutton-anchor">
+					<div class="toolBar-plate toolBar-plate--right"><span class="combobutton combobutton--plate" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="Play options"><svg class="toolBar-dots" viewBox="0 0 6 24"><circle cx="3" cy="4" r="1.6"/><circle cx="3" cy="12" r="1.6"/><circle cx="3" cy="20" r="1.6"/></svg></span></div>
+					<div class="combobutton-menu" hidden>
+						<ue-popup-menu>
+							<div class="popupmenu" role="menu" tabindex="0" aria-label="Play options">
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Selected Viewport</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">New Editor Window</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Simulate</span></span></div>
+							</div>
+						</ue-popup-menu>
+					</div>
 				</div>
-			</div>
+			</ue-combo-button>
 			<div class="toolBar-spacer"></div>
-			<div class="toolBar-slot toolBar-slot--button">
-				<div class="toolBar-wrap" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="More"><svg class="toolBar-ico toolBar-ico--16"><use href="#toolBar-i-expand"/></svg></div>
-				<div class="toolBar-menu" role="menu">
-					<div class="toolBar-row" role="menuitem" tabindex="-1">Content</div>
-					<div class="toolBar-row" role="menuitem" tabindex="-1">Build</div>
-					<div class="toolBar-row" role="menuitem" tabindex="-1">Source Control</div>
+			<ue-combo-button mode="action">
+				<div class="toolBar-slot toolBar-slot--button combobutton-anchor">
+					<span class="combobutton combobutton--toolbar combobutton--overflow" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="More"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M3 3.5L7.5 8 3 12.5M8.5 3.5L13 8l-4.5 4.5"/></svg></span>
+					<div class="combobutton-menu" hidden>
+						<ue-popup-menu>
+							<div class="popupmenu" role="menu" tabindex="0" aria-label="More">
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Content</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Build</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Source Control</span></span></div>
+							</div>
+						</ue-popup-menu>
+					</div>
 				</div>
-			</div>
+			</ue-combo-button>
 			<div class="toolBar-spacer"></div>
-			<div class="toolBar-slot toolBar-slot--settings">
-				<div class="toolBar-btn" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false"><svg class="toolBar-ico toolBar-ico--20"><use href="#toolBar-i-gear"/></svg><span class="toolBar-label">Settings</span><svg class="toolBar-ico toolBar-ico--16 toolBar-arrow"><use href="#toolBar-i-chev"/></svg></div>
-				<div class="toolBar-menu toolBar-menu--end" role="menu">
-					<div class="toolBar-row" role="menuitem" tabindex="-1">Project Settings</div>
-					<div class="toolBar-row" role="menuitem" tabindex="-1">World Settings</div>
-					<div class="toolBar-row" role="menuitem" tabindex="-1">Editor Preferences</div>
+			<ue-combo-button mode="action">
+				<div class="toolBar-slot toolBar-slot--settings combobutton-anchor">
+					<span class="combobutton combobutton--toolbar" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false"><svg class="combobutton__icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.3"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4"/></svg><span class="combobutton__label">Settings</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
+					<div class="combobutton-menu combobutton-menu--end" hidden>
+						<ue-popup-menu>
+							<div class="popupmenu" role="menu" tabindex="0" aria-label="Settings">
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Project Settings</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">World Settings</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Editor Preferences</span></span></div>
+							</div>
+						</ue-popup-menu>
+					</div>
 				</div>
-			</div>
+			</ue-combo-button>
 		</div>
 	</div>
 </ue-tool-bar>

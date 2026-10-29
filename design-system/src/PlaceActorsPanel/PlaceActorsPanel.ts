@@ -1,17 +1,16 @@
-// <ue-place-actors-panel> wraps a .placeActors panel: category strip, search field and one item group per category.
+// <ue-place-actors-panel> wraps a .placeActors panel: a ue-text-input search, a ue-segmented-control category rail and one item group per category.
 import { UeElement, define } from '../_shared/element.ts';
+import '../SegmentedControl/SegmentedControl.ts';
+import '../TextInput/TextInput.ts';
 
-const CAT = '.placeActors-cat';
 const GROUP = '.placeActors-group';
 const ROW = '.placeActors-row';
 
 export class PlaceActorsPanel extends UeElement {
 	protected setup(): void {
-		const field = this.one<HTMLInputElement>('.placeActors-field');
+		const field = this.one<HTMLInputElement>('.textinput__field');
 		const header = this.one('.placeActors-header');
 		const empty = this.one('.placeActors-empty');
-
-		const cats = (): HTMLElement[] => this.all(CAT);
 
 		// Shows only the rows of the visible group whose name contains the query.
 		const applyFilter = (): void => {
@@ -28,40 +27,15 @@ export class PlaceActorsPanel extends UeElement {
 			if (empty instanceof HTMLElement) empty.hidden = !(query !== '' && visible === 0);
 		};
 
-		const select = (cat: HTMLElement, focus: boolean): void => {
-			const name = cat.dataset.category ?? '';
-			for (const other of cats()) {
-				const active = other === cat;
-				other.classList.toggle('is-active', active);
-				other.setAttribute('aria-checked', String(active));
-				other.tabIndex = active ? 0 : -1;
-			}
+		const show = (name: string): void => {
 			if (header) header.textContent = name;
 			for (const group of this.all(GROUP)) group.hidden = group.dataset.category !== name;
 			applyFilter();
-			if (focus) cat.focus();
 			this.emit('ue-category-change', { category: name });
 		};
 
-		const clear = (): void => {
-			if (!field) return;
-			field.value = '';
-			applyFilter();
-			field.focus();
-		};
-
-		this.on(this, 'click', (event) => {
-			const target = event.target;
-			if (!(target instanceof Element)) return;
-			const cat = target.closest<HTMLElement>(CAT);
-			if (cat && this.contains(cat)) {
-				select(cat, false);
-				return;
-			}
-			if (target.closest('.placeActors-clear')) clear();
-		});
-
-		this.on(this, 'input', () => applyFilter());
+		this.on(this, 'ue-segment-change', (event) => show((event as CustomEvent<{ value: string }>).detail.value));
+		this.on(this, 'ue-text-input', () => applyFilter());
 
 		this.on(this, 'dblclick', (event) => {
 			const target = event.target;
@@ -72,45 +46,14 @@ export class PlaceActorsPanel extends UeElement {
 
 		this.on(this, 'keydown', (event) => {
 			const target = event.target;
-			if (!(target instanceof HTMLElement)) return;
-			const key = event.key;
-			if (target === field) {
-				if (key === 'Escape' && field.value !== '') {
-					event.preventDefault();
-					clear();
-				}
-				return;
-			}
-			if (target.matches('.placeActors-clear') && (key === 'Enter' || key === ' ')) {
-				event.preventDefault();
-				clear();
-				return;
-			}
-			if (target.matches(ROW) && key === 'Enter') {
+			if (target instanceof HTMLElement && target.matches(ROW) && event.key === 'Enter') {
 				event.preventDefault();
 				this.emit('ue-place', { name: target.querySelector('.placeActors-name')?.textContent ?? '' });
-				return;
 			}
-			if (!target.matches(CAT)) return;
-			const list = cats();
-			const index = list.indexOf(target);
-			let next = -1;
-			if (key === 'ArrowRight' || key === 'ArrowDown') next = (index + 1) % list.length;
-			else if (key === 'ArrowLeft' || key === 'ArrowUp') next = (index - 1 + list.length) % list.length;
-			else if (key === 'Home') next = 0;
-			else if (key === 'End') next = list.length - 1;
-			else if (key === 'Enter' || key === ' ') {
-				event.preventDefault();
-				select(target, false);
-				return;
-			}
-			if (next < 0) return;
-			event.preventDefault();
-			select(list[next], true);
 		});
 
-		const active = cats().find((cat) => cat.classList.contains('is-active'));
-		if (active) select(active, false);
+		const active = this.one('.SegmentedControl-seg.is-checked');
+		if (active) show(active.dataset.value ?? '');
 	}
 }
 

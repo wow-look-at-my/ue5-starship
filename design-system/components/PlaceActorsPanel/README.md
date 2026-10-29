@@ -1,15 +1,24 @@
 The body of the Place Actors panel: a pill search field, a strip of category icon buttons with one active, a section label. A list of draggable item rows.
 
+## Composed from
+
+| Primitive | Count | Role |
+|---|---|---|
+| `ue-text-input` with `textinput--search` | 1 | The pill search field. It owns the glass, the clear button, Escape and the hint |
+| `ue-segmented-control` with `SegmentedControl--rail` | 1 | The category strip. Add `SegmentedControl--row` for the wrapping arrangement of the screenshot |
+
+The composite adds the section label, the list body and the item rows (`.placeActors-row`). It listens to `ue-text-input` for the filter and to `ue-segment-change` for the category. It draws no search box and no category button.
+
 ## What the consumer provides
 
 - The panel width and height. The list scrolls inside the Recessed body.
-- Category buttons (`.placeActors-cat`, one has `.is-active`), the section label text (the active category name) and one `.placeActors-row` per item with an icon, a name and an end widget.
+- Category segments (`.SegmentedControl-seg` with `data-value`, one has `.is-checked`), the section label text (the active category name) and one `.placeActors-row` per item with an icon, a name and an end widget.
 - Icons as inline SVG: 20x20 for categories and tiles, 16x16 for the info button. The Starship SVG files are not in the source tree, so `preview.html` draws simple stroke icons that only approximate them. Real item tiles show a class thumbnail brush, which the preview replaces with a 20px glyph.
 - Which end widget to use: `.placeActors-info` (the "?" documentation anchor, as in the reference screenshot) or `.placeActors-handle` (the drag handle that `SPlacementAssetEntry` builds in 5.5.3 and 5.8.1).
 
 ## Two arrangements
 
-The 5.5.3 source (`SPlacementModeTools.cpp:684-711`, `CategoryDrivenContentBuilderBase.cpp:139-147`) puts a vertical category rail (44px wide) left of the title and list. The reference screenshot shows the same buttons as a wrapping horizontal strip above the label. The button look is same in both, so `preview.html` shows both arrangements: `.placeActors-rail--col` (source) and `.placeActors-rail--row` (screenshot).
+The 5.5.3 source (`SPlacementModeTools.cpp:684-711`, `CategoryDrivenContentBuilderBase.cpp:139-147`) puts a vertical category rail (44px wide) left of the title and list. The reference screenshot shows the same buttons as a wrapping horizontal strip above the label. The button look is same in both, so `preview.html` shows both arrangements: `SegmentedControl--rail` (source) and `SegmentedControl--rail SegmentedControl--row` (screenshot).
 
 ## Metrics
 
@@ -50,10 +59,10 @@ Citations: `SC` is `Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp`, `S
 
 ## Live behaviour
 
-`<ue-place-actors-panel>` (`src/PlaceActorsPanel/PlaceActorsPanel.ts`, built to `PlaceActorsPanel.js`) wraps a `.placeActors`. Each `.placeActors-cat` carries `data-category`, and each `.placeActors-group` holds the rows of the same category.
+`<ue-place-actors-panel>` (`src/PlaceActorsPanel/PlaceActorsPanel.ts`, built to `PlaceActorsPanel.js`) wraps a `.placeActors`. Each `.SegmentedControl-seg` carries `data-value` with the category name, and each `.placeActors-group` holds the rows of the same category.
 
-- Clicking a category (or Left, Right, Home, End on the strip) sets `.is-active` and `aria-checked`, shows its group and writes the name into the section label.
-- The search field is a real `<input class="placeActors-field">` with the hint as its placeholder. Typing hides the rows of the shown group whose name does not contain the text. The clear X shows while the field text (`SSearchBox.cpp:251-256`). It and Escape empty the field. A message shows when no row matches.
+- A category change (`ue-segment-change`, by click or by Left, Right, Home and End on the strip) shows its group and writes the name into the section label. `ue-category-change` repeats it with `{ category }`.
+- The search field is the real input of the `ue-text-input`. Typing (`ue-text-input`) hides the rows of the shown group whose name does not contain the text. The clear X and Escape belong to the text input. A message shows when no row matches.
 - Rows show the hover and pressed outlines through `:hover` and `:active`. The info button fills Hover on hover.
 - Double click or Enter on a row fires `ue-place` with `{ name }`.
 - The live panel lists the built-in categories of `PlacementModeModule.cpp:130-290`. The Basic, Lights, Shapes and Visual Effects items are factories registered there (`PlacementModeModule.cpp:150-260`). The Recent, Volumes and All items are illustrative, because the engine fills them at run time. The clapperboard category of the reference screenshot is not in this module and is left out of the live panel.

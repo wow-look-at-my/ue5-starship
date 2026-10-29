@@ -1,11 +1,25 @@
 A slim horizontal toolbar of icon, label, toggle and combo buttons on a Panel strip, with separators. This also covers the green Play button group and an overflow button.
 
+## Composed from
+
+| Primitive | Count | Role |
+|---|---|---|
+| `ue-button` with `button--simple button--toolbar` | 1 | Save |
+| `ue-button` with `button--toggle button--toolbar` | 2 | Select and Blueprints. `aria-pressed` is the checked state |
+| `ue-button` with `button--plate` | 4 | Play, Step, Stop and Eject. The plate owns the fill and the foreground |
+| `ue-combo-button` with the boxed trigger | 1 | The Select Mode combo, action mode |
+| `ue-combo-button` with `combobutton--toolbar` | 3 | Add, the overflow button (`combobutton--overflow`) and Settings |
+| `ue-combo-button` with `combobutton--plate` | 1 | The Play options dots |
+| `ue-popup-menu` | 5 | The panel of each combo |
+
+The composite adds only layout: the strip, the slots (`.toolBar-slot`, which are also the combo anchors), the separator, the spacers and the Play plates (`.toolBar-plate`). A slot never shrinks, and a combo never wraps its label.
+
 ## What the consumer provides
 
-- The strip (`.toolBar`) and one `.toolBar-slot` wrapper per block. The slot carries the block padding. The inner element carries the button look.
+- The strip (`.toolBar`) and one `.toolBar-slot` wrapper per block. The slot carries the block padding. A slot that holds a combo also carries `combobutton-anchor`.
 - Icons as inline SVG, 20x20 for toolbar buttons, 16x16 for the combo chevron. The Starship SVG files are not in the source tree, so `preview.html` draws simple 16x16 stroke icons that only approximate them.
-- Which button is checked, hovered or pressed. The preview shows those states with `.is-checked`, `.is-hover` and `.is-pressed`. Real use binds them to `:hover` and a pressed pseudo state.
-- The mode combo ("Select Mode") is a bare combo box, not a toolbar block. Use the `.toolBar-modes` rules, not `.toolBar-btn`.
+- The state of each toggle in `aria-pressed`. Forced states in a pinned strip use `button--hover`, `button--pressed`, `button--checked` and `combobutton--hover`.
+- The mode combo ("Select Mode") is a bare combo box, not a toolbar block. It is a `ue-combo-button` with the default boxed trigger.
 
 ## Metrics
 
@@ -55,16 +69,17 @@ Hover and pressed on a plate change only the foreground, because the plate brush
 
 - Do not give toggles a second visual for hover when checked. Checked hover is PrimaryHover and nothing else.
 - Do not add a border to buttons. The look comes from the fill brush only.
-- Do not use the plain `.toolBar-btn` look for the mode combo.
+- Do not use the toolbar button look for the mode combo.
 
 ## Live behaviour
 
-`<ue-tool-bar>` (`src/ToolBar/ToolBar.ts`, built to `ToolBar.js`) wraps a `.toolBar` and drives the states with attributes and the existing classes.
+`<ue-tool-bar>` (`src/ToolBar/ToolBar.ts`, built to `ToolBar.js`) wraps a `.toolBar`. The nested buttons and combos draw and run themselves.
 
-- `:hover` and `:active` reproduce `.is-hover` and `.is-pressed` (padding 5, 8, 3 for a button, `PressedComboButtonMargin` 8, 2, 8, 0 for the mode combo, colour only for the plates). A toggle has no pressed padding shift (`SC:2217-2218`). Its pressed fill is Dropdown (`SC:1629`, `SC:1632`).
-- A `.toolBar-btn--toggle` flips `.is-checked` and `aria-pressed` on click, Enter or Space.
-- A control whose slot holds a `.toolBar-menu` opens it. One menu is open at a time. Escape or a press outside closes. Down and Up open and enter the menu, Left and Right move between buttons.
-- Play adds `.is-pressed` (the pressed green) and enables Stop. Stop removes both. Idle Stop carries `.is-disabled` and `aria-disabled`, drawn at alpha .45 (`SlateElementPixelShader.usf:535`). State sits on `data-playing` of the `.toolBar`. `ue-play-change` fires with `{ playing }`, `ue-menu-select` with `{ label }`.
+- `:hover` and `:active` come from the primitives (padding 5, 8, 3 for a button, `PressedComboButtonMargin` 8, 2, 8, 0 for the mode combo, colour only for the plates). A toggle has no pressed padding shift (`SC:2217-2218`). Its pressed fill is Dropdown (`SC:1629`, `SC:1632`).
+- A toggle button flips `aria-pressed` on click, Enter or Space. That is the `ue-button` behaviour.
+- A combo opens its own panel. One menu is open at a time. Escape or a press outside closes. Down and Up open and enter the menu. Left and Right move the focus between the controls, which is the only key handling of the composite.
+- Play sets `aria-pressed` and enables Stop. Stop disables itself again. The state sits on `data-playing` of the `.toolBar`, and the plate colour follows it. A second Play press keeps the game running. An idle Stop button is `disabled`. Its plate draws at alpha .45 (`SlateElementPixelShader.usf:535`).
+- `ue-play-change` fires with `{ playing }`. `ue-menu-select` fires with `{ label }` and repeats `ue-combo-pick`.
 - The menu entries are illustrative. A strip with `data-pinned` stays plain HTML.
 
 ## Not found in source

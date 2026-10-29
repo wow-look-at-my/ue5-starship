@@ -1,10 +1,19 @@
 The main menu strip of the editor window: transparent text items that fill Hover on mouse over and Primary while their menu is open.
 
+## Composed from
+
+| Primitive | Count | Role |
+|---|---|---|
+| `ue-combo-button` with `combobutton--menubar` | 8 | One per top-level menu: File, Edit, Window, Tools, Build, Select, Actor, Help. Action mode, the label never changes |
+| `ue-popup-menu` | 8 | The panel of each combo. Rows, key bindings, separators and disabled rows follow the PopupMenu README |
+
+The composite adds only layout: the strip (`.menuBar`) and the slot (`.menuBar-slot`) that is also the combo anchor. It draws no item, no menu and no row.
+
 ## What the consumer provides
 
-- One `.menuBar-item` per top-level menu, in order: File, Edit, Window, Tools, Build, Select, Actor, Help.
-- The open state (`.is-open`) on the item whose pop-up menu shows. Hover can be `:hover`.
-- The pop-up menus themselves are not part of this component.
+- One `ue-combo-button` per top-level menu, in order, with a `combobutton--menubar` trigger and a `ue-popup-menu` panel.
+- The menu rows. The preview entries are illustrative.
+- Forced hover and open specimens use `combobutton--hover` and `combobutton--open` on a plain trigger.
 
 ## Metrics
 
@@ -36,13 +45,13 @@ The fill sits on a border outside the button and the button uses the NoBorder st
 
 ## Live behaviour
 
-`<ue-menu-bar>` (`src/MenuBar/MenuBar.ts`, built to `MenuBar.js`) wraps a `.menuBar` and makes it work. It adds no look: it toggles `.is-open` on the item and `aria-expanded`, and the CSS shows the menu that follows the item inside its `.menuBar-slot`.
+`<ue-menu-bar>` (`src/MenuBar/MenuBar.ts`, built to `MenuBar.js`) wraps a `.menuBar` and moves between its combos. It opens and closes nothing itself. It calls `open()` and `close()` of the nested `ue-combo-button` elements.
 
-- A press on an item opens its `.menuBar-menu`. A press on the open item closes it (the source opens on mouse down, `SMenuEntryBlock.cpp:276`).
+- A click on an item opens its menu. A click on the open item closes it. The combo button owns Escape, Tab, an outside press, the row keys and the focus return.
 - While one menu is open, moving over another item opens that one instead.
-- Escape, Tab or a press outside closes. Left and Right move between items, Down, Up, Home and End move in the menu, Enter and Space pick, Escape returns focus to the item.
-- A picked row fires `ue-menu-select` with `{ label }`.
-- The menu look (Dropdown ground, Primary hovered row, disabled alpha .45) is copied from the PopupMenu component. The menu entries in the preview are illustrative. They are not the full 5.5.3 menus.
+- Left and Right move between the items. In an open menu they close it and open the next menu on its first row. A row with a submenu keeps the arrow keys.
+- A picked row fires `ue-menu-select` with `{ label }`. The event repeats `ue-combo-pick` of the nested combo.
+- The menu entries in the preview are illustrative. They are not the full 5.5.3 menus.
 - A strip with `data-pinned` (the forced hover and open specimens) is outside the element and stays plain HTML.
 
 ## Not found in source

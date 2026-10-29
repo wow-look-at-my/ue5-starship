@@ -56,13 +56,31 @@ export class UeComboButtonElement extends UeElement {
 		});
 	}
 
+	// True while the panel shows.
+	get isOpen(): boolean {
+		return !this.#panel.hidden;
+	}
+
+	// Opens the panel. `keys` moves the focus into the list, `fromEnd` starts at the last row.
+	open(keys = false, fromEnd = false): void {
+		if (this.#disabled() || this.isOpen) return;
+		this.#open(keys, fromEnd);
+	}
+
+	// Closes the panel. `refocus` returns the focus to the trigger.
+	close(refocus = false): void {
+		if (this.isOpen) this.#close(refocus);
+	}
+
 	#disabled(): boolean {
 		return this.#trigger.getAttribute('aria-disabled') === 'true';
 	}
 
-	// Action mode keeps the label fixed. Value mode shows the picked row.
+	// Action mode keeps the label fixed. Value mode shows the picked row. mode="value" gives a simple trigger value mode.
 	#isAction(): boolean {
-		return this.#trigger.classList.contains('combobutton--simple') || this.getAttribute('mode') === 'action' || this.#label() === null;
+		const mode = this.getAttribute('mode');
+		if (mode === 'action' || this.#label() === null) return true;
+		return mode !== 'value' && this.#trigger.classList.contains('combobutton--simple');
 	}
 
 	#label(): HTMLElement | null {

@@ -336,6 +336,66 @@
 .button--small.button--pressed {
   padding: 1px 14px 0;
 }
+.button--toolbar {
+  padding: 4px 8px;
+}
+.button--toolbar:active,
+.button--toolbar.button--pressed {
+  padding: 5px 8px 3px;
+}
+.button--toolbar.button--toggle:active,
+.button--toolbar.button--toggle.button--pressed {
+  padding: 4px 8px;
+}
+.button--toolbar .button__icon {
+  width: 20px;
+  height: 20px;
+}
+.button--plate,
+.button--plate:hover,
+.button--plate:active,
+.button--plate.button--hover,
+.button--plate.button--pressed,
+.button--plate:disabled,
+.button--plate:disabled:hover,
+.button--plate[aria-disabled=true],
+.button--plate[aria-disabled=true]:hover {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  opacity: 1;
+}
+.button--plate .button__icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 0;
+}
+.button--status {
+  padding: 4px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--foreground);
+}
+.button--status:hover,
+.button--status.button--hover {
+  background: transparent;
+  color: var(--foreground-hover);
+}
+.button--status:active,
+.button--status.button--pressed,
+.button--status[aria-pressed=true] {
+  background: transparent;
+  color: var(--foreground-hover);
+  padding: 5px 4px 3px;
+}
+.button--status:disabled,
+.button--status:disabled:hover,
+.button--status[aria-disabled=true],
+.button--status[aria-disabled=true]:hover {
+  background: transparent;
+  color: var(--foreground);
+}
 .button__icon {
   width: 16px;
   height: 16px;
@@ -675,6 +735,7 @@
   color: var(--foreground);
   font: 400 13.333px/16px var(--font-sans);
   white-space: nowrap;
+  flex-shrink: 0;
   cursor: default;
   user-select: none;
 }
@@ -794,12 +855,101 @@
 .combobutton--button .combobutton__icon {
   margin-right: 0;
 }
+.combobutton--simple.combobutton--wide {
+  padding: 1px 10px;
+}
+.combobutton--simple.combobutton--wide:not([aria-disabled=true]):active,
+.combobutton--simple.combobutton--wide.combobutton--open {
+  padding: 2px 10px 0;
+}
+.combobutton--menubar {
+  min-width: 0;
+  padding: 4px 12px;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--foreground);
+}
+.combobutton--menubar:not([aria-disabled=true]):hover,
+.combobutton--menubar.combobutton--hover {
+  background: var(--hover);
+  box-shadow: none;
+  color: var(--foreground-hover);
+  padding: 4px 12px;
+}
+.combobutton--menubar:not([aria-disabled=true]):active,
+.combobutton--menubar:not([aria-disabled=true]).combobutton--open {
+  background: var(--primary);
+  box-shadow: none;
+  color: var(--foreground-hover);
+  padding: 4px 12px;
+}
+.combobutton--menubar ~ .combobutton-menu {
+  --combobutton-menu-min-width: 220px;
+}
+.combobutton--toolbar {
+  min-width: 0;
+  padding: 4px 8px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--foreground);
+}
+.combobutton--toolbar:not([aria-disabled=true]):hover,
+.combobutton--toolbar.combobutton--hover {
+  background: var(--dropdown);
+  box-shadow: none;
+  color: var(--foreground-hover);
+}
+.combobutton--toolbar:not([aria-disabled=true]):active,
+.combobutton--toolbar.combobutton--open {
+  background: var(--dropdown);
+  box-shadow: none;
+  color: var(--foreground-hover);
+  padding: 5px 8px 3px;
+}
+.combobutton--toolbar .combobutton__icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 0;
+}
+.combobutton--toolbar .combobutton__label {
+  margin-left: 4px;
+}
+.combobutton--toolbar .combobutton__arrow {
+  margin: 0 2px 0 1px;
+}
+.combobutton--toolbar.combobutton--overflow {
+  padding: 4px 12px;
+}
+.combobutton--toolbar.combobutton--overflow:not([aria-disabled=true]):active,
+.combobutton--toolbar.combobutton--overflow.combobutton--open {
+  padding: 5px 12px 3px;
+}
+.combobutton--toolbar.combobutton--overflow .combobutton__icon {
+  width: 16px;
+  height: 16px;
+}
+.combobutton--plate,
+.combobutton--plate:not([aria-disabled=true]):hover,
+.combobutton--plate:not([aria-disabled=true]):active,
+.combobutton--plate.combobutton--hover,
+.combobutton--plate.combobutton--open {
+  flex: 1 0 auto;
+  align-self: stretch;
+  min-width: 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+}
 .combobutton:focus-visible:not(.combobutton--open) {
   box-shadow: inset 0 0 0 1px var(--primary);
 }
 .combobutton-anchor {
   display: inline-block;
   position: relative;
+  flex-shrink: 0;
 }
 .combobutton-anchor--fill {
   display: flex;
@@ -821,6 +971,10 @@
 .combobutton-menu--end {
   left: auto;
   right: 0;
+}
+.combobutton-menu--up {
+  top: auto;
+  bottom: 100%;
 }
 .combobutton-menu[hidden] {
   display: none;
@@ -1231,6 +1385,248 @@
   background: var(--recessed);
 }
 
+/* design-system/src/SegmentedControl/SegmentedControl.css */
+.SegmentedControl {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  background: var(--input);
+  border-radius: 4px;
+  padding-right: 1px;
+}
+.SegmentedControl-seg {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  margin: 1px 0 1px 1px;
+  padding: 3px 8px;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+  background: transparent;
+  color: var(--foreground);
+  font: 400 10.667px/1.172 var(--font-sans);
+  letter-spacing: .1em;
+}
+.SegmentedControl-seg:hover,
+.SegmentedControl-seg.is-hover {
+  background: var(--hover);
+  color: var(--foreground-hover);
+}
+.SegmentedControl-seg:active,
+.SegmentedControl-seg.is-pressed {
+  background: var(--header);
+  color: var(--foreground-hover);
+}
+.SegmentedControl-seg.is-checked {
+  background: var(--dropdown);
+  color: var(--foreground-hover);
+}
+.SegmentedControl-seg.is-checked:hover {
+  background: var(--hover);
+}
+.SegmentedControl-seg.is-checked:active {
+  background: var(--header);
+}
+.SegmentedControl-seg:focus-visible {
+  outline: 1px solid var(--primary-hover);
+  outline-offset: -1px;
+}
+.SegmentedControl-seg:disabled {
+  opacity: .45;
+  cursor: default;
+}
+.SegmentedControl--rail {
+  flex: none;
+  flex-direction: column;
+  width: 44px;
+  box-sizing: border-box;
+  padding: 4px;
+  border-radius: 0;
+  background: var(--panel);
+}
+.SegmentedControl--rail.SegmentedControl--row {
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: auto;
+}
+.SegmentedControl--rail .SegmentedControl-seg {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 36px;
+  height: 36px;
+  margin: 2px 0;
+  padding: 8px;
+  border-radius: 4px;
+  letter-spacing: normal;
+  cursor: default;
+}
+.SegmentedControl--rail .SegmentedControl-seg svg {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.SegmentedControl--rail .SegmentedControl-seg:hover,
+.SegmentedControl--rail .SegmentedControl-seg.is-hover {
+  background: var(--dropdown);
+  color: var(--foreground-hover);
+}
+.SegmentedControl--rail .SegmentedControl-seg.is-checked {
+  background: var(--primary);
+  color: var(--foreground-hover);
+  box-shadow: inset 0 0 0 .5px rgba(0, 0, 0, .8);
+}
+.SegmentedControl--rail .SegmentedControl-seg.is-checked:hover,
+.SegmentedControl--rail .SegmentedControl-seg.is-checked:active {
+  background: var(--primary-hover);
+}
+.SegmentedControl--rail .SegmentedControl-seg:active:not(.is-checked) {
+  background: var(--dropdown);
+  color: var(--foreground-hover);
+}
+
+/* design-system/src/TextInput/TextInput.css */
+.textinput {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  border-radius: 4px;
+  background: var(--input);
+  box-shadow: inset 0 0 0 1px var(--input-outline);
+  color: var(--foreground);
+  font: 400 13.333px/16px var(--font-sans);
+  cursor: text;
+}
+.textinput:hover,
+.textinput--hover {
+  box-shadow: inset 0 0 0 1px var(--hover);
+}
+.textinput--focus,
+.textinput--focus:hover {
+  box-shadow: inset 0 0 0 1px var(--primary);
+  color: var(--foreground-hover);
+}
+.textinput:focus-within {
+  box-shadow: inset 0 0 0 1px var(--primary);
+  color: var(--foreground-hover);
+}
+.textinput--readonly,
+.textinput--readonly:hover,
+.textinput--readonly:focus-within {
+  background: var(--header);
+  box-shadow: inset 0 0 0 1px var(--input-outline);
+  cursor: default;
+}
+.textinput--readonly:focus-within {
+  color: var(--foreground);
+}
+.textinput__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 3px 8px 4px;
+  white-space: nowrap;
+}
+.textinput__hint {
+  opacity: .35;
+}
+.textinput__caret {
+  display: inline-block;
+  width: 1.28px;
+  height: 16px;
+  vertical-align: top;
+  background: var(--white);
+}
+.textinput__sel {
+  background: var(--highlight);
+}
+.textinput--search {
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--secondary);
+}
+.textinput--search:hover,
+.textinput--search.textinput--hover {
+  box-shadow: inset 0 0 0 1px var(--hover);
+}
+.textinput--search.textinput--focus,
+.textinput--search.textinput--focus:hover {
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+.textinput--search:focus-within {
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+.textinput--search.textinput--readonly,
+.textinput--search.textinput--readonly:hover,
+.textinput--search.textinput--readonly:focus-within {
+  box-shadow: inset 0 0 0 1px var(--input-outline);
+}
+.textinput__glyph {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-left: 4px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.textinput__tail {
+  flex: none;
+  width: 7px;
+}
+.textinput__trail {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding-right: 2px;
+}
+.textinput--console {
+  font: 400 12px/16px var(--font-mono);
+}
+.textinput__field {
+  width: 0;
+  margin: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 16px;
+  caret-color: var(--white);
+  cursor: inherit;
+}
+.textinput__field::placeholder {
+  color: inherit;
+  opacity: .35;
+}
+.textinput__field::selection {
+  background: var(--highlight);
+  color: inherit;
+}
+.textinput__clear {
+  display: none;
+  cursor: default;
+}
+.textinput--filled .textinput__glass {
+  display: none;
+}
+.textinput--filled .textinput__clear {
+  display: block;
+}
+
 /* design-system/src/ResetToDefault/ResetToDefault.css */
 .resettodefault {
   box-sizing: border-box;
@@ -1343,117 +1739,6 @@
 .sb-view:focus-visible {
   outline: 1px solid var(--primary);
   outline-offset: -1px;
-}
-
-/* design-system/src/SegmentedControl/SegmentedControl.css */
-.SegmentedControl {
-  display: flex;
-  flex: 1;
-  min-width: 0;
-  background: var(--input);
-  border-radius: 4px;
-  padding-right: 1px;
-}
-.SegmentedControl-seg {
-  flex: 1 1 0;
-  min-width: 0;
-  overflow: hidden;
-  margin: 1px 0 1px 1px;
-  padding: 3px 8px;
-  border: 0;
-  border-radius: 4px;
-  cursor: pointer;
-  text-align: center;
-  white-space: nowrap;
-  background: transparent;
-  color: var(--foreground);
-  font: 400 10.667px/1.172 var(--font-sans);
-  letter-spacing: .1em;
-}
-.SegmentedControl-seg:hover,
-.SegmentedControl-seg.is-hover {
-  background: var(--hover);
-  color: var(--foreground-hover);
-}
-.SegmentedControl-seg:active,
-.SegmentedControl-seg.is-pressed {
-  background: var(--header);
-  color: var(--foreground-hover);
-}
-.SegmentedControl-seg.is-checked {
-  background: var(--dropdown);
-  color: var(--foreground-hover);
-}
-.SegmentedControl-seg.is-checked:hover {
-  background: var(--hover);
-}
-.SegmentedControl-seg.is-checked:active {
-  background: var(--header);
-}
-.SegmentedControl-seg:focus-visible {
-  outline: 1px solid var(--primary-hover);
-  outline-offset: -1px;
-}
-.SegmentedControl-seg:disabled {
-  opacity: .45;
-  cursor: default;
-}
-.SegmentedControl--rail {
-  flex: none;
-  flex-direction: column;
-  width: 44px;
-  box-sizing: border-box;
-  padding: 4px;
-  border-radius: 0;
-  background: var(--panel);
-}
-.SegmentedControl--rail.SegmentedControl--row {
-  flex-direction: row;
-  flex-wrap: wrap;
-  width: auto;
-}
-.SegmentedControl--rail .SegmentedControl-seg {
-  flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  width: 36px;
-  height: 36px;
-  margin: 2px 0;
-  padding: 8px;
-  border-radius: 4px;
-  letter-spacing: normal;
-  cursor: default;
-}
-.SegmentedControl--rail .SegmentedControl-seg svg {
-  width: 20px;
-  height: 20px;
-  flex: none;
-  display: block;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.25;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.SegmentedControl--rail .SegmentedControl-seg:hover,
-.SegmentedControl--rail .SegmentedControl-seg.is-hover {
-  background: var(--dropdown);
-  color: var(--foreground-hover);
-}
-.SegmentedControl--rail .SegmentedControl-seg.is-checked {
-  background: var(--primary);
-  color: var(--foreground-hover);
-  box-shadow: inset 0 0 0 .5px rgba(0, 0, 0, .8);
-}
-.SegmentedControl--rail .SegmentedControl-seg.is-checked:hover,
-.SegmentedControl--rail .SegmentedControl-seg.is-checked:active {
-  background: var(--primary-hover);
-}
-.SegmentedControl--rail .SegmentedControl-seg:active:not(.is-checked) {
-  background: var(--dropdown);
-  color: var(--foreground-hover);
 }
 
 /* design-system/src/Slider/Slider.css */
@@ -1728,137 +2013,6 @@
   right: 0;
   top: -3px;
   bottom: -3px;
-}
-
-/* design-system/src/TextInput/TextInput.css */
-.textinput {
-  display: flex;
-  align-items: center;
-  box-sizing: border-box;
-  width: 100%;
-  border-radius: 4px;
-  background: var(--input);
-  box-shadow: inset 0 0 0 1px var(--input-outline);
-  color: var(--foreground);
-  font: 400 13.333px/16px var(--font-sans);
-  cursor: text;
-}
-.textinput:hover,
-.textinput--hover {
-  box-shadow: inset 0 0 0 1px var(--hover);
-}
-.textinput--focus,
-.textinput--focus:hover {
-  box-shadow: inset 0 0 0 1px var(--primary);
-  color: var(--foreground-hover);
-}
-.textinput:focus-within {
-  box-shadow: inset 0 0 0 1px var(--primary);
-  color: var(--foreground-hover);
-}
-.textinput--readonly,
-.textinput--readonly:hover,
-.textinput--readonly:focus-within {
-  background: var(--header);
-  box-shadow: inset 0 0 0 1px var(--input-outline);
-  cursor: default;
-}
-.textinput--readonly:focus-within {
-  color: var(--foreground);
-}
-.textinput__text {
-  flex: 1 1 auto;
-  min-width: 0;
-  padding: 3px 8px 4px;
-  white-space: nowrap;
-}
-.textinput__hint {
-  opacity: .35;
-}
-.textinput__caret {
-  display: inline-block;
-  width: 1.28px;
-  height: 16px;
-  vertical-align: top;
-  background: var(--white);
-}
-.textinput__sel {
-  background: var(--highlight);
-}
-.textinput--search {
-  border-radius: 999px;
-  box-shadow: inset 0 0 0 1px var(--secondary);
-}
-.textinput--search:hover,
-.textinput--search.textinput--hover {
-  box-shadow: inset 0 0 0 1px var(--hover);
-}
-.textinput--search.textinput--focus,
-.textinput--search.textinput--focus:hover {
-  box-shadow: inset 0 0 0 1px var(--primary);
-}
-.textinput--search:focus-within {
-  box-shadow: inset 0 0 0 1px var(--primary);
-}
-.textinput--search.textinput--readonly,
-.textinput--search.textinput--readonly:hover,
-.textinput--search.textinput--readonly:focus-within {
-  box-shadow: inset 0 0 0 1px var(--input-outline);
-}
-.textinput__glyph {
-  flex: none;
-  width: 14px;
-  height: 14px;
-  margin-left: 4px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.textinput__tail {
-  flex: none;
-  width: 7px;
-}
-.textinput__trail {
-  flex: none;
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  padding-right: 2px;
-}
-.textinput--console {
-  font: 400 12px/16px var(--font-mono);
-}
-.textinput__field {
-  width: 0;
-  margin: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  line-height: 16px;
-  caret-color: var(--white);
-  cursor: inherit;
-}
-.textinput__field::placeholder {
-  color: inherit;
-  opacity: .35;
-}
-.textinput__field::selection {
-  background: var(--highlight);
-  color: inherit;
-}
-.textinput__clear {
-  display: none;
-  cursor: default;
-}
-.textinput--filled .textinput__glass {
-  display: none;
-}
-.textinput--filled .textinput__clear {
-  display: block;
 }
 
 /* design-system/src/Tooltip/Tooltip.css */

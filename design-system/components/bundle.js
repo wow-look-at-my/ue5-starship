@@ -712,18 +712,6 @@
   function enabledRows(menu, rowSelector) {
     return Array.from(menu.querySelectorAll(rowSelector)).filter((row) => row.getAttribute("aria-disabled") !== "true");
   }
-  function moveRowFocus(rows, current, key) {
-    if (rows.length === 0) return false;
-    const index = current instanceof HTMLElement ? rows.indexOf(current) : -1;
-    let next;
-    if (key === "ArrowDown") next = index < 0 ? 0 : (index + 1) % rows.length;
-    else if (key === "ArrowUp") next = index < 0 ? rows.length - 1 : (index - 1 + rows.length) % rows.length;
-    else if (key === "Home") next = 0;
-    else if (key === "End") next = rows.length - 1;
-    else return false;
-    rows[next].focus();
-    return true;
-  }
   function rowLabel(row, labelSelector) {
     const label = row.querySelector(labelSelector);
     return (label ?? row).textContent?.trim() ?? "";
@@ -967,12 +955,27 @@
         if (!panel.hidden && !(event.target instanceof Node && anchor.contains(event.target))) this.#close(false);
       });
     }
+    // True while the panel shows.
+    get isOpen() {
+      return !this.#panel.hidden;
+    }
+    // Opens the panel. `keys` moves the focus into the list, `fromEnd` starts at the last row.
+    open(keys = false, fromEnd = false) {
+      if (this.#disabled() || this.isOpen) return;
+      this.#open(keys, fromEnd);
+    }
+    // Closes the panel. `refocus` returns the focus to the trigger.
+    close(refocus = false) {
+      if (this.isOpen) this.#close(refocus);
+    }
     #disabled() {
       return this.#trigger.getAttribute("aria-disabled") === "true";
     }
-    // Action mode keeps the label fixed. Value mode shows the picked row.
+    // Action mode keeps the label fixed. Value mode shows the picked row. mode="value" gives a simple trigger value mode.
     #isAction() {
-      return this.#trigger.classList.contains("combobutton--simple") || this.getAttribute("mode") === "action" || this.#label() === null;
+      const mode = this.getAttribute("mode");
+      if (mode === "action" || this.#label() === null) return true;
+      return mode !== "value" && this.#trigger.classList.contains("combobutton--simple");
     }
     #label() {
       return this.#trigger.querySelector(".combobutton__label");
@@ -2603,123 +2606,67 @@
   define("ue-header-row", HeaderRow);
 
   // design-system/src/MenuBar/MenuBar.ts
-  var ITEM = ".menuBar-item";
-  var ROW2 = ".menuBar-row";
-  var MENU = ".menuBar-menu";
+  var TRIGGER = ".combobutton";
+  var PANEL = ".combobutton-menu";
+  var CURRENT_ROW = ".popupmenu__row--hover";
   var MenuBar = class extends UeElement {
     setup() {
-      const items = () => this.all(ITEM);
-      const openItem = () => this.one(ITEM + ".is-open");
-      const menuOf2 = (item) => {
-        const menu = item.nextElementSibling;
-        return menu instanceof HTMLElement && menu.matches(MENU) ? menu : null;
-      };
-      const itemOf = (menu) => {
-        const item = menu.previousElementSibling;
-        return item instanceof HTMLElement && item.matches(ITEM) ? item : null;
-      };
-      const setCurrent = (item) => {
-        for (const other of items()) other.tabIndex = other === item ? 0 : -1;
-      };
-      const close = (restoreFocus) => {
-        const item = openItem();
-        if (!item) return;
-        item.classList.remove("is-open");
-        item.setAttribute("aria-expanded", "false");
-        if (restoreFocus) item.focus();
-      };
-      const open = (item, rows) => {
-        const menu = menuOf2(item);
-        if (!menu) return;
-        for (const other of items()) {
-          if (other === item) continue;
-          other.classList.remove("is-open");
-          other.setAttribute("aria-expanded", "false");
+      const combos = () => this.all("ue-combo-button");
+      const triggerOf = (combo) => combo.querySelector(TRIGGER);
+      const openCombo = () => combos().find((combo) => combo.isOpen);
+      const setCurrent = (trigger) => {
+        for (const other of combos()) {
+          const own = triggerOf(other);
+          if (own) own.tabIndex = own === trigger ? 0 : -1;
         }
-        item.classList.add("is-open");
-        item.setAttribute("aria-expanded", "true");
-        setCurrent(item);
-        if (rows === "none") return;
-        const list = enabledRows(menu, ROW2);
-        if (list.length > 0) (rows === "first" ? list[0] : list[list.length - 1]).focus();
       };
-      const step = (item, delta) => {
-        const list = items();
-        return list[(list.indexOf(item) + delta + list.length) % list.length];
+      const step = (combo, delta) => {
+        const list = combos();
+        return list[(list.indexOf(combo) + delta + list.length) % list.length];
       };
-      this.on(this, "pointerdown", (event) => {
-        const target = event.target;
-        if (!(target instanceof Element) || event.button !== 0) return;
-        const item = target.closest(ITEM);
-        if (!item || !this.contains(item)) return;
-        if (item.classList.contains("is-open")) close(false);
-        else open(item, "none");
-      });
+      const moveTo = (from, next, keys) => {
+        from?.close(false);
+        next.open(keys, false);
+        const trigger = triggerOf(next);
+        if (trigger) setCurrent(trigger);
+      };
       this.on(this, "pointerover", (event) => {
-        const target = event.target;
-        if (!(target instanceof Element)) return;
-        const row = target.closest(ROW2);
-        if (row) {
-          if (row.getAttribute("aria-disabled") !== "true") row.focus({ preventScroll: true });
-          return;
-        }
-        const item = target.closest(ITEM);
-        if (item && openItem() && !item.classList.contains("is-open")) open(item, "none");
+        const trigger = event.target instanceof Element ? event.target.closest(TRIGGER) : null;
+        const combo = trigger?.closest("ue-combo-button");
+        const open = openCombo();
+        if (combo && open && open !== combo) moveTo(open, combo, false);
       });
-      this.on(this, "click", (event) => {
-        const target = event.target;
-        if (!(target instanceof Element)) return;
-        const row = target.closest(ROW2);
-        if (!row || row.getAttribute("aria-disabled") === "true") return;
-        this.emit("ue-menu-select", { label: rowLabel(row, ".menuBar-label") });
-        close(true);
+      this.on(this, "focusin", (event) => {
+        const trigger = event.target instanceof Element ? event.target.closest(TRIGGER) : null;
+        if (trigger) setCurrent(trigger);
+      });
+      this.on(this, "ue-combo-pick", (event) => {
+        this.emit("ue-menu-select", { label: event.detail.label });
       });
       this.on(this, "keydown", (event) => {
         const target = event.target;
-        if (!(target instanceof HTMLElement)) return;
-        const key = event.key;
-        const row = target.closest(ROW2);
-        const item = row ? itemOf(row.closest(MENU) ?? row) : target.closest(ITEM);
-        if (!item) return;
-        if (key === "Escape") {
-          if (!openItem()) return;
-          event.preventDefault();
-          close(true);
+        if (!(target instanceof HTMLElement) || event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+        const combo = target.closest("ue-combo-button");
+        if (!combo) return;
+        const inPanel = target.closest(PANEL) !== null;
+        if (inPanel) {
+          const current = combo.querySelector(CURRENT_ROW);
+          if (event.key === "ArrowRight" && current?.hasAttribute("aria-haspopup")) return;
+          if (event.key === "ArrowLeft" && current?.closest(".popupmenu__sub")) return;
+        } else if (target !== triggerOf(combo)) {
           return;
         }
-        if (key === "Tab") {
-          close(false);
+        event.preventDefault();
+        const next = step(combo, event.key === "ArrowRight" ? 1 : -1);
+        const open = openCombo();
+        if (inPanel || open) {
+          moveTo(open, next, inPanel);
           return;
         }
-        if (key === "ArrowRight" || key === "ArrowLeft") {
-          event.preventDefault();
-          const next = step(item, key === "ArrowRight" ? 1 : -1);
-          if (row) open(next, "first");
-          else {
-            next.focus();
-            setCurrent(next);
-            if (openItem()) open(next, "none");
-          }
-          return;
-        }
-        if (row) {
-          if (moveRowFocus(enabledRows(row.closest(MENU) ?? row, ROW2), row, key)) event.preventDefault();
-          else if (key === "Enter" || key === " ") {
-            event.preventDefault();
-            row.click();
-          }
-          return;
-        }
-        if (key === "ArrowDown" || key === "Enter" || key === " ") {
-          event.preventDefault();
-          open(item, "first");
-        } else if (key === "ArrowUp") {
-          event.preventDefault();
-          open(item, "last");
-        }
-      });
-      this.on(document, "pointerdown", (event) => {
-        if (event.target instanceof Node && !this.contains(event.target)) close(false);
+        const trigger = triggerOf(next);
+        if (!trigger) return;
+        trigger.focus();
+        setCurrent(trigger);
       });
     }
   };
@@ -2778,22 +2725,118 @@
   };
   define("ue-notification", UeNotificationElement);
 
+  // design-system/src/SegmentedControl/SegmentedControl.ts
+  var UeSegmentedControl = class extends UeElement {
+    #group = null;
+    setup() {
+      const group = this.all(".SegmentedControl").find((candidate) => this.owns(candidate));
+      if (!group) throw new Error("ue-segmented-control needs a .SegmentedControl radiogroup");
+      this.#group = group;
+      group.setAttribute("role", "radiogroup");
+      this.on(group, "click", (event) => {
+        if (!this.owns(event.target)) return;
+        const seg = event.target.closest(".SegmentedControl-seg");
+        if (seg && group.contains(seg)) this.#select(seg, false);
+      });
+      this.on(group, "keydown", (event) => {
+        if (!this.owns(event.target)) return;
+        const segs = this.#segs();
+        const at = segs.indexOf(document.activeElement);
+        if (at < 0) return;
+        let next = -1;
+        if (event.key === "ArrowRight" || event.key === "ArrowDown") next = Math.min(at + 1, segs.length - 1);
+        else if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = Math.max(at - 1, 0);
+        else if (event.key === "Home") next = 0;
+        else if (event.key === "End") next = segs.length - 1;
+        if (next < 0) return;
+        event.preventDefault();
+        this.#select(segs[next], true);
+      });
+    }
+    #segs() {
+      return Array.from(this.#group?.querySelectorAll(".SegmentedControl-seg") ?? []);
+    }
+    // A segment is named by data-value, else aria-label, else its text.
+    #valueOf(seg) {
+      return seg.dataset.value ?? seg.getAttribute("aria-label") ?? (seg.textContent ?? "").trim();
+    }
+    #labelOf(seg) {
+      return seg.getAttribute("aria-label") ?? (seg.textContent ?? "").trim();
+    }
+    // The value of the checked segment.
+    get value() {
+      const checked = this.#segs().find((seg) => seg.classList.contains("is-checked"));
+      return checked ? this.#valueOf(checked) : "";
+    }
+    // Checks the segment with this value. It fires ue-segment-change when that changes the checked segment.
+    set value(value) {
+      const seg = this.#segs().find((candidate) => this.#valueOf(candidate) === value);
+      if (seg) this.#select(seg, false);
+    }
+    #select(seg, focus) {
+      const changed = !seg.classList.contains("is-checked");
+      for (const other of this.#segs()) {
+        const on = other === seg;
+        other.classList.toggle("is-checked", on);
+        other.setAttribute("aria-checked", String(on));
+        other.tabIndex = on ? 0 : -1;
+      }
+      if (focus) seg.focus();
+      if (changed) this.emit("ue-segment-change", { value: this.#valueOf(seg), label: this.#labelOf(seg) });
+    }
+  };
+  define("ue-segmented-control", UeSegmentedControl);
+
+  // design-system/src/TextInput/TextInput.ts
+  var UeTextInputElement = class extends UeElement {
+    setup() {
+      const box = this.one(".textinput");
+      const field = box?.querySelector(".textinput__field");
+      if (!box || !field) throw new Error("ue-text-input needs a .textinput box with a .textinput__field input");
+      const search = box.classList.contains("textinput--search");
+      const sync = () => {
+        if (search) box.classList.toggle("textinput--filled", field.value !== "");
+      };
+      const clear = () => {
+        field.value = "";
+        sync();
+        field.focus();
+        this.emit("ue-text-input", { value: "" });
+        this.emit("ue-text-clear", {});
+      };
+      sync();
+      this.on(field, "input", () => {
+        sync();
+        this.emit("ue-text-input", { value: field.value });
+      });
+      this.on(box, "click", (event) => {
+        if (!(event.target instanceof Element)) return;
+        if (event.target.closest(".textinput__clear")) clear();
+        else if (event.target !== field && !event.target.closest(".textinput__trail")) field.focus();
+      });
+      this.on(field, "keydown", (event) => {
+        if (!search || event.key !== "Escape" || field.readOnly || field.value === "") return;
+        event.preventDefault();
+        clear();
+      });
+    }
+  };
+  define("ue-text-input", UeTextInputElement);
+
   // design-system/src/PlaceActorsPanel/PlaceActorsPanel.ts
-  var CAT = ".placeActors-cat";
   var GROUP = ".placeActors-group";
-  var ROW3 = ".placeActors-row";
+  var ROW2 = ".placeActors-row";
   var PlaceActorsPanel = class extends UeElement {
     setup() {
-      const field = this.one(".placeActors-field");
+      const field = this.one(".textinput__field");
       const header = this.one(".placeActors-header");
       const empty = this.one(".placeActors-empty");
-      const cats = () => this.all(CAT);
       const applyFilter = () => {
         const query = (field?.value ?? "").trim().toLowerCase();
         const group = this.one(GROUP + ":not([hidden])");
         let visible = 0;
         if (group) {
-          for (const row of Array.from(group.querySelectorAll(ROW3))) {
+          for (const row of Array.from(group.querySelectorAll(ROW2))) {
             const name = row.querySelector(".placeActors-name")?.textContent?.toLowerCase() ?? "";
             row.hidden = query !== "" && !name.includes(query);
             if (!row.hidden) visible++;
@@ -2801,83 +2844,29 @@
         }
         if (empty instanceof HTMLElement) empty.hidden = !(query !== "" && visible === 0);
       };
-      const select = (cat, focus) => {
-        const name = cat.dataset.category ?? "";
-        for (const other of cats()) {
-          const active2 = other === cat;
-          other.classList.toggle("is-active", active2);
-          other.setAttribute("aria-checked", String(active2));
-          other.tabIndex = active2 ? 0 : -1;
-        }
+      const show = (name) => {
         if (header) header.textContent = name;
         for (const group of this.all(GROUP)) group.hidden = group.dataset.category !== name;
         applyFilter();
-        if (focus) cat.focus();
         this.emit("ue-category-change", { category: name });
       };
-      const clear = () => {
-        if (!field) return;
-        field.value = "";
-        applyFilter();
-        field.focus();
-      };
-      this.on(this, "click", (event) => {
-        const target = event.target;
-        if (!(target instanceof Element)) return;
-        const cat = target.closest(CAT);
-        if (cat && this.contains(cat)) {
-          select(cat, false);
-          return;
-        }
-        if (target.closest(".placeActors-clear")) clear();
-      });
-      this.on(this, "input", () => applyFilter());
+      this.on(this, "ue-segment-change", (event) => show(event.detail.value));
+      this.on(this, "ue-text-input", () => applyFilter());
       this.on(this, "dblclick", (event) => {
         const target = event.target;
         if (!(target instanceof Element) || target.closest(".placeActors-info")) return;
-        const row = target.closest(ROW3);
+        const row = target.closest(ROW2);
         if (row) this.emit("ue-place", { name: row.querySelector(".placeActors-name")?.textContent ?? "" });
       });
       this.on(this, "keydown", (event) => {
         const target = event.target;
-        if (!(target instanceof HTMLElement)) return;
-        const key = event.key;
-        if (target === field) {
-          if (key === "Escape" && field.value !== "") {
-            event.preventDefault();
-            clear();
-          }
-          return;
-        }
-        if (target.matches(".placeActors-clear") && (key === "Enter" || key === " ")) {
-          event.preventDefault();
-          clear();
-          return;
-        }
-        if (target.matches(ROW3) && key === "Enter") {
+        if (target instanceof HTMLElement && target.matches(ROW2) && event.key === "Enter") {
           event.preventDefault();
           this.emit("ue-place", { name: target.querySelector(".placeActors-name")?.textContent ?? "" });
-          return;
         }
-        if (!target.matches(CAT)) return;
-        const list = cats();
-        const index = list.indexOf(target);
-        let next = -1;
-        if (key === "ArrowRight" || key === "ArrowDown") next = (index + 1) % list.length;
-        else if (key === "ArrowLeft" || key === "ArrowUp") next = (index - 1 + list.length) % list.length;
-        else if (key === "Home") next = 0;
-        else if (key === "End") next = list.length - 1;
-        else if (key === "Enter" || key === " ") {
-          event.preventDefault();
-          select(target, false);
-          return;
-        }
-        if (next < 0) return;
-        event.preventDefault();
-        select(list[next], true);
       });
-      const active = cats().find((cat) => cat.classList.contains("is-active"));
-      if (active) select(active, false);
+      const active = this.one(".SegmentedControl-seg.is-checked");
+      if (active) show(active.dataset.value ?? "");
     }
   };
   define("ue-place-actors-panel", PlaceActorsPanel);
@@ -3203,7 +3192,7 @@
   }
 
   // design-system/src/SceneOutliner/SceneOutliner.ts
-  var ROW4 = ".so-row";
+  var ROW3 = ".so-row";
   var SORTABLE2 = ".so-hcell[aria-sort]";
   var collator = new Intl.Collator(void 0, { numeric: true, sensitivity: "base" });
   var SceneOutliner = class extends UeElement {
@@ -3245,7 +3234,7 @@
       });
       this.onDispose(binding.dispose);
       const controller = new TreeController(rowsEl, {
-        row: ROW4,
+        row: ROW3,
         arrow: ".so-arrow",
         folder: ".so-ico.is-folder",
         caretOpen: "so-caret-down",
@@ -3441,68 +3430,6 @@
   };
   define("ue-scrollbar", Scrollbar);
 
-  // design-system/src/SegmentedControl/SegmentedControl.ts
-  var UeSegmentedControl = class extends UeElement {
-    #group = null;
-    setup() {
-      const group = this.all(".SegmentedControl").find((candidate) => this.owns(candidate));
-      if (!group) throw new Error("ue-segmented-control needs a .SegmentedControl radiogroup");
-      this.#group = group;
-      group.setAttribute("role", "radiogroup");
-      this.on(group, "click", (event) => {
-        if (!this.owns(event.target)) return;
-        const seg = event.target.closest(".SegmentedControl-seg");
-        if (seg && group.contains(seg)) this.#select(seg, false);
-      });
-      this.on(group, "keydown", (event) => {
-        if (!this.owns(event.target)) return;
-        const segs = this.#segs();
-        const at = segs.indexOf(document.activeElement);
-        if (at < 0) return;
-        let next = -1;
-        if (event.key === "ArrowRight" || event.key === "ArrowDown") next = Math.min(at + 1, segs.length - 1);
-        else if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = Math.max(at - 1, 0);
-        else if (event.key === "Home") next = 0;
-        else if (event.key === "End") next = segs.length - 1;
-        if (next < 0) return;
-        event.preventDefault();
-        this.#select(segs[next], true);
-      });
-    }
-    #segs() {
-      return Array.from(this.#group?.querySelectorAll(".SegmentedControl-seg") ?? []);
-    }
-    // A segment is named by data-value, else aria-label, else its text.
-    #valueOf(seg) {
-      return seg.dataset.value ?? seg.getAttribute("aria-label") ?? (seg.textContent ?? "").trim();
-    }
-    #labelOf(seg) {
-      return seg.getAttribute("aria-label") ?? (seg.textContent ?? "").trim();
-    }
-    // The value of the checked segment.
-    get value() {
-      const checked = this.#segs().find((seg) => seg.classList.contains("is-checked"));
-      return checked ? this.#valueOf(checked) : "";
-    }
-    // Checks the segment with this value. It fires ue-segment-change when that changes the checked segment.
-    set value(value) {
-      const seg = this.#segs().find((candidate) => this.#valueOf(candidate) === value);
-      if (seg) this.#select(seg, false);
-    }
-    #select(seg, focus) {
-      const changed = !seg.classList.contains("is-checked");
-      for (const other of this.#segs()) {
-        const on = other === seg;
-        other.classList.toggle("is-checked", on);
-        other.setAttribute("aria-checked", String(on));
-        other.tabIndex = on ? 0 : -1;
-      }
-      if (focus) seg.focus();
-      if (changed) this.emit("ue-segment-change", { value: this.#valueOf(seg), label: this.#labelOf(seg) });
-    }
-  };
-  define("ue-segmented-control", UeSegmentedControl);
-
   // design-system/src/Slider/Slider.ts
   var HANDLE = 8;
   function attr(el, name, fallback) {
@@ -3602,7 +3529,7 @@
   define("ue-slider", UeSliderElement);
 
   // design-system/src/SourcePanel/SourcePanel.ts
-  var ROW5 = ".SourcePanel__row";
+  var ROW4 = ".SourcePanel__row";
   var SELECTED2 = "SourcePanel__row--selected";
   var PARENT = "SourcePanel__row--parent";
   var INDENT_PX2 = 10;
@@ -3631,7 +3558,7 @@
       this.on(root, "keydown", (event) => this.#keydown(event));
     }
     #rows(tree) {
-      return Array.from(tree.querySelectorAll(ROW5));
+      return Array.from(tree.querySelectorAll(ROW4));
     }
     #visible(tree) {
       return this.#rows(tree).filter((row) => !row.hidden);
@@ -3675,7 +3602,7 @@
       if (use && href) use.setAttribute("href", href.replace(from, to));
     }
     #select(row, focus) {
-      for (const other of this.all(ROW5)) {
+      for (const other of this.all(ROW4)) {
         other.classList.remove(SELECTED2, PARENT);
         other.setAttribute("aria-selected", "false");
       }
@@ -3752,7 +3679,7 @@
         if (area && body) this.#setSection(area, body.hidden);
         return;
       }
-      const row = target.closest(ROW5);
+      const row = target.closest(ROW4);
       if (!row) return;
       if (target.closest(".SourcePanel__exp")) {
         this.#setOpen(row, !this.#isOpen(row));
@@ -3761,7 +3688,7 @@
       this.#select(row, true);
     }
     #doubleClick(event) {
-      const row = event.target instanceof Element ? event.target.closest(ROW5) : null;
+      const row = event.target instanceof Element ? event.target.closest(ROW4) : null;
       if (row && !event.target.closest(".SourcePanel__exp")) this.#setOpen(row, !this.#isOpen(row));
     }
     #addCollection(area) {
@@ -3789,7 +3716,7 @@
         target.click();
         return;
       }
-      if (!target.matches(ROW5)) return;
+      if (!target.matches(ROW4)) return;
       const tree = this.#treeOf(target);
       if (!tree) return;
       const visible = this.#visible(tree);
@@ -4086,65 +4013,14 @@
   define("ue-splitter", SplitterElement);
 
   // design-system/src/StatusBar/StatusBar.ts
-  var DRAWER = ".statusBar-btn";
-  var COMBO = ".statusBar-combo";
-  var MENU2 = ".statusBar-menu";
-  var ROW6 = ".statusBar-row";
+  var DRAWER = ".statusBar-seg--drawer .button";
   var MAX_LINES = 4;
   var StatusBar = class extends UeElement {
     setup() {
-      const field = this.one(".statusBar-field");
+      const field = this.one(".statusBar-console .textinput__field");
       const history = this.one(".statusBar-history");
       const recalled = [];
       let recallIndex = 0;
-      const openMenu2 = () => this.one(MENU2 + ".is-open");
-      const comboOf = (menu) => menu.parentElement?.querySelector(COMBO) ?? null;
-      const close = (restoreFocus) => {
-        const menu = openMenu2();
-        if (!menu) return;
-        menu.classList.remove("is-open");
-        const combo = comboOf(menu);
-        if (!combo) return;
-        combo.setAttribute("aria-expanded", "false");
-        if (restoreFocus) combo.focus();
-      };
-      const open = (combo, focusFirst) => {
-        const menu = combo.parentElement?.querySelector(MENU2);
-        if (!menu) return;
-        close(false);
-        menu.classList.add("is-open");
-        combo.setAttribute("aria-expanded", "true");
-        if (!focusFirst) return;
-        const rows = enabledRows(menu, ROW6);
-        if (rows.length > 0) rows[0].focus();
-      };
-      const toggleDrawer = (button) => {
-        const bar = button.closest(".statusBar");
-        const opening = !button.classList.contains("is-open");
-        if (bar) {
-          for (const other of Array.from(bar.querySelectorAll(DRAWER))) {
-            other.classList.remove("is-open");
-            other.setAttribute("aria-expanded", "false");
-          }
-        }
-        if (opening) {
-          button.classList.add("is-open");
-          button.setAttribute("aria-expanded", "true");
-        }
-        const label = button.querySelector(".statusBar-txt")?.textContent ?? "";
-        this.emit("ue-drawer-change", { drawer: opening ? label : null });
-      };
-      const choose = (row) => {
-        const label = row.textContent?.trim() ?? "";
-        for (const other of Array.from(row.parentElement?.querySelectorAll(ROW6) ?? [])) {
-          other.setAttribute("aria-checked", String(other === row));
-        }
-        const combo = comboOf(row.closest(MENU2) ?? row);
-        const text = combo?.querySelector(".statusBar-txt");
-        if (text) text.textContent = label;
-        this.emit("ue-executor-change", { executor: label });
-        close(true);
-      };
       const run = (command) => {
         if (history) {
           const line = document.createElement("div");
@@ -4157,78 +4033,32 @@
         recallIndex = recalled.length;
         this.emit("ue-command", { command });
       };
-      this.on(this, "click", (event) => {
-        const target = event.target;
-        if (!(target instanceof Element)) return;
-        const row = target.closest(ROW6);
-        if (row) {
-          choose(row);
-          return;
+      this.on(this, "ue-button-click", (event) => {
+        const button = event.target instanceof Element ? event.target.querySelector(".button") : null;
+        if (!button?.closest(".statusBar-seg--drawer")) return;
+        const detail = event.detail;
+        for (const other of this.all(DRAWER)) {
+          if (other !== button) other.setAttribute("aria-pressed", "false");
         }
-        const drawer = target.closest(DRAWER);
-        if (drawer && this.contains(drawer)) {
-          toggleDrawer(drawer);
-          return;
-        }
-        const combo = target.closest(COMBO + ".statusBar-cmd");
-        if (!combo) return;
-        if (combo.getAttribute("aria-expanded") === "true") close(false);
-        else open(combo, false);
+        this.emit("ue-drawer-change", { drawer: detail.pressed ? detail.label : null });
       });
-      this.on(this, "pointerover", (event) => {
-        const row = event.target instanceof Element ? event.target.closest(ROW6) : null;
-        if (row) row.focus({ preventScroll: true });
+      this.on(this, "ue-combo-pick", (event) => {
+        if (!(event.target instanceof Element) || !event.target.closest(".statusBar-console")) return;
+        this.emit("ue-executor-change", { executor: event.detail.label });
       });
-      this.on(this, "keydown", (event) => {
-        const target = event.target;
-        if (!(target instanceof HTMLElement)) return;
-        const key = event.key;
-        if (target === field && field) {
-          if (key === "Enter") {
-            const command = field.value.trim();
-            event.preventDefault();
-            if (command === "") return;
-            run(command);
-            field.value = "";
-          } else if (key === "ArrowUp" || key === "ArrowDown") {
-            event.preventDefault();
-            recallIndex = Math.min(Math.max(recallIndex + (key === "ArrowUp" ? -1 : 1), 0), recalled.length);
-            field.value = recalled[recallIndex] ?? "";
-          }
-          return;
-        }
-        const row = target.closest(ROW6);
-        if (row) {
-          if (key === "Escape") {
-            event.preventDefault();
-            close(true);
-          } else if (key === "Tab") close(false);
-          else if (moveRowFocus(enabledRows(row.closest(MENU2) ?? row, ROW6), row, key)) event.preventDefault();
-          else if (key === "Enter" || key === " ") {
-            event.preventDefault();
-            row.click();
-          }
-          return;
-        }
-        if (key === "Escape" && openMenu2()) {
+      if (!field) return;
+      this.on(field, "keydown", (event) => {
+        if (event.key === "Enter") {
+          const command = field.value.trim();
           event.preventDefault();
-          close(true);
-        } else if ((key === "Enter" || key === " ") && target.matches(DRAWER + ", " + COMBO)) {
+          if (command === "") return;
+          run(command);
+          field.value = "";
+        } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
           event.preventDefault();
-          target.click();
-        } else if ((key === "ArrowUp" || key === "ArrowDown") && target.matches(COMBO + ".statusBar-cmd")) {
-          event.preventDefault();
-          open(target, true);
+          recallIndex = Math.min(Math.max(recallIndex + (event.key === "ArrowUp" ? -1 : 1), 0), recalled.length);
+          field.value = recalled[recallIndex] ?? "";
         }
-      });
-      this.on(document, "pointerdown", (event) => {
-        const target = event.target;
-        if (!(target instanceof Element)) return;
-        const menu = openMenu2();
-        if (!menu || menu.contains(target)) return;
-        const combo = comboOf(menu);
-        if (combo && combo.contains(target)) return;
-        close(false);
       });
     }
   };
@@ -4249,89 +4079,21 @@
   };
   define("ue-tab-well", TabWellElement);
 
-  // design-system/src/TextInput/TextInput.ts
-  var UeTextInputElement = class extends UeElement {
-    setup() {
-      const box = this.one(".textinput");
-      const field = box?.querySelector(".textinput__field");
-      if (!box || !field) throw new Error("ue-text-input needs a .textinput box with a .textinput__field input");
-      const search = box.classList.contains("textinput--search");
-      const sync = () => {
-        if (search) box.classList.toggle("textinput--filled", field.value !== "");
-      };
-      const clear = () => {
-        field.value = "";
-        sync();
-        field.focus();
-        this.emit("ue-text-input", { value: "" });
-        this.emit("ue-text-clear", {});
-      };
-      sync();
-      this.on(field, "input", () => {
-        sync();
-        this.emit("ue-text-input", { value: field.value });
-      });
-      this.on(box, "click", (event) => {
-        if (!(event.target instanceof Element)) return;
-        if (event.target.closest(".textinput__clear")) clear();
-        else if (event.target !== field && !event.target.closest(".textinput__trail")) field.focus();
-      });
-      this.on(field, "keydown", (event) => {
-        if (!search || event.key !== "Escape" || field.readOnly || field.value === "") return;
-        event.preventDefault();
-        clear();
-      });
-    }
-  };
-  define("ue-text-input", UeTextInputElement);
-
   // design-system/src/ToolBar/ToolBar.ts
-  var CONTROL = ".toolBar-btn, .toolBar-modes, .toolBar-wrap, .toolBar-plate";
-  var TOGGLE = ".toolBar-btn--toggle";
-  var MENU3 = ".toolBar-menu";
-  var ROW7 = ".toolBar-row";
+  var CONTROL = ".button, .combobutton";
+  var PANEL2 = ".combobutton-menu";
   function isDisabled3(el) {
-    return el.getAttribute("aria-disabled") === "true";
+    return el.matches(":disabled") || el.getAttribute("aria-disabled") === "true";
   }
   var ToolBar = class extends UeElement {
     setup() {
-      const menuOf2 = (control) => {
-        const slot = control.closest(".toolBar-slot");
-        return slot ? slot.querySelector(":scope > " + MENU3) : null;
-      };
-      const controlOf = (menu) => {
-        const slot = menu.closest(".toolBar-slot");
-        return slot ? slot.querySelector(CONTROL) : null;
-      };
-      const openMenu2 = () => this.one(MENU3 + ".is-open");
-      const close = (restoreFocus) => {
-        const menu = openMenu2();
-        if (!menu) return;
-        menu.classList.remove("is-open");
-        const control = controlOf(menu);
-        if (!control) return;
-        control.setAttribute("aria-expanded", "false");
-        if (restoreFocus) control.focus();
-      };
-      const open = (control, rows) => {
-        const menu = menuOf2(control);
-        if (!menu) return;
-        close(false);
-        menu.classList.add("is-open");
-        control.setAttribute("aria-expanded", "true");
-        if (rows === "none") return;
-        const list = enabledRows(menu, ROW7);
-        if (list.length > 0) (rows === "first" ? list[0] : list[list.length - 1]).focus();
-      };
+      const buttonIn = (bar, plate) => bar.querySelector(plate + " .button");
       const setPlaying = (bar, playing) => {
-        const play = bar.querySelector(".toolBar-plate--play");
-        const stop = bar.querySelector(".toolBar-plate--stop");
+        const play = buttonIn(bar, ".toolBar-plate--play");
+        const stop = buttonIn(bar, ".toolBar-plate--stop");
         if (!play || !stop) return;
-        play.classList.toggle("is-pressed", playing);
         play.setAttribute("aria-pressed", String(playing));
-        stop.classList.toggle("is-disabled", !playing);
-        stop.setAttribute("aria-disabled", String(!playing));
-        stop.tabIndex = playing ? 0 : -1;
+        stop.disabled = !playing;
         if (bar instanceof HTMLElement) bar.dataset.playing = String(playing);
         this.emit("ue-play-change", { playing });
       };
@@ -4339,85 +4101,31 @@
         const bar = stop.closest(".toolBar");
         if (bar) setPlaying(bar, bar.getAttribute("data-playing") === "true");
       }
-      this.on(this, "click", (event) => {
+      this.on(this, "ue-button-click", (event) => {
         const target = event.target;
         if (!(target instanceof Element)) return;
-        const row = target.closest(ROW7);
-        if (row) {
-          if (isDisabled3(row)) return;
-          this.emit("ue-menu-select", { label: rowLabel(row, ".toolBar-label") });
-          close(true);
-          return;
-        }
-        const control = target.closest(CONTROL);
-        if (!control || isDisabled3(control)) return;
-        if (control.matches(TOGGLE)) {
-          const checked = control.classList.toggle("is-checked");
-          control.setAttribute("aria-pressed", String(checked));
-        }
-        if (menuOf2(control)) {
-          if (control.getAttribute("aria-expanded") === "true") close(false);
-          else open(control, "none");
-          return;
-        }
-        const bar = control.closest(".toolBar");
+        const bar = target.closest(".toolBar");
         if (!bar) return;
-        if (control.matches(".toolBar-plate--play") && bar.getAttribute("data-playing") !== "true") setPlaying(bar, true);
-        else if (control.matches(".toolBar-plate--stop")) setPlaying(bar, false);
+        if (target.closest(".toolBar-plate--play")) {
+          if (bar.getAttribute("data-playing") !== "true") setPlaying(bar, true);
+          else buttonIn(bar, ".toolBar-plate--play")?.setAttribute("aria-pressed", "true");
+        } else if (target.closest(".toolBar-plate--stop")) {
+          setPlaying(bar, false);
+        }
       });
-      this.on(this, "pointerover", (event) => {
-        const target = event.target;
-        if (!(target instanceof Element)) return;
-        const row = target.closest(ROW7);
-        if (row && !isDisabled3(row)) row.focus({ preventScroll: true });
+      this.on(this, "ue-combo-pick", (event) => {
+        this.emit("ue-menu-select", { label: event.detail.label });
       });
       this.on(this, "keydown", (event) => {
         const target = event.target;
-        if (!(target instanceof HTMLElement)) return;
-        const key = event.key;
-        const row = target.closest(ROW7);
-        if (row) {
-          if (key === "Escape") {
-            event.preventDefault();
-            close(true);
-          } else if (key === "Tab") close(false);
-          else if (moveRowFocus(enabledRows(row.closest(MENU3) ?? row, ROW7), row, key)) event.preventDefault();
-          else if (key === "Enter" || key === " ") {
-            event.preventDefault();
-            row.click();
-          }
-          return;
-        }
+        if (!(target instanceof HTMLElement) || event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
         const control = target.closest(CONTROL);
-        if (!control) return;
-        if (key === "Escape") {
-          if (!openMenu2()) return;
-          event.preventDefault();
-          close(true);
-        } else if (key === "Enter" || key === " ") {
-          event.preventDefault();
-          control.click();
-        } else if ((key === "ArrowDown" || key === "ArrowUp") && menuOf2(control)) {
-          event.preventDefault();
-          open(control, key === "ArrowDown" ? "first" : "last");
-        } else if (key === "ArrowRight" || key === "ArrowLeft") {
-          const bar = control.closest(".toolBar");
-          if (!bar) return;
-          const list = Array.from(bar.querySelectorAll(CONTROL)).filter((c) => !isDisabled3(c));
-          const next = list[(list.indexOf(control) + (key === "ArrowRight" ? 1 : -1) + list.length) % list.length];
-          event.preventDefault();
-          close(false);
-          next.focus();
-        }
-      });
-      this.on(document, "pointerdown", (event) => {
-        const target = event.target;
-        if (!(target instanceof Element)) return;
-        const menu = openMenu2();
-        if (!menu || menu.contains(target)) return;
-        const control = controlOf(menu);
-        if (control && control.contains(target)) return;
-        close(false);
+        const bar = control?.closest(".toolBar");
+        if (!control || !bar || control.closest(PANEL2)) return;
+        const list = Array.from(bar.querySelectorAll(CONTROL)).filter((c) => !c.closest(PANEL2) && !isDisabled3(c));
+        const next = list[(list.indexOf(control) + (event.key === "ArrowRight" ? 1 : -1) + list.length) % list.length];
+        event.preventDefault();
+        next.focus();
       });
     }
   };

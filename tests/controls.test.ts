@@ -441,6 +441,81 @@ scenario('ComboButton: the panel minimum width follows --combobutton-menu-min-wi
 	assert.ok(trigger && trigger.width < 200);
 });
 
+interface ComboApi {
+	open(keys?: boolean, fromEnd?: boolean): void;
+	close(refocus?: boolean): void;
+	isOpen: boolean;
+}
+
+scenario('ComboButton: open() and close() drive the panel, mode=value gives a simple trigger value mode, --up opens above', 'ComboButton', async (page) => {
+	await page.evaluate(() => {
+		const holder = document.createElement('div');
+		holder.style.cssText = 'position:absolute;left:40px;top:420px';
+		holder.innerHTML = '<ue-combo-button mode="value" id="vm"><div class="combobutton-anchor"><span class="combobutton combobutton--simple" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false"><span class="combobutton__label">Cmd</span></span><div class="combobutton-menu combobutton-menu--up" hidden><ue-popup-menu><div class="popupmenu" role="menu" tabindex="0"><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Cmd</span></span></div><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Python</span></span></div></div></ue-popup-menu></div></div></ue-combo-button>';
+		document.body.append(holder);
+	});
+	const host = page.locator('#vm');
+	const trigger = host.locator('.combobutton');
+	const menu = host.locator('.combobutton-menu');
+	const isOpen = (): Promise<boolean> => host.evaluate((el) => (el as unknown as ComboApi).isOpen);
+	assert.equal(await isOpen(), false);
+	await host.evaluate((el) => (el as unknown as ComboApi).open());
+	await seen(menu, true);
+	await attr(trigger, 'aria-expanded', 'true');
+	await cls(trigger, 'combobutton--open', true);
+	assert.equal(await isOpen(), true);
+	const triggerBox = await trigger.boundingBox();
+	const menuBox = await menu.boundingBox();
+	assert.ok(triggerBox && menuBox && menuBox.y + menuBox.height <= triggerBox.y + 1, 'the --up panel sits above the trigger');
+	await host.evaluate((el) => (el as unknown as ComboApi).close());
+	await seen(menu, false);
+	assert.equal(await isOpen(), false);
+	await trigger.click();
+	await menu.locator('.popupmenu__row').nth(1).click();
+	assert.equal(await cbLabel(trigger), 'Python', 'a simple trigger in value mode follows the pick');
+});
+
+scenario('Button and ComboButton: the toolbar, plate, status, menubar and wide variants carry their own metrics', 'ComboButton', async (page) => {
+	await page.evaluate(() => {
+		const holder = document.createElement('div');
+		holder.style.cssText = 'position:absolute;left:40px;top:480px;color:rgb(10, 20, 30)';
+		const icon = '<svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M3 3h10v10H3z"/></svg>';
+		holder.innerHTML = '<button class="button button--simple button--toolbar" id="tb">' + icon + '</button>'
+			+ '<button class="button button--simple button--toolbar button--pressed" id="tbp">' + icon + '</button>'
+			+ '<button class="button button--toggle button--toolbar button--pressed" id="tbt">' + icon + '</button>'
+			+ '<button class="button button--plate" id="pl">' + icon + '</button>'
+			+ '<button class="button button--plate" id="pld" disabled>' + icon + '</button>'
+			+ '<button class="button button--status" id="st">' + icon + 'Drawer</button>'
+			+ '<button class="button button--status" id="sto" aria-pressed="true">' + icon + 'Drawer</button>'
+			+ '<span class="combobutton combobutton--menubar" id="mb"><span class="combobutton__label">File</span></span>'
+			+ '<span class="combobutton combobutton--menubar combobutton--open" id="mbo"><span class="combobutton__label">File</span></span>'
+			+ '<span class="combobutton combobutton--toolbar" id="ct"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M3 3h10v10H3z"/></svg></span>'
+			+ '<span class="combobutton combobutton--simple combobutton--wide" id="cw"><span class="combobutton__label">Derived Data</span></span>';
+		document.body.append(holder);
+	});
+	const at = (id: string): Locator => page.locator('#' + id);
+	assert.equal(await prop(at('tb'), 'padding-top'), '4px');
+	assert.equal(await prop(at('tb'), 'padding-left'), '8px');
+	assert.equal(await prop(at('tb').locator('svg'), 'width'), '20px');
+	assert.equal(await prop(at('tbp'), 'padding-top'), '5px');
+	assert.equal(await prop(at('tbp'), 'padding-bottom'), '3px');
+	assert.equal(await prop(at('tbt'), 'padding-top'), '4px', 'a toggle does not shift when pressed');
+	assert.equal(await fill(at('pl')), CLEAR);
+	assert.equal(await prop(at('pl'), 'color'), 'rgb(10, 20, 30)', 'a plate button takes the foreground of its plate');
+	assert.equal(await prop(at('pld'), 'opacity'), '1', 'the plate owns the disabled alpha');
+	assert.equal(await prop(at('st'), 'padding-top'), '4px');
+	assert.equal(await prop(at('sto'), 'padding-top'), '5px');
+	assert.equal(await prop(at('sto'), 'color'), await token(page, 'foreground-hover'));
+	assert.equal(await fill(at('sto')), CLEAR, 'an open drawer has no fill');
+	assert.equal(await prop(at('mb'), 'padding-left'), '12px');
+	assert.equal(await prop(at('mb'), 'padding-top'), '4px');
+	assert.equal(await fill(at('mb')), CLEAR);
+	assert.equal(await fill(at('mbo')), await token(page, 'primary'));
+	assert.equal(await prop(at('ct'), 'padding-left'), '8px');
+	assert.equal(await prop(at('ct').locator('svg'), 'width'), '20px');
+	assert.equal(await prop(at('cw'), 'padding-left'), '10px');
+});
+
 scenario('ComboButton: a combo button inside another primitive acts on its own control only', 'ExpandableArea', async (page) => {
 	if (process.env.UE_MODE === 'modules') await page.addScriptTag({ type: 'module', url: '/components/ComboButton/ComboButton.js' });
 	await page.waitForFunction(() => customElements.get('ue-combo-button') !== undefined);

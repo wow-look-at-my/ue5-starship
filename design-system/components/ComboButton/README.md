@@ -100,6 +100,10 @@ The host owns open and close, an outside click, Escape, Down, Up, Enter and Spac
 | Value | default | The trigger label follows the pick. The picked row gets `aria-selected="true"`, the others `false` |
 | Action | `combobutton--simple` on the trigger, or `mode="action"` on the host, or a trigger without a label | The label stays fixed. Rows only fire events |
 
+`mode="value"` on the host gives a simple trigger value mode: the simple look with a label that follows the pick.
+
+The host also has a small code API for a composite that coordinates several combos: `open(keys?, fromEnd?)`, `close(refocus?)` and `isOpen`. `open` does nothing on a disabled combo or an open one. `close` does nothing on a closed one.
+
 A check row never changes the label.
 
 ## Variants
@@ -111,8 +115,15 @@ A check row never changes the label.
 | `combobutton--icon` | Transparent icon plus chevron, no label, padding 4 x 3 |
 | `combobutton--small` | Property row size: `400 10.667px/1.172` font, fixed 22px height, no minimum width |
 | `combobutton--button` | The Button look: `--secondary` fill, fixed 22px height, padding 14, 3px gap |
+| `combobutton--wide` (with `--simple`) | Content padding 6 on top of the simple padding: 10 x 1 (`SDerivedDataStatusBar.cpp:166`) |
+| `combobutton--menubar` | A menu bar item: no fill, padding 12 x 4, Hover fill on hover, Primary while open, no chevron. The panel is at least 220px wide (`StarshipCoreStyle.cpp:2433-2448`) |
+| `combobutton--toolbar` | The slim toolbar combo: padding 8 x 4 (pressed 8, 5, 8, 3), 20px icon, Dropdown fill on hover. Add `combobutton--overflow` for the 16px glyph with padding 12 x 4 (`StarshipCoreStyle.cpp:2193-2206`) |
+| `combobutton--plate` | A trigger on a backplate. It fills its host and draws nothing: the plate owns the fill and the foreground |
 | `combobutton-anchor--fill` (on the anchor) | The trigger takes the free width of a row |
 | `combobutton-menu--end` (on the panel) | The panel aligns to the right edge of the trigger |
+| `combobutton-menu--up` (on the panel) | The panel opens above the trigger, for a bar at the bottom edge |
+
+A trigger and its anchor never shrink or wrap in a flex row (`white-space: nowrap`, `flex-shrink: 0`).
 
 Panel width: the panel is at least as wide as the trigger. Set `--combobutton-menu-min-width` on the panel to change the minimum. Use `popupmenu--combo` on the list for value pickers and `popupmenu--small` for 10.667px rows.
 
