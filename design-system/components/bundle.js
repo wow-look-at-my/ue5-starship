@@ -1430,11 +1430,12 @@
         }
       );
       this.#controller = controller;
+      const live = (target) => this.owns(target) && !target.closest("[data-tr-inert]");
       this.on(tree, "click", (event) => {
-        if (this.owns(event.target)) controller.click(event);
+        if (live(event.target)) controller.click(event);
       });
       this.on(tree, "dblclick", (event) => {
-        if (this.owns(event.target)) controller.doubleClick(event);
+        if (live(event.target)) controller.doubleClick(event);
       });
       this.on(tree, "keydown", (event) => {
         if (this.owns(event.target)) controller.keyDown(event);
@@ -1465,7 +1466,7 @@
       return this.#rows().find((row) => this.#idOf(row) === id);
     }
     #info(row) {
-      return { id: this.#idOf(row), label: (row.querySelector(".tr-text")?.textContent ?? "").trim(), depth: (this.#controller?.level(row) ?? 1) - 1 };
+      return { id: this.#idOf(row), label: (row.querySelector(".tr-text")?.textContent ?? "").trim(), depth: (this.#controller?.level(row) ?? 1) - 1, element: row };
     }
     #announceSelection() {
       const ids = this.getSelectedIds();
@@ -1527,6 +1528,32 @@
         cellEls[i].textContent = value;
       });
       return row;
+    }
+    // Sorts the children of every parent with compare. A row keeps its subtree. Selection and open state stay.
+    sortChildren(compare) {
+      const tree = this.#tree;
+      const controller = this.#controller;
+      if (!tree || !controller) return;
+      const roots = [];
+      const stack = [];
+      for (const row of this.#rows()) {
+        const node = { row, kids: [] };
+        const level = controller.level(row);
+        stack.length = level - 1;
+        (stack[level - 2]?.kids ?? roots).push(node);
+        stack[level - 1] = node;
+      }
+      const flat = [];
+      const walk = (list) => {
+        list.sort((a, b) => compare(this.#info(a.row), this.#info(b.row)));
+        for (const node of list) {
+          flat.push(node.row);
+          walk(node.kids);
+        }
+      };
+      walk(roots);
+      tree.append(...flat);
+      controller.refresh();
     }
     // Shows only the rows the filter accepts and their ancestors. Ancestors open while the filter is set. Null clears it.
     setFilter(filter) {
@@ -2685,7 +2712,7 @@
     setup() {
       this.on(this, "click", (event) => {
         if (!(event.target instanceof Element)) return;
-        const button = event.target.closest(".notification__btn");
+        const button = event.target.closest(".button[data-action]");
         if (!button) return;
         switch (button.dataset.action) {
           case "dismiss":
@@ -2963,210 +2990,6 @@
     };
   }
 
-  // design-system/src/SceneOutliner/SceneOutliner.ts
-  var ROW3 = ".so-row";
-  var SORTABLE2 = ".so-hcell[aria-sort]";
-  var collator = new Intl.Collator(void 0, { numeric: true, sensitivity: "base" });
-  var SceneOutliner = class extends UeElement {
-    setup() {
-      const rowsEl = this.one(".so-rows");
-      const input = this.one(".so-input");
-      const clear = this.one(".so-clear");
-      const status = this.one(".so-status");
-      const bar = this.one(".so-sb");
-      const thumb = this.one(".so-thumb");
-      const hcells = this.one(".so-hcells");
-      const spacer = this.one(".so-hspacer");
-      if (!rowsEl || !input || !clear || !status || !bar || !thumb) return;
-      const text = (row, selector) => row.querySelector(selector)?.textContent?.trim() ?? "";
-      const label = (row) => text(row, ".so-text");
-      const kind = (row) => text(row, ".so-type");
-      const isActor = (row) => kind(row) !== "Folder" && kind(row) !== "World";
-      let keep = null;
-      let saved = null;
-      const updateStatus = () => {
-        const actors = controller.rows().filter(isActor);
-        const total = actors.length;
-        const selected = actors.filter((row) => controller.isSelected(row)).length;
-        const suffix = selected > 0 ? " (" + selected + " selected)" : "";
-        status.classList.remove("is-match", "is-none");
-        if (!keep) {
-          status.textContent = total + " actors" + suffix;
-          return;
-        }
-        const shown = actors.filter((row) => keep?.has(row)).length;
-        status.classList.add(shown === 0 ? "is-none" : "is-match");
-        if (shown === 0) status.textContent = "No matching actors (" + total + " total)";
-        else if (shown === total) status.textContent = total + " actors" + suffix;
-        else status.textContent = "Showing " + shown + " of " + total + " actors" + suffix;
-      };
-      const binding = bindBar(rowsEl, bar, thumb, true, (fits) => {
-        if (spacer) spacer.hidden = fits;
-        hcells?.classList.toggle("is-no-bar", fits);
-      });
-      this.onDispose(binding.dispose);
-      const controller = new TreeController(rowsEl, {
-        row: ROW3,
-        arrow: ".so-arrow",
-        folder: ".so-ico.is-folder",
-        caretOpen: "so-caret-down",
-        caretClosed: "so-caret-right",
-        folderOpen: "so-folder-open",
-        folderClosed: "so-folder"
-      }, {
-        excluded: (row) => keep !== null && !keep.has(row),
-        changed: () => {
-          updateStatus();
-          binding.update();
-        }
-      });
-      const applyFilter = () => {
-        const needle = input.value.trim().toLowerCase();
-        clear.hidden = input.value === "";
-        if (needle === "") {
-          if (saved) {
-            for (const [row, value] of saved) {
-              if (value === null) row.removeAttribute("aria-expanded");
-              else row.setAttribute("aria-expanded", value);
-            }
-          }
-          keep = null;
-          saved = null;
-          controller.refresh();
-          return;
-        }
-        const rows = controller.rows();
-        saved ??= new Map(rows.map((row) => [row, row.getAttribute("aria-expanded")]));
-        const next = /* @__PURE__ */ new Set();
-        rows.forEach((row, index) => {
-          if (!label(row).toLowerCase().includes(needle)) return;
-          next.add(row);
-          let want = controller.level(row);
-          for (let j = index - 1; j >= 0 && want > 1; j--) {
-            if (controller.level(rows[j]) < want) {
-              next.add(rows[j]);
-              rows[j].setAttribute("aria-expanded", "true");
-              want = controller.level(rows[j]);
-            }
-          }
-        });
-        keep = next;
-        controller.refresh();
-      };
-      const sortRows = (column, mode) => {
-        const rows = controller.rows();
-        const roots = [];
-        const stack = [];
-        for (const row of rows) {
-          const node = { row, kids: [] };
-          const level = controller.level(row);
-          stack.length = level - 1;
-          (stack[level - 2]?.kids ?? roots).push(node);
-          stack[level - 1] = node;
-        }
-        const dir = mode === "descending" ? -1 : 1;
-        const compare = (a, b) => {
-          if (column === "type") return dir * collator.compare(kind(a.row), kind(b.row));
-          const byKind = Number(isActor(a.row)) - Number(isActor(b.row));
-          return dir * (byKind || collator.compare(label(a.row), label(b.row)));
-        };
-        const flat = [];
-        const walk = (list) => {
-          list.sort(compare);
-          for (const node of list) {
-            flat.push(node.row);
-            walk(node.kids);
-          }
-        };
-        walk(roots);
-        rowsEl.append(...flat);
-        controller.refresh();
-      };
-      const paintHeader = (cell, mode) => {
-        cell.setAttribute("aria-sort", mode);
-        const arrow = cell.querySelector(".so-sort");
-        if (!arrow) return;
-        arrow.toggleAttribute("hidden", mode === "none");
-        arrow.querySelector("use")?.setAttribute("href", mode === "descending" ? "#so-down" : "#so-up");
-      };
-      const modeOf2 = (cell) => {
-        const value = cell.getAttribute("aria-sort");
-        return value === "ascending" || value === "descending" ? value : "none";
-      };
-      const cells = () => this.all(SORTABLE2);
-      const activate = (cell) => {
-        const mode = modeOf2(cell) === "ascending" ? "descending" : "ascending";
-        for (const other of cells()) paintHeader(other, other === cell ? mode : "none");
-        sortRows(cell.dataset.column ?? "label", mode);
-      };
-      this.on(this, "click", (event) => {
-        const target = event.target;
-        if (!(target instanceof Element)) return;
-        const cell = target.closest(SORTABLE2);
-        if (cell && this.contains(cell)) {
-          activate(cell);
-          return;
-        }
-        if (target.closest(".so-clear")) {
-          input.value = "";
-          applyFilter();
-          input.focus();
-        }
-      });
-      this.on(this, "keydown", (event) => {
-        const target = event.target;
-        if (!(target instanceof HTMLElement) || !target.matches(SORTABLE2)) return;
-        if (event.key !== "Enter" && event.key !== " ") return;
-        event.preventDefault();
-        activate(target);
-      });
-      this.on(input, "input", applyFilter);
-      this.on(input, "keydown", (event) => {
-        if (event.key === "Escape" && input.value !== "") {
-          event.preventDefault();
-          input.value = "";
-          applyFilter();
-        } else if (event.key === "ArrowDown") {
-          const current = controller.shown().find((row) => row.tabIndex === 0) ?? controller.shown()[0];
-          if (!current) return;
-          event.preventDefault();
-          controller.focusRow(current, true);
-        }
-      });
-      const toggleEye = (row) => {
-        const rows = controller.rows();
-        const start = rows.indexOf(row);
-        const hide = !row.querySelector(".so-eye")?.classList.contains("is-off");
-        const level = controller.level(row);
-        for (let i = start; i < rows.length && (i === start || controller.level(rows[i]) > level); i++) {
-          const eye = rows[i].querySelector(".so-eye");
-          if (!eye) continue;
-          eye.classList.toggle("is-off", hide);
-          eye.querySelector("use")?.setAttribute("href", hide ? "#so-eye-off" : "#so-eye");
-        }
-      };
-      this.on(rowsEl, "click", (event) => {
-        const target = event.target;
-        if (!(target instanceof Element)) return;
-        const row = controller.rowOf(target);
-        if (row && target.closest(".so-gutter")) {
-          toggleEye(row);
-          return;
-        }
-        controller.click(event);
-      });
-      this.on(rowsEl, "dblclick", (event) => controller.doubleClick(event));
-      this.on(rowsEl, "keydown", (event) => {
-        controller.keyDown(event);
-      });
-      const sorted = cells().find((cell) => modeOf2(cell) !== "none");
-      for (const cell of cells()) paintHeader(cell, modeOf2(cell));
-      if (sorted) sortRows(sorted.dataset.column ?? "label", modeOf2(sorted));
-      else controller.refresh();
-    }
-  };
-  define("ue-scene-outliner", SceneOutliner);
-
   // design-system/src/Scrollbar/Scrollbar.ts
   var Scrollbar = class extends UeElement {
     #visible = null;
@@ -3201,6 +3024,110 @@
     }
   };
   define("ue-scrollbar", Scrollbar);
+
+  // design-system/src/SceneOutliner/SceneOutliner.ts
+  var ROW3 = ".so-row";
+  var SORTABLE2 = ".hr-cell[aria-sort]";
+  var collator = new Intl.Collator(void 0, { numeric: true, sensitivity: "base" });
+  var SceneOutliner = class extends UeElement {
+    setup() {
+      const tree = this.one("ue-tree-row");
+      const status = this.one(".so-status");
+      const spacer = this.one(".hr-spacer");
+      if (!tree || !status) return;
+      const rows = () => this.all(ROW3);
+      const text = (row, selector) => row.querySelector(selector)?.textContent?.trim() ?? "";
+      const label = (row) => text(row, ".tr-text");
+      const kind = (row) => text(row, ".so-type");
+      const isActor = (row) => kind(row) !== "Folder" && kind(row) !== "World";
+      let needle = "";
+      const updateStatus = () => {
+        const actors = rows().filter(isActor);
+        const total = actors.length;
+        const selected = actors.filter((row) => row.getAttribute("aria-selected") === "true").length;
+        const suffix = selected > 0 ? " (" + selected + " selected)" : "";
+        status.classList.remove("is-match", "is-none");
+        if (needle === "") {
+          status.textContent = total + " actors" + suffix;
+          return;
+        }
+        const shown = actors.filter((row) => label(row).toLowerCase().includes(needle)).length;
+        status.classList.add(shown === 0 ? "is-none" : "is-match");
+        if (shown === 0) status.textContent = "No matching actors (" + total + " total)";
+        else if (shown === total) status.textContent = total + " actors" + suffix;
+        else status.textContent = "Showing " + shown + " of " + total + " actors" + suffix;
+      };
+      this.on(this, "ue-text-input", (event) => {
+        needle = event.detail.value.trim().toLowerCase();
+        tree.setFilter(needle);
+        updateStatus();
+      });
+      this.on(this, "ue-tree-select", updateStatus);
+      this.on(this, "ue-scrollbar-visibility", (event) => {
+        if (spacer) spacer.hidden = !event.detail.visible;
+      });
+      const keys = {};
+      const compareBy = (key, a, b) => {
+        if (key.column === "type") return key.direction * collator.compare(kind(a.element), kind(b.element));
+        const byKind = Number(isActor(a.element)) - Number(isActor(b.element));
+        return key.direction * (byKind || collator.compare(a.label, b.label));
+      };
+      const sortRows = () => {
+        const chain = [keys.primary, keys.secondary].filter((key) => key !== void 0);
+        tree.sortChildren((a, b) => {
+          for (const key of chain) {
+            const order = compareBy(key, a, b);
+            if (order !== 0) return order;
+          }
+          return 0;
+        });
+      };
+      const record = (column, mode, priority) => {
+        const key = { column, direction: mode === "descending" ? -1 : 1 };
+        if (priority === "secondary") keys.secondary = key;
+        else keys.primary = key;
+        if (priority === "primary" && keys.secondary?.column === column) delete keys.secondary;
+      };
+      this.on(this, "ue-sort", (event) => {
+        const detail = event.detail;
+        record(detail.column, detail.mode, detail.priority);
+        sortRows();
+      });
+      for (const cell of this.all(SORTABLE2)) {
+        const mode = cell.getAttribute("aria-sort") ?? "none";
+        if (mode !== "none") record(cell.dataset.column ?? "label", mode, cell.dataset.priority ?? "primary");
+      }
+      if (keys.primary || keys.secondary) sortRows();
+      this.on(this, "keydown", (event) => {
+        const source = event.target;
+        if (event.key !== "ArrowDown" || !(source instanceof HTMLElement) || !source.matches(".textinput__field")) return;
+        const shown = rows().filter((row) => !row.hidden);
+        const current = shown.find((row) => row.tabIndex === 0) ?? shown[0];
+        if (!current) return;
+        event.preventDefault();
+        current.focus({ preventScroll: true });
+        current.scrollIntoView({ block: "nearest" });
+      });
+      this.on(this, "click", (event) => {
+        const source = event.target;
+        if (!(source instanceof Element) || !source.closest(".so-gutter")) return;
+        const row = source.closest(ROW3);
+        if (!row) return;
+        const all = rows();
+        const level = (r) => Number(r.getAttribute("aria-level"));
+        const start = all.indexOf(row);
+        const hide = !row.querySelector(".so-eye")?.classList.contains("is-off");
+        for (let i = start; i < all.length && (i === start || level(all[i]) > level(row)); i++) {
+          const eye = all[i].querySelector(".so-eye");
+          if (!eye) continue;
+          eye.classList.toggle("is-off", hide);
+          eye.querySelector("use")?.setAttribute("href", hide ? "#so-eye-off" : "#so-eye");
+        }
+      });
+      updateStatus();
+    }
+  };
+  define("ue-scene-outliner", SceneOutliner);
 
   // design-system/src/Slider/Slider.ts
   var HANDLE = 8;
@@ -3865,7 +3792,8 @@
       const frame = this.one(".windowChrome-frame");
       if (!frame) throw new Error("ue-window-chrome needs a .windowChrome-frame child");
       const status = this.one(".windowChrome-status");
-      const reopen = this.one(".windowChrome-reopen");
+      const reopenHost = this.one(".windowChrome-reopen");
+      const reopen = reopenHost?.querySelector(".button") ?? null;
       const setActive = (active) => {
         frame.dataset.active = String(active);
         if (status) status.textContent = active ? "Window active" : "Window inactive";
@@ -3875,9 +3803,9 @@
       this.on(this, "focusout", (event) => setActive(event.relatedTarget instanceof Node && frame.contains(event.relatedTarget)));
       const hideWindow = (label) => {
         frame.hidden = true;
-        if (!reopen) return;
+        if (!reopenHost || !reopen) return;
         reopen.textContent = label;
-        reopen.hidden = false;
+        reopenHost.hidden = false;
         reopen.focus();
       };
       const toggleMaximized = (button) => {
@@ -3891,11 +3819,11 @@
         const target = event.target instanceof Element ? event.target : null;
         if (target?.closest(".windowChrome-reopen")) {
           frame.hidden = false;
-          if (reopen) reopen.hidden = true;
+          if (reopenHost) reopenHost.hidden = true;
           frame.focus();
           return;
         }
-        const button = target?.closest(".windowChrome-btn");
+        const button = target?.closest(".button[data-action]");
         if (!button || !frame.contains(button)) return;
         const action = button.dataset.action;
         if (action === "minimize") hideWindow("Window minimized: restore");

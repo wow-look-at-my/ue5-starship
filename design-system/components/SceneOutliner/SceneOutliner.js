@@ -656,7 +656,10 @@ var TreeRow = class extends UeElement {
         excluded: (row) => this.#filter !== null && !this.#kept.has(row),
         forceOpen: (row) => this.#filter !== null && this.#parentsOfKept.has(row),
         lazy: (row) => row.dataset.expandable === "true",
-        toggled: (row, open) => this.emit("ue-tree-toggle", { id: this.#idOf(row), expanded: open }),
+        toggled: (row, open) => {
+          this.emit("ue-tree-toggle", { id: this.#idOf(row), expanded: open });
+          if (!open && this.hasAttribute("collapse-selects") && this.#rows().some((each) => each.hidden && this.#controller?.isSelected(each))) this.select([this.#idOf(row)]);
+        },
         selected: () => this.#announceSelection()
       }
     );
@@ -732,6 +735,13 @@ var TreeRow = class extends UeElement {
     this.#lastIds = this.getSelectedIds().join("\n");
     this.#refilter();
     controller.refresh();
+  }
+  // Adds one row after the last row. It does not touch the selection.
+  appendRow(data) {
+    if (!this.#tree || !this.#controller) return;
+    this.#tree.append(this.#draw(data));
+    this.#refilter();
+    this.#controller.refresh();
   }
   #draw(data) {
     const depth = data.depth ?? 0;
