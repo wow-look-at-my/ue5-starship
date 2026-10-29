@@ -45,6 +45,40 @@ Slate unit = 1px.
 
 The 16px text line box is derived from Roboto metrics, not read from source.
 
+## Markup contract
+
+One `<ue-checkbox>` wraps exactly one control. The CSS lives in `src/Checkbox/Checkbox.css`. Glyphs are inline `svg` elements with a `viewBox`.
+
+```html
+<ue-checkbox>
+	<span class="checkbox" role="checkbox" tabindex="0" aria-checked="false" data-label="Simulate Physics">
+		<span class="checkbox__box">
+			<svg class="checkbox__glyph checkbox__glyph--check" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg>
+			<svg class="checkbox__glyph checkbox__glyph--mixed" viewBox="0 0 16 16"><path d="M4 8h8"/></svg>
+		</span>
+		<span class="checkbox__label">Simulate Physics</span>
+	</span>
+</ue-checkbox>
+```
+
+| Variant | Markup |
+|---|---|
+| Box with label | as above |
+| Box only, no visible label | leave out `.checkbox__label` and set `aria-label` on `.checkbox` |
+| Tri-state | add `checkbox--tristate`. The state cycles `false`, `true`, `mixed` |
+| Toggle button | `<span class="checkbox-toggle" role="button" tabindex="0" aria-pressed="false">Physics</span>`. A checked toggle also has `checkbox-toggle--checked` |
+| Disabled | `aria-disabled="true"` |
+
+The box draws the glyph of its `aria-checked` state: none for `false`, the check for `true`, the dash for `mixed`. The control needs both glyph elements to be live. A static specimen carries one `checkbox__glyph` of its state.
+
+Forced state classes for pinned specimens: `checkbox--hover`, `checkbox--pressed`, `checkbox--disabled`, `checkbox-toggle--hover`, `checkbox-toggle--pressed`, `checkbox-toggle--disabled`.
+
+## Events
+
+| Event | Detail | When |
+|---|---|---|
+| `ue-checkbox-change` | `{ label, state, checked, text }` | The control toggles by click, Enter or Space. `state` is `checked`, `unchecked`, `undetermined`, `on` or `off`. `checked` is `true`, `false`, or `null` for undetermined. `label` is `data-label`, else `aria-label`, else the visible text. `text` is `label is state` |
+
 ## Other styles in the same function (not drawn)
 
 | Style | Difference | Source |

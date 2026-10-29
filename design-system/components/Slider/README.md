@@ -32,6 +32,37 @@ Slate unit = 1px.
 | Bar and thumb vertical position | centred in the widget | `SSlider.cpp:88` |
 | Disabled look | whole slider at 45% alpha | `SlateElementPixelShader.usf:535` |
 
+## Markup contract
+
+One `<ue-slider>` wraps exactly one `.slider`. The CSS lives in `src/Slider/Slider.css`.
+
+```html
+<ue-slider>
+	<div class="slider" role="slider" tabindex="0" aria-label="Opacity" data-min="0" data-max="1" data-step="0.01" data-value="0.5">
+		<span class="slider__bar"></span><span class="slider__thumb"></span>
+	</div>
+</ue-slider>
+```
+
+| Attribute on `.slider` | Meaning |
+|---|---|
+| `data-min`, `data-max` | The range. Defaults 0 and 1 |
+| `data-step` | The snap step. Zero or missing means continuous. The arrow keys use a hundredth of the range then |
+| `data-value` | The current value |
+| `aria-disabled="true"` | Disabled |
+
+The element writes `--slider-value` (the fraction), `aria-valuenow`, `aria-valuemin` and `aria-valuemax`. Pointer: a press jumps the thumb to the pointer and a drag follows it. Keys: arrows step, Page Up and Page Down step by ten, Home and End go to the ends.
+
+A value readout is an optional `<ue-event-status event="ue-slider-change" template="{text}">` inside the `ue-slider`.
+
+Forced state classes for pinned specimens: `slider--hover`, `slider--disabled`.
+
+## Events
+
+| Event | Detail | When |
+|---|---|---|
+| `ue-slider-change` | `{ value, text }` | The value changes by pointer or key. `text` is the value with two decimals when the step is below one, else the plain number |
+
 ## Do
 
 - Place the slider on `--panel` or `--background`. The bar is `--input`. It reads as a dark slot.

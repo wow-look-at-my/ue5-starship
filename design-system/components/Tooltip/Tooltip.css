@@ -2,3 +2,42 @@
 [data-pinned] {
   pointer-events: none;
 }
+
+/* design-system/src/Tooltip/Tooltip.css */
+.tooltip {
+  display: block;
+  box-sizing: border-box;
+  max-width: 360px;
+  font: 400 12px/14px var(--font-sans);
+}
+.tooltip--dark {
+  padding: 8px;
+  background: var(--dropdown);
+  box-shadow: inset 0 0 0 1px var(--dropdown-outline);
+  color: var(--foreground-hover);
+}
+.tooltip-popup {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 50;
+  width: max-content;
+  pointer-events: none;
+  white-space: normal;
+  opacity: 0;
+}
+.tooltip[hidden] {
+  display: none;
+}
+.tooltip__line + .tooltip__line {
+  margin-top: 4px;
+}
+.tooltip__keys {
+  color: var(--foreground-hover);
+  opacity: .6;
+}
+.tooltip--bright {
+  padding: 11px;
+  background: var(--foreground);
+  color: var(--black);
+}

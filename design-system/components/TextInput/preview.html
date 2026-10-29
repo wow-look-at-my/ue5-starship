@@ -1,4 +1,4 @@
-<!-- @dsCard group="Controls" height=300 subtitle="EditableTextBox and SearchBox: normal, hovered, focused, read-only, with the search glyph and clear button" -->
+<!-- @dsCard group="Controls" height=360 subtitle="EditableTextBox and SearchBox: normal, hovered, focused, read-only, with the search glyph and clear button" -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -15,62 +15,24 @@
 	.textinput-row { display: flex; flex-wrap: wrap; gap: 8px 16px; }
 	.textinput-item { display: flex; flex-direction: column; gap: 4px; width: 220px; }
 
-	.textinput {
-		display: flex; align-items: center; box-sizing: border-box; width: 100%;
-		border-radius: 4px; /* InputFocusRadius CoreStyle.h:117 */
-		background: var(--input); /* StarshipCoreStyle.cpp:1284 */
-		box-shadow: inset 0 0 0 1px var(--input-outline); /* outline thickness CoreStyle.h:118; :1284 */
-		color: var(--foreground); /* ForegroundColor :1290 */
-		font: 400 13.333px/16px var(--font-sans); /* Normal 10pt :1288 */
-		cursor: text;
-	}
-	.textinput:hover, .textinput--hover { box-shadow: inset 0 0 0 1px var(--hover); } /* :1285 */
-	.textinput--focus, .textinput--focus:hover { box-shadow: inset 0 0 0 1px var(--primary); color: var(--foreground-hover); } /* :1286, FocusedForegroundColor White :1293 */
-	.textinput:focus-within { box-shadow: inset 0 0 0 1px var(--primary); color: var(--foreground-hover); } /* a live field with the keyboard focus: :1286, :1293 */
-	.textinput--readonly, .textinput--readonly:hover, .textinput--readonly:focus-within { background: var(--header); box-shadow: inset 0 0 0 1px var(--input-outline); cursor: default; } /* :1287 */
-	.textinput--readonly:focus-within { color: var(--foreground); } /* ReadOnlyForegroundColor UseForeground :1292 */
-	.textinput__text { flex: 1 1 auto; min-width: 0; padding: 3px 8px 4px; white-space: nowrap; } /* Padding (8,3,8,4) :1289 */
-	.textinput__hint { opacity: .35; } /* hint = foreground at alpha .35 SlateEditableTextLayout.cpp:3563 */
-	.textinput__caret { display: inline-block; width: 1.28px; height: 16px; vertical-align: top; background: var(--white); } /* width clamp(.08 x 16, 1, 2) TextEditHelper.h:18, .cpp:17; brush White :1272 */
-	.textinput__sel { background: var(--highlight); } /* SelectedBackgroundColor Highlight :1174, brush :1264 */
-
-	.textinput--search { border-radius: 999px; box-shadow: inset 0 0 0 1px var(--secondary); } /* no radius given = half height :1303 */
-	.textinput--search:hover, .textinput--search.textinput--hover { box-shadow: inset 0 0 0 1px var(--hover); } /* :1304 */
-	.textinput--search.textinput--focus, .textinput--search.textinput--focus:hover { box-shadow: inset 0 0 0 1px var(--primary); } /* :1305 */
-	.textinput--search:focus-within { box-shadow: inset 0 0 0 1px var(--primary); } /* :1305 */
-	.textinput--search.textinput--readonly, .textinput--search.textinput--readonly:hover, .textinput--search.textinput--readonly:focus-within { box-shadow: inset 0 0 0 1px var(--input-outline); } /* :1306 */
-	.textinput__glyph {
-		flex: none; width: 14px; height: 14px; margin-left: 4px; /* ImageSizeOverride 14 :1316, ImagePadding (4,0,0,0) :1315 */
-		fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; /* approximation of the SVG */
-	}
-	.textinput__tail { flex: none; width: 7px; } /* end spacer SSearchBox.cpp:172-177 */
-
-	.textinput__field { width: 0; margin: 0; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; line-height: 16px; caret-color: var(--white); cursor: inherit; } /* a real <input> inside .textinput__text; caret White :1272 */
-	.textinput__field::placeholder { color: inherit; opacity: .35; } /* hint = foreground at alpha .35 SlateEditableTextLayout.cpp:3563 */
-	.textinput__field::selection { background: var(--highlight); color: inherit; } /* SelectedBackgroundColor Highlight :1174 */
-	.textinput__clear { display: none; cursor: default; }
-	.textinput--filled .textinput__glass { display: none; } /* the clear button replaces the glass while the text is non-empty, SSearchBox.cpp:148-170 */
-	.textinput--filled .textinput__clear { display: block; }
-	[data-pinned] { pointer-events: none; } /* a pinned specimen shows one forced state and ignores the pointer */
+	.textinput-trail-btn { display: inline-flex; width: 18px; height: 18px; align-items: center; justify-content: center; border-radius: 50%; color: var(--foreground); }
+	.textinput-trail-btn:hover { background: var(--dropdown); color: var(--foreground-hover); }
+	.textinput-trail-btn svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-	<symbol id="textinput-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></symbol>
-	<symbol id="textinput-clear" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></symbol>
-</svg>
 <div class="textinput-page">
-	<ue-text-input>
-		<div class="textinput-section">
-			<span class="textinput-title">Live: click and type, hover, Tab for the focus ring. In the search box the clear button appears with text, and Escape clears.</span>
-			<div class="textinput-row">
-				<div class="textinput-item"><div class="textinput"><input class="textinput__text textinput__field" type="text" placeholder="Enter a name" aria-label="Name"></div><span class="textinput-cap">EditableTextBox</span></div>
-				<div class="textinput-item"><div class="textinput"><input class="textinput__text textinput__field" type="text" value="StaticMeshActor" aria-label="Class"></div><span class="textinput-cap">EditableTextBox with text</span></div>
-				<div class="textinput-item"><div class="textinput textinput--readonly"><input class="textinput__text textinput__field" type="text" value="StaticMeshActor" readonly aria-label="Class (read-only)"></div><span class="textinput-cap">Read-only: focusable, not editable</span></div>
-				<div class="textinput-item"><div class="textinput textinput--search"><svg class="textinput__glyph textinput__glass"><use href="#textinput-search"/></svg><svg class="textinput__glyph textinput__clear" role="button" aria-label="Clear search"><use href="#textinput-clear"/></svg><input class="textinput__text textinput__field" type="text" placeholder="Search..." aria-label="Search"><span class="textinput__tail"></span></div><span class="textinput-cap">SearchBox</span></div>
-			</div>
+	<div class="textinput-section">
+		<span class="textinput-title">Live: click and type, hover, Tab for the focus ring. In the search box the clear button appears with text, and Escape clears.</span>
+		<div class="textinput-row">
+			<div class="textinput-item"><ue-text-input><div class="textinput"><input class="textinput__text textinput__field" type="text" placeholder="Enter a name" aria-label="Name"></div></ue-text-input><span class="textinput-cap">EditableTextBox</span></div>
+			<div class="textinput-item"><ue-text-input><div class="textinput"><input class="textinput__text textinput__field" type="text" value="StaticMeshActor" aria-label="Class"></div></ue-text-input><span class="textinput-cap">EditableTextBox with text</span></div>
+			<div class="textinput-item"><ue-text-input><div class="textinput textinput--readonly"><input class="textinput__text textinput__field" type="text" value="StaticMeshActor" readonly aria-label="Class (read-only)"></div></ue-text-input><span class="textinput-cap">Read-only: focusable, not editable</span></div>
+			<div class="textinput-item"><ue-text-input><div class="textinput textinput--search"><svg class="textinput__glyph textinput__glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><svg class="textinput__glyph textinput__clear" role="button" aria-label="Clear search" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg><input class="textinput__text textinput__field" type="text" placeholder="Search..." aria-label="Search"><span class="textinput__tail"></span></div><ue-event-status class="textinput-cap" event="ue-text-input" template="Value: {value}">Value: (empty)</ue-event-status></ue-text-input><span class="textinput-cap">SearchBox</span></div>
+			<div class="textinput-item"><ue-text-input><div class="textinput textinput--search"><svg class="textinput__glyph textinput__glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><svg class="textinput__glyph textinput__clear" role="button" aria-label="Clear search" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg><input class="textinput__text textinput__field" type="text" placeholder="Filter..." aria-label="Filter"><span class="textinput__trail"><span class="textinput-trail-btn" role="button" tabindex="0" aria-label="Filter options"><svg viewBox="0 0 16 16"><path d="M2.5 4h11M5 8h6M7 12h2"/></svg></span></span><span class="textinput__tail"></span></div></ue-text-input><span class="textinput-cap">SearchBox with a trailing button slot</span></div>
+			<div class="textinput-item"><ue-text-input><div class="textinput textinput--console"><input class="textinput__text textinput__field" type="text" placeholder="Enter Console Command" aria-label="Console command" autocomplete="off" spellcheck="false"></div></ue-text-input><span class="textinput-cap">Console variant: 12px mono. Escape does not clear</span></div>
 		</div>
-	</ue-text-input>
+	</div>
 	<span class="textinput-title">Pinned: forced states for reference, not interactive</span>
 	<div class="textinput-section">
 		<span class="textinput-title">EditableTextBox</span>
@@ -85,10 +47,10 @@
 	<div class="textinput-section">
 		<span class="textinput-title">SearchBox</span>
 		<div class="textinput-row">
-			<div class="textinput-item"><div class="textinput textinput--search" data-pinned><svg class="textinput__glyph"><use href="#textinput-search"/></svg><span class="textinput__text"><span class="textinput__hint">Search...</span></span><span class="textinput__tail"></span></div><span class="textinput-cap">Normal, glass shown</span></div>
-			<div class="textinput-item"><div class="textinput textinput--search textinput--hover" data-pinned><svg class="textinput__glyph"><use href="#textinput-search"/></svg><span class="textinput__text"><span class="textinput__hint">Search...</span></span><span class="textinput__tail"></span></div><span class="textinput-cap">Hovered</span></div>
-			<div class="textinput-item"><div class="textinput textinput--search textinput--focus" data-pinned><svg class="textinput__glyph"><use href="#textinput-clear"/></svg><span class="textinput__text">chair<span class="textinput__caret"></span></span><span class="textinput__tail"></span></div><span class="textinput-cap">Focused with text, clear button replaces the glass</span></div>
-			<div class="textinput-item"><div class="textinput textinput--search textinput--readonly" data-pinned><svg class="textinput__glyph"><use href="#textinput-search"/></svg><span class="textinput__text">chair</span><span class="textinput__tail"></span></div><span class="textinput-cap">Read-only</span></div>
+			<div class="textinput-item"><div class="textinput textinput--search" data-pinned><svg class="textinput__glyph" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><span class="textinput__text"><span class="textinput__hint">Search...</span></span><span class="textinput__tail"></span></div><span class="textinput-cap">Normal, glass shown</span></div>
+			<div class="textinput-item"><div class="textinput textinput--search textinput--hover" data-pinned><svg class="textinput__glyph" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><span class="textinput__text"><span class="textinput__hint">Search...</span></span><span class="textinput__tail"></span></div><span class="textinput-cap">Hovered</span></div>
+			<div class="textinput-item"><div class="textinput textinput--search textinput--focus" data-pinned><svg class="textinput__glyph" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg><span class="textinput__text">chair<span class="textinput__caret"></span></span><span class="textinput__tail"></span></div><span class="textinput-cap">Focused with text, clear button replaces the glass</span></div>
+			<div class="textinput-item"><div class="textinput textinput--search textinput--readonly" data-pinned><svg class="textinput__glyph" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><span class="textinput__text">chair</span><span class="textinput__tail"></span></div><span class="textinput-cap">Read-only</span></div>
 		</div>
 	</div>
 </div>

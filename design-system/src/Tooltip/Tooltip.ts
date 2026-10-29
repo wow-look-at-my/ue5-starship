@@ -1,5 +1,7 @@
-// <ue-tooltip> shows the .tooltip-popup inside a .tooltip-target after the Slate summon delay and hides it again.
+// <ue-tooltip> shows its .tooltip-popup after the Slate summon delay when the pointer or the keyboard focus enters it.
 import { UeElement, define } from '../_shared/element.ts';
+import { ownedBy } from '../_shared/own.ts';
+import './Tooltip.css';
 
 const SUMMON_DELAY = 150;
 const INTRO = 100;
@@ -8,56 +10,53 @@ const OFFSET_Y = 8;
 const EDGE = 4;
 
 interface Active {
-	target: HTMLElement;
 	popup: HTMLElement;
 	start: number;
 	x: number;
 	y: number;
 }
 
-function targetOf(node: EventTarget | null): HTMLElement | null {
-	return node instanceof Element ? node.closest<HTMLElement>('.tooltip-target') : null;
-}
-
 export class UeTooltipElement extends UeElement {
 	#active: Active | null = null;
-	#suppressed: HTMLElement | null = null;
+	#suppressed = false;
 	#frame = 0;
+	#popup: HTMLElement | null = null;
 
 	protected setup(): void {
+		const popup = this.all('.tooltip-popup').find((candidate) => ownedBy(this, candidate));
+		if (!popup) throw new Error('ue-tooltip needs a .tooltip-popup element');
+		this.#popup = popup;
+		const inTarget = (node: EventTarget | null): node is Element => ownedBy(this, node) && !popup.contains(node);
+
 		this.on(this, 'pointerover', (event) => {
-			const target = targetOf(event.target);
-			if (!target || target === this.#suppressed || this.#active?.target === target) return;
-			this.#summon(target, event.clientX, event.clientY);
+			if (!inTarget(event.target) || this.#suppressed || this.#active) return;
+			this.#summon(event.clientX, event.clientY);
 		});
 		this.on(this, 'pointermove', (event) => {
-			const target = targetOf(event.target);
-			if (target && this.#active?.target === target && this.#active.start >= 0) {
+			if (inTarget(event.target) && this.#active && this.#active.start >= 0) {
 				this.#active.x = event.clientX;
 				this.#active.y = event.clientY;
 			}
 		});
 		this.on(this, 'pointerout', (event) => {
-			const target = targetOf(event.target);
-			if (!target) return;
-			if (event.relatedTarget instanceof Node && target.contains(event.relatedTarget)) return;
-			if (this.#suppressed === target) this.#suppressed = null;
-			if (this.#active?.target === target) this.#dismiss();
+			if (!inTarget(event.target)) return;
+			if (event.relatedTarget instanceof Node && this.contains(event.relatedTarget)) return;
+			this.#suppressed = false;
+			this.#dismiss();
 		});
 		this.on(this, 'pointerdown', (event) => {
-			const target = targetOf(event.target);
-			if (!target) return;
-			this.#suppressed = target;
+			if (!inTarget(event.target)) return;
+			this.#suppressed = true;
 			this.#dismiss();
 		});
 		this.on(this, 'focusin', (event) => {
-			const target = targetOf(event.target);
-			if (!target || target !== event.target || !target.matches(':focus-visible') || this.#active?.target === target) return;
+			const target = event.target;
+			if (!inTarget(target) || !target.matches(':focus-visible') || this.#active) return;
 			const rect = target.getBoundingClientRect();
-			this.#summon(target, rect.left, rect.bottom - OFFSET_Y);
+			this.#summon(rect.left, rect.bottom - OFFSET_Y);
 		});
 		this.on(this, 'focusout', (event) => {
-			if (this.#active && targetOf(event.target) === this.#active.target) this.#dismiss();
+			if (inTarget(event.target)) this.#dismiss();
 		});
 		this.on(document, 'keydown', (event) => {
 			if (event.key === 'Escape') this.#dismiss();
@@ -65,11 +64,11 @@ export class UeTooltipElement extends UeElement {
 		this.onDispose(() => this.#dismiss());
 	}
 
-	#summon(target: HTMLElement, x: number, y: number): void {
+	#summon(x: number, y: number): void {
 		this.#dismiss();
-		const popup = target.querySelector<HTMLElement>('.tooltip-popup');
+		const popup = this.#popup;
 		if (!popup) return;
-		this.#active = { target, popup, start: performance.now(), x, y };
+		this.#active = { popup, start: performance.now(), x, y };
 		this.#frame = requestAnimationFrame(this.#tick);
 	}
 

@@ -31,6 +31,34 @@ Slate unit = 1px. The 14px text line box is derived from Roboto metrics, not rea
 | Wrap width | 1000 units (console variable `Slate.ToolTipWrapWidth`) | `SToolTip.cpp:9-12` |
 | Documentation tooltip | outer `ToolTip.BrightBackground`, inner padding 9, key binding chip `--hover-2` r4, chip padding 4 x 2 | `Documentation.cpp:228`; `SDocumentationToolTip.cpp:157`, `189`; `DocumentationStyleSet.cpp:47` (not drawn) |
 
+## Markup contract
+
+One `<ue-tooltip>` wraps one target and its popup. The target is anything inside the element except the popup: a button, an icon, a whole row. The CSS lives in `src/Tooltip/Tooltip.css`.
+
+```html
+<ue-tooltip>
+	<button class="button">Save All</button>
+	<span class="tooltip tooltip--dark tooltip-popup" role="tooltip" hidden>
+		<div class="tooltip__line">Saves every modified asset and level.</div>
+		<div class="tooltip__line tooltip__keys">Ctrl+Shift+S</div>
+	</span>
+</ue-tooltip>
+```
+
+| Part | Rule |
+|---|---|
+| `.tooltip-popup` | Required, with `role="tooltip"` and `hidden`. The element positions it with `position: fixed` and fades it in |
+| `tooltip--dark` | Custom content form: `--dropdown` fill, 1px outline, 8px padding. Use `.tooltip__line` for each line and add `tooltip__keys` for the key binding line |
+| `tooltip--bright` | Text-only form: `--foreground` fill, black text, 11px padding. The fill is an approximation of a texture |
+
+The popup shows 150ms after the pointer enters the target, 12px right and 8px below the pointer, and follows the pointer. It hides when the pointer leaves, on a press (it stays hidden until the pointer leaves and returns), on Escape and on blur. Keyboard focus that shows a focus ring also shows it. The outer one ignores a nested `ue-tooltip` inside the target.
+
+A pinned specimen is a `.tooltip` with `tooltip--dark` or `tooltip--bright` and no `tooltip-popup` class.
+
+## Events
+
+None. The tooltip only shows and hides its popup.
+
 ## Do
 
 - Use the dark form when the tooltip carries a content widget, such as a description and a key binding.

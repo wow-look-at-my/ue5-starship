@@ -21,6 +21,7 @@ import '../src/MenuBar/MenuBar.ts';
 import '../src/Notification/Notification.ts';
 import '../src/PlaceActorsPanel/PlaceActorsPanel.ts';
 import '../src/PopupMenu/PopupMenu.ts';
+import '../src/ResetToDefault/ResetToDefault.ts';
 import '../src/SceneOutliner/SceneOutliner.ts';
 import '../src/Scrollbar/Scrollbar.ts';
 import '../src/SegmentedControl/SegmentedControl.ts';

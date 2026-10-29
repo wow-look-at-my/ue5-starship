@@ -15,50 +15,31 @@
 	.slider-panel--live { grid-template-columns: 110px 230px 90px; margin-bottom: 12px; }
 	.slider-panel--live > .slider-head { grid-column: 1 / -1; }
 	.slider-value { font: 400 10.667px/1.2 var(--font-sans); color: var(--foreground-hover); }
-	[data-pinned] { pointer-events: none; } /* a pinned specimen shows one forced state and ignores the pointer */
-
-	.slider { --slider-value: .5; position: relative; width: 200px; height: 8px; } /* desired height = max(BarThickness 4, thumb 8) SSlider.cpp:151-159 */
-	.slider__bar {
-		position: absolute; left: 4px; right: 4px; top: 2px; height: 4px; /* BarThickness 4 StarshipCoreStyle.cpp:580; bar spans handle-half to width minus handle-half SSlider.cpp:93-94, 114-115 */
-		border-radius: 2px; /* :574 */
-		background: var(--input); /* fill Input :574 */
-		box-shadow: inset 0 0 0 1px var(--input); /* outline Input 1px :574 */
-	}
-	.slider__thumb {
-		position: absolute; top: 0; width: 8px; height: 8px; /* Icon8x8 :577 */
-		left: calc(4px + var(--slider-value) * (100% - 16px)); /* IndentHandle on: track = width - 2 x handle, offset + handle/2 SSlider.cpp:84-91, SSlider.h:29 */
-		border-radius: 50%; /* no radius given = half height :577 */
-		background: var(--foreground); /* Foreground :577 */
-	}
-	.slider:hover .slider__thumb, .slider--hover .slider__thumb { background: var(--foreground-hover); } /* :578 */
-	.slider:active .slider__thumb { background: var(--foreground-hover); } /* the pointer stays over the captured slider, so the hovered brush shows while dragging; the style has no pressed brush :571-580 */
-	.slider--disabled, .slider[aria-disabled="true"] { opacity: .45; } /* alpha x .45 SlateElementPixelShader.usf:535 */
-	.slider--disabled .slider__bar, .slider[aria-disabled="true"] .slider__bar { box-shadow: inset 0 0 0 1px var(--recessed); } /* DisabledBarImage outline Recessed :576 */
-	.slider--disabled:hover .slider__thumb, .slider[aria-disabled="true"]:hover .slider__thumb, .slider[aria-disabled="true"]:active .slider__thumb { background: var(--foreground); } /* :579 */
-	.slider[role="slider"] { cursor: default; outline: 0; touch-action: none; }
-	.slider[role="slider"]::before { content: ""; position: absolute; inset: -6px 0; } /* taller hit area for the pointer; not part of the style */
-	.slider[role="slider"]:focus-visible { outline: 1px solid var(--primary); outline-offset: 3px; border-radius: 4px; } /* FocusRectangle 1px Primary r4 StarshipCoreStyle.cpp:218 */
 </style>
 </head>
 <body>
 <div class="slider-page">
-	<ue-slider>
-		<div class="slider-panel slider-panel--live">
-			<span class="slider-head">Live: drag the thumb or click the bar. Arrow keys step, Page Up and Page Down jump, Home and End go to the ends.</span>
+	<div class="slider-panel slider-panel--live">
+		<span class="slider-head">Live: drag the thumb or click the bar. Arrow keys step, Page Up and Page Down jump, Home and End go to the ends.</span>
 
-			<span class="slider-name">0 to 1, step 0.01</span>
+		<span class="slider-name">0 to 1, step 0.01</span>
+		<ue-slider>
 			<div class="slider" role="slider" tabindex="0" aria-label="Opacity" data-min="0" data-max="1" data-step="0.01" data-value="0.5" style="--slider-value:.5"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
-			<span class="slider-value">0.50</span>
+			<ue-event-status class="slider-value" event="ue-slider-change" template="{text}">0.50</ue-event-status>
+		</ue-slider>
 
-			<span class="slider-name">0 to 100, step 5</span>
+		<span class="slider-name">0 to 100, step 5</span>
+		<ue-slider>
 			<div class="slider" role="slider" tabindex="0" aria-label="Volume" data-min="0" data-max="100" data-step="5" data-value="25" style="--slider-value:.25"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
-			<span class="slider-value">25</span>
+			<ue-event-status class="slider-value" event="ue-slider-change" template="{text}">25</ue-event-status>
+		</ue-slider>
 
-			<span class="slider-name">Disabled</span>
+		<span class="slider-name">Disabled</span>
+		<ue-slider>
 			<div class="slider" role="slider" aria-disabled="true" aria-label="Locked" data-min="0" data-max="1" data-step="0.01" data-value="0.5" style="--slider-value:.5"><span class="slider__bar"></span><span class="slider__thumb"></span></div>
-			<span class="slider-value">0.50</span>
-		</div>
-	</ue-slider>
+			<ue-event-status class="slider-value" event="ue-slider-change" template="{text}">0.50</ue-event-status>
+		</ue-slider>
+	</div>
 	<div class="slider-panel">
 		<span></span><span class="slider-head">Normal</span><span class="slider-head">Hovered</span>
 

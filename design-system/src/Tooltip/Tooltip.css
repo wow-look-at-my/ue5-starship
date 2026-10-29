@@ -1,0 +1,19 @@
+.tooltip {
+	display: block; box-sizing: border-box; max-width: 360px;
+	font: 400 12px/14px var(--font-sans); /* ToolTip.Font Regular 9pt StarshipCoreStyle.cpp:493; line box derived */
+}
+.tooltip--dark {
+	padding: 8px; /* TextMargin 8 SToolTip.h:30 */
+	background: var(--dropdown); /* ToolTip.Background fill :494 */
+	box-shadow: inset 0 0 0 1px var(--dropdown-outline); /* outline 1px, radius 0 :494 */
+	color: var(--foreground-hover); /* default foreground is white, WidgetStyle.h:21 */
+}
+.tooltip-popup { position: fixed; left: 0; top: 0; z-index: 50; width: max-content; pointer-events: none; white-space: normal; opacity: 0; }
+.tooltip[hidden] { display: none; }
+.tooltip__line + .tooltip__line { margin-top: 4px; } /* first line padding-bottom 4 UICommandInfo.cpp:177 */
+.tooltip__keys { color: var(--foreground-hover); opacity: .6; } /* UseSubduedForeground = foreground x .6 alpha, WidgetStyle.cpp:11 */
+.tooltip--bright {
+	padding: 11px; /* SToolTip.cpp:76 */
+	background: var(--foreground); /* APPROXIMATION: ToolTip.BrightBackground is a texture, not available. Surface colour not known. */
+	color: var(--black); /* text colour Black SToolTip.cpp:67 */
+}

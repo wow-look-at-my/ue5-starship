@@ -1,0 +1,10 @@
+.resettodefault {
+	box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; flex: none;
+	width: 20px; height: 20px; margin: 0; border: 0; outline: 0; background: transparent; /* 16px glyph + NormalPadding (2,2,2,2) StarshipStyle.cpp:3277-3283 */
+	padding: 2px; color: var(--foreground); cursor: default; /* NormalForeground Foreground :3278 */
+}
+.resettodefault:hover, .resettodefault--hover { color: var(--foreground-hover); } /* HoveredForeground ForegroundHover :3279 */
+.resettodefault:active, .resettodefault--pressed { color: var(--foreground-hover); padding: 3px 2px 1px; } /* PressedForeground :3280, PressedPadding (2,3,2,1) :3283 */
+.resettodefault:focus-visible { outline: 1px solid var(--primary); outline-offset: -1px; border-radius: 4px; } /* FocusRectangle 1px Primary r4 StarshipCoreStyle.cpp:218 */
+.resettodefault--idle { visibility: hidden; } /* the slot keeps its width when the value equals the default, so the rows align: SDetailSingleItemRow.cpp:636-650 */
+.resettodefault__glyph { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; } /* PropertyWindow.DiffersFromDefault ResetToDefault.svg 16x16 StarshipStyle.cpp:3120; approximation of the SVG */

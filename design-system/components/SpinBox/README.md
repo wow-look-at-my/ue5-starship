@@ -57,6 +57,39 @@ Slate unit = 1px. The 16px text line box is derived from Roboto metrics, not rea
 
 The strip height is the box height minus 6 (3px padding top and bottom). This follows from the overlay slot with fill alignment. It is derived, not measured.
 
+## Markup contract
+
+One `<ue-spin-box>` wraps exactly one `.spinbox`. The CSS lives in `src/SpinBox/SpinBox.css`. The element renders the value, so the text in the markup is only the first paint.
+
+```html
+<ue-spin-box>
+	<div class="spinbox" tabindex="0" role="spinbutton" data-value="40" data-min="0" data-max="100" data-delta="1">
+		<span class="spinbox__fill"></span>
+		<span class="spinbox__text">40.0</span>
+	</div>
+</ue-spin-box>
+```
+
+| Attribute on `.spinbox` | Meaning |
+|---|---|
+| `data-value` | The current value |
+| `data-min`, `data-max` | The range. With both set the box is bounded: it shows the fill bar, clamps and drags by a share of the range. With either missing it is unbounded: no fill bar, no clamp, and a drag changes the value by a share of its size |
+| `data-delta` or `data-step` | The step of the arrow keys and the snap after a drag. Zero means no stepping |
+| `data-unit` | A unit suffix such as `cm`. The element adds `<span class="spinbox__unit">` after the text |
+| `aria-disabled="true"` | Disabled |
+
+An axis colour strip goes first inside `.spinbox`: `<span class="spinbox__axis spinbox__axis--x"></span>`, with `--y` or `--z`. The strips use the `--axis-x`, `--axis-y` and `--axis-z` tokens. A vector input is three of these boxes.
+
+Input: a drag past 5px changes the value. Escape during a drag restores the start value. A click without a drag opens text entry, where Enter commits (clamped), Escape cancels and a blur commits. Up and Right add the step, Down and Left subtract it, and Enter opens text entry.
+
+Forced state classes for pinned specimens: `spinbox--hover`, `spinbox--active`, `spinbox--text`, `spinbox--disabled`.
+
+## Events
+
+| Event | Detail | When |
+|---|---|---|
+| `ue-spin-change` | `{ value, text }` | The value changes by a drag, a key, typed entry or the Escape restore. `text` is the formatted value with the unit |
+
 ## Do
 
 - Show the fill only for a bounded range. An unbounded box has no bar.
