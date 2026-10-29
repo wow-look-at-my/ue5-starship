@@ -1,0 +1,58 @@
+/* Metrics: StarshipCoreStyle.cpp (SetupTableViewStyles), STableRow.h, SExpanderArrow.cpp, SOutlinerTreeView.cpp, SceneOutlinerPublicTypes.h. See README. */
+
+/* Row: min height 20 -- SceneOutlinerPublicTypes.h:222 RowHeight() */
+.tr-row { display: flex; align-items: center; min-height: 20px; color: var(--foreground); background: var(--recessed); font-family: var(--font-sans); font-size: 13.333px; line-height: 16px; white-space: nowrap; overflow: hidden; }
+.tr-row[hidden] { display: none; }
+/* AlternatingRow odd = Background -- StarshipCoreStyle.cpp:2069 */
+.tr-row.is-odd { background: var(--background); }
+/* ActiveHighlightedBrush / InactiveHighlightedBrush = SelectParent -- StarshipCoreStyle.cpp:2015-2016 */
+.tr-row.is-parent { background: var(--select-parent); }
+/* EvenRowBackgroundHovered / OddRowBackgroundHovered = SelectHover -- StarshipCoreStyle.cpp:2002,2005. A hovered parent row uses this fill -- STableRow.h:1003-1017 */
+.tr-row.is-hover, :where(.tr-tree) .tr-row:hover { background: var(--select-hover); }
+/* ActiveBrush = Select; SelectedTextColor = ForegroundHover -- StarshipCoreStyle.cpp:2009,2019. Stays on hover -- STableRow.h:988-995 */
+.tr-row.is-selected { background: var(--select); color: var(--foreground-hover); }
+/* InactiveBrush = SelectInactive -- StarshipCoreStyle.cpp:2012. A tree without keyboard focus draws it -- STableRow.h:996-1001 */
+.tr-row.is-selected.is-inactive, :where(.tr-tree):not(:focus-within) .tr-row.is-selected { background: var(--select-inactive); }
+/* FSceneOutlinerCommonLabelData::DarkColor (0.15,0.15,0.15 linear) -- SceneOutlinerStandaloneTypes.cpp:18 */
+.tr-row.is-dim .tr-text { color: #6c6c6c; }
+
+/* Live tree: selection follows focus. The engine selector border is not drawn (README, Not drawn), so an unselected focused row gets a plain inset ring. */
+.tr-tree { cursor: default; user-select: none; -webkit-user-select: none; }
+.tr-tree .tr-row:focus { outline: none; }
+.tr-tree .tr-row:focus-visible:not(.is-selected) { outline: 1px solid var(--primary); outline-offset: -1px; }
+
+/* Indent: SExpanderArrow IndentAmount(12) -- SOutlinerTreeView.cpp:306; label slot padding-left 6 -- SOutlinerTreeView.cpp:304 */
+.tr-indent { flex: none; width: calc(var(--tree-indent-base, 6px) + var(--depth, 0) * var(--tree-indent-step, 12px)); }
+/* Arrow button: 16x16 image, ContentPadding 0 -- SExpanderArrow.cpp:41; Icon16x16 -- StarshipCoreStyle.cpp:2072 */
+.tr-arrow { flex: none; width: 16px; height: 16px; display: block; color: color-mix(in srgb, var(--foreground) 75%, #000); opacity: .6; }
+.tr-arrow path, .tr-icon path { fill: currentColor; }
+/* One right-pointing caret. A row that shows its children turns it a quarter turn, which draws TreeArrow_Expanded. */
+.tr-row.is-open > .tr-arrow { transform: rotate(90deg); }
+.tr-row.is-selected .tr-arrow { color: var(--foreground); }
+/* Hovered arrow uses ForegroundHover tint -- StarshipCoreStyle.cpp:2073,2075; subdued alpha 0.6 -- WidgetStyle.cpp:11 */
+.tr-arrow.is-hover, :where(.tr-tree) .tr-arrow:hover { color: var(--foreground); }
+.tr-row.is-selected .tr-arrow.is-hover, :where(.tr-tree) .tr-row.is-selected .tr-arrow:hover { color: var(--foreground-hover); }
+.tr-arrow.is-leaf { visibility: hidden; }
+/* Icon slot: 16x16, padding (0,1,6,1) -- SceneOutlinerPublicTypes.h:223-224 */
+.tr-icon { flex: none; width: 16px; height: 16px; margin: 1px 6px 1px 0; display: block; }
+.tr-icon.is-object path { fill: none; stroke: currentColor; stroke-width: 1.2; stroke-linejoin: round; }
+/* Folder: AccentFolder tint x row foreground -- StarshipStyle.cpp:1140, ActorFolderTreeItem.cpp:70 */
+.tr-icon.is-folder { color: color-mix(in srgb, var(--accent-folder) 75%, #000); }
+.tr-row.is-selected .tr-icon.is-folder { color: var(--accent-folder); }
+/* The folder icon holds a closed and an open drawing. The row picks one. */
+.tr-row.is-open .tr-folder-closed, .tr-row:not(.is-open) .tr-folder-open { display: none; }
+.tr-text { flex: 1 1 auto; min-width: 0; overflow: hidden; }
+/* Extra column: a label-side cell before the indent or after the text. Set its width inline or with --tr-cell-width. */
+.tr-cell { flex: none; box-sizing: border-box; width: var(--tr-cell-width, 80px); overflow: hidden; }
+
+/* Source-tree look: 16px rows, 19px roots, full-strength arrow and folder tint, indent 0 + 10 per level.
+   Rows: components/SourcePanel/preview.html:31-32 (height 16, root 19 with 3 top padding, SourcesViewWidgets.cpp:138).
+   Arrow and folder: components/SourcePanel/preview.html:44-45, SourcesViewWidgets.cpp:144, StarshipStyle.cpp:6348.
+   Indent: components/SourcePanel/preview.html:43 (IndentAmount 10, SExpanderArrow.cpp:73,182). */
+.tr-tree.is-compact { --tree-indent-base: 0px; --tree-indent-step: 10px; }
+.tr-tree.is-compact .tr-row { min-height: 16px; height: 16px; }
+.tr-tree.is-compact .tr-row[aria-level="1"] { height: 19px; padding-top: 3px; box-sizing: border-box; }
+.tr-tree.is-compact .tr-arrow { color: var(--foreground); opacity: 1; }
+.tr-tree.is-compact .tr-row.is-selected .tr-arrow { color: var(--foreground-hover); }
+.tr-tree.is-compact .tr-icon { margin: 0 2px 0 0; }
+.tr-tree.is-compact .tr-icon.is-folder { color: var(--accent-folder); }

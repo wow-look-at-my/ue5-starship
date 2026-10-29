@@ -1,6 +1,81 @@
 # TreeRow
 
-This is a 20px-tall table or tree row with a caret expander, a 16px icon and a label. By hover, the 20px-tall table is tinted, selection and parent-of-selection state (UE 5.5.3 Starship, `TableView.AlternatingRow` as the Scene Outliner uses it).
+A 20px tree row with a caret expander, a 16px icon and a label, plus the whole tree behaviour. Selection, expansion, keyboard and the parent tint (UE 5.5.3 Starship, `TableView.AlternatingRow` as the Scene Outliner uses it). One `<ue-tree-row>` wraps exactly one tree. Compose bigger components by putting one inside them.
+
+## Markup contract
+
+```html
+<ue-tree-row select="multi">  <!-- select="single" turns Shift and Ctrl off -->
+	<div class="tr-tree" role="tree">   <!-- add class is-compact for the source-tree look -->
+		<div class="tr-row" role="treeitem" aria-level="1" aria-expanded="true" data-id="lights" tabindex="0">
+			<span class="tr-indent" style="--depth:0"></span>
+			<svg class="tr-arrow" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg>
+			<svg class="tr-icon is-folder" viewBox="0 0 16 16"><path class="tr-folder-closed" d="..."/><path class="tr-folder-open" d="..."/></svg>
+			<span class="tr-text">Lights</span>
+		</div>
+		<div class="tr-row" role="treeitem" aria-level="2" data-id="sun" tabindex="-1">
+			<span class="tr-indent" style="--depth:1"></span>
+			<svg class="tr-arrow is-leaf" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg>
+			<svg class="tr-icon is-object" viewBox="0 0 16 16"><path d="..."/></svg>
+			<span class="tr-text">Sun</span>
+		</div>
+	</div>
+</ue-tree-row>
+```
+
+The rows are a flat list. The depth of a row is its `aria-level` (1 is the root) and the `--depth` of its `.tr-indent` (0 is the root). A row has children when the next row is deeper. The element sets `aria-expanded`, `aria-selected`, `tabindex`, `is-leaf` on the arrow, `is-odd` (stripe by visible position), `is-parent` (tint of a parent of the selection) and `is-open` (the row shows its children) on its own. An author writes only the initial `aria-expanded`, `is-selected` and `data-id`. `data-id` is the id in events.
+
+Without it the label text is the id.
+
+- The arrow is one right-pointing caret. A row with `is-open` turns it a quarter turn (`TreeArrow_Expanded`). The folder icon holds a closed path and an open path, and the row shows one. No `<symbol>` is needed.
+- `.tr-cell` is a free column cell: a fixed-width box (`--tr-cell-width`, 80px by default, or an inline `width`). Put cells before `.tr-indent` for a gutter (the eye of the Scene Outliner) or after `.tr-text` for a trailing column (its Type).
+- Colours follow focus with no script: `--select` while the tree focus (`:focus-within`), `--select-inactive` otherwise. A pinned specimen outside a tree uses the classes `is-hover`, `is-selected`, `is-inactive`, `is-parent` and `is-dim`.
+
+## Variants
+
+| Variant | Markup | Effect |
+|---|---|---|
+| Default | `.tr-tree` | 20px rows, indent 6 + 12 per level, subdued arrow, folder tint at 75% |
+| Source tree | `.tr-tree.is-compact` | 16px rows, 19px root rows (3px top padding), indent 0 + 10 per level, full-strength arrow and folder. Values from `components/SourcePanel/preview.html:31-45` |
+| Custom indent | `style="--tree-indent-base:0px; --tree-indent-step:10px"` on `.tr-tree` or on an ancestor | The indent of a row is `base + depth x step`. Defaults 6px and 12px. `is-compact` defaults to 0px and 10px |
+| Single select | `<ue-tree-row select="single">` | Every click and key selects one row. Shift and Ctrl add nothing. `aria-multiselectable` is `false` |
+| Multi select | default | Click replaces, Ctrl or Cmd toggles, Shift selects the range from the anchor |
+
+## Events
+
+Both events bubble and are composed.
+
+| Event | `detail` | When |
+|---|---|---|
+| `ue-tree-select` | `{ ids: string[] }` | The set of selected rows changed, in tree order. Fires for a click, a key or `select()` |
+| `ue-tree-toggle` | `{ id: string, expanded: boolean }` | A row opened or closed, by the arrow, a double-click, Left or Right, or `setExpanded()`. A filter that opens ancestors does not fire it |
+
+A handler on the element ignores an event whose target belongs to another `ue-tree-row`, so trees can nest in a composite.
+
+## Data API
+
+```ts
+interface TreeRowData {
+	id: string;
+	label: string;
+	depth?: number;                       // from 0
+	icon?: 'folder' | 'object' | 'none';  // default 'object'
+	expandable?: boolean;                 // show the arrow although no child row follows
+	expanded?: boolean;                   // initial state
+	selected?: boolean;
+	dim?: boolean;                        // non-interactive grey label
+	cells?: string[];                     // text of trailing .tr-cell columns
+}
+el.setRows(rows: TreeRowData[]);          // replaces every row; an element with no .tr-tree creates one
+el.getSelectedIds(): string[];
+el.select(ids: string[]);                 // fires ue-tree-select
+el.setExpanded(id: string, expanded: boolean);
+el.setFilter(filter: string | ((row: { id: string; label: string; depth: number }) => boolean) | null);
+```
+
+`setFilter` keeps the rows that match and their ancestors, hides the rest, and shows each ancestor open while the filter is set. The stored `aria-expanded` of an ancestor does not change, so `setFilter(null)` restores the earlier tree. A string filter is a case-insensitive substring of the label.
+
+`expandable: true` keeps the arrow on a row with no children yet. Opening it fires `ue-tree-toggle`. The consumer answers with a new `setRows`.
 
 ## What the consumer provides
 

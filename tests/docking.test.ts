@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Locator, Page } from 'playwright';
 import { openPreview, withBrowser } from './lib.ts';
+import { assertInert, clickAt, hoverAt } from './pinned.ts';
 
 const TRANSPARENT = 'rgba(0, 0, 0, 0)';
 
@@ -212,13 +213,70 @@ test('DockTab: pinned specimens ignore the pointer', async () => {
 		const { page, errors } = await openPreview(browser, 'DockTab');
 		const normal = page.locator('.dockTab[data-pinned]').first();
 		const before = await classes(normal);
-		await normal.hover();
+		await assertInert(normal);
+		await hoverAt(page, normal);
 		assert.equal(await bg(normal), TRANSPARENT);
 		assert.equal(await visibility(normal.locator('.dockTab-close')), 'hidden');
-		await normal.click();
+		await clickAt(page, normal);
 		assert.deepEqual(await classes(normal), before);
 		assert.equal(await page.locator('ue-dock-tab').count(), 3);
+		assert.equal(await page.locator('use').count(), 0, 'no glyph of the preview refers to a symbol');
 		assert.equal(await page.locator('[data-pinned] ue-dock-tab, ue-dock-tab [data-pinned]').count(), 0);
+		assert.deepEqual(errors, []);
+		await page.close();
+	});
+});
+
+// Records the detail of every event of these names that reaches the document, in order, each with its name.
+async function watchEvents(page: Page, ...names: string[]): Promise<void> {
+	await page.evaluate((types) => {
+		const log: Array<{ type: string; detail: unknown }> = [];
+		(window as unknown as { __events: typeof log }).__events = log;
+		for (const type of types) document.addEventListener(type, (event) => log.push({ type, detail: (event as CustomEvent).detail }));
+	}, names);
+}
+
+const recordedEvents = (page: Page): Promise<Array<{ type: string; detail: unknown }>> => page.evaluate(() => (window as unknown as { __events: Array<{ type: string; detail: unknown }> }).__events.slice());
+
+for (const [tag, tabClass, closeClass, stackIndex] of [['ue-dock-tab', 'dockTab', 'dockTab-close', 0], ['ue-tab-well', 'tabWell-tab', 'tabWell-close', 0]] as const) {
+	test(tag + ': ue-tab-activate and ue-tab-close report the tab, and the API activates and closes by id', async () => {
+		await withBrowser(async (browser) => {
+			const { page, errors } = await openPreview(browser, tag === 'ue-dock-tab' ? 'DockTab' : 'TabWell');
+			const stack = page.locator(tag).nth(stackIndex);
+			const tab = (id: string): Locator => stack.locator('.' + tabClass + '[data-tab="' + id + '"]');
+			await watchEvents(page, 'ue-tab-activate', 'ue-tab-close');
+			await tab('content').click();
+			await tab('content').click();
+			assert.deepEqual(await recordedEvents(page), [{ type: 'ue-tab-activate', detail: { id: 'content', label: 'Content Browser' } }], 'a second click on the foreground tab changes nothing');
+			await tab('content').locator('.' + closeClass).click();
+			assert.deepEqual((await recordedEvents(page)).slice(1), [
+				{ type: 'ue-tab-close', detail: { id: 'content', label: 'Content Browser' } },
+				{ type: 'ue-tab-activate', detail: { id: 'outliner', label: 'Outliner' } },
+			], 'the close comes first, then the left neighbour takes over');
+			await stack.evaluate((el, id) => (el as HTMLElement & { activateTab(id: string): void }).activateTab(id), 'details');
+			assert.ok((await classes(tab('details'))).includes(tabClass + '--foreground'));
+			assert.ok(await stack.locator('[data-panel="details"]').isVisible());
+			await stack.evaluate((el, id) => (el as HTMLElement & { closeTab(id: string): void }).closeTab(id), 'outliner');
+			assert.deepEqual(await names(stack.locator('.' + tabClass)), ['details']);
+			const last = (await recordedEvents(page)).at(-1);
+			assert.deepEqual(last?.type, 'ue-tab-close');
+			assert.deepEqual(errors, []);
+			await page.close();
+		});
+	});
+}
+
+test('DockTab: the status line under a stack shows its own events only', async () => {
+	await withBrowser(async (browser) => {
+		const { page, errors } = await openPreview(browser, 'DockTab');
+		const first = page.locator('ue-dock-tab').nth(0);
+		const second = page.locator('ue-dock-tab').nth(1);
+		await first.locator('.dockTab[data-tab="content"]').click();
+		await first.locator('.dockTab[data-tab="content"] .dockTab-close').click();
+		assert.equal(await first.locator('ue-event-status').textContent(), 'Closed: Content Browser (content)');
+		await second.locator('.dockTab[data-tab="layers"]').click();
+		assert.equal(await second.locator('ue-event-status').textContent(), 'Activated: Layers (layers)');
+		assert.equal(await first.locator('ue-event-status').textContent(), 'Closed: Content Browser (content)', 'the first stack did not hear the second');
 		assert.deepEqual(errors, []);
 		await page.close();
 	});
@@ -309,6 +367,29 @@ test('TabWell: keyboard moves between tabs and Delete closes', async () => {
 		assert.equal(await focusedTab(page), 'details');
 		await page.keyboard.press('Delete');
 		assert.deepEqual(await names(stack.locator('.tabWell-well > .tabWell-tab')), ['outliner', 'content']);
+		assert.deepEqual(errors, []);
+		await page.close();
+	});
+});
+
+test('TabWell: one major tab alone draws the title-bar tab with no element and no symbol', async () => {
+	await withBrowser(async (browser) => {
+		const { page, errors } = await openPreview(browser, 'TabWell');
+		const alone = page.locator('.tabWell-tab--major[data-pinned]');
+		assert.equal(await alone.count(), 1);
+		assert.equal(await alone.evaluate((el) => el.closest('ue-tab-well')), null);
+		assert.equal(await page.locator('use').count(), 0, 'no glyph of the preview refers to a symbol');
+		assert.equal(await bg(alone), await resolve(page, 'background-color', 'var(--panel)'));
+		assert.equal(await fg(alone), await resolve(page, 'color', 'var(--white)'));
+		assert.equal(await lineContent(alone), 'none', 'a major tab has no active line');
+		const box = (await alone.boundingBox())!;
+		assert.ok(Math.abs(box.height - 30.8) < 0.1, 'major tab height ' + box.height);
+		assert.equal(await visibility(alone.locator('.tabWell-close')), 'visible', 'the foreground tab shows its close button');
+		assert.equal(await alone.locator('.tabWell-icon svg').evaluate((el) => getComputedStyle(el).width), '16px');
+		assert.equal(await alone.locator('.tabWell-icon').evaluate((el) => getComputedStyle(el).paddingLeft), '4px');
+		const well = (await page.locator('.tabWell-well--major').filter({ has: alone }).boundingBox())!;
+		assert.ok(well.height >= 30.7, 'the major well is as tall as the major tab: ' + well.height);
+		assert.equal(await bg(page.locator('.tabWell-well--major').filter({ has: alone })), await resolve(page, 'background-color', 'var(--title)'));
 		assert.deepEqual(errors, []);
 		await page.close();
 	});
@@ -410,7 +491,7 @@ test('WindowChrome: pinned button specimens ignore the pointer', async () => {
 	await withBrowser(async (browser) => {
 		const { page, errors } = await openPreview(browser, 'WindowChrome');
 		const pinned = page.locator('.windowChrome-states .windowChrome-btn--close').first();
-		await pinned.hover();
+		await hoverAt(page, pinned);
 		assert.equal(await bg(pinned), TRANSPARENT);
 		assert.equal(await page.locator('ue-window-chrome').count(), 1);
 		assert.equal(await page.locator('[data-pinned] ue-window-chrome, ue-window-chrome [data-pinned]').count(), 0);
@@ -462,7 +543,7 @@ test('Splitter: hover shows the secondary fill and the resize cursor', async () 
 test('Splitter: dragging the horizontal handle resizes both panes and holds the pressed colour', async () => {
 	await withBrowser(async (browser) => {
 		const { page, errors } = await openPreview(browser, 'Splitter');
-		const demo = page.locator('ue-splitter').nth(0).locator('.splitter-demo');
+		const demo = page.locator('ue-splitter').nth(0).locator('.splitter');
 		const handle = demo.locator('.splitter-handle');
 		const start = await sizes(demo, 'width');
 		await dragHandle(page, handle, 40, 0, false);
@@ -484,7 +565,7 @@ test('Splitter: dragging the horizontal handle resizes both panes and holds the 
 test('Splitter: no pane shrinks below the minimum size', async () => {
 	await withBrowser(async (browser) => {
 		const { page, errors } = await openPreview(browser, 'Splitter');
-		const demo = page.locator('ue-splitter').nth(0).locator('.splitter-demo');
+		const demo = page.locator('ue-splitter').nth(0).locator('.splitter');
 		const handle = demo.locator('.splitter-handle');
 		const start = await sizes(demo, 'width');
 		const total = start.before + start.after;
@@ -504,7 +585,7 @@ test('Splitter: no pane shrinks below the minimum size', async () => {
 test('Splitter: dragging the vertical handle resizes the pane heights', async () => {
 	await withBrowser(async (browser) => {
 		const { page, errors } = await openPreview(browser, 'Splitter');
-		const demo = page.locator('ue-splitter').nth(1).locator('.splitter-demo');
+		const demo = page.locator('ue-splitter').nth(1).locator('.splitter');
 		const handle = demo.locator('.splitter-handle');
 		const start = await sizes(demo, 'height');
 		await dragHandle(page, handle, 0, -30);
@@ -521,7 +602,7 @@ test('Splitter: dragging the vertical handle resizes the pane heights', async ()
 test('Splitter: arrow keys move a focused handle by a few pixels', async () => {
 	await withBrowser(async (browser) => {
 		const { page, errors } = await openPreview(browser, 'Splitter');
-		const demo = page.locator('ue-splitter').nth(0).locator('.splitter-demo');
+		const demo = page.locator('ue-splitter').nth(0).locator('.splitter');
 		const handle = demo.locator('.splitter-handle');
 		const start = await sizes(demo, 'width');
 		await handle.focus();
@@ -552,7 +633,7 @@ test('Splitter: arrow keys move a focused handle by a few pixels', async () => {
 test('Splitter: the vertical handle answers the up and down arrows', async () => {
 	await withBrowser(async (browser) => {
 		const { page, errors } = await openPreview(browser, 'Splitter');
-		const demo = page.locator('ue-splitter').nth(1).locator('.splitter-demo');
+		const demo = page.locator('ue-splitter').nth(1).locator('.splitter');
 		const handle = demo.locator('.splitter-handle');
 		const start = await sizes(demo, 'height');
 		await handle.focus();
@@ -568,17 +649,105 @@ test('Splitter: the vertical handle answers the up and down arrows', async () =>
 	});
 });
 
+test('Splitter: data-min-start and data-min-end set the limits, the key steps and the aria values', async () => {
+	await withBrowser(async (browser) => {
+		const { page, errors } = await openPreview(browser, 'Splitter');
+		const demo = page.locator('ue-splitter').nth(2).locator('.splitter');
+		const handle = demo.locator('.splitter-handle');
+		const start = await sizes(demo, 'width');
+		const total = start.before + start.after;
+		await dragHandle(page, handle, 3000, 0);
+		let end = await sizes(demo, 'width');
+		assert.ok(Math.abs(end.after - 150) <= 1, 'the end pane stops at its own minimum: ' + end.after);
+		await dragHandle(page, handle, -3000, 0);
+		end = await sizes(demo, 'width');
+		assert.ok(Math.abs(end.before - 120) <= 1, 'the start pane stops at its own minimum: ' + end.before);
+		assert.equal(await handle.getAttribute('aria-valuemin'), '120');
+		assert.equal(await handle.getAttribute('aria-valuemax'), String(Math.round(total - 150)));
+		assert.equal(await handle.getAttribute('aria-valuenow'), String(Math.round(end.before)));
+		await handle.focus();
+		await page.keyboard.press('Shift+ArrowRight');
+		assert.ok(Math.abs((await sizes(demo, 'width')).before - (end.before + 40)) <= 0.5, 'data-step-shift');
+		await page.keyboard.press('ArrowLeft');
+		assert.ok(Math.abs((await sizes(demo, 'width')).before - (end.before + 30)) <= 0.5, 'data-step');
+		await page.keyboard.press('End');
+		assert.ok(Math.abs((await sizes(demo, 'width')).after - 150) <= 0.5);
+		await page.keyboard.press('Home');
+		assert.ok(Math.abs((await sizes(demo, 'width')).before - 120) <= 0.5);
+		assert.deepEqual(errors, []);
+		await page.close();
+	});
+});
+
+test('Splitter: ue-splitter-resize reports the size, the total and the orientation, and splitters are independent', async () => {
+	await withBrowser(async (browser) => {
+		const { page, errors } = await openPreview(browser, 'Splitter');
+		const first = page.locator('ue-splitter').nth(0).locator('.splitter');
+		const second = page.locator('ue-splitter').nth(1).locator('.splitter');
+		await page.evaluate(() => {
+			const log: unknown[] = [];
+			(window as unknown as { __resize: unknown[] }).__resize = log;
+			document.addEventListener('ue-splitter-resize', (event) => log.push((event as CustomEvent).detail));
+		});
+		const before = await sizes(second, 'height');
+		const start = await sizes(first, 'width');
+		await first.locator('.splitter-handle').focus();
+		await page.keyboard.press('ArrowRight');
+		await page.keyboard.press('Home');
+		const log = await page.evaluate(() => (window as unknown as { __resize: Array<{ size: number; total: number; orientation: string }> }).__resize);
+		assert.equal(log.length, 2);
+		assert.equal(log[0].orientation, 'horizontal');
+		assert.ok(Math.abs(log[0].size - (start.before + 5)) <= 0.5);
+		assert.ok(Math.abs(log[0].total - (start.before + start.after)) <= 0.5);
+		assert.equal(log[1].size, 20);
+		assert.match((await page.locator('.splitter-cell').nth(0).textContent()) ?? '', /size 20 of /);
+		assert.deepEqual(await sizes(second, 'height'), before, 'the other splitter did not move');
+		await second.locator('.splitter-handle').focus();
+		await page.keyboard.press('ArrowDown');
+		const vertical = await page.evaluate(() => (window as unknown as { __resize: Array<{ orientation: string }> }).__resize.at(-1)?.orientation);
+		assert.equal(vertical, 'vertical');
+		assert.deepEqual(errors, []);
+		await page.close();
+	});
+});
+
+test('Splitter: the line handle is 2px wide with a hit area 3px wider on each side', async () => {
+	await withBrowser(async (browser) => {
+		const { page, errors } = await openPreview(browser, 'Splitter');
+		const demo = page.locator('ue-splitter').nth(3).locator('.splitter');
+		const handle = demo.locator('.splitter-handle');
+		const box = (await handle.boundingBox())!;
+		assert.equal(box.width, 2);
+		const hit = await handle.evaluate((el) => {
+			const style = getComputedStyle(el, '::before');
+			return [style.left, style.right, style.top, style.bottom];
+		});
+		assert.deepEqual(hit, ['-3px', '-3px', '0px', '0px']);
+		const start = await sizes(demo, 'width');
+		await page.mouse.move(box.x - 2, box.y + box.height / 2);
+		await page.mouse.down();
+		await page.mouse.move(box.x + 28, box.y + box.height / 2, { steps: 4 });
+		await page.mouse.up();
+		const end = await sizes(demo, 'width');
+		assert.ok(Math.abs(end.before - (start.before + 30)) <= 1, 'a grab beside the line drags it: ' + start.before + ' to ' + end.before);
+		await page.mouse.move(box.x + 40, box.y + box.height / 2);
+		assert.equal(await handle.evaluate((el) => getComputedStyle(el).cursor), 'col-resize');
+		assert.deepEqual(errors, []);
+		await page.close();
+	});
+});
+
 test('Splitter: pinned handles stay pinned', async () => {
 	await withBrowser(async (browser) => {
 		const { page, errors } = await openPreview(browser, 'Splitter');
 		const pinned = page.locator('.splitter-handle[data-pinned]').first();
-		const demo = page.locator('.splitter-demo').filter({ has: pinned });
+		const demo = page.locator('.splitter').filter({ has: pinned });
 		const start = await sizes(demo, 'width');
-		await pinned.hover();
+		await assertInert(pinned);
+		await hoverAt(page, pinned);
 		assert.equal(await bg(pinned), await resolve(page, 'background-color', 'var(--background)'));
 		await dragHandle(page, pinned, 30, 0);
 		assert.deepEqual(await sizes(demo, 'width'), start);
-		assert.equal(await pinned.evaluate((el) => getComputedStyle(el).cursor), 'auto');
 		assert.equal(await page.locator('[data-pinned] ue-splitter, ue-splitter [data-pinned]').count(), 0);
 		assert.deepEqual(errors, []);
 		await page.close();

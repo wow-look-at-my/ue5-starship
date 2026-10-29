@@ -196,6 +196,147 @@ test('SegmentedControl: click selects, arrows move, hover fills, the pinned row 
 	});
 });
 
+// Records the detail of every bubbling event of this name that reaches the document.
+async function watch(page: Page, type: string): Promise<void> {
+	await page.evaluate((name) => {
+		const log: unknown[] = [];
+		(window as unknown as Record<string, unknown>)['__seen_' + name] = log;
+		document.addEventListener(name, (event) => log.push((event as CustomEvent).detail));
+	}, type);
+}
+
+const seen = (page: Page, type: string): Promise<unknown[]> => page.evaluate((name) => ((window as unknown as Record<string, unknown[]>)['__seen_' + name] ?? []).slice(), type);
+
+test('FilterPills: ue-filter-change reports the value once per change, and value and setPills drive the strip', async () => {
+	await inPreview('FilterPills', async (page) => {
+		const live = page.locator('ue-filter-pills').nth(0);
+		const pills = live.locator('.FilterPills-pill');
+		await watch(page, 'ue-filter-change');
+		await pills.filter({ hasText: /^Physics$/ }).click();
+		await pills.filter({ hasText: /^Physics$/ }).click();
+		await pills.filter({ hasText: /^LOD$/ }).click();
+		assert.deepEqual(await seen(page, 'ue-filter-change'), [{ value: 'Physics', label: 'Physics' }, { value: 'LOD', label: 'LOD' }], 'a click on the checked pill changes nothing');
+		assert.equal(await live.locator('ue-event-status').textContent(), 'Section: LOD');
+		type Api = HTMLElement & { value: string; setPills(items: object[]): void };
+		await live.evaluate((el) => { (el as Api).value = 'Misc'; });
+		assert.deepEqual(await live.locator('.FilterPills-pill.is-checked').allTextContents(), ['Misc']);
+		assert.equal(await live.evaluate((el) => (el as Api).value), 'Misc');
+		await live.evaluate((el) => (el as Api).setPills([{ value: 'a', label: 'Alpha' }, { value: 'b', label: 'Beta', checked: true }]));
+		assert.deepEqual(await pills.allTextContents(), ['Alpha', 'Beta']);
+		assert.equal(await live.locator('.FilterPills-strip').getAttribute('role'), 'tablist');
+		assert.equal(await pills.nth(1).getAttribute('tabindex'), '0');
+		assert.equal(await pills.nth(0).getAttribute('tabindex'), '-1');
+		await pills.nth(1).focus();
+		await key(page, 'ArrowLeft');
+		assert.deepEqual(await live.locator('.FilterPills-pill.is-checked').allTextContents(), ['Alpha']);
+		assert.deepEqual((await seen(page, 'ue-filter-change')).slice(-1), [{ value: 'a', label: 'Alpha' }], 'value is data-value');
+	});
+});
+
+test('FilterPills: the tablist pill keeps the DetailsCategory section pill look', async () => {
+	await inPreview('FilterPills', async (page) => {
+		const pill = page.locator('ue-filter-pills').nth(0).locator('.FilterPills-pill').first();
+		const style = await pill.evaluate((el) => {
+			const s = getComputedStyle(el);
+			return [s.paddingTop, s.paddingRight, s.fontSize, s.borderTopLeftRadius];
+		});
+		assert.deepEqual(style, ['4px', '16px', '10.667px', '4px']);
+		assert.equal(await bgOf(pill), rgb('header'));
+	});
+});
+
+test('FilterPills: chips remove with their X, add and set from data, and each strip is independent', async () => {
+	await inPreview('FilterPills', async (page) => {
+		const chips = page.locator('ue-filter-pills').nth(1);
+		const names = (): Promise<string[]> => chips.locator('.FilterPills-chipName').allTextContents();
+		assert.deepEqual(await names(), ['Static Mesh', 'Material', 'Texture']);
+		const chip = chips.locator('.FilterPills-chip').first();
+		assert.equal((await chip.boundingBox())!.height, 22);
+		assert.equal(await bgOf(chip), rgb('secondary'));
+		assert.equal((await chips.locator('.FilterPills-chipColor').first().boundingBox())!.width, 8);
+		assert.equal(await bgOf(chips.locator('.FilterPills-chipColor').first()), rgb('accent-blue'));
+		const remove = chip.locator('.FilterPills-chipRemove');
+		assert.equal(await bgOf(remove), CLEAR);
+		await remove.hover();
+		assert.equal(await bgOf(remove), rgb('dropdown'));
+		await watch(page, 'ue-pill-remove');
+		await watch(page, 'ue-pill-add');
+		await remove.click();
+		assert.deepEqual(await names(), ['Material', 'Texture']);
+		assert.deepEqual(await seen(page, 'ue-pill-remove'), [{ id: 'staticmesh', label: 'Static Mesh' }]);
+		assert.equal(await chips.locator('ue-event-status').textContent(), 'Removed: Static Mesh');
+		type Api = HTMLElement & { addChip(chip: object): void; removeChip(id: string): void; setChips(chips: object[]): void; getChips(): Array<{ id: string; label: string }> };
+		await chips.evaluate((el) => (el as Api).addChip({ id: 'sound', label: 'Sound Cue', color: '#ff00ff' }));
+		await chips.evaluate((el) => (el as Api).addChip({ id: 'sound', label: 'Sound Cue' }));
+		assert.deepEqual(await names(), ['Material', 'Texture', 'Sound Cue'], 'a repeated id is ignored');
+		assert.deepEqual(await seen(page, 'ue-pill-add'), [{ id: 'sound', label: 'Sound Cue', color: '#ff00ff' }]);
+		assert.equal(await bgOf(chips.locator('.FilterPills-chipColor').last()), 'rgb(255, 0, 255)');
+		await chips.locator('.FilterPills-chip').last().locator('.FilterPills-chipRemove').click();
+		assert.deepEqual(await chips.evaluate((el) => (el as Api).getChips().map((each) => each.id)), ['material', 'texture']);
+		await chips.evaluate((el) => (el as Api).setChips([{ id: 'texture', label: 'Texture' }, { id: 'blueprint', label: 'Blueprint' }]));
+		assert.deepEqual(await names(), ['Texture', 'Blueprint'], 'setChips drops the chips that are not listed and appends the new ones');
+		assert.deepEqual((await seen(page, 'ue-pill-remove')).slice(-2), [{ id: 'sound', label: 'Sound Cue' }, { id: 'material', label: 'Material' }]);
+		assert.deepEqual(await page.locator('ue-filter-pills').nth(0).locator('.FilterPills-pill.is-checked').allTextContents(), ['All'], 'the tablist did not move');
+		await chips.evaluate((el) => (el as Api).removeChip('texture'));
+		await chips.evaluate((el) => (el as Api).removeChip('blueprint'));
+		assert.equal(await chips.locator('.FilterPills-strip').isVisible(), false, 'an empty chip strip takes no room');
+	});
+});
+
+test('SegmentedControl: ue-segment-change carries the value, the value property drives it, and a second control is independent', async () => {
+	await inPreview('SegmentedControl', async (page) => {
+		const first = page.locator('ue-segmented-control').nth(0);
+		await watch(page, 'ue-segment-change');
+		await first.locator('.SegmentedControl-seg').nth(2).click();
+		await first.locator('.SegmentedControl-seg').nth(2).click();
+		await key(page, 'ArrowLeft');
+		assert.deepEqual(await seen(page, 'ue-segment-change'), [{ value: 'Movable', label: 'Movable' }, { value: 'Stationary', label: 'Stationary' }], 'a click on the checked segment fires nothing');
+		assert.equal(await first.locator('xpath=ancestor::*[contains(@class, "SegmentedControl-live")]').locator('ue-event-status').textContent(), 'Mobility: Stationary');
+		type Api = HTMLElement & { value: string };
+		assert.equal(await first.evaluate((el) => (el as Api).value), 'Stationary');
+		await first.evaluate((el) => { (el as Api).value = 'Static'; });
+		assert.deepEqual(await first.locator('.SegmentedControl-seg.is-checked').allTextContents(), ['Static']);
+		assert.deepEqual((await seen(page, 'ue-segment-change')).slice(-1), [{ value: 'Static', label: 'Static' }]);
+		assert.deepEqual(await page.locator('ue-segmented-control').nth(1).locator('.SegmentedControl-seg.is-checked').allTextContents(), ['Static'], 'the control in row 3 did not follow');
+	});
+});
+
+test('SegmentedControl: the rail variant draws the Place Actors category look with vertical roving keys', async () => {
+	await inPreview('SegmentedControl', async (page) => {
+		const rail = page.locator('ue-segmented-control').nth(2);
+		const segs = rail.locator('.SegmentedControl-seg');
+		const basic = segs.nth(1);
+		assert.equal(await bgOf(basic), rgb('primary'), 'checked is Primary');
+		assert.match(await shadowOf(basic), /rgba\(0, 0, 0, 0\.8\)/, 'with the 0.5px outline');
+		const box = (await basic.boundingBox())!;
+		assert.deepEqual([box.width, box.height], [36, 36]);
+		assert.equal(await basic.evaluate((el) => getComputedStyle(el).borderTopLeftRadius), '4px');
+		assert.equal(await basic.locator('svg').evaluate((el) => getComputedStyle(el).width), '20px');
+		assert.equal((await rail.locator('.SegmentedControl').boundingBox())!.width, 44);
+		assert.equal(await bgOf(rail.locator('.SegmentedControl')), rgb('panel'));
+		const lights = segs.nth(2);
+		await lights.hover();
+		assert.equal(await bgOf(lights), rgb('dropdown'), 'unchecked hover is Dropdown');
+		await basic.hover();
+		assert.equal(await bgOf(basic), rgb('primary-hover'));
+		await basic.click();
+		await key(page, 'ArrowDown');
+		assert.deepEqual(await rail.locator('.SegmentedControl-seg.is-checked').getAttribute('aria-label'), 'Lights');
+		await key(page, 'End');
+		assert.equal(await rail.locator('.SegmentedControl-seg.is-checked').getAttribute('aria-label'), 'All');
+		await key(page, 'ArrowUp');
+		assert.equal(await rail.locator('.SegmentedControl-seg.is-checked').getAttribute('aria-label'), 'Volumes');
+		await key(page, 'Home');
+		assert.equal(await rail.locator('.SegmentedControl-seg.is-checked').getAttribute('aria-label'), 'Recent');
+		assert.equal(await rail.locator('xpath=following-sibling::ue-event-status').textContent(), 'Category: Recent');
+		assert.equal(await segs.nth(0).getAttribute('tabindex'), '0');
+		assert.equal(await segs.nth(1).getAttribute('tabindex'), '-1');
+		const wrapped = page.locator('ue-segmented-control').nth(3).locator('.SegmentedControl');
+		assert.equal(await wrapped.evaluate((el) => getComputedStyle(el).flexDirection), 'row');
+		assert.equal(await page.locator('use').count(), 0, 'no glyph refers to a symbol');
+	});
+});
+
 test('AssetPicker: the list sets the label and thumbnail, buttons react, reset restores', async () => {
 	await inPreview('AssetPicker', async (page) => {
 		const root = page.locator('ue-asset-picker');

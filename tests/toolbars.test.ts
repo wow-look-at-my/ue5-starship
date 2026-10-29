@@ -102,7 +102,7 @@ scenario('MenuBar: pinned specimens ignore clicks and keep their forced states',
 	const pinned = page.locator('.menuBar[data-pinned]');
 	assert.equal(await pinned.count(), 2);
 	assert.equal(await fill(pinned.nth(1).locator('.menuBar-item.is-open')), await token(page, 'primary'));
-	await pinned.nth(0).locator('.menuBar-item').nth(0).click();
+	await pinned.nth(0).locator('.menuBar-item').nth(0).click({ force: true }); // pointer-events: none, so the click lands on the page behind
 	assert.equal(await page.locator('.menuBar[data-pinned] .menuBar-item.is-open').count(), 1);
 	assert.equal(await fill(pinned.nth(0).locator('.menuBar-item.is-hover')), await token(page, 'hover'));
 });
@@ -216,7 +216,7 @@ scenario('ToolBar: pinned specimens ignore clicks', 'ToolBar', async (page) => {
 	const pinned = page.locator('.toolBar[data-pinned]');
 	assert.equal(await pinned.count(), 2);
 	const toggle = pinned.nth(1).locator('.toolBar-btn--toggle').first();
-	await toggle.click();
+	await toggle.click({ force: true });
 	assert.equal(await hasClass(toggle, 'is-checked'), false);
 	assert.equal(await prop(pinned.nth(1).locator('.toolBar-btn.is-pressed'), 'padding-top'), '5px');
 });
@@ -310,7 +310,7 @@ scenario('PlaceActorsPanel: arrow keys move the category and activate it', 'Plac
 
 scenario('PlaceActorsPanel: pinned specimens ignore clicks and keep their forced rows', 'PlaceActorsPanel', async (page) => {
 	const pinned = page.locator('div[data-pinned]').first();
-	await pinned.locator('.placeActors-cat').nth(2).click();
+	await pinned.locator('.placeActors-cat').nth(2).click({ force: true });
 	assert.equal(await pinned.locator('.placeActors-cat.is-active use').getAttribute('href'), '#placeActors-i-basic');
 	assert.equal(await pinned.locator('.placeActors-header').textContent(), 'Basic');
 	assert.equal(await pinned.locator('.placeActors-row.is-hover').count(), 1);
@@ -413,7 +413,7 @@ scenario('StatusBar: Derived Data and Source Control fill Dropdown on hover', 'S
 scenario('StatusBar: pinned specimens ignore clicks and keep their hover state', 'StatusBar', async (page) => {
 	const pinned = page.locator('.statusBar[data-pinned]');
 	assert.equal(await pinned.count(), 2);
-	await pinned.nth(0).locator('.statusBar-btn').first().click();
+	await pinned.nth(0).locator('.statusBar-btn').first().click({ force: true });
 	assert.equal(await page.locator('.statusBar[data-pinned] .statusBar-btn.is-open').count(), 0);
 	assert.equal(await ink(pinned.nth(1).locator('.statusBar-btn.is-hover')), await token(page, 'foreground-hover'));
 });

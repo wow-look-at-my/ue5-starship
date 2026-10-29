@@ -12,110 +12,50 @@
 	.AssetTilePreview h4 { margin: 0 0 4px; font: 400 10.667px/1 var(--font-sans); color: var(--hover-2); }
 	.AssetTilePreview__row { display: flex; gap: 0; margin-bottom: 8px; }
 
-	/* Cell: GetTileViewItemWidth(), Medium thumbnails at a 1080p display = (150+2*9)*Lerp(..) ~ 82 (SAssetView.cpp:5727,5750; derived, depends on display). Item height (50+50)*k + 82 ~ 130 (SAssetView.cpp:5718, 5676-5678).
-	   ChildSlot Padding(0,0,4,4) + shadow SBorder Padding(0,0,5,5) leave a 73px card (AssetViewWidgets.cpp:2204,2208, 2384-2391). */
-	.AssetTile { box-sizing: border-box; width: 82px; height: 130px; padding: 0 9px 9px 0; flex: none; }
-	.AssetTile__card { position: relative; width: 73px; height: 121px; border-radius: 4px; overflow: hidden; }
-
-	/* ---- thumbnail box: 73 x 73 (GetThumbnailBoxSize, AssetViewWidgets.cpp:2389) ---- */
-	.AssetTile__thumb { position: relative; width: 73px; height: 73px; }
-
-	/* ---- folder ---- */
-	.AssetTile--folder .AssetTile__thumb { padding: 5px; }                 /* AssetViewWidgets.cpp:173 overlay Padding(5) */
-	.AssetTile__folderIcon { display: block; width: 100%; height: 100%; padding: 0 2px 2px 0; box-sizing: border-box; color: var(--accent-folder); /* StarshipStyle.cpp:6348; padding = shadow SBorder (0,0,2,2) at AssetViewWidgets.cpp:177 */
-		filter: drop-shadow(1.5px 1.5px 1.5px rgba(0,0,0,.55)); }          /* approximates folder-drop-shadow.png (StarshipStyle.cpp:6579), image not available */
-	.AssetTile--folder .AssetTile__name { text-align: center; }
-	.AssetTile--folder.is-hover .AssetTile__card,
-	.AssetTile--folder.is-selected .AssetTile__card { background: var(--secondary); }  /* FolderAreaHovered/Selected/SelectedHoverBackground = Secondary r4 (StarshipStyle.cpp:6540-6542) */
-	.AssetTile--folder.is-hover .AssetTile__card,
-	.AssetTile--folder.is-selected .AssetTile__card { box-shadow: 2px 2px 3px rgba(0,0,0,.5); overflow: visible; }   /* drop shadow brush, approximated */
-
-	/* ---- asset ---- */
-	.AssetTile--asset .AssetTile__card { background: var(--recessed); }     /* ThumbnailAreaBackground Recessed r4 (StarshipStyle.cpp:6543) */
-	.AssetTile__asset { position: absolute; inset: 2px; background: var(--recessed); display: grid; place-items: center; color: var(--foreground); overflow: hidden; } /* thumbnail Padding(2) AssetViewWidgets.cpp:2040; AssetBackground Recessed StarshipStyle.cpp:1229 */
-	.AssetTile__asset svg { width: 32px; height: 32px; opacity: .8; }
-	.AssetTile__strip { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--strip, var(--accent-blue)); } /* GetAssetColorStripThickness 2 (AssetThumbnail.cpp:1050-1053); colour = asset-type colour */
-	.AssetTile--asset .AssetTile__nameArea { background: var(--secondary); border-radius: 0 0 4px 4px; } /* NameAreaBackground Secondary, radii (0,0,4,4) StarshipStyle.cpp:6544 */
-	.AssetTile--asset.is-hover .AssetTile__nameArea { background: var(--hover); }                       /* :6545 Hover */
-	.AssetTile--asset.is-selected .AssetTile__nameArea { background: var(--primary); }                  /* :6546 Primary */
-	.AssetTile--asset.is-selected.is-hover .AssetTile__nameArea { background: var(--primary-hover); }   /* :6547 PrimaryHover */
-
-	/* ---- name area: Border Padding(2,3); name slot Padding(2,2,0,0) (AssetViewWidgets.cpp:2237,2242) ---- */
-	.AssetTile__nameArea { height: 48px; box-sizing: border-box; padding: 3px 2px; display: flex; flex-direction: column; justify-content: space-between; }
-	.AssetTile--folder .AssetTile__nameArea { background: none; }
-	.AssetTile__name { padding: 2px 0 0 2px; font: 400 12px/14px var(--font-sans); /* AssetTileViewNameFont Regular 9pt = 12px (StarshipStyle.cpp:6367) */
-		color: var(--foreground); flex: 1 1 0; min-height: 0; overflow: hidden; word-break: break-word; } /* fill slot above the class label; MultilineEllipsis (AssetViewWidgets.cpp:2111) */
-	.AssetTile--folder .AssetTile__name { flex: none; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
-	.AssetTile--asset .AssetTile__name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
-	.AssetTile__class { font: 400 9.333px/12px var(--font-sans); /* ContentBrowser.ClassFont Regular 7pt (StarshipStyle.cpp:6477) */
-		color: var(--foreground); opacity: .6; padding-left: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } /* UseSubduedForeground = 0.6 alpha (WidgetStyle.cpp:11) */
-	.is-hover .AssetTile__name, .is-selected .AssetTile__name { color: var(--white); }   /* GetNameAreaTextColor AssetViewWidgets.cpp:2572-2579 */
-	.is-hover .AssetTile__class, .is-selected .AssetTile__class { color: var(--white); opacity: 1; }  /* GetAssetClassLabelTextColor :2400-2407 */
-
-	/* ---- state outlines (overlay SImage, AssetViewWidgets.cpp:2287-2291, GetBorderImage :2344-2365) ---- */
-	.AssetTile__card::after { content: ""; position: absolute; inset: 0; border-radius: 4px; pointer-events: none; }
-	.AssetTile--asset.is-hover .AssetTile__card::after { box-shadow: inset 0 0 0 1px var(--hover); }                /* HoverBorder, assets only (:2358) */
-	.AssetTile.is-selected .AssetTile__card::after { box-shadow: inset 0 0 0 1px var(--primary); }                  /* SelectedBorder StarshipStyle.cpp:6567 */
-	.AssetTile.is-selected.is-hover .AssetTile__card::after { box-shadow: inset 0 0 0 1px var(--primary-hover); }   /* SelectedHoverBorder :6571 */
-	.AssetTile--asset .AssetTile__card { box-shadow: 2px 2px 3px rgba(0,0,0,.45); }                                  /* AssetTileItem.DropShadow (StarshipStyle.cpp:6578), approximated */
-
-	/* ---- live tiles (inside <ue-asset-tile>): real :hover reproduces the is-hover declarations above; pinned tiles are plain HTML and skip these ---- */
-	ue-asset-tile .AssetTile { cursor: default; user-select: none; outline: 0; }
-	ue-asset-tile .AssetTile--folder:hover .AssetTile__card { background: var(--secondary); box-shadow: 2px 2px 3px rgba(0,0,0,.5); overflow: visible; }
-	ue-asset-tile .AssetTile--asset:hover .AssetTile__nameArea { background: var(--hover); }
-	ue-asset-tile .AssetTile--asset.is-selected .AssetTile__nameArea { background: var(--primary); }
-	ue-asset-tile .AssetTile--asset.is-selected:hover .AssetTile__nameArea { background: var(--primary-hover); }
-	ue-asset-tile .AssetTile--asset:hover .AssetTile__card::after { box-shadow: inset 0 0 0 1px var(--hover); }
-	ue-asset-tile .AssetTile.is-selected .AssetTile__card::after { box-shadow: inset 0 0 0 1px var(--primary); }
-	ue-asset-tile .AssetTile.is-selected:hover .AssetTile__card::after { box-shadow: inset 0 0 0 1px var(--primary-hover); }
-	ue-asset-tile .AssetTile:hover .AssetTile__name { color: var(--white); }
-	ue-asset-tile .AssetTile:hover .AssetTile__class { color: var(--white); opacity: 1; }
-	/* keyboard focus selector: SelectorFocusedBrush 1px, SelectorColor linear (0.701, 0.225, 0.003) = #da820a (StarshipCoreStyle.cpp:62,2007) */
-	ue-asset-tile .AssetTile:focus-visible .AssetTile__card { outline: 1px solid #da820a; outline-offset: 1px; }
-	.AssetTilePreview__grid { display: flex; flex-wrap: wrap; width: 328px; margin-bottom: 8px; }
-	.AssetTilePreview__status { margin: 4px 0 14px; font: 400 10.667px/1.3 var(--font-sans); color: var(--hover-2); min-height: 14px; }
+	.AssetTilePreview__grid { width: 328px; margin-bottom: 8px; }
+	.AssetTilePreview ue-asset-tile { font: 400 10.667px/1.3 var(--font-sans); color: var(--hover-2); }
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-	<defs>
-		<!-- approximation of Starship/ContentBrowser/folder.svg (64x64, not available) -->
-		<symbol id="at-folder" viewBox="0 0 64 64">
-			<path d="M2 13a2 2 0 0 1 2-2h18l5 6h33a2 2 0 0 1 2 2v31a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="currentColor"/>
-			<path d="M2 13a2 2 0 0 1 2-2h18l5 6H2z" fill="#fff" opacity=".12"/>
-			<path d="M2 24h60v26a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="#000" opacity=".12"/>
-		</symbol>
-		<symbol id="at-mesh" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></symbol>
-	</defs>
-</svg>
+<!-- The folder glyph approximates Starship/ContentBrowser/folder.svg (64x64, not available). It is inline in every folder tile. -->
 <div class="AssetTilePreview">
 	<h4>Live: hover a tile. Click selects, Ctrl/Cmd+click toggles, Shift+click selects a range. Double-click or Enter opens. Arrow keys, Home and End move.</h4>
 	<ue-asset-tile>
-		<div class="AssetTilePreview__grid">
-			<div class="AssetTile AssetTile--folder"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon"><use href="#at-folder"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Architecture</div></div></div></div>
-			<div class="AssetTile AssetTile--folder"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon"><use href="#at-folder"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Audio</div></div></div></div>
-			<div class="AssetTile AssetTile--folder"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon"><use href="#at-folder"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Blueprints</div></div></div></div>
-			<div class="AssetTile AssetTile--folder"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon"><use href="#at-folder"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Materials</div></div></div></div>
-			<div class="AssetTile AssetTile--asset"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg><use href="#at-mesh"/></svg><span class="AssetTile__strip" style="--strip:var(--accent-blue)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">SM_Chair</div><div class="AssetTile__class">Static Mesh</div></div></div></div>
-			<div class="AssetTile AssetTile--asset"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg><use href="#at-mesh"/></svg><span class="AssetTile__strip" style="--strip:var(--accent-blue)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">SM_Table</div><div class="AssetTile__class">Static Mesh</div></div></div></div>
-			<div class="AssetTile AssetTile--asset"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg><use href="#at-mesh"/></svg><span class="AssetTile__strip" style="--strip:var(--accent-green)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">M_Wood_Floor_Walnut_Polished</div><div class="AssetTile__class">Material</div></div></div></div>
-			<div class="AssetTile AssetTile--asset"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg><use href="#at-mesh"/></svg><span class="AssetTile__strip" style="--strip:var(--accent-orange)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">T_Brick_Clay_D</div><div class="AssetTile__class">Texture</div></div></div></div>
+		<div class="AssetTile-grid AssetTilePreview__grid">
+			<div class="AssetTile AssetTile--folder"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon" viewBox="0 0 64 64"><path d="M2 13a2 2 0 0 1 2-2h18l5 6h33a2 2 0 0 1 2 2v31a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="currentColor"/><path d="M2 13a2 2 0 0 1 2-2h18l5 6H2z" fill="#fff" opacity=".12"/><path d="M2 24h60v26a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="#000" opacity=".12"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Architecture</div></div></div></div>
+			<div class="AssetTile AssetTile--folder"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon" viewBox="0 0 64 64"><path d="M2 13a2 2 0 0 1 2-2h18l5 6h33a2 2 0 0 1 2 2v31a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="currentColor"/><path d="M2 13a2 2 0 0 1 2-2h18l5 6H2z" fill="#fff" opacity=".12"/><path d="M2 24h60v26a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="#000" opacity=".12"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Audio</div></div></div></div>
+			<div class="AssetTile AssetTile--folder"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon" viewBox="0 0 64 64"><path d="M2 13a2 2 0 0 1 2-2h18l5 6h33a2 2 0 0 1 2 2v31a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="currentColor"/><path d="M2 13a2 2 0 0 1 2-2h18l5 6H2z" fill="#fff" opacity=".12"/><path d="M2 24h60v26a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="#000" opacity=".12"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Blueprints</div></div></div></div>
+			<div class="AssetTile AssetTile--folder"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon" viewBox="0 0 64 64"><path d="M2 13a2 2 0 0 1 2-2h18l5 6h33a2 2 0 0 1 2 2v31a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="currentColor"/><path d="M2 13a2 2 0 0 1 2-2h18l5 6H2z" fill="#fff" opacity=".12"/><path d="M2 24h60v26a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="#000" opacity=".12"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Materials</div></div></div></div>
+			<div class="AssetTile AssetTile--asset"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><span class="AssetTile__strip" style="--strip:var(--accent-blue)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">SM_Chair</div><div class="AssetTile__class">Static Mesh</div></div></div></div>
+			<div class="AssetTile AssetTile--asset"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><span class="AssetTile__strip" style="--strip:var(--accent-blue)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">SM_Table</div><div class="AssetTile__class">Static Mesh</div></div></div></div>
+			<div class="AssetTile AssetTile--asset"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><span class="AssetTile__strip" style="--strip:var(--accent-green)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">M_Wood_Floor_Walnut_Polished</div><div class="AssetTile__class">Material</div></div></div></div>
+			<div class="AssetTile AssetTile--asset"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><span class="AssetTile__strip" style="--strip:var(--accent-orange)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">T_Brick_Clay_D</div><div class="AssetTile__class">Texture</div></div></div></div>
 		</div>
-		<div class="AssetTilePreview__status" role="status"></div>
+		<ue-event-status event="ue-tile-select" template="Selected: {ids}. "></ue-event-status>
+		<ue-event-status event="ue-tile-open" template="Opened: {id}"></ue-event-status>
+	</ue-asset-tile>
+	<h4>Single select (<code>select="single"</code>): Shift and Ctrl pick one tile.</h4>
+	<ue-asset-tile select="single">
+		<div class="AssetTile-grid AssetTilePreview__grid">
+			<div class="AssetTile AssetTile--folder" data-id="textures"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon" viewBox="0 0 64 64"><path d="M2 13a2 2 0 0 1 2-2h18l5 6h33a2 2 0 0 1 2 2v31a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="currentColor"/><path d="M2 13a2 2 0 0 1 2-2h18l5 6H2z" fill="#fff" opacity=".12"/><path d="M2 24h60v26a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="#000" opacity=".12"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Textures</div></div></div></div>
+			<div class="AssetTile AssetTile--asset" data-id="sm_lamp"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><span class="AssetTile__strip" style="--strip:var(--accent-blue)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">SM_Lamp</div><div class="AssetTile__class">Static Mesh</div></div></div></div>
+			<div class="AssetTile AssetTile--asset" data-id="m_metal"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><span class="AssetTile__strip" style="--strip:var(--accent-green)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">M_Metal</div><div class="AssetTile__class">Material</div></div></div></div>
+		</div>
+		<ue-event-status event="ue-tile-select" template="Selected: {ids}"></ue-event-status>
 	</ue-asset-tile>
 	<h4>Folder tile: normal / hovered / selected / selected + hovered (pinned)</h4>
-	<div class="AssetTilePreview__row">
-		<div class="AssetTile AssetTile--folder"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon"><use href="#at-folder"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Architecture</div></div></div></div>
-		<div class="AssetTile AssetTile--folder is-hover"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon"><use href="#at-folder"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Audio</div></div></div></div>
-		<div class="AssetTile AssetTile--folder is-selected"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon"><use href="#at-folder"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Blueprints</div></div></div></div>
-		<div class="AssetTile AssetTile--folder is-selected is-hover"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon"><use href="#at-folder"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Materials</div></div></div></div>
+	<div class="AssetTilePreview__row" data-pinned>
+		<div class="AssetTile AssetTile--folder"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon" viewBox="0 0 64 64"><path d="M2 13a2 2 0 0 1 2-2h18l5 6h33a2 2 0 0 1 2 2v31a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="currentColor"/><path d="M2 13a2 2 0 0 1 2-2h18l5 6H2z" fill="#fff" opacity=".12"/><path d="M2 24h60v26a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="#000" opacity=".12"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Architecture</div></div></div></div>
+		<div class="AssetTile AssetTile--folder is-hover"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon" viewBox="0 0 64 64"><path d="M2 13a2 2 0 0 1 2-2h18l5 6h33a2 2 0 0 1 2 2v31a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="currentColor"/><path d="M2 13a2 2 0 0 1 2-2h18l5 6H2z" fill="#fff" opacity=".12"/><path d="M2 24h60v26a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="#000" opacity=".12"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Audio</div></div></div></div>
+		<div class="AssetTile AssetTile--folder is-selected"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon" viewBox="0 0 64 64"><path d="M2 13a2 2 0 0 1 2-2h18l5 6h33a2 2 0 0 1 2 2v31a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="currentColor"/><path d="M2 13a2 2 0 0 1 2-2h18l5 6H2z" fill="#fff" opacity=".12"/><path d="M2 24h60v26a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="#000" opacity=".12"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Blueprints</div></div></div></div>
+		<div class="AssetTile AssetTile--folder is-selected is-hover"><div class="AssetTile__card"><div class="AssetTile__thumb"><svg class="AssetTile__folderIcon" viewBox="0 0 64 64"><path d="M2 13a2 2 0 0 1 2-2h18l5 6h33a2 2 0 0 1 2 2v31a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="currentColor"/><path d="M2 13a2 2 0 0 1 2-2h18l5 6H2z" fill="#fff" opacity=".12"/><path d="M2 24h60v26a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="#000" opacity=".12"/></svg></div><div class="AssetTile__nameArea"><div class="AssetTile__name">Materials</div></div></div></div>
 	</div>
 	<h4>Asset tile: normal / hovered / selected / selected + hovered (pinned)</h4>
-	<div class="AssetTilePreview__row">
-		<div class="AssetTile AssetTile--asset"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg><use href="#at-mesh"/></svg><span class="AssetTile__strip" style="--strip:var(--accent-blue)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">SM_Chair</div><div class="AssetTile__class">Static Mesh</div></div></div></div>
-		<div class="AssetTile AssetTile--asset is-hover"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg><use href="#at-mesh"/></svg><span class="AssetTile__strip" style="--strip:var(--accent-blue)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">SM_Table</div><div class="AssetTile__class">Static Mesh</div></div></div></div>
-		<div class="AssetTile AssetTile--asset is-selected"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg><use href="#at-mesh"/></svg><span class="AssetTile__strip" style="--strip:var(--accent-green)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">M_Wood_Floor_Walnut_Polished</div><div class="AssetTile__class">Material</div></div></div></div>
-		<div class="AssetTile AssetTile--asset is-selected is-hover"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg><use href="#at-mesh"/></svg><span class="AssetTile__strip" style="--strip:var(--accent-orange)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">T_Brick_Clay_D</div><div class="AssetTile__class">Texture</div></div></div></div>
+	<div class="AssetTilePreview__row" data-pinned>
+		<div class="AssetTile AssetTile--asset"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><span class="AssetTile__strip" style="--strip:var(--accent-blue)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">SM_Chair</div><div class="AssetTile__class">Static Mesh</div></div></div></div>
+		<div class="AssetTile AssetTile--asset is-hover"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><span class="AssetTile__strip" style="--strip:var(--accent-blue)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">SM_Table</div><div class="AssetTile__class">Static Mesh</div></div></div></div>
+		<div class="AssetTile AssetTile--asset is-selected"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><span class="AssetTile__strip" style="--strip:var(--accent-green)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">M_Wood_Floor_Walnut_Polished</div><div class="AssetTile__class">Material</div></div></div></div>
+		<div class="AssetTile AssetTile--asset is-selected is-hover"><div class="AssetTile__card"><div class="AssetTile__thumb"><div class="AssetTile__asset"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><span class="AssetTile__strip" style="--strip:var(--accent-orange)"></span></div></div><div class="AssetTile__nameArea"><div class="AssetTile__name">T_Brick_Clay_D</div><div class="AssetTile__class">Texture</div></div></div></div>
 	</div>
 </div>
 </body>

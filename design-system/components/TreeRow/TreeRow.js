@@ -36,6 +36,10 @@ var UeElement = class extends HTMLElement {
   emit(name, detail) {
     return this.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
   }
+  // True when the nearest element of this tag above the target is this element, so a nested instance keeps its own events.
+  owns(target) {
+    return target instanceof Element && target.closest(this.localName) === this;
+  }
   all(selector) {
     return Array.from(this.querySelectorAll(selector));
   }
@@ -77,6 +81,7 @@ var TreeController = class {
     return row.getAttribute("aria-expanded") === "true";
   }
   hasChildren(row) {
+    if (this.hooks.lazy?.(row)) return true;
     const next = row.nextElementSibling;
     return next instanceof HTMLElement && next.matches(this.parts.row) && this.level(next) > this.level(row);
   }
@@ -103,17 +108,19 @@ var TreeController = class {
         return;
       }
       hideBelow = Infinity;
-      const kids = index + 1 < rows.length && this.level(rows[index + 1]) > level;
-      const open = kids && this.isOpen(row);
+      const kids = index + 1 < rows.length && this.level(rows[index + 1]) > level || (this.hooks.lazy?.(row) ?? false);
+      const stored = kids && this.isOpen(row);
+      const open = stored || kids && (this.hooks.forceOpen?.(row) ?? false);
       const arrow = row.querySelector(this.parts.arrow);
       arrow?.classList.toggle("is-leaf", !kids);
       if (kids) {
-        row.setAttribute("aria-expanded", open ? "true" : "false");
+        row.setAttribute("aria-expanded", stored ? "true" : "false");
         this.#swap(arrow, open ? this.parts.caretOpen : this.parts.caretClosed);
         if (!open) hideBelow = level;
       } else {
         row.removeAttribute("aria-expanded");
       }
+      if (this.parts.openClass) row.classList.toggle(this.parts.openClass, open);
       this.#swap(row.querySelector(this.parts.folder), open ? this.parts.folderOpen : this.parts.folderClosed);
       row.setAttribute("aria-selected", this.isSelected(row) ? "true" : "false");
       if (this.hooks.excluded?.(row)) {
@@ -134,10 +141,13 @@ var TreeController = class {
     for (const row of this.rows()) row.classList.toggle("is-selected", set.has(row));
     if (anchor) this.#anchor = anchor;
     this.refresh();
+    this.hooks.selected?.(this.selected());
   }
   setOpen(row, open) {
+    const was = this.isOpen(row);
     row.setAttribute("aria-expanded", open ? "true" : "false");
     this.refresh();
+    if (was !== open) this.hooks.toggled?.(row, open);
   }
   focusRow(row, reveal) {
     for (const other of this.rows()) other.tabIndex = other === row ? 0 : -1;
@@ -145,7 +155,8 @@ var TreeController = class {
     if (reveal) row.scrollIntoView({ block: "nearest" });
   }
   // Plain: replace the selection. Shift: range from the anchor. Ctrl or cmd: toggle the row.
-  pick(row, mods, reveal) {
+  pick(row, given, reveal) {
+    const mods = this.hooks.multi === false ? { shiftKey: false, ctrlKey: false, metaKey: false } : given;
     const chosen = this.selected();
     const toggle = mods.ctrlKey || mods.metaKey;
     if (mods.shiftKey) {
@@ -240,27 +251,165 @@ var TreeController = class {
 };
 
 // design-system/src/TreeRow/TreeRow.ts
+var ARROW = '<svg class="tr-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4l4.5 4L6 12z"/></svg>';
+var FOLDER = '<svg class="tr-icon is-folder" viewBox="0 0 16 16" aria-hidden="true"><path class="tr-folder-closed" d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.5 4.5V12a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H5.2L3.8 11V4.5a1 1 0 0 1 1-1h2L8 5h5.5"/></svg>';
+var OBJECT = '<svg class="tr-icon is-object" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg>';
 var TreeRow = class extends UeElement {
+  #tree = null;
+  #controller = null;
+  #filter = null;
+  #kept = /* @__PURE__ */ new Set();
+  #parentsOfKept = /* @__PURE__ */ new Set();
+  #lastIds = "";
   setup() {
-    const tree = this.one(".tr-tree");
-    if (!tree) return;
-    const controller = new TreeController(tree, {
-      row: ".tr-row",
-      arrow: ".tr-arrow",
-      folder: ".tr-icon.is-folder",
-      caretOpen: "tr-caret-down",
-      caretClosed: "tr-caret-right",
-      folderOpen: "tr-folder-open",
-      folderClosed: "tr-folder"
-    });
+    const tree = this.#ownTree() ?? this.#createTree();
+    this.#tree = tree;
+    tree.setAttribute("role", "tree");
+    tree.setAttribute("aria-multiselectable", String(!this.#single()));
+    const controller = new TreeController(
+      tree,
+      {
+        row: ".tr-row",
+        arrow: ".tr-arrow",
+        folder: ".tr-icon.is-folder",
+        caretOpen: "",
+        caretClosed: "",
+        folderOpen: "",
+        folderClosed: "",
+        openClass: "is-open"
+      },
+      {
+        multi: !this.#single(),
+        excluded: (row) => this.#filter !== null && !this.#kept.has(row),
+        forceOpen: (row) => this.#filter !== null && this.#parentsOfKept.has(row),
+        lazy: (row) => row.dataset.expandable === "true",
+        toggled: (row, open) => this.emit("ue-tree-toggle", { id: this.#idOf(row), expanded: open }),
+        selected: () => this.#announceSelection()
+      }
+    );
+    this.#controller = controller;
     this.on(tree, "click", (event) => {
-      controller.click(event);
+      if (this.owns(event.target)) controller.click(event);
     });
-    this.on(tree, "dblclick", (event) => controller.doubleClick(event));
+    this.on(tree, "dblclick", (event) => {
+      if (this.owns(event.target)) controller.doubleClick(event);
+    });
     this.on(tree, "keydown", (event) => {
-      controller.keyDown(event);
+      if (this.owns(event.target)) controller.keyDown(event);
     });
+    this.#lastIds = this.getSelectedIds().join("\n");
     controller.refresh();
+  }
+  #single() {
+    return this.getAttribute("select") === "single";
+  }
+  // The first tree below this element that no nested instance owns.
+  #ownTree() {
+    return this.all(".tr-tree").find((tree) => tree.closest(this.localName) === this) ?? null;
+  }
+  #createTree() {
+    const tree = document.createElement("div");
+    tree.className = "tr-tree";
+    this.append(tree);
+    return tree;
+  }
+  #rows() {
+    return this.#controller?.rows() ?? [];
+  }
+  #idOf(row) {
+    return row.dataset.id ?? (row.querySelector(".tr-text")?.textContent ?? "").trim();
+  }
+  #rowOf(id) {
+    return this.#rows().find((row) => this.#idOf(row) === id);
+  }
+  #info(row) {
+    return { id: this.#idOf(row), label: (row.querySelector(".tr-text")?.textContent ?? "").trim(), depth: (this.#controller?.level(row) ?? 1) - 1 };
+  }
+  #announceSelection() {
+    const ids = this.getSelectedIds();
+    const key = ids.join("\n");
+    if (key === this.#lastIds) return;
+    this.#lastIds = key;
+    this.emit("ue-tree-select", { ids });
+  }
+  // Ids of the selected rows in tree order.
+  getSelectedIds() {
+    return this.#rows().filter((row) => row.classList.contains("is-selected")).map((row) => this.#idOf(row));
+  }
+  // Selects exactly these rows. Ids that name no row are ignored.
+  select(ids) {
+    const controller = this.#controller;
+    if (!controller) return;
+    const wanted = new Set(this.#single() ? ids.slice(0, 1) : ids);
+    const rows = this.#rows().filter((row) => wanted.has(this.#idOf(row)));
+    controller.setSelection(rows, rows[rows.length - 1] ?? null);
+  }
+  // Opens or closes one row.
+  setExpanded(id, expanded) {
+    const row = this.#rowOf(id);
+    if (row && this.#controller?.hasChildren(row)) this.#controller.setOpen(row, expanded);
+  }
+  // Replaces every row with rows drawn from data.
+  setRows(rows) {
+    const tree = this.#tree;
+    const controller = this.#controller;
+    if (!tree || !controller) return;
+    tree.replaceChildren(...rows.map((data) => this.#draw(data)));
+    this.#lastIds = this.getSelectedIds().join("\n");
+    this.#refilter();
+    controller.refresh();
+  }
+  #draw(data) {
+    const depth = data.depth ?? 0;
+    const row = document.createElement("div");
+    row.className = "tr-row" + (data.selected ? " is-selected" : "") + (data.dim ? " is-dim" : "");
+    row.setAttribute("role", "treeitem");
+    row.setAttribute("aria-level", String(depth + 1));
+    row.setAttribute("aria-expanded", data.expanded ? "true" : "false");
+    row.dataset.id = data.id;
+    if (data.expandable) row.dataset.expandable = "true";
+    const icon = data.icon ?? "object";
+    const cells = (data.cells ?? []).map(() => '<span class="tr-cell"></span>').join("");
+    row.innerHTML = '<span class="tr-indent" style="--depth:' + depth + '"></span>' + ARROW + (icon === "folder" ? FOLDER : icon === "object" ? OBJECT : "") + '<span class="tr-text"></span>' + cells;
+    const text = row.querySelector(".tr-text");
+    if (text) text.textContent = data.label;
+    const cellEls = row.querySelectorAll(".tr-cell");
+    (data.cells ?? []).forEach((value, i) => {
+      cellEls[i].textContent = value;
+    });
+    return row;
+  }
+  // Shows only the rows the filter accepts and their ancestors. Ancestors open while the filter is set. Null clears it.
+  setFilter(filter) {
+    if (typeof filter === "string") {
+      const needle = filter.trim().toLowerCase();
+      this.#filter = needle === "" ? null : (row) => row.label.toLowerCase().includes(needle);
+    } else {
+      this.#filter = filter;
+    }
+    this.#refilter();
+    this.#controller?.refresh();
+  }
+  #refilter() {
+    this.#kept = /* @__PURE__ */ new Set();
+    this.#parentsOfKept = /* @__PURE__ */ new Set();
+    const filter = this.#filter;
+    const controller = this.#controller;
+    if (!filter || !controller) return;
+    const rows = this.#rows();
+    rows.forEach((row, index) => {
+      if (!filter(this.#info(row))) return;
+      this.#kept.add(row);
+      let want = controller.level(row);
+      for (let j = index - 1; j >= 0 && want > 1; j--) {
+        const level = controller.level(rows[j]);
+        if (level < want) {
+          this.#kept.add(rows[j]);
+          this.#parentsOfKept.add(rows[j]);
+          want = level;
+        }
+      }
+    });
   }
 };
 define("ue-tree-row", TreeRow);

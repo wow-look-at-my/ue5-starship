@@ -81,7 +81,15 @@ const outliner = element(html.SceneOutliner, 'ue-scene-outliner');
 const browser = element(html.ContentBrowser, 'ue-content-browser');
 const status = element(html.StatusBar, 'ue-status-bar');
 
-const tab = (id: string, icon: string, label: string): string => '<div class="tabWell-tab tabWell-tab--foreground tabWell-tab--active" role="tab" tabindex="0" aria-selected="true" data-tab="' + id + '"><span class="tabWell-icon"><svg><use href="#tabWell-i-' + icon + '"/></svg></span><span class="tabWell-label">' + label + '</span><span class="tabWell-close"><svg><use href="#tabWell-i-close"/></svg></span></div>';
+const ICONS: Record<string, string> = {
+	details: 'M2.500 4h11 M2.500 8h11 M2.500 12h7',
+	outliner: 'M5.500 3.500h8 M5.500 8h8 M5.500 12.500h8 M2.500 3.500h.5 M2.500 8h.5 M2.500 12.500h.5',
+	folder: 'M2 4.500h4l1.500 1.500H14v6.500H2z',
+	world: 'M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3',
+	close: 'M4.500 4.500l7 7 M11.500 4.500l-7 7',
+};
+const glyph = (name: string): string => '<svg viewBox="0 0 16 16"><path d="' + ICONS[name] + '"/></svg>';
+const tab = (id: string, icon: string, label: string): string => '<div class="tabWell-tab tabWell-tab--foreground tabWell-tab--active" role="tab" tabindex="0" aria-selected="true" data-tab="' + id + '"><span class="tabWell-icon">' + glyph(icon) + '</span><span class="tabWell-label">' + label + '</span><span class="tabWell-close">' + glyph('close') + '</span></div>';
 const stack = (cls: string, id: string, icon: string, label: string, body: string): string => '<ue-tab-well><div class="tabWell-stack ' + cls + '" style="width:100%"><div class="tabWell-well" role="tablist" aria-label="' + label + '">' + tab(id, icon, label) + '</div><div class="tabWell-content el-body"><div role="tabpanel" data-panel="' + id + '">' + body + '</div></div></div></ue-tab-well>';
 
 const viewport = '<img class="el-viewport" src="' + (local ? LOCAL : BLOB) + '" alt="3D viewport placeholder">';

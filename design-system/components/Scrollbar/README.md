@@ -2,6 +2,34 @@
 
 An 8px rounded. Thumb on a transparent track, grey at rest and lighter when the pointer is over the bar or the thumb is dragged (UE 5.5.3 Starship `Scrollbar`).
 
+One `<ue-scrollbar>` wraps exactly one scroll box. It hides the native scrollbar of the view and draws this bar beside it.
+
+## Markup contract
+
+```html
+<ue-scrollbar>
+	<div class="sb-scroll">                      <!-- add is-h for a horizontal bar below the view -->
+		<div class="sb-view" tabindex="0">...scrolling content...</div>
+		<div class="sb sb-v" aria-hidden="true"><div class="sb-thumb"></div></div>
+	</div>
+</ue-scrollbar>
+```
+
+- `.sb-scroll` is a flex box. `.sb-view` is the native scroller: give it a width and a height, or let a parent size it. Focus it (`tabindex="0"`) and the arrow keys, Page Up, Page Down, Home and End scroll it.
+- The bar is the second child, `.sb`, with one `.sb-thumb`. The element sets the thumb position and size. It sets `hidden` on the bar while the content fits.
+- Slot classes: `sb-v` (vertical, 16px wide, the table, list and tree slot), `sb-box-v` (vertical, 12px, the ScrollBox slot), `sb-h` (horizontal, 16px tall). The bar stretches to the view along the scroll axis. Use `sb-scroll is-h` with `sb-h` for a horizontal box.
+- The thumb is 8px thick, at least 35px long, and has no track. `sb-well` in the preview is a demo background for a bar, not part of the component.
+- Wheel over the bar scrolls the view. A click on the track centres the thumb there. A drag moves the thumb and keeps tracking outside the bar.
+- Each scroll box has its own `<ue-scrollbar>`. A pinned bar specimen (`.sb` outside any `.sb-scroll`, with `data-pinned`) takes `is-hover` or `is-drag` for a forced state.
+
+## Events
+
+| Event | `detail` | When |
+|---|---|---|
+| `ue-scrollbar-visibility` | `{ visible: boolean }` | The bar showed or hid because the content stopped or started to overflow. It fires once with the first state in the task after setup, so a listener set up in the same page load sees it, whatever its position in the document |
+
+The event bubbles and is composed. `el.visible` reads the last state. A table header listens for this event to hide its 16px `.hr-spacer` while the bar is hidden (`ue-scene-outliner`).
+
 ## What the consumer provides
 
 - The orientation, the scroll offset fraction and the thumb size fraction (visible length divided by content length).

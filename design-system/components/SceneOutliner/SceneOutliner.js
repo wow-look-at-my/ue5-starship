@@ -36,6 +36,10 @@ var UeElement = class extends HTMLElement {
   emit(name, detail) {
     return this.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
   }
+  // True when the nearest element of this tag above the target is this element, so a nested instance keeps its own events.
+  owns(target) {
+    return target instanceof Element && target.closest(this.localName) === this;
+  }
   all(selector) {
     return Array.from(this.querySelectorAll(selector));
   }
@@ -77,6 +81,7 @@ var TreeController = class {
     return row.getAttribute("aria-expanded") === "true";
   }
   hasChildren(row) {
+    if (this.hooks.lazy?.(row)) return true;
     const next = row.nextElementSibling;
     return next instanceof HTMLElement && next.matches(this.parts.row) && this.level(next) > this.level(row);
   }
@@ -103,17 +108,19 @@ var TreeController = class {
         return;
       }
       hideBelow = Infinity;
-      const kids = index + 1 < rows.length && this.level(rows[index + 1]) > level;
-      const open = kids && this.isOpen(row);
+      const kids = index + 1 < rows.length && this.level(rows[index + 1]) > level || (this.hooks.lazy?.(row) ?? false);
+      const stored = kids && this.isOpen(row);
+      const open = stored || kids && (this.hooks.forceOpen?.(row) ?? false);
       const arrow = row.querySelector(this.parts.arrow);
       arrow?.classList.toggle("is-leaf", !kids);
       if (kids) {
-        row.setAttribute("aria-expanded", open ? "true" : "false");
+        row.setAttribute("aria-expanded", stored ? "true" : "false");
         this.#swap(arrow, open ? this.parts.caretOpen : this.parts.caretClosed);
         if (!open) hideBelow = level;
       } else {
         row.removeAttribute("aria-expanded");
       }
+      if (this.parts.openClass) row.classList.toggle(this.parts.openClass, open);
       this.#swap(row.querySelector(this.parts.folder), open ? this.parts.folderOpen : this.parts.folderClosed);
       row.setAttribute("aria-selected", this.isSelected(row) ? "true" : "false");
       if (this.hooks.excluded?.(row)) {
@@ -134,10 +141,13 @@ var TreeController = class {
     for (const row of this.rows()) row.classList.toggle("is-selected", set.has(row));
     if (anchor) this.#anchor = anchor;
     this.refresh();
+    this.hooks.selected?.(this.selected());
   }
   setOpen(row, open) {
+    const was = this.isOpen(row);
     row.setAttribute("aria-expanded", open ? "true" : "false");
     this.refresh();
+    if (was !== open) this.hooks.toggled?.(row, open);
   }
   focusRow(row, reveal) {
     for (const other of this.rows()) other.tabIndex = other === row ? 0 : -1;
@@ -145,7 +155,8 @@ var TreeController = class {
     if (reveal) row.scrollIntoView({ block: "nearest" });
   }
   // Plain: replace the selection. Shift: range from the anchor. Ctrl or cmd: toggle the row.
-  pick(row, mods, reveal) {
+  pick(row, given, reveal) {
+    const mods = this.hooks.multi === false ? { shiftKey: false, ctrlKey: false, metaKey: false } : given;
     const chosen = this.selected();
     const toggle = mods.ctrlKey || mods.metaKey;
     if (mods.shiftKey) {
@@ -359,6 +370,11 @@ function bindBar(view, bar, thumb, vertical, onFits) {
   observer.observe(view);
   observer.observe(bar);
   for (const child of Array.from(view.children)) observer.observe(child);
+  const mutations = new MutationObserver((records) => {
+    for (const record of records) for (const added of Array.from(record.addedNodes)) if (added instanceof Element) observer.observe(added);
+    update();
+  });
+  mutations.observe(view, { childList: true });
   update();
   return {
     update,
@@ -367,6 +383,7 @@ function bindBar(view, bar, thumb, vertical, onFits) {
       view.removeEventListener("scroll", onScroll);
       bar.removeEventListener("wheel", onWheel);
       observer.disconnect();
+      mutations.disconnect();
     }
   };
 }

@@ -15,119 +15,112 @@
 	.tr-head { grid-column: 1 / -1; font: 700 11px/1 var(--font-sans); letter-spacing: .06em; text-transform: uppercase; color: var(--foreground); opacity: .6; margin: 14px 0 6px; }
 	.tr-head:first-child { margin-top: 0; }
 
-	/* Row: min height 20 -- SceneOutlinerPublicTypes.h:222 RowHeight() */
-	.tr-row { display: flex; align-items: center; min-height: 20px; color: var(--foreground); background: var(--recessed); font-size: 13.333px; line-height: 16px; white-space: nowrap; overflow: hidden; }
-	.tr-row[hidden] { display: none; }
-	/* AlternatingRow odd = Background -- StarshipCoreStyle.cpp:2069 */
-	.tr-row.is-odd { background: var(--background); }
-	/* ActiveHighlightedBrush / InactiveHighlightedBrush = SelectParent -- StarshipCoreStyle.cpp:2015-2016 */
-	.tr-row.is-parent { background: var(--select-parent); }
-	/* EvenRowBackgroundHovered / OddRowBackgroundHovered = SelectHover -- StarshipCoreStyle.cpp:2002,2005. A hovered parent row uses this fill -- STableRow.h:1003-1017 */
-	.tr-row.is-hover, :where(.tr-tree) .tr-row:hover { background: var(--select-hover); }
-	/* ActiveBrush = Select; SelectedTextColor = ForegroundHover -- StarshipCoreStyle.cpp:2009,2019. Stays on hover -- STableRow.h:988-995 */
-	.tr-row.is-selected { background: var(--select); color: var(--foreground-hover); }
-	/* InactiveBrush = SelectInactive -- StarshipCoreStyle.cpp:2012. A tree without keyboard focus draws it -- STableRow.h:996-1001 */
-	.tr-row.is-selected.is-inactive, :where(.tr-tree):not(:focus-within) .tr-row.is-selected { background: var(--select-inactive); }
-	/* FSceneOutlinerCommonLabelData::DarkColor (0.15,0.15,0.15 linear) -- SceneOutlinerStandaloneTypes.cpp:18 */
-	.tr-row.is-dim .tr-text { color: #6c6c6c; }
-
-	/* Live tree: selection follows focus. The engine selector border is not drawn (README, Not drawn), so an unselected focused row gets a plain inset ring. */
-	.tr-tree { cursor: default; user-select: none; -webkit-user-select: none; }
-	.tr-tree .tr-row:focus { outline: none; }
-	.tr-tree .tr-row:focus-visible:not(.is-selected) { outline: 1px solid var(--primary); outline-offset: -1px; }
-
-	/* Indent: SExpanderArrow IndentAmount(12) -- SOutlinerTreeView.cpp:306; label slot padding-left 6 -- SOutlinerTreeView.cpp:304 */
-	.tr-indent { flex: none; width: calc(6px + var(--depth, 0) * 12px); }
-	/* Arrow button: 16x16 image, ContentPadding 0 -- SExpanderArrow.cpp:41; Icon16x16 -- StarshipCoreStyle.cpp:2072 */
-	.tr-arrow { flex: none; width: 16px; height: 16px; display: block; color: color-mix(in srgb, var(--foreground) 75%, #000); opacity: .6; }
-	.tr-row.is-selected .tr-arrow { color: var(--foreground); }
-	/* Hovered arrow uses ForegroundHover tint -- StarshipCoreStyle.cpp:2073,2075; subdued alpha 0.6 -- WidgetStyle.cpp:11 */
-	.tr-arrow.is-hover, :where(.tr-tree) .tr-arrow:hover { color: var(--foreground); }
-	.tr-row.is-selected .tr-arrow.is-hover, :where(.tr-tree) .tr-row.is-selected .tr-arrow:hover { color: var(--foreground-hover); }
-	.tr-arrow.is-leaf { visibility: hidden; }
-	/* Icon slot: 16x16, padding (0,1,6,1) -- SceneOutlinerPublicTypes.h:223-224 */
-	.tr-icon { flex: none; width: 16px; height: 16px; margin: 1px 6px 1px 0; display: block; }
-	/* Folder: AccentFolder tint x row foreground -- StarshipStyle.cpp:1140, ActorFolderTreeItem.cpp:70 */
-	.tr-icon.is-folder { color: color-mix(in srgb, var(--accent-folder) 75%, #000); }
-	.tr-row.is-selected .tr-icon.is-folder { color: var(--accent-folder); }
-	.tr-text { flex: 1 1 auto; min-width: 0; overflow: hidden; }
-	.tr-svg { width: 0; height: 0; position: absolute; }
+	/* A live specimen: one tree and the line that shows its latest event. The status element writes its text straight into this box. */
+	.tr-spec { align-self: start; font-size: 11px; line-height: 16px; color: var(--hover-2); min-height: 40px; }
+	.tr-eye { width: 16px; height: 16px; margin: 0 4px; flex: none; }
+	.tr-eye path { fill: none; stroke: currentColor; stroke-width: 1.2; stroke-linejoin: round; }
 </style>
 </head>
 <body>
-<!-- Approximated 16x16 stroke/fill icons. The Starship SVG files are not available. -->
-<svg class="tr-svg" aria-hidden="true">
-	<symbol id="tr-caret-right" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z" fill="currentColor"/></symbol>
-	<symbol id="tr-caret-down" viewBox="0 0 16 16"><path d="M4 6h8l-4 4.5z" fill="currentColor"/></symbol>
-	<symbol id="tr-folder" viewBox="0 0 16 16"><path d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z" fill="currentColor"/></symbol>
-	<symbol id="tr-folder-open" viewBox="0 0 16 16"><path d="M1.5 4.5V12a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H5.2L3.8 11V4.5a1 1 0 0 1 1-1h2L8 5h5.5" fill="currentColor"/></symbol>
-	<symbol id="tr-cube"viewBox="0 0 16 16"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></symbol>
-</svg>
+<!-- The Starship SVG files are not available. The icons are approximated 16x16 paths, inline in each row. -->
 
 <div class="tr-page">
 	<div class="tr-head">Live</div>
 
-	<ue-tree-row>
+	<div class="tr-spec">
+	<ue-tree-row id="tr-main">
 		<div class="tr-tree" role="tree" aria-label="Live tree" aria-multiselectable="true">
-			<div class="tr-row" role="treeitem" aria-level="1" aria-selected="false" aria-expanded="true" tabindex="0"><span class="tr-indent" style="--depth:0"></span><svg class="tr-arrow"><use href="#tr-caret-down"/></svg><svg class="tr-icon is-folder"><use href="#tr-folder-open"/></svg><span class="tr-text">Lights</span></div>
-			<div class="tr-row is-odd" role="treeitem" aria-level="2" aria-selected="false" tabindex="-1"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow is-leaf"><use href="#tr-caret-right"/></svg><svg class="tr-icon"><use href="#tr-cube"/></svg><span class="tr-text">Light Source</span></div>
-			<div class="tr-row" role="treeitem" aria-level="2" aria-selected="false" tabindex="-1"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow is-leaf"><use href="#tr-caret-right"/></svg><svg class="tr-icon"><use href="#tr-cube"/></svg><span class="tr-text">SkyLight</span></div>
-			<div class="tr-row is-odd" role="treeitem" aria-level="2" aria-selected="false" tabindex="-1"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow is-leaf"><use href="#tr-caret-right"/></svg><svg class="tr-icon"><use href="#tr-cube"/></svg><span class="tr-text">PointLight</span></div>
-			<div class="tr-row" role="treeitem" aria-level="1" aria-selected="false" aria-expanded="true" tabindex="-1"><span class="tr-indent" style="--depth:0"></span><svg class="tr-arrow"><use href="#tr-caret-down"/></svg><svg class="tr-icon is-folder"><use href="#tr-folder-open"/></svg><span class="tr-text">StaticMeshes</span></div>
-			<div class="tr-row is-odd" role="treeitem" aria-level="2" aria-selected="false" tabindex="-1"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow is-leaf"><use href="#tr-caret-right"/></svg><svg class="tr-icon"><use href="#tr-cube"/></svg><span class="tr-text">Chair</span></div>
-			<div class="tr-row" role="treeitem" aria-level="2" aria-selected="false" tabindex="-1"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow is-leaf"><use href="#tr-caret-right"/></svg><svg class="tr-icon"><use href="#tr-cube"/></svg><span class="tr-text">Table</span></div>
-			<div class="tr-row is-odd" role="treeitem" aria-level="2" aria-selected="false" aria-expanded="false" tabindex="-1"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow"><use href="#tr-caret-right"/></svg><svg class="tr-icon is-folder"><use href="#tr-folder"/></svg><span class="tr-text">Furniture</span></div>
-			<div class="tr-row" role="treeitem" aria-level="3" aria-selected="false" tabindex="-1" hidden><span class="tr-indent" style="--depth:2"></span><svg class="tr-arrow is-leaf"><use href="#tr-caret-right"/></svg><svg class="tr-icon"><use href="#tr-cube"/></svg><span class="tr-text">Sofa</span></div>
-			<div class="tr-row is-odd" role="treeitem" aria-level="3" aria-selected="false" tabindex="-1" hidden><span class="tr-indent" style="--depth:2"></span><svg class="tr-arrow is-leaf"><use href="#tr-caret-right"/></svg><svg class="tr-icon"><use href="#tr-cube"/></svg><span class="tr-text">Bookshelf</span></div>
-			<div class="tr-row" role="treeitem" aria-level="1" aria-selected="false" aria-expanded="true" tabindex="-1"><span class="tr-indent" style="--depth:0"></span><svg class="tr-arrow"><use href="#tr-caret-down"/></svg><svg class="tr-icon is-folder"><use href="#tr-folder-open"/></svg><span class="tr-text">Audio</span></div>
-			<div class="tr-row is-odd" role="treeitem" aria-level="2" aria-selected="false" tabindex="-1"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow is-leaf"><use href="#tr-caret-right"/></svg><svg class="tr-icon"><use href="#tr-cube"/></svg><span class="tr-text">Starter_Background</span></div>
+			<div class="tr-row" role="treeitem" aria-level="1" aria-selected="false" aria-expanded="true" tabindex="0"><span class="tr-indent" style="--depth:0"></span><svg class="tr-arrow" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-folder" viewBox="0 0 16 16"><path class="tr-folder-closed" d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.5 4.5V12a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H5.2L3.8 11V4.5a1 1 0 0 1 1-1h2L8 5h5.5"/></svg><span class="tr-text">Lights</span></div>
+			<div class="tr-row is-odd" role="treeitem" aria-level="2" aria-selected="false" tabindex="-1"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow is-leaf" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-object" viewBox="0 0 16 16"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg><span class="tr-text">Light Source</span></div>
+			<div class="tr-row" role="treeitem" aria-level="2" aria-selected="false" tabindex="-1"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow is-leaf" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-object" viewBox="0 0 16 16"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg><span class="tr-text">SkyLight</span></div>
+			<div class="tr-row is-odd" role="treeitem" aria-level="2" aria-selected="false" tabindex="-1"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow is-leaf" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-object" viewBox="0 0 16 16"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg><span class="tr-text">PointLight</span></div>
+			<div class="tr-row" role="treeitem" aria-level="1" aria-selected="false" aria-expanded="true" tabindex="-1"><span class="tr-indent" style="--depth:0"></span><svg class="tr-arrow" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-folder" viewBox="0 0 16 16"><path class="tr-folder-closed" d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.5 4.5V12a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H5.2L3.8 11V4.5a1 1 0 0 1 1-1h2L8 5h5.5"/></svg><span class="tr-text">StaticMeshes</span></div>
+			<div class="tr-row is-odd" role="treeitem" aria-level="2" aria-selected="false" tabindex="-1"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow is-leaf" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-object" viewBox="0 0 16 16"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg><span class="tr-text">Chair</span></div>
+			<div class="tr-row" role="treeitem" aria-level="2" aria-selected="false" tabindex="-1"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow is-leaf" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-object" viewBox="0 0 16 16"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg><span class="tr-text">Table</span></div>
+			<div class="tr-row is-odd" role="treeitem" aria-level="2" aria-selected="false" aria-expanded="false" tabindex="-1"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-folder" viewBox="0 0 16 16"><path class="tr-folder-closed" d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.5 4.5V12a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H5.2L3.8 11V4.5a1 1 0 0 1 1-1h2L8 5h5.5"/></svg><span class="tr-text">Furniture</span></div>
+			<div class="tr-row" role="treeitem" aria-level="3" aria-selected="false" tabindex="-1" hidden><span class="tr-indent" style="--depth:2"></span><svg class="tr-arrow is-leaf" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-object" viewBox="0 0 16 16"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg><span class="tr-text">Sofa</span></div>
+			<div class="tr-row is-odd" role="treeitem" aria-level="3" aria-selected="false" tabindex="-1" hidden><span class="tr-indent" style="--depth:2"></span><svg class="tr-arrow is-leaf" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-object" viewBox="0 0 16 16"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg><span class="tr-text">Bookshelf</span></div>
+			<div class="tr-row" role="treeitem" aria-level="1" aria-selected="false" aria-expanded="true" tabindex="-1"><span class="tr-indent" style="--depth:0"></span><svg class="tr-arrow" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-folder" viewBox="0 0 16 16"><path class="tr-folder-closed" d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.5 4.5V12a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H5.2L3.8 11V4.5a1 1 0 0 1 1-1h2L8 5h5.5"/></svg><span class="tr-text">Audio</span></div>
+			<div class="tr-row is-odd" role="treeitem" aria-level="2" aria-selected="false" tabindex="-1"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow is-leaf" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-object" viewBox="0 0 16 16"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg><span class="tr-text">Starter_Background</span></div>
 		</div>
 	</ue-tree-row>
+	<ue-event-status event="ue-tree-select" template="Selected: {ids}"></ue-event-status>
+	</div>
 	<div class="tr-cap is-live">Live. Hover a row. Click to select, ctrl or cmd-click to toggle, shift-click for a range. Click a caret, or double-click a row, to expand. Focus the tree, then use Up, Down, Left, Right, Home, End, Space and Enter. Click outside the tree and the selection turns inactive. Select a row inside Furniture, then collapse it: its parents keep the tint.</div>
+
+	<div class="tr-head">Source tree: compact rows, indent 0 + 10 per level, single select</div>
+
+	<div class="tr-spec">
+	<ue-tree-row id="tr-source" select="single">
+		<div class="tr-tree is-compact" role="tree" aria-label="Source tree">
+			<div class="tr-row" role="treeitem" aria-level="1" aria-expanded="true" data-id="content" tabindex="0"><span class="tr-indent" style="--depth:0"></span><svg class="tr-arrow" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-folder" viewBox="0 0 16 16"><path class="tr-folder-closed" d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.5 4.5V12a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H5.2L3.8 11V4.5a1 1 0 0 1 1-1h2L8 5h5.5"/></svg><span class="tr-text">Content</span></div>
+			<div class="tr-row" role="treeitem" aria-level="2" aria-expanded="false" data-id="maps" tabindex="-1"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-folder" viewBox="0 0 16 16"><path class="tr-folder-closed" d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.5 4.5V12a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H5.2L3.8 11V4.5a1 1 0 0 1 1-1h2L8 5h5.5"/></svg><span class="tr-text">Maps</span></div>
+			<div class="tr-row" role="treeitem" aria-level="3" data-id="maps/levels" tabindex="-1" hidden><span class="tr-indent" style="--depth:2"></span><svg class="tr-arrow is-leaf" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-folder" viewBox="0 0 16 16"><path class="tr-folder-closed" d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.5 4.5V12a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H5.2L3.8 11V4.5a1 1 0 0 1 1-1h2L8 5h5.5"/></svg><span class="tr-text">Levels</span></div>
+			<div class="tr-row" role="treeitem" aria-level="2" data-id="materials" tabindex="-1"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow is-leaf" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-folder" viewBox="0 0 16 16"><path class="tr-folder-closed" d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.5 4.5V12a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H5.2L3.8 11V4.5a1 1 0 0 1 1-1h2L8 5h5.5"/></svg><span class="tr-text">Materials</span></div>
+			<div class="tr-row" role="treeitem" aria-level="2" data-id="meshes" tabindex="-1"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow is-leaf" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-folder" viewBox="0 0 16 16"><path class="tr-folder-closed" d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.5 4.5V12a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H5.2L3.8 11V4.5a1 1 0 0 1 1-1h2L8 5h5.5"/></svg><span class="tr-text">Meshes</span></div>
+		</div>
+	</ue-tree-row>
+	<ue-event-status event="ue-tree-select" template="Selected: {ids}"></ue-event-status>
+	</div>
+	<div class="tr-cap is-live">Live, <code>select="single"</code>. Shift and Ctrl clicks select one row. Rows are 16px, the root row 19px. The indent comes from <code>--tree-indent-base: 0px</code> and <code>--tree-indent-step: 10px</code>, and the arrow and folder keep full strength.</div>
+
+	<div class="tr-head">Extra columns: a leading cell and a trailing cell</div>
+
+	<div class="tr-spec">
+	<ue-tree-row id="tr-columns">
+		<div class="tr-tree" role="tree" aria-label="Tree with columns" aria-multiselectable="true">
+			<div class="tr-row" role="treeitem" aria-level="1" aria-expanded="true" data-id="lights" tabindex="0"><span class="tr-cell" style="width:24px"><svg class="tr-eye" viewBox="0 0 16 16"><path d="M1.5 8C3 5.2 5.3 3.8 8 3.8s5 1.4 6.5 4.2c-1.5 2.8-3.8 4.2-6.5 4.2S3 10.8 1.5 8z"/><circle cx="8" cy="8" r="2.1"/></svg></span><span class="tr-indent" style="--depth:0"></span><svg class="tr-arrow" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-folder" viewBox="0 0 16 16"><path class="tr-folder-closed" d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.5 4.5V12a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H5.2L3.8 11V4.5a1 1 0 0 1 1-1h2L8 5h5.5"/></svg><span class="tr-text">Lights</span><span class="tr-cell">Folder</span></div>
+			<div class="tr-row" role="treeitem" aria-level="2" data-id="sun" tabindex="-1"><span class="tr-cell" style="width:24px"><svg class="tr-eye" viewBox="0 0 16 16"><path d="M1.5 8C3 5.2 5.3 3.8 8 3.8s5 1.4 6.5 4.2c-1.5 2.8-3.8 4.2-6.5 4.2S3 10.8 1.5 8z"/><circle cx="8" cy="8" r="2.1"/></svg></span><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow is-leaf" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-object" viewBox="0 0 16 16"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg><span class="tr-text">Sun</span><span class="tr-cell">DirectionalLight</span></div>
+			<div class="tr-row" role="treeitem" aria-level="2" data-id="sky" tabindex="-1"><span class="tr-cell" style="width:24px"><svg class="tr-eye" viewBox="0 0 16 16"><path d="M1.5 8C3 5.2 5.3 3.8 8 3.8s5 1.4 6.5 4.2c-1.5 2.8-3.8 4.2-6.5 4.2S3 10.8 1.5 8z"/><circle cx="8" cy="8" r="2.1"/></svg></span><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow is-leaf" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-object" viewBox="0 0 16 16"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg><span class="tr-text">SkyLight</span><span class="tr-cell">SkyLight</span></div>
+		</div>
+	</ue-tree-row>
+	<ue-event-status event="ue-tree-toggle" template="Toggled: {id} (expanded: {expanded})"></ue-event-status>
+	</div>
+	<div class="tr-cap is-live">Live. Any child of the row that is not the arrow, the icon or the label is a free cell: <code>.tr-cell</code> is a fixed-width box, 80px unless you set a width. The line under the tree shows the latest <code>ue-tree-toggle</code>.</div>
 
 	<div class="tr-head">Row states (pinned)</div>
 
-	<div class="tr-row"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow"><use href="#tr-caret-down"/></svg><svg class="tr-icon is-folder"><use href="#tr-folder"/></svg><span class="tr-text">Lights</span></div>
+	<div class="tr-row is-open"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-folder" viewBox="0 0 16 16"><path class="tr-folder-closed" d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.5 4.5V12a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H5.2L3.8 11V4.5a1 1 0 0 1 1-1h2L8 5h5.5"/></svg><span class="tr-text">Lights</span></div>
 	<div class="tr-cap">normal, even row -- Recessed</div>
 
-	<div class="tr-row is-odd"><span class="tr-indent" style="--depth:2"></span><svg class="tr-arrow is-leaf"><use href="#tr-caret-right"/></svg><svg class="tr-icon"><use href="#tr-cube"/></svg><span class="tr-text">Light Source</span></div>
+	<div class="tr-row is-odd"><span class="tr-indent" style="--depth:2"></span><svg class="tr-arrow is-leaf" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-object" viewBox="0 0 16 16"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg><span class="tr-text">Light Source</span></div>
 	<div class="tr-cap">normal, odd row -- Background</div>
 
-	<div class="tr-row is-hover"><span class="tr-indent" style="--depth:2"></span><svg class="tr-arrow is-leaf"><use href="#tr-caret-right"/></svg><svg class="tr-icon"><use href="#tr-cube"/></svg><span class="tr-text">SkyLight</span></div>
+	<div class="tr-row is-hover"><span class="tr-indent" style="--depth:2"></span><svg class="tr-arrow is-leaf" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-object" viewBox="0 0 16 16"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg><span class="tr-text">SkyLight</span></div>
 	<div class="tr-cap">hovered -- SelectHover</div>
 
-	<div class="tr-row is-selected"><span class="tr-indent" style="--depth:2"></span><svg class="tr-arrow is-leaf"><use href="#tr-caret-right"/></svg><svg class="tr-icon"><use href="#tr-cube"/></svg><span class="tr-text">Chair</span></div>
+	<div class="tr-row is-selected"><span class="tr-indent" style="--depth:2"></span><svg class="tr-arrow is-leaf" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-object" viewBox="0 0 16 16"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg><span class="tr-text">Chair</span></div>
 	<div class="tr-cap">selected, tree focused -- Select</div>
 
-	<div class="tr-row is-selected is-inactive"><span class="tr-indent" style="--depth:2"></span><svg class="tr-arrow is-leaf"><use href="#tr-caret-right"/></svg><svg class="tr-icon"><use href="#tr-cube"/></svg><span class="tr-text">Chair</span></div>
+	<div class="tr-row is-selected is-inactive"><span class="tr-indent" style="--depth:2"></span><svg class="tr-arrow is-leaf" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-object" viewBox="0 0 16 16"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg><span class="tr-text">Chair</span></div>
 	<div class="tr-cap">selected, tree not focused -- SelectInactive</div>
 
-	<div class="tr-row is-parent"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow"><use href="#tr-caret-down"/></svg><svg class="tr-icon is-folder"><use href="#tr-folder"/></svg><span class="tr-text">StaticMeshes</span></div>
+	<div class="tr-row is-parent is-open"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-folder" viewBox="0 0 16 16"><path class="tr-folder-closed" d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.5 4.5V12a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H5.2L3.8 11V4.5a1 1 0 0 1 1-1h2L8 5h5.5"/></svg><span class="tr-text">StaticMeshes</span></div>
 	<div class="tr-cap">parent of selection -- SelectParent</div>
 
-	<div class="tr-row is-odd is-dim"><span class="tr-indent" style="--depth:2"></span><svg class="tr-arrow is-leaf"><use href="#tr-caret-right"/></svg><svg class="tr-icon"><use href="#tr-cube"/></svg><span class="tr-text">Not interactive</span></div>
+	<div class="tr-row is-odd is-dim"><span class="tr-indent" style="--depth:2"></span><svg class="tr-arrow is-leaf" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-object" viewBox="0 0 16 16"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg><span class="tr-text">Not interactive</span></div>
 	<div class="tr-cap">label that cannot interact -- DarkColor</div>
 
 	<div class="tr-head">Expander arrow (pinned)</div>
 
-	<div class="tr-row"><span class="tr-indent" style="--depth:0"></span><svg class="tr-arrow"><use href="#tr-caret-right"/></svg><span class="tr-text">collapsed</span></div>
+	<div class="tr-row"><span class="tr-indent" style="--depth:0"></span><svg class="tr-arrow" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><span class="tr-text">collapsed</span></div>
 	<div class="tr-cap">TreeArrow_Collapsed</div>
-	<div class="tr-row is-odd"><span class="tr-indent" style="--depth:0"></span><svg class="tr-arrow"><use href="#tr-caret-down"/></svg><span class="tr-text">expanded</span></div>
+	<div class="tr-row is-odd is-open"><span class="tr-indent" style="--depth:0"></span><svg class="tr-arrow" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><span class="tr-text">expanded</span></div>
 	<div class="tr-cap">TreeArrow_Expanded</div>
-	<div class="tr-row"><span class="tr-indent" style="--depth:0"></span><svg class="tr-arrow is-hover"><use href="#tr-caret-right"/></svg><span class="tr-text">collapsed, arrow hovered</span></div>
+	<div class="tr-row"><span class="tr-indent" style="--depth:0"></span><svg class="tr-arrow is-hover" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><span class="tr-text">collapsed, arrow hovered</span></div>
 	<div class="tr-cap">TreeArrow_Collapsed_Hovered</div>
-	<div class="tr-row is-odd"><span class="tr-indent" style="--depth:0"></span><svg class="tr-arrow is-hover"><use href="#tr-caret-down"/></svg><span class="tr-text">expanded, arrow hovered</span></div>
+	<div class="tr-row is-odd is-open"><span class="tr-indent" style="--depth:0"></span><svg class="tr-arrow is-hover" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><span class="tr-text">expanded, arrow hovered</span></div>
 	<div class="tr-cap">TreeArrow_Expanded_Hovered</div>
 
 	<div class="tr-head">Indentation, 12 per level (pinned)</div>
 
-	<div class="tr-row"><span class="tr-indent" style="--depth:0"></span><svg class="tr-arrow"><use href="#tr-caret-down"/></svg><svg class="tr-icon"><use href="#tr-cube"/></svg><span class="tr-text">level 0</span></div>
+	<div class="tr-row is-open"><span class="tr-indent" style="--depth:0"></span><svg class="tr-arrow" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-object" viewBox="0 0 16 16"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg><span class="tr-text">level 0</span></div>
 	<div class="tr-cap">6 + 0 x 12</div>
-	<div class="tr-row is-odd"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow"><use href="#tr-caret-down"/></svg><svg class="tr-icon is-folder"><use href="#tr-folder"/></svg><span class="tr-text">level 1</span></div>
+	<div class="tr-row is-odd is-open"><span class="tr-indent" style="--depth:1"></span><svg class="tr-arrow" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-folder" viewBox="0 0 16 16"><path class="tr-folder-closed" d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.5 4.5V12a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H5.2L3.8 11V4.5a1 1 0 0 1 1-1h2L8 5h5.5"/></svg><span class="tr-text">level 1</span></div>
 	<div class="tr-cap">6 + 1 x 12</div>
-	<div class="tr-row"><span class="tr-indent" style="--depth:2"></span><svg class="tr-arrow"><use href="#tr-caret-down"/></svg><svg class="tr-icon is-folder"><use href="#tr-folder"/></svg><span class="tr-text">level 2</span></div>
+	<div class="tr-row is-open"><span class="tr-indent" style="--depth:2"></span><svg class="tr-arrow" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-folder" viewBox="0 0 16 16"><path class="tr-folder-closed" d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.5 4.5V12a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H5.2L3.8 11V4.5a1 1 0 0 1 1-1h2L8 5h5.5"/></svg><span class="tr-text">level 2</span></div>
 	<div class="tr-cap">6 + 2 x 12</div>
-	<div class="tr-row is-odd"><span class="tr-indent" style="--depth:3"></span><svg class="tr-arrow is-leaf"><use href="#tr-caret-right"/></svg><svg class="tr-icon"><use href="#tr-cube"/></svg><span class="tr-text">level 3 (leaf keeps the arrow slot)</span></div>
+	<div class="tr-row is-odd"><span class="tr-indent" style="--depth:3"></span><svg class="tr-arrow is-leaf" viewBox="0 0 16 16"><path d="M6 4l4.5 4L6 12z"/></svg><svg class="tr-icon is-object" viewBox="0 0 16 16"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg><span class="tr-text">level 3 (leaf keeps the arrow slot)</span></div>
 	<div class="tr-cap">6 + 3 x 12</div>
 </div>
 </body>

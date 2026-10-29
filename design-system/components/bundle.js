@@ -38,6 +38,10 @@
     emit(name, detail) {
       return this.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
     }
+    // True when the nearest element of this tag above the target is this element, so a nested instance keeps its own events.
+    owns(target) {
+      return target instanceof Element && target.closest(this.localName) === this;
+    }
     all(selector) {
       return Array.from(this.querySelectorAll(selector));
     }
@@ -399,55 +403,131 @@
 
   // design-system/src/AssetTile/AssetTile.ts
   var SELECTED = "is-selected";
+  var FOLDER = '<svg class="AssetTile__folderIcon" viewBox="0 0 64 64" aria-hidden="true"><path d="M2 13a2 2 0 0 1 2-2h18l5 6h33a2 2 0 0 1 2 2v31a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="currentColor"/><path d="M2 13a2 2 0 0 1 2-2h18l5 6H2z" fill="#fff" opacity=".12"/><path d="M2 24h60v26a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="#000" opacity=".12"/></svg>';
+  var CUBE = '<svg viewBox="0 0 32 32" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg>';
   var AssetTileElement = class extends UeElement {
     #anchor = null;
-    #opened = "";
+    #grid = null;
+    #lastIds = "";
     setup() {
       this.#anchor = null;
-      this.#opened = "";
-      for (const group of this.#groups()) {
-        group.setAttribute("role", "listbox");
-        group.setAttribute("aria-multiselectable", "true");
-        for (const tile of this.#tiles(group)) {
-          tile.setAttribute("role", "option");
-          tile.setAttribute("aria-selected", String(tile.classList.contains(SELECTED)));
-        }
-        this.#rove(group, null);
+      const grid = this.all(".AssetTile-grid").find((candidate) => this.owns(candidate)) ?? this.#createGrid();
+      this.#grid = grid;
+      grid.setAttribute("role", "listbox");
+      grid.setAttribute("aria-multiselectable", String(!this.#single()));
+      for (const tile of this.#tiles()) {
+        tile.setAttribute("role", "option");
+        tile.setAttribute("aria-selected", String(tile.classList.contains(SELECTED)));
       }
-      this.#status();
-      this.on(this, "click", (event) => this.#click(event));
-      this.on(this, "dblclick", (event) => this.#open(this.#tileAt(event.target)));
-      this.on(this, "keydown", (event) => this.#keydown(event));
+      this.#rove(null);
+      this.#lastIds = this.getSelectedIds().join("\n");
+      this.on(this, "click", (event) => {
+        if (this.owns(event.target)) this.#click(event);
+      });
+      this.on(this, "dblclick", (event) => {
+        if (this.owns(event.target)) this.#open(this.#tileAt(event.target));
+      });
+      this.on(this, "keydown", (event) => {
+        if (this.owns(event.target)) this.#keydown(event);
+      });
     }
-    #groups() {
-      const groups = /* @__PURE__ */ new Set();
-      for (const tile of this.all(".AssetTile")) if (tile.parentElement) groups.add(tile.parentElement);
-      return Array.from(groups);
+    #createGrid() {
+      const grid = document.createElement("div");
+      grid.className = "AssetTile-grid";
+      this.append(grid);
+      return grid;
     }
-    #tiles(group) {
-      return Array.from(group.children).filter((child2) => child2 instanceof HTMLElement && child2.classList.contains("AssetTile"));
+    // select="single" makes every click and key pick one tile. The default is multiple selection.
+    #single() {
+      return this.getAttribute("select") === "single";
+    }
+    #tiles() {
+      return Array.from(this.#grid?.children ?? []).filter((child2) => child2 instanceof HTMLElement && child2.classList.contains("AssetTile"));
     }
     #tileAt(target) {
-      return target instanceof Element ? target.closest(".AssetTile") : null;
+      const tile = target instanceof Element ? target.closest(".AssetTile") : null;
+      return tile && this.#tiles().includes(tile) ? tile : null;
     }
     #name(tile) {
       return (tile.querySelector(".AssetTile__name")?.textContent ?? "").trim();
     }
-    // One tile per group takes the Tab stop: `stop`, else the first selected tile, else the first tile.
-    #rove(group, stop) {
-      const tiles = this.#tiles(group);
+    #idOf(tile) {
+      return tile.dataset.id ?? this.#name(tile);
+    }
+    // Ids of the selected tiles in grid order.
+    getSelectedIds() {
+      return this.#tiles().filter((tile) => tile.classList.contains(SELECTED)).map((tile) => this.#idOf(tile));
+    }
+    // Selects exactly these tiles. Ids that name no tile are ignored. A single-select grid keeps the first.
+    select(ids) {
+      const wanted = new Set(this.#single() ? ids.slice(0, 1) : ids);
+      const tiles = this.#tiles();
+      for (const tile of tiles) this.#mark(tile, wanted.has(this.#idOf(tile)));
+      this.#anchor = tiles.find((tile) => tile.classList.contains(SELECTED)) ?? null;
+      this.#rove(this.#anchor);
+      this.#announce();
+    }
+    // Replaces every tile with tiles drawn from data.
+    setTiles(tiles) {
+      const grid = this.#grid;
+      if (!grid) return;
+      grid.replaceChildren(...tiles.map((data) => this.#draw(data)));
+      this.#anchor = null;
+      this.#rove(null);
+      this.#lastIds = this.getSelectedIds().join("\n");
+    }
+    #draw(data) {
+      const tile = document.createElement("div");
+      const folder = data.kind === "folder";
+      tile.className = "AssetTile " + (folder ? "AssetTile--folder" : "AssetTile--asset") + (data.selected ? " " + SELECTED : "");
+      tile.dataset.id = data.id;
+      tile.setAttribute("role", "option");
+      tile.setAttribute("aria-selected", String(data.selected === true));
+      const thumb = folder ? FOLDER : '<div class="AssetTile__asset"><span class="AssetTile__glyph"></span><span class="AssetTile__strip"></span></div>';
+      tile.innerHTML = '<div class="AssetTile__card"><div class="AssetTile__thumb">' + thumb + '</div><div class="AssetTile__nameArea"><div class="AssetTile__name"></div>' + (folder ? "" : '<div class="AssetTile__class"></div>') + "</div></div>";
+      const name = tile.querySelector(".AssetTile__name");
+      if (name) name.textContent = data.label;
+      if (!folder) {
+        const holder = tile.querySelector(".AssetTile__glyph");
+        if (holder && data.thumb) {
+          const image = document.createElement("img");
+          image.className = "AssetTile__image";
+          image.src = data.thumb;
+          image.alt = "";
+          holder.replaceWith(image);
+        } else {
+          holder?.insertAdjacentHTML("afterend", CUBE);
+          holder?.remove();
+        }
+        const kind = tile.querySelector(".AssetTile__class");
+        if (kind) kind.textContent = data.typeLabel ?? "";
+        if (data.strip) tile.querySelector(".AssetTile__strip")?.style.setProperty("--strip", data.strip);
+      }
+      return tile;
+    }
+    // One tile takes the Tab stop: `stop`, else the first selected tile, else the first tile.
+    #rove(stop) {
+      const tiles = this.#tiles();
       const chosen = stop ?? tiles.find((tile) => tile.classList.contains(SELECTED)) ?? tiles[0];
       for (const tile of tiles) tile.tabIndex = tile === chosen ? 0 : -1;
+    }
+    // Announces the selection when it differs from the last one announced.
+    #announce() {
+      const ids = this.getSelectedIds();
+      const key = ids.join("\n");
+      if (key === this.#lastIds) return;
+      this.#lastIds = key;
+      this.emit("ue-tile-select", { ids });
     }
     #mark(tile, selected) {
       tile.classList.toggle(SELECTED, selected);
       tile.setAttribute("aria-selected", String(selected));
     }
     // Applies a click or key movement to the selection of the tile's group.
-    #choose(tile, toggle, range) {
-      const group = tile.parentElement;
-      if (!group) return;
-      const tiles = this.#tiles(group);
+    #choose(tile, wantToggle, wantRange) {
+      const toggle = wantToggle && !this.#single();
+      const range = wantRange && !this.#single();
+      const tiles = this.#tiles();
       if (range && this.#anchor && tiles.includes(this.#anchor)) {
         const from = tiles.indexOf(this.#anchor);
         const to = tiles.indexOf(tile);
@@ -459,9 +539,8 @@
         for (const each of tiles) this.#mark(each, each === tile);
         this.#anchor = tile;
       }
-      this.#rove(group, tile);
-      this.#status();
-      this.emit("assettile:select", { names: tiles.filter((each) => each.classList.contains(SELECTED)).map((each) => this.#name(each)) });
+      this.#rove(tile);
+      this.#announce();
     }
     #click(event) {
       const tile = this.#tileAt(event.target);
@@ -471,23 +550,12 @@
     }
     #open(tile) {
       if (!tile) return;
-      const name = this.#name(tile);
-      this.#opened = name;
-      this.#status();
-      this.emit("assettile:open", { name, folder: tile.classList.contains("AssetTile--folder") });
-    }
-    #status() {
-      const line = this.one(".AssetTilePreview__status");
-      if (!line) return;
-      const selected = this.all(".AssetTile." + SELECTED).map((tile) => this.#name(tile));
-      const head = selected.length === 0 ? "Nothing selected" : selected.length + " selected: " + selected.join(", ");
-      line.textContent = head + (this.#opened ? ". Opened: " + this.#opened : "");
+      this.emit("ue-tile-open", { id: this.#idOf(tile) });
     }
     #keydown(event) {
-      const tile = event.target instanceof HTMLElement && event.target.matches(".AssetTile") ? event.target : null;
-      const group = tile?.parentElement;
-      if (!tile || !group) return;
-      const tiles = this.#tiles(group);
+      const tile = event.target instanceof HTMLElement && event.target.matches(".AssetTile") ? this.#tileAt(event.target) : null;
+      if (!tile) return;
+      const tiles = this.#tiles();
       const at = tiles.indexOf(tile);
       let go;
       switch (event.key) {
@@ -519,18 +587,18 @@
           return;
         case "a":
         case "A":
-          if (!(event.ctrlKey || event.metaKey)) return;
+          if (!(event.ctrlKey || event.metaKey) || this.#single()) return;
           event.preventDefault();
           for (const each of tiles) this.#mark(each, true);
-          this.#status();
+          this.#announce();
           return;
         default:
           return;
       }
       event.preventDefault();
       if (!go) return;
-      if (event.ctrlKey || event.metaKey) {
-        this.#rove(group, go);
+      if ((event.ctrlKey || event.metaKey) && !this.#single()) {
+        this.#rove(go);
       } else {
         this.#choose(go, false, event.shiftKey);
       }
@@ -2074,11 +2142,12 @@
         if (event.button !== 0 && event.button !== 2) return;
         const target = targetElement(event);
         const tab = target?.closest("." + this.names.tab);
-        if (!tab || !this.contains(tab) || target?.closest("." + this.names.close)) return;
+        if (!tab || !this.owns(tab) || target?.closest("." + this.names.close)) return;
         this.#activate(tab);
       });
       this.on(this, "click", (event) => {
         const target = targetElement(event);
+        if (!this.owns(target)) return;
         const closeButton = target?.closest("." + this.names.close);
         if (closeButton) {
           const tab = closeButton.closest("." + this.names.tab);
@@ -2090,13 +2159,13 @@
       this.on(this, "auxclick", (event) => {
         if (event.button !== 1) return;
         const tab = targetElement(event)?.closest("." + this.names.tab);
-        if (!tab) return;
+        if (!tab || !this.owns(tab)) return;
         event.preventDefault();
         this.#close(tab);
       });
       this.on(this, "keydown", (event) => {
         const tab = targetElement(event)?.closest("." + this.names.tab);
-        if (!tab || event.target !== tab) return;
+        if (!tab || event.target !== tab || !this.owns(tab)) return;
         const stack = tab.closest("." + this.names.stack);
         if (!stack) return;
         const tabs = this.#tabsOf(stack);
@@ -2125,9 +2194,29 @@
       const well = stack.querySelector("." + this.names.well);
       return Array.from(well?.children ?? []).filter((child2) => child2 instanceof HTMLElement && child2.classList.contains(this.names.tab));
     }
+    // The panel of this tab. A panel that belongs to a stack nested inside this
+    // never matches.
     #panelOf(stack, tab) {
-      const panels = Array.from(stack.querySelectorAll("[data-panel]"));
+      const panels = Array.from(stack.querySelectorAll("[data-panel]")).filter((panel) => panel.closest("." + this.names.stack) === stack);
       return panels.find((panel) => panel.dataset.panel === tab.dataset.tab) ?? null;
+    }
+    #detail(tab) {
+      const label = (tab.querySelector("." + this.names.label)?.textContent ?? "").trim();
+      return { id: tab.dataset.tab ?? label, label };
+    }
+    // Every tab of this element in document order, each owned by this element.
+    tabs() {
+      return this.all("." + this.names.tab).filter((tab) => this.owns(tab));
+    }
+    // Makes the tab with this data-tab the foreground tab and the active one.
+    activateTab(id) {
+      const tab = this.tabs().find((candidate) => this.#detail(candidate).id === id);
+      if (tab) this.#activate(tab);
+    }
+    // Closes the tab with this data-tab.
+    closeTab(id) {
+      const tab = this.tabs().find((candidate) => this.#detail(candidate).id === id);
+      if (tab) this.#close(tab);
     }
     // Every active tab of every live stack of this component in the page.
     #activeTabs() {
@@ -2136,6 +2225,7 @@
     }
     // Makes the tab the foreground tab of its stack and shows its panel.
     #bringToFront(stack, tab) {
+      const changed = !tab.classList.contains(this.names.foreground);
       for (const candidate of this.#tabsOf(stack)) {
         const foreground = candidate === tab;
         candidate.classList.toggle(this.names.foreground, foreground);
@@ -2144,6 +2234,7 @@
         const panel = this.#panelOf(stack, candidate);
         if (panel) panel.hidden = !foreground;
       }
+      if (changed) this.emit("ue-tab-activate", this.#detail(tab));
     }
     // Foreground plus active. One tab per page is active, like the focused stack of the editor.
     #activate(tab) {
@@ -2162,8 +2253,10 @@
       const old = tabs.findIndex((candidate) => candidate.classList.contains(this.names.foreground));
       const hadFocus = tab.contains(document.activeElement);
       const wasActive = tab.classList.contains(this.names.active);
+      const closed = this.#detail(tab);
       this.#panelOf(stack, tab)?.remove();
       tab.remove();
+      this.emit("ue-tab-close", closed);
       const rest = tabs.filter((candidate) => candidate !== tab);
       if (rest.length === 0) return;
       let next;
@@ -2191,6 +2284,7 @@
       stack: "dockTab-stack",
       well: "dockTab-well",
       tab: "dockTab",
+      label: "dockTab-label",
       close: "dockTab-close",
       reset: "dockTab-reset",
       foreground: "dockTab--foreground",
@@ -2246,37 +2340,144 @@
   define("ue-expandable-area", UeExpandableAreaElement);
 
   // design-system/src/FilterPills/FilterPills.ts
+  var CROSS2 = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
   var UeFilterPills = class extends UeElement {
+    #strip = null;
     setup() {
-      for (const strip of this.all(".FilterPills-strip")) {
-        this.on(strip, "click", (event) => {
-          const pill = event.target.closest(".FilterPills-pill");
-          if (pill && strip.contains(pill)) this.select(strip, pill, false);
-        });
-        this.on(strip, "keydown", (event) => {
-          const pills = Array.from(strip.querySelectorAll(".FilterPills-pill"));
-          const at = pills.indexOf(document.activeElement);
-          if (at < 0) return;
-          let next = -1;
-          if (event.key === "ArrowRight" || event.key === "ArrowDown") next = (at + 1) % pills.length;
-          else if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = (at - 1 + pills.length) % pills.length;
-          else if (event.key === "Home") next = 0;
-          else if (event.key === "End") next = pills.length - 1;
-          if (next < 0) return;
-          event.preventDefault();
-          this.select(strip, pills[next], true);
-        });
-      }
+      const strip = this.all(".FilterPills-strip").find((candidate) => this.owns(candidate)) ?? this.#createStrip();
+      this.#strip = strip;
+      this.on(strip, "click", (event) => {
+        if (!this.owns(event.target)) return;
+        const target = event.target;
+        const remove = target.closest(".FilterPills-chipRemove");
+        const chip = remove?.closest(".FilterPills-chip");
+        if (chip) {
+          this.removeChip(this.#chipId(chip));
+          return;
+        }
+        const pill = target.closest(".FilterPills-pill");
+        if (pill && strip.contains(pill)) this.#select(pill, false);
+      });
+      this.on(strip, "keydown", (event) => {
+        if (!this.owns(event.target)) return;
+        const pills = this.#pills();
+        const at = pills.indexOf(document.activeElement);
+        if (at < 0) return;
+        let next = -1;
+        if (event.key === "ArrowRight" || event.key === "ArrowDown") next = (at + 1) % pills.length;
+        else if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = (at - 1 + pills.length) % pills.length;
+        else if (event.key === "Home") next = 0;
+        else if (event.key === "End") next = pills.length - 1;
+        if (next < 0) return;
+        event.preventDefault();
+        this.#select(pills[next], true);
+      });
+      if (this.#pills().length > 0 && !strip.hasAttribute("role")) strip.setAttribute("role", "tablist");
+      if (strip.classList.contains("FilterPills-strip--chips")) strip.setAttribute("role", "list");
     }
-    select(strip, pill, focus) {
-      for (const other of strip.querySelectorAll(".FilterPills-pill")) {
+    #createStrip() {
+      const strip = document.createElement("div");
+      strip.className = "FilterPills-strip";
+      this.append(strip);
+      return strip;
+    }
+    #pills() {
+      return Array.from(this.#strip?.querySelectorAll(".FilterPills-pill") ?? []);
+    }
+    #chips() {
+      return Array.from(this.#strip?.querySelectorAll(".FilterPills-chip") ?? []);
+    }
+    #valueOf(pill) {
+      return pill.dataset.value ?? (pill.textContent ?? "").trim();
+    }
+    #chipId(chip) {
+      return chip.dataset.id ?? (chip.querySelector(".FilterPills-chipName")?.textContent ?? "").trim();
+    }
+    // The value of the checked pill, or an empty string when no pill is checked.
+    get value() {
+      const checked = this.#pills().find((pill) => pill.classList.contains("is-checked"));
+      return checked ? this.#valueOf(checked) : "";
+    }
+    // Checks the pill with this value. It fires ue-filter-change when that changes the checked pill.
+    set value(value) {
+      const pill = this.#pills().find((candidate) => this.#valueOf(candidate) === value);
+      if (pill) this.#select(pill, false);
+    }
+    #select(pill, focus) {
+      const changed = !pill.classList.contains("is-checked");
+      for (const other of this.#pills()) {
         const on = other === pill;
         other.classList.toggle("is-checked", on);
         other.setAttribute("aria-selected", String(on));
         other.tabIndex = on ? 0 : -1;
       }
       if (focus) pill.focus();
-      this.emit("ue-filter-change", { label: pill.textContent ?? "" });
+      if (changed) this.emit("ue-filter-change", { value: this.#valueOf(pill), label: (pill.textContent ?? "").trim() });
+    }
+    // Replaces every pill. The first pill with checked set is checked; with none, no pill is checked.
+    setPills(pills) {
+      const strip = this.#strip;
+      if (!strip) return;
+      const drawn = pills.map((data) => {
+        const pill = document.createElement("button");
+        pill.type = "button";
+        pill.className = "FilterPills-pill" + (data.checked ? " is-checked" : "");
+        pill.setAttribute("role", "tab");
+        pill.setAttribute("aria-selected", String(data.checked === true));
+        pill.dataset.value = data.value;
+        pill.textContent = data.label;
+        return pill;
+      });
+      strip.replaceChildren(...drawn);
+      strip.setAttribute("role", "tablist");
+      const stop = drawn.find((pill) => pill.classList.contains("is-checked")) ?? drawn[0];
+      for (const pill of drawn) pill.tabIndex = pill === stop ? 0 : -1;
+    }
+    // The chips in order.
+    getChips() {
+      return this.#chips().map((chip) => ({ id: this.#chipId(chip), label: (chip.querySelector(".FilterPills-chipName")?.textContent ?? "").trim(), color: chip.querySelector(".FilterPills-chipColor")?.style.background || void 0 }));
+    }
+    // Adds a removable chip at the end. An id that is already there is ignored.
+    addChip(data) {
+      const strip = this.#strip;
+      if (!strip || this.#chips().some((chip2) => this.#chipId(chip2) === data.id)) return;
+      strip.classList.add("FilterPills-strip--chips");
+      strip.setAttribute("role", "list");
+      const chip = document.createElement("span");
+      chip.className = "FilterPills-chip";
+      chip.setAttribute("role", "listitem");
+      chip.dataset.id = data.id;
+      chip.setAttribute("aria-label", "Filter: " + data.label);
+      const color = document.createElement("span");
+      color.className = "FilterPills-chipColor";
+      if (data.color) color.style.background = data.color;
+      const name = document.createElement("span");
+      name.className = "FilterPills-chipName";
+      name.textContent = data.label;
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "FilterPills-chipRemove";
+      remove.setAttribute("aria-label", "Remove " + data.label + " filter");
+      remove.innerHTML = CROSS2;
+      chip.append(color, name, remove);
+      strip.append(chip);
+      strip.hidden = false;
+      this.emit("ue-pill-add", { id: data.id, label: data.label, color: data.color });
+    }
+    // Removes the chip with this id. It fires ue-pill-remove.
+    removeChip(id) {
+      const chip = this.#chips().find((candidate) => this.#chipId(candidate) === id);
+      if (!chip) return;
+      const detail = { id, label: (chip.querySelector(".FilterPills-chipName")?.textContent ?? "").trim() };
+      chip.remove();
+      if (this.#strip && this.#chips().length === 0) this.#strip.hidden = true;
+      this.emit("ue-pill-remove", detail);
+    }
+    // Replaces every chip. It fires ue-pill-add for each new chip and ue-pill-remove for each chip that was dropped.
+    setChips(chips) {
+      const wanted = new Set(chips.map((chip) => chip.id));
+      for (const have of this.getChips()) if (!wanted.has(have.id)) this.removeChip(have.id);
+      for (const chip of chips) this.addChip(chip);
     }
   };
   define("ue-filter-pills", UeFilterPills);
@@ -2286,6 +2487,13 @@
   var SORTABLE = ".hr-cell[aria-sort]";
   var GRIP = ".hr-grip";
   var ARROW = ".hr-sort";
+  var GLYPH = {
+    up: "M2 8l4-5 4 5z",
+    down: "M2 4l4 5 4-5z",
+    up2: "M2 6.2l4-4 4 4zM2 10.5l4-4 4 4z",
+    down2: "M2 1.5l4 4 4-4zM2 5.8l4 4 4-4z"
+  };
+  var SVG_NS = "http://www.w3.org/2000/svg";
   var MIN_WIDTH = 20;
   var KEY_STEP = 8;
   function modeOf(cell) {
@@ -2298,15 +2506,27 @@
   function paint(cell, mode, priority) {
     cell.setAttribute("aria-sort", mode);
     cell.dataset.priority = priority;
-    const arrow = cell.querySelector(ARROW);
-    if (!arrow) return;
+    let arrow = cell.querySelector(ARROW);
+    if (!arrow) {
+      arrow = document.createElementNS(SVG_NS, "svg");
+      arrow.setAttribute("class", "hr-sort");
+      arrow.setAttribute("viewBox", "0 0 12 12");
+      arrow.setAttribute("aria-hidden", "true");
+      const grip = cell.querySelector(GRIP);
+      if (grip) cell.insertBefore(arrow, grip);
+      else cell.append(arrow);
+    }
+    let path = arrow.querySelector("path");
+    if (!path) {
+      path = document.createElementNS(SVG_NS, "path");
+      arrow.append(path);
+    }
     arrow.toggleAttribute("hidden", mode === "none");
-    const symbol = "hr-" + (mode === "descending" ? "down" : "up") + (priority === "secondary" ? "2" : "");
-    arrow.querySelector("use")?.setAttribute("href", "#" + symbol);
+    path.setAttribute("d", GLYPH[(mode === "descending" ? "down" : "up") + (priority === "secondary" ? "2" : "")]);
   }
   var HeaderRow = class extends UeElement {
     setup() {
-      const sortable = () => this.all(SORTABLE);
+      const sortable = () => this.all(SORTABLE).filter((cell) => this.owns(cell));
       for (const cell of sortable()) paint(cell, modeOf(cell), priorityOf(cell));
       const activate = (cell, shift) => {
         let mode = modeOf(cell);
@@ -2322,22 +2542,27 @@
           if (other !== cell && modeOf(other) !== "none" && priorityOf(other) === priority) paint(other, "none", priority);
         }
         paint(cell, mode, priority);
-        this.emit("ue-sort", { column: cell.dataset.column ?? "", mode, priority });
+        this.emit("ue-sort", { column: cell.dataset.column ?? "", mode, direction: mode, priority });
       };
       this.on(this, "click", (event) => {
         const target = event.target;
-        if (!(target instanceof Element) || target.closest(GRIP)) return;
+        if (!(target instanceof Element) || target.closest(GRIP) || !this.owns(target)) return;
         const cell = target.closest(SORTABLE);
         if (cell && this.contains(cell)) activate(cell, event.shiftKey);
       });
       this.on(this, "keydown", (event) => {
         const target = event.target;
-        if (!(target instanceof HTMLElement) || !target.matches(SORTABLE)) return;
+        if (!(target instanceof HTMLElement) || !target.matches(SORTABLE) || !this.owns(target)) return;
         if (event.key !== "Enter" && event.key !== " ") return;
         event.preventDefault();
         activate(target, event.shiftKey);
       });
-      for (const grip of this.all(GRIP)) this.#bindGrip(grip);
+      const grips = this.all(GRIP).filter((grip) => this.owns(grip));
+      const resizable = this.getAttribute("grips") !== "off";
+      for (const grip of grips) {
+        grip.hidden = !resizable;
+        if (resizable) this.#bindGrip(grip);
+      }
     }
     #bindGrip(grip) {
       const left = grip.closest(CELL);
@@ -2348,11 +2573,17 @@
       let total = 0;
       const apply = (width) => {
         const clamped = Math.min(total - MIN_WIDTH, Math.max(MIN_WIDTH, width));
-        cells.style.setProperty("--hr-a", clamped + "fr");
-        cells.style.setProperty("--hr-b", total - clamped + "fr");
+        left.style.flex = clamped + " 1 " + clamped + "px";
+        right.style.flex = total - clamped + " 1 " + (total - clamped) + "px";
         grip.setAttribute("aria-valuenow", String(Math.round(clamped)));
+        this.emit("ue-column-resize", { column: left.dataset.column ?? "", width: clamped, nextColumn: right.dataset.column ?? "", nextWidth: total - clamped });
       };
       const measure = () => {
+        const flexible = Array.from(cells.children).filter((cell) => cell instanceof HTMLElement && cell.matches(CELL) && getComputedStyle(cell).flexGrow !== "0");
+        const widths = flexible.map((cell) => cell.getBoundingClientRect().width);
+        flexible.forEach((cell, i) => {
+          cell.style.flex = widths[i] + " 1 " + widths[i] + "px";
+        });
         startLeft = left.getBoundingClientRect().width;
         total = startLeft + right.getBoundingClientRect().width;
       };
@@ -2706,6 +2937,7 @@
       return row.getAttribute("aria-expanded") === "true";
     }
     hasChildren(row) {
+      if (this.hooks.lazy?.(row)) return true;
       const next = row.nextElementSibling;
       return next instanceof HTMLElement && next.matches(this.parts.row) && this.level(next) > this.level(row);
     }
@@ -2732,17 +2964,19 @@
           return;
         }
         hideBelow = Infinity;
-        const kids = index + 1 < rows.length && this.level(rows[index + 1]) > level;
-        const open = kids && this.isOpen(row);
+        const kids = index + 1 < rows.length && this.level(rows[index + 1]) > level || (this.hooks.lazy?.(row) ?? false);
+        const stored = kids && this.isOpen(row);
+        const open = stored || kids && (this.hooks.forceOpen?.(row) ?? false);
         const arrow = row.querySelector(this.parts.arrow);
         arrow?.classList.toggle("is-leaf", !kids);
         if (kids) {
-          row.setAttribute("aria-expanded", open ? "true" : "false");
+          row.setAttribute("aria-expanded", stored ? "true" : "false");
           this.#swap(arrow, open ? this.parts.caretOpen : this.parts.caretClosed);
           if (!open) hideBelow = level;
         } else {
           row.removeAttribute("aria-expanded");
         }
+        if (this.parts.openClass) row.classList.toggle(this.parts.openClass, open);
         this.#swap(row.querySelector(this.parts.folder), open ? this.parts.folderOpen : this.parts.folderClosed);
         row.setAttribute("aria-selected", this.isSelected(row) ? "true" : "false");
         if (this.hooks.excluded?.(row)) {
@@ -2763,10 +2997,13 @@
       for (const row of this.rows()) row.classList.toggle("is-selected", set.has(row));
       if (anchor) this.#anchor = anchor;
       this.refresh();
+      this.hooks.selected?.(this.selected());
     }
     setOpen(row, open) {
+      const was = this.isOpen(row);
       row.setAttribute("aria-expanded", open ? "true" : "false");
       this.refresh();
+      if (was !== open) this.hooks.toggled?.(row, open);
     }
     focusRow(row, reveal) {
       for (const other of this.rows()) other.tabIndex = other === row ? 0 : -1;
@@ -2774,7 +3011,8 @@
       if (reveal) row.scrollIntoView({ block: "nearest" });
     }
     // Plain: replace the selection. Shift: range from the anchor. Ctrl or cmd: toggle the row.
-    pick(row, mods, reveal) {
+    pick(row, given, reveal) {
+      const mods = this.hooks.multi === false ? { shiftKey: false, ctrlKey: false, metaKey: false } : given;
       const chosen = this.selected();
       const toggle = mods.ctrlKey || mods.metaKey;
       if (mods.shiftKey) {
@@ -2946,6 +3184,11 @@
     observer.observe(view);
     observer.observe(bar);
     for (const child2 of Array.from(view.children)) observer.observe(child2);
+    const mutations = new MutationObserver((records) => {
+      for (const record of records) for (const added of Array.from(record.addedNodes)) if (added instanceof Element) observer.observe(added);
+      update();
+    });
+    mutations.observe(view, { childList: true });
     update();
     return {
       update,
@@ -2954,6 +3197,7 @@
         view.removeEventListener("scroll", onScroll);
         bar.removeEventListener("wheel", onWheel);
         observer.disconnect();
+        mutations.disconnect();
       }
     };
   }
@@ -3164,51 +3408,97 @@
 
   // design-system/src/Scrollbar/Scrollbar.ts
   var Scrollbar = class extends UeElement {
+    #visible = null;
+    // True while the content overflows and the bar shows.
+    get visible() {
+      return this.#visible === true;
+    }
     setup() {
-      for (const box of this.all(".sb-scroll")) {
-        const view = box.querySelector(".sb-view");
-        const bar = box.querySelector(".sb");
-        const thumb = bar?.querySelector(".sb-thumb");
-        if (!view || !bar || !thumb) continue;
-        const vertical = !bar.classList.contains("sb-h");
-        this.onDispose(bindBar(view, bar, thumb, vertical).dispose);
-      }
+      const box = this.all(".sb-scroll").find((candidate) => this.owns(candidate));
+      const view = box?.querySelector(":scope > .sb-view");
+      const bar = box?.querySelector(":scope > .sb");
+      const thumb = bar?.querySelector(".sb-thumb");
+      if (!view || !bar || !thumb) throw new Error("ue-scrollbar needs a .sb-scroll with a .sb-view and a .sb bar that holds a .sb-thumb");
+      const vertical = !bar.classList.contains("sb-h");
+      this.#visible = null;
+      let started = false;
+      const binding = bindBar(view, bar, thumb, vertical, (fits) => {
+        if (started) this.#report(!fits);
+      });
+      this.onDispose(binding.dispose);
+      const first = setTimeout(() => {
+        started = true;
+        this.#report(!bar.hidden);
+      }, 0);
+      this.onDispose(() => clearTimeout(first));
+    }
+    // Announces the first state and every change.
+    #report(visible) {
+      if (this.#visible === visible) return;
+      this.#visible = visible;
+      this.emit("ue-scrollbar-visibility", { visible });
     }
   };
   define("ue-scrollbar", Scrollbar);
 
   // design-system/src/SegmentedControl/SegmentedControl.ts
   var UeSegmentedControl = class extends UeElement {
+    #group = null;
     setup() {
-      for (const group of this.all(".SegmentedControl")) {
-        this.on(group, "click", (event) => {
-          const seg = event.target.closest(".SegmentedControl-seg");
-          if (seg && group.contains(seg)) this.select(group, seg, false);
-        });
-        this.on(group, "keydown", (event) => {
-          const segs = Array.from(group.querySelectorAll(".SegmentedControl-seg"));
-          const at = segs.indexOf(document.activeElement);
-          if (at < 0) return;
-          let next = -1;
-          if (event.key === "ArrowRight" || event.key === "ArrowDown") next = Math.min(at + 1, segs.length - 1);
-          else if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = Math.max(at - 1, 0);
-          else if (event.key === "Home") next = 0;
-          else if (event.key === "End") next = segs.length - 1;
-          if (next < 0) return;
-          event.preventDefault();
-          this.select(group, segs[next], true);
-        });
-      }
+      const group = this.all(".SegmentedControl").find((candidate) => this.owns(candidate));
+      if (!group) throw new Error("ue-segmented-control needs a .SegmentedControl radiogroup");
+      this.#group = group;
+      group.setAttribute("role", "radiogroup");
+      this.on(group, "click", (event) => {
+        if (!this.owns(event.target)) return;
+        const seg = event.target.closest(".SegmentedControl-seg");
+        if (seg && group.contains(seg)) this.#select(seg, false);
+      });
+      this.on(group, "keydown", (event) => {
+        if (!this.owns(event.target)) return;
+        const segs = this.#segs();
+        const at = segs.indexOf(document.activeElement);
+        if (at < 0) return;
+        let next = -1;
+        if (event.key === "ArrowRight" || event.key === "ArrowDown") next = Math.min(at + 1, segs.length - 1);
+        else if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = Math.max(at - 1, 0);
+        else if (event.key === "Home") next = 0;
+        else if (event.key === "End") next = segs.length - 1;
+        if (next < 0) return;
+        event.preventDefault();
+        this.#select(segs[next], true);
+      });
     }
-    select(group, seg, focus) {
-      for (const other of group.querySelectorAll(".SegmentedControl-seg")) {
+    #segs() {
+      return Array.from(this.#group?.querySelectorAll(".SegmentedControl-seg") ?? []);
+    }
+    // A segment is named by data-value, else aria-label, else its text.
+    #valueOf(seg) {
+      return seg.dataset.value ?? seg.getAttribute("aria-label") ?? (seg.textContent ?? "").trim();
+    }
+    #labelOf(seg) {
+      return seg.getAttribute("aria-label") ?? (seg.textContent ?? "").trim();
+    }
+    // The value of the checked segment.
+    get value() {
+      const checked = this.#segs().find((seg) => seg.classList.contains("is-checked"));
+      return checked ? this.#valueOf(checked) : "";
+    }
+    // Checks the segment with this value. It fires ue-segment-change when that changes the checked segment.
+    set value(value) {
+      const seg = this.#segs().find((candidate) => this.#valueOf(candidate) === value);
+      if (seg) this.#select(seg, false);
+    }
+    #select(seg, focus) {
+      const changed = !seg.classList.contains("is-checked");
+      for (const other of this.#segs()) {
         const on = other === seg;
         other.classList.toggle("is-checked", on);
         other.setAttribute("aria-checked", String(on));
         other.tabIndex = on ? 0 : -1;
       }
       if (focus) seg.focus();
-      this.emit("ue-segment-change", { label: seg.textContent ?? "" });
+      if (changed) this.emit("ue-segment-change", { value: this.#valueOf(seg), label: this.#labelOf(seg) });
     }
   };
   define("ue-segmented-control", UeSegmentedControl);
@@ -3711,9 +4001,9 @@
   define("ue-spin-box", UeSpinBoxElement);
 
   // design-system/src/Splitter/Splitter.ts
-  var MIN_PANE = 20;
-  var KEY_STEP2 = 5;
-  var KEY_STEP_LARGE = 20;
+  var DEFAULT_MIN = 20;
+  var DEFAULT_STEP = 5;
+  var DEFAULT_STEP_LARGE = 20;
   var HIGHLIGHT = "splitter-handle--highlight";
   function panesOf(handle) {
     const before = handle.previousElementSibling;
@@ -3724,21 +4014,28 @@
   var extent = (pane, vertical) => pane.getBoundingClientRect()[vertical ? "height" : "width"];
   var SplitterElement = class extends UeElement {
     setup() {
-      for (const handle of this.all(".splitter-handle")) {
-        if (handle.hasAttribute("data-pinned")) continue;
-        this.#wire(handle);
-      }
+      const handle = this.all(".splitter-handle").find((candidate) => this.owns(candidate));
+      if (!handle) throw new Error("ue-splitter needs a .splitter-handle between two panes");
+      this.#wire(handle);
+    }
+    // A number attribute of this element, or the fallback when it is missing or not a number.
+    #number(name, fallback) {
+      const value = Number(this.getAttribute(name));
+      return this.hasAttribute(name) && Number.isFinite(value) ? value : fallback;
     }
     #wire(handle) {
       let startSize = 0;
       let total = 0;
+      const minStart = () => this.#number("data-min-start", DEFAULT_MIN);
+      const minEnd = () => this.#number("data-min-end", DEFAULT_MIN);
       const resize = (size) => {
         const panes2 = panesOf(handle);
         if (!panes2) return;
-        const clamped = Math.min(Math.max(size, MIN_PANE), total - MIN_PANE);
+        const clamped = Math.min(Math.max(size, minStart()), total - minEnd());
         panes2.before.style.flex = "0 0 " + clamped + "px";
         panes2.after.style.flex = "1 1 0";
         this.#publish(handle, panes2);
+        this.emit("ue-splitter-resize", { size: clamped, total, orientation: panes2.vertical ? "vertical" : "horizontal" });
       };
       const measure = () => {
         const panes2 = panesOf(handle);
@@ -3768,11 +4065,11 @@
         if (!current) return;
         const grow = current.vertical ? "ArrowDown" : "ArrowRight";
         const shrink = current.vertical ? "ArrowUp" : "ArrowLeft";
-        const step = event.shiftKey ? KEY_STEP_LARGE : KEY_STEP2;
+        const step = event.shiftKey ? this.#number("data-step-shift", DEFAULT_STEP_LARGE) : this.#number("data-step", DEFAULT_STEP);
         if (event.key === grow) resize(startSize + step);
         else if (event.key === shrink) resize(startSize - step);
-        else if (event.key === "Home") resize(MIN_PANE);
-        else if (event.key === "End") resize(total - MIN_PANE);
+        else if (event.key === "Home") resize(minStart());
+        else if (event.key === "End") resize(total - minEnd());
         else return;
         event.preventDefault();
       });
@@ -3781,8 +4078,8 @@
     #publish(handle, panes) {
       const size = extent(panes.before, panes.vertical);
       const total = size + extent(panes.after, panes.vertical);
-      handle.setAttribute("aria-valuemin", String(MIN_PANE));
-      handle.setAttribute("aria-valuemax", String(Math.round(total - MIN_PANE)));
+      handle.setAttribute("aria-valuemin", String(this.#number("data-min-start", DEFAULT_MIN)));
+      handle.setAttribute("aria-valuemax", String(Math.round(total - this.#number("data-min-end", DEFAULT_MIN))));
       handle.setAttribute("aria-valuenow", String(Math.round(size)));
     }
   };
@@ -3943,6 +4240,7 @@
       stack: "tabWell-stack",
       well: "tabWell-well",
       tab: "tabWell-tab",
+      label: "tabWell-label",
       close: "tabWell-close",
       reset: "tabWell-reset",
       foreground: "tabWell-tab--foreground",
@@ -4212,27 +4510,165 @@
   define("ue-tooltip", UeTooltipElement);
 
   // design-system/src/TreeRow/TreeRow.ts
+  var ARROW2 = '<svg class="tr-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4l4.5 4L6 12z"/></svg>';
+  var FOLDER2 = '<svg class="tr-icon is-folder" viewBox="0 0 16 16" aria-hidden="true"><path class="tr-folder-closed" d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.5 4.5V12a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H5.2L3.8 11V4.5a1 1 0 0 1 1-1h2L8 5h5.5"/></svg>';
+  var OBJECT = '<svg class="tr-icon is-object" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg>';
   var TreeRow = class extends UeElement {
+    #tree = null;
+    #controller = null;
+    #filter = null;
+    #kept = /* @__PURE__ */ new Set();
+    #parentsOfKept = /* @__PURE__ */ new Set();
+    #lastIds = "";
     setup() {
-      const tree = this.one(".tr-tree");
-      if (!tree) return;
-      const controller = new TreeController(tree, {
-        row: ".tr-row",
-        arrow: ".tr-arrow",
-        folder: ".tr-icon.is-folder",
-        caretOpen: "tr-caret-down",
-        caretClosed: "tr-caret-right",
-        folderOpen: "tr-folder-open",
-        folderClosed: "tr-folder"
-      });
+      const tree = this.#ownTree() ?? this.#createTree();
+      this.#tree = tree;
+      tree.setAttribute("role", "tree");
+      tree.setAttribute("aria-multiselectable", String(!this.#single()));
+      const controller = new TreeController(
+        tree,
+        {
+          row: ".tr-row",
+          arrow: ".tr-arrow",
+          folder: ".tr-icon.is-folder",
+          caretOpen: "",
+          caretClosed: "",
+          folderOpen: "",
+          folderClosed: "",
+          openClass: "is-open"
+        },
+        {
+          multi: !this.#single(),
+          excluded: (row) => this.#filter !== null && !this.#kept.has(row),
+          forceOpen: (row) => this.#filter !== null && this.#parentsOfKept.has(row),
+          lazy: (row) => row.dataset.expandable === "true",
+          toggled: (row, open) => this.emit("ue-tree-toggle", { id: this.#idOf(row), expanded: open }),
+          selected: () => this.#announceSelection()
+        }
+      );
+      this.#controller = controller;
       this.on(tree, "click", (event) => {
-        controller.click(event);
+        if (this.owns(event.target)) controller.click(event);
       });
-      this.on(tree, "dblclick", (event) => controller.doubleClick(event));
+      this.on(tree, "dblclick", (event) => {
+        if (this.owns(event.target)) controller.doubleClick(event);
+      });
       this.on(tree, "keydown", (event) => {
-        controller.keyDown(event);
+        if (this.owns(event.target)) controller.keyDown(event);
       });
+      this.#lastIds = this.getSelectedIds().join("\n");
       controller.refresh();
+    }
+    #single() {
+      return this.getAttribute("select") === "single";
+    }
+    // The first tree below this element that no nested instance owns.
+    #ownTree() {
+      return this.all(".tr-tree").find((tree) => tree.closest(this.localName) === this) ?? null;
+    }
+    #createTree() {
+      const tree = document.createElement("div");
+      tree.className = "tr-tree";
+      this.append(tree);
+      return tree;
+    }
+    #rows() {
+      return this.#controller?.rows() ?? [];
+    }
+    #idOf(row) {
+      return row.dataset.id ?? (row.querySelector(".tr-text")?.textContent ?? "").trim();
+    }
+    #rowOf(id) {
+      return this.#rows().find((row) => this.#idOf(row) === id);
+    }
+    #info(row) {
+      return { id: this.#idOf(row), label: (row.querySelector(".tr-text")?.textContent ?? "").trim(), depth: (this.#controller?.level(row) ?? 1) - 1 };
+    }
+    #announceSelection() {
+      const ids = this.getSelectedIds();
+      const key = ids.join("\n");
+      if (key === this.#lastIds) return;
+      this.#lastIds = key;
+      this.emit("ue-tree-select", { ids });
+    }
+    // Ids of the selected rows in tree order.
+    getSelectedIds() {
+      return this.#rows().filter((row) => row.classList.contains("is-selected")).map((row) => this.#idOf(row));
+    }
+    // Selects exactly these rows. Ids that name no row are ignored.
+    select(ids) {
+      const controller = this.#controller;
+      if (!controller) return;
+      const wanted = new Set(this.#single() ? ids.slice(0, 1) : ids);
+      const rows = this.#rows().filter((row) => wanted.has(this.#idOf(row)));
+      controller.setSelection(rows, rows[rows.length - 1] ?? null);
+    }
+    // Opens or closes one row.
+    setExpanded(id, expanded) {
+      const row = this.#rowOf(id);
+      if (row && this.#controller?.hasChildren(row)) this.#controller.setOpen(row, expanded);
+    }
+    // Replaces every row with rows drawn from data.
+    setRows(rows) {
+      const tree = this.#tree;
+      const controller = this.#controller;
+      if (!tree || !controller) return;
+      tree.replaceChildren(...rows.map((data) => this.#draw(data)));
+      this.#lastIds = this.getSelectedIds().join("\n");
+      this.#refilter();
+      controller.refresh();
+    }
+    #draw(data) {
+      const depth = data.depth ?? 0;
+      const row = document.createElement("div");
+      row.className = "tr-row" + (data.selected ? " is-selected" : "") + (data.dim ? " is-dim" : "");
+      row.setAttribute("role", "treeitem");
+      row.setAttribute("aria-level", String(depth + 1));
+      row.setAttribute("aria-expanded", data.expanded ? "true" : "false");
+      row.dataset.id = data.id;
+      if (data.expandable) row.dataset.expandable = "true";
+      const icon = data.icon ?? "object";
+      const cells = (data.cells ?? []).map(() => '<span class="tr-cell"></span>').join("");
+      row.innerHTML = '<span class="tr-indent" style="--depth:' + depth + '"></span>' + ARROW2 + (icon === "folder" ? FOLDER2 : icon === "object" ? OBJECT : "") + '<span class="tr-text"></span>' + cells;
+      const text = row.querySelector(".tr-text");
+      if (text) text.textContent = data.label;
+      const cellEls = row.querySelectorAll(".tr-cell");
+      (data.cells ?? []).forEach((value, i) => {
+        cellEls[i].textContent = value;
+      });
+      return row;
+    }
+    // Shows only the rows the filter accepts and their ancestors. Ancestors open while the filter is set. Null clears it.
+    setFilter(filter) {
+      if (typeof filter === "string") {
+        const needle = filter.trim().toLowerCase();
+        this.#filter = needle === "" ? null : (row) => row.label.toLowerCase().includes(needle);
+      } else {
+        this.#filter = filter;
+      }
+      this.#refilter();
+      this.#controller?.refresh();
+    }
+    #refilter() {
+      this.#kept = /* @__PURE__ */ new Set();
+      this.#parentsOfKept = /* @__PURE__ */ new Set();
+      const filter = this.#filter;
+      const controller = this.#controller;
+      if (!filter || !controller) return;
+      const rows = this.#rows();
+      rows.forEach((row, index) => {
+        if (!filter(this.#info(row))) return;
+        this.#kept.add(row);
+        let want = controller.level(row);
+        for (let j = index - 1; j >= 0 && want > 1; j--) {
+          const level = controller.level(rows[j]);
+          if (level < want) {
+            this.#kept.add(rows[j]);
+            this.#parentsOfKept.add(rows[j]);
+            want = level;
+          }
+        }
+      });
     }
   };
   define("ue-tree-row", TreeRow);

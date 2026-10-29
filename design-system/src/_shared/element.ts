@@ -54,6 +54,11 @@ export abstract class UeElement extends HTMLElement {
 		return this.dispatchEvent(new CustomEvent<T>(name, { detail, bubbles: true, composed: true }));
 	}
 
+	// True when the nearest element of this tag above the target is this element, so a nested instance keeps its own events.
+	protected owns(target: EventTarget | null): boolean {
+		return target instanceof Element && target.closest(this.localName) === this;
+	}
+
 	protected all<T extends Element = HTMLElement>(selector: string): T[] {
 		return Array.from(this.querySelectorAll<T>(selector));
 	}

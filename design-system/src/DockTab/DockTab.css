@@ -1,0 +1,41 @@
+/* The look of a dock tab, minor and major. Two class families draw it: dockTab-* (ue-dock-tab) and tabWell-tab-* (ue-tab-well). Each rule lists both. The well and the content area are in ../TabWell/TabWell.css. */
+
+:is(.dockTab, .tabWell-tab) {
+	position: relative; display: inline-flex; align-items: center; box-sizing: border-box; flex: 0 1 auto; min-width: 0;
+	height: 25px; /* FDockingConstants::MaxMinorTabSize.Y, SDockingTabWell.cpp:9 */
+	max-width: 160px; /* MaxMinorTabSize.X, SDockingTabWell.cpp:9 */
+	padding: 2.55px 10px 3.4px 4px; /* TabPadding (4,3,10,4) with top and bottom x0.85: StarshipCoreStyle.cpp:1798, SDockTab.cpp:30,811-816 */
+	border-radius: 4px 4px 0 0; /* 4px slice of DockTab_Foreground, StarshipCoreStyle.cpp:1791; texture not in tree, radius approximated */
+	color: var(--foreground); /* NormalForegroundColor, StarshipCoreStyle.cpp:1801 */
+	font: 400 13.333px/1.2 var(--font-sans); white-space: nowrap;
+}
+:is(.dockTab-icon, .tabWell-icon) { display: flex; flex: none; padding: 1px; /* IconBorderPadding default, SlateTypes.cpp:713 */ margin-right: 5px; /* SDockTab.cpp:646 */ }
+:is(.dockTab-icon, .tabWell-icon, .dockTab-close, .tabWell-close) svg { display: block; width: 16px; height: 16px; /* Icon16x16, FDockTabStyle::IconSize SlateTypes.cpp:707; close-small StarshipCoreStyle.cpp:1777 */ fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+:is(.dockTab-label, .tabWell-label) { padding: 2px 0; /* outer 0,1 and inner 0,1: SDockTab.cpp:665,676 */ overflow: hidden; text-overflow: ellipsis; }
+:is(.dockTab-close, .tabWell-close) { display: flex; flex: none; padding: 1.5px 0 0; /* ContentPadding (0,1.5,0,0): SDockTab.cpp:707 */ color: var(--foreground); /* CloseButton Normal, StarshipCoreStyle.cpp:1777 */ visibility: hidden; /* HandleIsCloseButtonVisible: SDockTab.cpp:970-976 */ }
+.dockTab-close--hot { color: var(--foreground-hover); /* CloseButton Hovered, StarshipCoreStyle.cpp:1779 */ }
+
+.dockTab--hovered { background: color-mix(in srgb, var(--panel) 80%, transparent); /* HoveredBrush Panel at 0.8, StarshipCoreStyle.cpp:1790 */ color: var(--foreground-hover); /* HoveredForegroundColor :1804 */ }
+.dockTab--hovered .dockTab-close, :is(.dockTab--foreground, .tabWell-tab--foreground) :is(.dockTab-close, .tabWell-close) { visibility: visible; }
+:is(.dockTab--foreground, .tabWell-tab--foreground) { background: var(--panel); /* ForegroundBrush, StarshipCoreStyle.cpp:1791 */ color: var(--foreground); /* ForegroundForegroundColor :1803 */ }
+:is(.dockTab--active, .tabWell-tab--active) { color: var(--foreground-hover); /* ActiveForegroundColor :1802 */ }
+:is(.dockTab--active, .tabWell-tab--active)::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; /* SDockTab.cpp:616 DesiredSizeOverride(1,1) */
+	background: linear-gradient(90deg, transparent, var(--primary), transparent); /* ActiveTabIndicatorColor, StarshipCoreStyle.cpp:1839; stops SDockTab.cpp:592-594 */ }
+.dockTab--flash::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: #18a0fb; opacity: .5; /* FlashColor = SelectionColor #18A0FB (StarshipCoreStyle.cpp:63,1774), alpha = GetFlashValue() peak, SDockTab.cpp:529-544 */ }
+
+/* major app tab. Alone it is a title-bar tab: components/WindowChrome/preview.html draws the same look. */
+:is(.dockTab--major, .tabWell-tab--major) { height: auto; /* icon 16 + 2x4 border = 24, + vertical padding 2x3.4 */ max-width: 210px; /* MaxMajorTabSize.X, SDockingTabWell.cpp:10 */
+	padding: 3.4px 10px 3.4px 4px; /* TabPadding (4,4,10,4) x0.85 vertical: StarshipCoreStyle.cpp:1823 */ }
+:is(.dockTab--major.dockTab--hovered, .dockTab--major.dockTab--foreground, .dockTab--major.dockTab--active, .tabWell-tab--major.tabWell-tab--foreground, .tabWell-tab--major.tabWell-tab--active) { color: var(--white); /* Hovered/Foreground/ActiveForegroundColor White, StarshipCoreStyle.cpp:1828-1830 */ }
+:is(.dockTab--major, .tabWell-tab--major) :is(.dockTab-icon, .tabWell-icon) { padding: 4px; /* SetIconBorderPadding(4), StarshipCoreStyle.cpp:1832 */ border-radius: 4px; /* ColorOverlayIconBrush radius 4, :1819 */ }
+.dockTab-icon--tinted { background: var(--accent-orange); /* TabColorScale tint on a Foreground-coloured brush; value is consumer-provided, orange is illustrative */ }
+:is(.dockTab--major.dockTab--active, .tabWell-tab--major.tabWell-tab--active)::before { content: none; /* no active line on a major tab: GetActiveTabIndicatorVisibility, SDockTab.cpp:833-836 */ }
+
+/* Live states: a real pointer. A pinned specimen has pointer-events: none, so these never match it. */
+:is(.dockTab, .tabWell-tab):not(.dockTab--foreground, .tabWell-tab--foreground):hover { background: color-mix(in srgb, var(--panel) 80%, transparent); /* same as .dockTab--hovered */ }
+:is(.dockTab, .tabWell-tab):hover { color: var(--foreground-hover); /* HoveredForegroundColor beats ForegroundForegroundColor: SDockTab.cpp:233-256 */ }
+:is(.dockTab--major, .tabWell-tab--major):hover { color: var(--white); }
+:is(.dockTab, .tabWell-tab):hover :is(.dockTab-close, .tabWell-close), :is(.dockTab, .tabWell-tab):focus-visible :is(.dockTab-close, .tabWell-close) { visibility: visible; }
+:is(.dockTab-close, .tabWell-close):hover { color: var(--foreground-hover); /* CloseButton Hovered, StarshipCoreStyle.cpp:1779 */ }
+:is(.dockTab-close, .tabWell-close):active { color: var(--foreground); /* CloseButton Pressed keeps the Foreground tint, StarshipCoreStyle.cpp:1778 */ }
+:is(.dockTab, .tabWell-tab):focus-visible { outline: 1px solid var(--primary); outline-offset: -2px; /* keyboard focus ring; the engine tab is not keyboard focusable */ }

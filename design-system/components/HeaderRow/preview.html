@@ -13,69 +13,53 @@
 	.hr-cap { font-size: 11px; line-height: 1.3; color: var(--foreground); opacity: .6; margin-top: 10px; }
 	.hr-cap:first-child { margin-top: 0; }
 
-	/* Header: Recessed background, Foreground text -- StarshipCoreStyle.cpp:2113-2114 */
-	.hr-row { background: var(--recessed); color: var(--foreground); font-size: 13.333px; }
-	/* Cells: 1px splitter handle drawn as the Recessed gap between slots -- StarshipCoreStyle.cpp:2112 */
-	.hr-cells { display: grid; grid-template-columns: 24px 24px minmax(0, var(--hr-a, 5fr)) minmax(0, var(--hr-b, 2fr)); column-gap: 1px; }
-	.hr-cells.has-scrollbar { grid-template-columns: 24px 24px minmax(0, var(--hr-a, 5fr)) minmax(0, var(--hr-b, 2fr)) 16px; }
-	/* Cell fill = Header, hovered = Dropdown, only for a column that can sort -- StarshipCoreStyle.cpp:2083-2084, SHeaderRow.cpp:302-309 */
-	.hr-cell { position: relative; display: flex; align-items: center; min-width: 0; height: 24px; background: var(--header); overflow: hidden; white-space: nowrap; }
-	.hr-cell.is-hover, .hr-cell[aria-sort]:hover { background: var(--dropdown); }
-	.hr-cell[aria-sort] { cursor: default; user-select: none; -webkit-user-select: none; }
-	.hr-cell[aria-sort]:focus-visible { outline: 1px solid var(--primary); outline-offset: -1px; }
-	.hr-sort[hidden] { display: none; }
-	/* Splitter hit area: 5px = the 1px handle plus 4 -- SHeaderRow.cpp:716. The grip covers the last 4px of the cell and the handle gap. */
-	.hr-grip { position: absolute; top: 0; right: 0; width: 4px; height: 100%; cursor: col-resize; touch-action: none; }
-	.hr-grip:focus-visible { background: var(--primary); outline: none; }
-	/* Default cell padding (5 + 2) / 2 = 3.5 each side -- SHeaderRow.cpp:716,745,769; label box height 24 -- SHeaderRow.cpp:88 */
-	.hr-cell.is-text { padding: 0 3.5px; }
-	/* Gutter header: HeaderContentPadding(4,0,0,0), icon left -- SceneOutlinerGutter.cpp:322-334 */
-	.hr-cell.is-gutter { padding-left: 4px; }
-	/* Pinned header: icon centered -- SceneOutlinerPinnedColumn.cpp:187 */
-	.hr-cell.is-pinned { justify-content: center; }
-	/* Scrollbar spacer, 16 wide -- SHeaderRow.cpp:734-741, STableViewBase.cpp:172 */
-	.hr-spacer { background: var(--recessed); }
-	.hr-icon { flex: none; width: 16px; height: 16px; display: block; }
-	/* Sort arrow: 12x12, 4px left padding, Foreground -- SHeaderRow.cpp:127-133, StarshipCoreStyle.cpp:2079-2082 */
-	.hr-sort { flex: none; width: 12px; height: 12px; margin-left: 4px; display: block; }
-	/* Separator under the row: 2px Recessed -- StarshipCoreStyle.cpp:2115-2116, SHeaderRow.cpp:949-964 */
-	.hr-rule { height: 2px; background: var(--recessed); }
-	.hr-svg { width: 0; height: 0; position: absolute; }
+	/* Live headers: the same column share as the Scene Outliner, Item Label 5 : Type 2. */
+	.hr-live { display: flex; flex-direction: column; gap: 6px; }
+	.hr-live ue-event-status { font-size: 11px; line-height: 14px; color: var(--hover-2); min-height: 14px; }
 </style>
 </head>
 <body>
-<!-- Approximated icons: the Starship SVG files are not available. -->
-<svg class="hr-svg" aria-hidden="true">
-	<symbol id="hr-eye" viewBox="0 0 16 16"><path d="M1.5 8C3 5.2 5.3 3.8 8 3.8s5 1.4 6.5 4.2c-1.5 2.8-3.8 4.2-6.5 4.2S3 10.8 1.5 8z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="8" cy="8" r="2.1" fill="none" stroke="currentColor" stroke-width="1.2"/></symbol>
-	<symbol id="hr-pin" viewBox="0 0 16 16"><path d="M9.6 2.4l4 4-1.4.7-2.3 2.3.2 2.2-1 1-2.7-2.7-3.7 3.7-.7-.7 3.7-3.7L3.1 7.8l1-1 2.2.2 2.3-2.3z" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></symbol>
-	<symbol id="hr-up" viewBox="0 0 12 12"><path d="M2 8l4-5 4 5z" fill="currentColor"/></symbol>
-	<symbol id="hr-down" viewBox="0 0 12 12"><path d="M2 4l4 5 4-5z" fill="currentColor"/></symbol>
-	<symbol id="hr-up2" viewBox="0 0 12 12"><path d="M2 6.2l4-4 4 4zM2 10.5l4-4 4 4z" fill="currentColor"/></symbol>
-	<symbol id="hr-down2" viewBox="0 0 12 12"><path d="M2 1.5l4 4 4-4zM2 5.8l4 4 4-4z" fill="currentColor"/></symbol>
-</svg>
+<!-- The Starship SVG files are not available. The eye and pin are approximated strokes, inline in the cell. The sort arrows are drawn by the element. -->
 
 <div class="hr-page">
 	<div class="hr-cap">Live. Click Item Label or Type to sort: ascending, then descending. Shift-click adds a secondary key. Drag the splitter between the two columns (minimum 20px), or focus it and press Left or Right. Hover a sortable cell for the Dropdown fill.</div>
+	<div class="hr-live">
 	<ue-header-row>
 		<div class="hr-row">
-			<div class="hr-cells has-scrollbar">
-				<div class="hr-cell is-gutter"><svg class="hr-icon"><use href="#hr-eye"/></svg></div>
-				<div class="hr-cell is-pinned"><svg class="hr-icon"><use href="#hr-pin"/></svg></div>
-				<div class="hr-cell is-text" role="columnheader" tabindex="0" aria-sort="ascending" data-column="label">Item Label<svg class="hr-sort"><use href="#hr-up"/></svg><span class="hr-grip" role="separator" aria-orientation="vertical" aria-label="Resize Item Label" tabindex="0"></span></div>
-				<div class="hr-cell is-text" role="columnheader" tabindex="0" aria-sort="none" data-column="type">Type<svg class="hr-sort" hidden><use href="#hr-up"/></svg></div>
+			<div class="hr-cells">
+				<div class="hr-cell is-gutter"><svg class="hr-icon" viewBox="0 0 16 16"><path d="M1.5 8C3 5.2 5.3 3.8 8 3.8s5 1.4 6.5 4.2c-1.5 2.8-3.8 4.2-6.5 4.2S3 10.8 1.5 8z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="8" cy="8" r="2.1" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></div>
+				<div class="hr-cell is-pinned"><svg class="hr-icon" viewBox="0 0 16 16"><path d="M9.6 2.4l4 4-1.4.7-2.3 2.3.2 2.2-1 1-2.7-2.7-3.7 3.7-.7-.7 3.7-3.7L3.1 7.8l1-1 2.2.2 2.3-2.3z" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg></div>
+				<div class="hr-cell is-text" role="columnheader" tabindex="0" aria-sort="ascending" data-column="label" style="--hr-grow:5">Item Label<span class="hr-grip" role="separator" aria-orientation="vertical" aria-label="Resize Item Label" tabindex="0"></span></div>
+				<div class="hr-cell is-text" role="columnheader" tabindex="0" aria-sort="none" data-column="type" style="--hr-grow:2">Type</div>
 				<div class="hr-spacer"></div>
 			</div>
 			<div class="hr-rule"></div>
 		</div>
 	</ue-header-row>
+	<ue-event-status event="ue-sort" template="Sort: {column} {direction} ({priority})"></ue-event-status>
+	</div>
+
+	<div class="hr-cap">No grips, no gutter, two sortable columns (<code>grips="off"</code>). This is the Scene Outliner header with the resize handle removed.</div>
+	<div class="hr-live">
+	<ue-header-row grips="off">
+		<div class="hr-row">
+			<div class="hr-cells">
+				<div class="hr-cell is-text" role="columnheader" tabindex="0" aria-sort="descending" data-column="name" style="--hr-grow:3">Name<span class="hr-grip" role="separator" aria-orientation="vertical" aria-label="Resize Name" tabindex="0"></span></div>
+				<div class="hr-cell is-text" role="columnheader" tabindex="0" aria-sort="none" data-column="size" style="--hr-grow:1">Size</div>
+			</div>
+			<div class="hr-rule"></div>
+		</div>
+	</ue-header-row>
+	<ue-event-status event="ue-sort" template="Sort: {column} {direction} ({priority})"></ue-event-status>
+	</div>
 
 	<div class="hr-cap">Primary sort, ascending (outliner default), pinned</div>
 	<div class="hr-row">
-		<div class="hr-cells has-scrollbar">
-			<div class="hr-cell is-gutter"><svg class="hr-icon"><use href="#hr-eye"/></svg></div>
-			<div class="hr-cell is-pinned"><svg class="hr-icon"><use href="#hr-pin"/></svg></div>
-			<div class="hr-cell is-text">Item Label<svg class="hr-sort"><use href="#hr-up"/></svg></div>
-			<div class="hr-cell is-text">Type</div>
+		<div class="hr-cells">
+			<div class="hr-cell is-gutter"><svg class="hr-icon" viewBox="0 0 16 16"><path d="M1.5 8C3 5.2 5.3 3.8 8 3.8s5 1.4 6.5 4.2c-1.5 2.8-3.8 4.2-6.5 4.2S3 10.8 1.5 8z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="8" cy="8" r="2.1" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></div>
+			<div class="hr-cell is-pinned"><svg class="hr-icon" viewBox="0 0 16 16"><path d="M9.6 2.4l4 4-1.4.7-2.3 2.3.2 2.2-1 1-2.7-2.7-3.7 3.7-.7-.7 3.7-3.7L3.1 7.8l1-1 2.2.2 2.3-2.3z" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg></div>
+			<div class="hr-cell is-text" style="--hr-grow:5">Item Label<svg class="hr-sort" viewBox="0 0 12 12"><path d="M2 8l4-5 4 5z"/></svg></div>
+			<div class="hr-cell is-text" style="--hr-grow:2">Type</div>
 			<div class="hr-spacer"></div>
 		</div>
 		<div class="hr-rule"></div>
@@ -84,10 +68,10 @@
 	<div class="hr-cap">Primary sort, descending, sortable cell hovered (Dropdown), pinned</div>
 	<div class="hr-row">
 		<div class="hr-cells">
-			<div class="hr-cell is-gutter"><svg class="hr-icon"><use href="#hr-eye"/></svg></div>
-			<div class="hr-cell is-pinned"><svg class="hr-icon"><use href="#hr-pin"/></svg></div>
-			<div class="hr-cell is-text is-hover">Item Label<svg class="hr-sort"><use href="#hr-down"/></svg></div>
-			<div class="hr-cell is-text">Type</div>
+			<div class="hr-cell is-gutter"><svg class="hr-icon" viewBox="0 0 16 16"><path d="M1.5 8C3 5.2 5.3 3.8 8 3.8s5 1.4 6.5 4.2c-1.5 2.8-3.8 4.2-6.5 4.2S3 10.8 1.5 8z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="8" cy="8" r="2.1" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></div>
+			<div class="hr-cell is-pinned"><svg class="hr-icon" viewBox="0 0 16 16"><path d="M9.6 2.4l4 4-1.4.7-2.3 2.3.2 2.2-1 1-2.7-2.7-3.7 3.7-.7-.7 3.7-3.7L3.1 7.8l1-1 2.2.2 2.3-2.3z" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg></div>
+			<div class="hr-cell is-text is-hover" style="--hr-grow:5">Item Label<svg class="hr-sort" viewBox="0 0 12 12"><path d="M2 4l4 5 4-5z"/></svg></div>
+			<div class="hr-cell is-text" style="--hr-grow:2">Type</div>
 		</div>
 		<div class="hr-rule"></div>
 	</div>
@@ -95,10 +79,10 @@
 	<div class="hr-cap">Secondary sort arrows on Type, pinned</div>
 	<div class="hr-row">
 		<div class="hr-cells">
-			<div class="hr-cell is-gutter"><svg class="hr-icon"><use href="#hr-eye"/></svg></div>
-			<div class="hr-cell is-pinned"><svg class="hr-icon"><use href="#hr-pin"/></svg></div>
-			<div class="hr-cell is-text">Item Label<svg class="hr-sort"><use href="#hr-up"/></svg></div>
-			<div class="hr-cell is-text">Type<svg class="hr-sort"><use href="#hr-up2"/></svg></div>
+			<div class="hr-cell is-gutter"><svg class="hr-icon" viewBox="0 0 16 16"><path d="M1.5 8C3 5.2 5.3 3.8 8 3.8s5 1.4 6.5 4.2c-1.5 2.8-3.8 4.2-6.5 4.2S3 10.8 1.5 8z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="8" cy="8" r="2.1" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></div>
+			<div class="hr-cell is-pinned"><svg class="hr-icon" viewBox="0 0 16 16"><path d="M9.6 2.4l4 4-1.4.7-2.3 2.3.2 2.2-1 1-2.7-2.7-3.7 3.7-.7-.7 3.7-3.7L3.1 7.8l1-1 2.2.2 2.3-2.3z" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg></div>
+			<div class="hr-cell is-text" style="--hr-grow:5">Item Label<svg class="hr-sort" viewBox="0 0 12 12"><path d="M2 8l4-5 4 5z"/></svg></div>
+			<div class="hr-cell is-text" style="--hr-grow:2">Type<svg class="hr-sort" viewBox="0 0 12 12"><path d="M2 6.2l4-4 4 4zM2 10.5l4-4 4 4z"/></svg></div>
 		</div>
 		<div class="hr-rule"></div>
 	</div>
@@ -106,10 +90,10 @@
 	<div class="hr-cap">Secondary, descending, pinned</div>
 	<div class="hr-row">
 		<div class="hr-cells">
-			<div class="hr-cell is-gutter"><svg class="hr-icon"><use href="#hr-eye"/></svg></div>
-			<div class="hr-cell is-pinned"><svg class="hr-icon"><use href="#hr-pin"/></svg></div>
-			<div class="hr-cell is-text">Item Label<svg class="hr-sort"><use href="#hr-down"/></svg></div>
-			<div class="hr-cell is-text">Type<svg class="hr-sort"><use href="#hr-down2"/></svg></div>
+			<div class="hr-cell is-gutter"><svg class="hr-icon" viewBox="0 0 16 16"><path d="M1.5 8C3 5.2 5.3 3.8 8 3.8s5 1.4 6.5 4.2c-1.5 2.8-3.8 4.2-6.5 4.2S3 10.8 1.5 8z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="8" cy="8" r="2.1" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></div>
+			<div class="hr-cell is-pinned"><svg class="hr-icon" viewBox="0 0 16 16"><path d="M9.6 2.4l4 4-1.4.7-2.3 2.3.2 2.2-1 1-2.7-2.7-3.7 3.7-.7-.7 3.7-3.7L3.1 7.8l1-1 2.2.2 2.3-2.3z" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg></div>
+			<div class="hr-cell is-text" style="--hr-grow:5">Item Label<svg class="hr-sort" viewBox="0 0 12 12"><path d="M2 4l4 5 4-5z"/></svg></div>
+			<div class="hr-cell is-text" style="--hr-grow:2">Type<svg class="hr-sort" viewBox="0 0 12 12"><path d="M2 1.5l4 4 4-4zM2 5.8l4 4 4-4z"/></svg></div>
 		</div>
 		<div class="hr-rule"></div>
 	</div>

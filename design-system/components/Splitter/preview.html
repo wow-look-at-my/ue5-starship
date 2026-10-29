@@ -9,36 +9,18 @@
 <style>body { font-family: var(--font-sans); }</style>
 <style>
 	.splitter-page { display: flex; flex-wrap: wrap; gap: 20px; padding: 16px; font: 400 13.333px/1.2 var(--font-sans); color: var(--foreground); }
-	.splitter-cell { display: flex; flex-direction: column; gap: 6px; }
+	.splitter-cell { display: flex; flex-direction: column; gap: 6px; font: 400 11px/1.2 var(--font-sans); color: var(--hover-2); }
 	.splitter-caption { font: 400 11px/1.2 var(--font-sans); color: var(--hover-2); }
 
-	/* Two docked panels with the splitter handle between them. The handle is drawn over the gap the SSplitter reserves (PhysicalSplitterHandleSize). */
-	.splitter-demo { display: flex; background: var(--panel); }
-	.splitter-demo--row { flex-direction: row; width: 190px; height: 100px; }
-	.splitter-demo--col { flex-direction: column; width: 190px; height: 100px; }
-	.splitter-pane { flex: 1 1 0; display: flex; align-items: center; justify-content: center; color: var(--foreground); }
-
-	.splitter-handle { flex: none; background: var(--background); /* HandleNormalBrush Background: StarshipCoreStyle.cpp:634 */ }
-	.splitter-demo--row .splitter-handle { width: 5px; /* PhysicalSplitterHandleSize default 5: SSplitter.h:179 */ }
-	.splitter-demo--col .splitter-handle { height: 5px; /* same size on the vertical axis: SSplitter.cpp:291 */ }
-	.splitter-handle--highlight { background: var(--secondary); /* HandleHighlightBrush Secondary: StarshipCoreStyle.cpp:635; used while hovered or dragged, SSplitter.cpp:295-304 */ }
-
-	/* SplitterPanel variant, StarshipCoreStyle.cpp:637-640 */
-	.splitter-handle--panelNormal { background: var(--panel); }
-	.splitter-handle--panelHighlight { background: #606060; /* FLinearColor(FColor(96,96,96)), StarshipCoreStyle.cpp:639 literal */ }
-
-	/* Live states. Same declarations as .splitter-handle--highlight. A handle with data-pinned opts out. */
-	.splitter-handle:not([data-pinned]):hover, .splitter-handle:not([data-pinned]):active, .splitter-handle:not([data-pinned]):focus-visible { background: var(--secondary); }
-	.splitter-handle:not([data-pinned]) { touch-action: none; outline: none; }
-	.splitter-demo--row > .splitter-handle:not([data-pinned]) { cursor: col-resize; /* EMouseCursor::ResizeLeftRight, SSplitter.cpp:524 */ }
-	.splitter-demo--col > .splitter-handle:not([data-pinned]) { cursor: row-resize; /* EMouseCursor::ResizeUpDown, SSplitter.cpp:525 */ }
-	.splitter-demo--live .splitter-pane { min-width: 0; min-height: 0; overflow: hidden; }
-	.splitter-demo--row.splitter-demo--live { width: 320px; height: 110px; }
-	.splitter-demo--col.splitter-demo--live { width: 320px; height: 150px; }
+	/* Demo sizes: the component sets only the layout of the panes and the handle. */
+	.splitter { width: 190px; height: 100px; }
+	.splitter-pane { display: flex; align-items: center; justify-content: center; color: var(--foreground); }
+	.splitter--live { width: 320px; height: 110px; }
+	.splitter--live.splitter--col { height: 150px; }
 	.splitter-live { flex: 1 0 100%; max-width: 760px; line-height: 1.45; }
 	.splitter-live b { color: var(--foreground); }
 	.splitter-h { flex: 1 0 100%; margin: 0; font: 700 11px/1.2 var(--font-sans); letter-spacing: .04em; text-transform: uppercase; color: var(--hover-2); }
-	ue-splitter { display: contents; }
+	.splitter { font: 400 13.333px/1.2 var(--font-sans); }
 </style>
 </head>
 <body>
@@ -47,40 +29,56 @@
 	<div class="splitter-caption splitter-live"><b>Live.</b> Try: hover a handle (secondary fill, resize cursor), drag it (the fill stays while you drag, each pane keeps at least 20px), or Tab to a handle and press the arrow keys (5px a step, Shift for 20px, Home and End jump to the limits).</div>
 	<div class="splitter-cell">
 		<ue-splitter>
-			<div class="splitter-demo splitter-demo--row splitter-demo--live"><div class="splitter-pane">A</div><div class="splitter-handle" role="separator" tabindex="0" aria-label="Resize panes A and B"></div><div class="splitter-pane">B</div></div>
+			<div class="splitter splitter--live"><div class="splitter-pane">A</div><div class="splitter-handle" role="separator" tabindex="0" aria-label="Resize panes A and B"></div><div class="splitter-pane">B</div></div>
 		</ue-splitter>
+		<ue-event-status event="ue-splitter-resize" template="size {size} of {total}"></ue-event-status>
 		<span class="splitter-caption">live, horizontal (side by side panes)</span>
 	</div>
 	<div class="splitter-cell">
 		<ue-splitter>
-			<div class="splitter-demo splitter-demo--col splitter-demo--live"><div class="splitter-pane">A</div><div class="splitter-handle" role="separator" tabindex="0" aria-label="Resize panes A and B"></div><div class="splitter-pane">B</div></div>
+			<div class="splitter splitter--col splitter--live"><div class="splitter-pane">A</div><div class="splitter-handle" role="separator" tabindex="0" aria-label="Resize panes A and B"></div><div class="splitter-pane">B</div></div>
 		</ue-splitter>
+		<ue-event-status event="ue-splitter-resize" template="size {size} of {total}"></ue-event-status>
 		<span class="splitter-caption">live, vertical (stacked panes)</span>
+	</div>
+	<div class="splitter-cell">
+		<ue-splitter data-min-start="120" data-min-end="150" data-step="10" data-step-shift="40">
+			<div class="splitter splitter--live"><div class="splitter-pane">Start, min 120</div><div class="splitter-handle" role="separator" tabindex="0" aria-label="Resize start and end panes"></div><div class="splitter-pane">End, min 150</div></div>
+		</ue-splitter>
+		<ue-event-status event="ue-splitter-resize" template="size {size} of {total}"></ue-event-status>
+		<span class="splitter-caption">live, <code>data-min-start="120" data-min-end="150"</code>, keys 10px, Shift 40px</span>
+	</div>
+	<div class="splitter-cell">
+		<ue-splitter data-min-start="40" data-min-end="40">
+			<div class="splitter splitter--live"><div class="splitter-pane">Sources</div><div class="splitter-handle splitter-handle--line" role="separator" tabindex="0" aria-label="Resize sources and assets"></div><div class="splitter-pane">Assets</div></div>
+		</ue-splitter>
+		<ue-event-status event="ue-splitter-resize" template="size {size} of {total}"></ue-event-status>
+		<span class="splitter-caption">live, line handle: 2px visible, 8px to grab (Content Browser)</span>
 	</div>
 	<h3 class="splitter-h">Pinned</h3>
 	<div class="splitter-caption splitter-live">pinned: forced states, they do not react to the pointer</div>
 	<div class="splitter-cell">
-		<div class="splitter-demo splitter-demo--row"><div class="splitter-pane">A</div><div class="splitter-handle" data-pinned></div><div class="splitter-pane">B</div></div>
+		<div class="splitter"><div class="splitter-pane">A</div><div class="splitter-handle" data-pinned></div><div class="splitter-pane">B</div></div>
 		<span class="splitter-caption">horizontal, normal (background)</span>
 	</div>
 	<div class="splitter-cell">
-		<div class="splitter-demo splitter-demo--row"><div class="splitter-pane">A</div><div class="splitter-handle splitter-handle--highlight" data-pinned></div><div class="splitter-pane">B</div></div>
+		<div class="splitter"><div class="splitter-pane">A</div><div class="splitter-handle splitter-handle--highlight" data-pinned></div><div class="splitter-pane">B</div></div>
 		<span class="splitter-caption">horizontal, highlighted (secondary)</span>
 	</div>
 	<div class="splitter-cell">
-		<div class="splitter-demo splitter-demo--col"><div class="splitter-pane">A</div><div class="splitter-handle" data-pinned></div><div class="splitter-pane">B</div></div>
+		<div class="splitter splitter--col"><div class="splitter-pane">A</div><div class="splitter-handle" data-pinned></div><div class="splitter-pane">B</div></div>
 		<span class="splitter-caption">vertical, normal</span>
 	</div>
 	<div class="splitter-cell">
-		<div class="splitter-demo splitter-demo--col"><div class="splitter-pane">A</div><div class="splitter-handle splitter-handle--highlight" data-pinned></div><div class="splitter-pane">B</div></div>
+		<div class="splitter splitter--col"><div class="splitter-pane">A</div><div class="splitter-handle splitter-handle--highlight" data-pinned></div><div class="splitter-pane">B</div></div>
 		<span class="splitter-caption">vertical, highlighted</span>
 	</div>
 	<div class="splitter-cell">
-		<div class="splitter-demo splitter-demo--row"><div class="splitter-pane">A</div><div class="splitter-handle splitter-handle--panelNormal" data-pinned></div><div class="splitter-pane">B</div></div>
+		<div class="splitter"><div class="splitter-pane">A</div><div class="splitter-handle splitter-handle--panelNormal" data-pinned></div><div class="splitter-pane">B</div></div>
 		<span class="splitter-caption">SplitterPanel normal (panel)</span>
 	</div>
 	<div class="splitter-cell">
-		<div class="splitter-demo splitter-demo--row"><div class="splitter-pane">A</div><div class="splitter-handle splitter-handle--panelHighlight" data-pinned></div><div class="splitter-pane">B</div></div>
+		<div class="splitter"><div class="splitter-pane">A</div><div class="splitter-handle splitter-handle--panelHighlight" data-pinned></div><div class="splitter-pane">B</div></div>
 		<span class="splitter-caption">SplitterPanel highlighted (#606060)</span>
 	</div>
 </div>
