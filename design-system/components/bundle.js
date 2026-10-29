@@ -2937,6 +2937,7 @@
     const observer = new ResizeObserver(update);
     observer.observe(view);
     observer.observe(bar);
+    for (const child2 of Array.from(view.children)) observer.observe(child2);
     update();
     return {
       update,

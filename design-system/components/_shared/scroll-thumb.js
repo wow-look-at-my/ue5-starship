@@ -117,6 +117,7 @@ function bindBar(view, bar, thumb, vertical, onFits) {
   const observer = new ResizeObserver(update);
   observer.observe(view);
   observer.observe(bar);
+  for (const child of Array.from(view.children)) observer.observe(child);
   update();
   return {
     update,
