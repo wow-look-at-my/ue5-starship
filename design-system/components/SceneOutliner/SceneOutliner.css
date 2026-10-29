@@ -2,3 +2,658 @@
 [data-pinned] {
   pointer-events: none;
 }
+
+/* design-system/src/Button/Button.css */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  border: 0;
+  outline: 0;
+  padding: 3.5px 16px;
+  border-radius: 4px;
+  background: var(--secondary);
+  box-shadow: inset 0 0 0 1px var(--input);
+  color: var(--foreground-hover);
+  font: 400 13.333px/16px var(--font-sans);
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+}
+.button:hover,
+.button--hover {
+  background: var(--hover);
+}
+.button:active,
+.button.button--pressed {
+  background: var(--header);
+  padding: 4.5px 16px 2.5px;
+}
+.button--disabled,
+.button--disabled:hover,
+.button:disabled,
+.button:disabled:hover,
+.button[aria-disabled=true],
+.button[aria-disabled=true]:hover {
+  background: var(--secondary);
+  opacity: .45;
+  color: var(--foreground);
+}
+.button--disabled-brush,
+.button--disabled-brush:hover {
+  background: var(--dropdown);
+  box-shadow: inset 0 0 0 1px var(--recessed);
+  color: var(--foreground);
+}
+.button--focus,
+.button:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+.button--primary {
+  background: var(--primary);
+}
+.button--primary:hover,
+.button--primary.button--hover {
+  background: var(--primary-hover);
+}
+.button--primary:active,
+.button--primary.button--pressed {
+  background: var(--primary-press);
+}
+.button--primary.button--disabled,
+.button--primary.button--disabled:hover,
+.button--primary:disabled,
+.button--primary:disabled:hover,
+.button--primary[aria-disabled=true],
+.button--primary[aria-disabled=true]:hover {
+  background: var(--primary);
+}
+.button--primary.button--disabled-brush,
+.button--primary.button--disabled-brush:hover {
+  background: var(--dropdown);
+}
+.button--bold {
+  font-weight: 700;
+}
+.button--simple,
+.button--toggle {
+  background: transparent;
+  box-shadow: none;
+  color: var(--foreground);
+  padding: 3px 8px;
+}
+.button--simple:hover,
+.button--simple.button--hover,
+.button--toggle:hover,
+.button--toggle.button--hover {
+  background: var(--dropdown);
+  color: var(--foreground-hover);
+}
+.button--simple:active,
+.button--simple.button--pressed {
+  background: var(--dropdown);
+  color: var(--foreground-hover);
+  padding: 4px 8px 2px;
+}
+.button--simple.button--disabled,
+.button--simple.button--disabled:hover,
+.button--simple:disabled,
+.button--simple:disabled:hover,
+.button--simple[aria-disabled=true],
+.button--simple[aria-disabled=true]:hover,
+.button--toggle.button--disabled,
+.button--toggle.button--disabled:hover,
+.button--toggle:disabled,
+.button--toggle:disabled:hover,
+.button--toggle[aria-disabled=true],
+.button--toggle[aria-disabled=true]:hover {
+  background: transparent;
+  color: var(--foreground);
+}
+.button--icon {
+  padding: 3px 4px;
+}
+.button--icon:active,
+.button--icon.button--pressed {
+  padding: 4px 4px 2px;
+}
+.button--toggle:active,
+.button--toggle.button--pressed {
+  background: var(--dropdown);
+  color: var(--foreground-hover);
+  padding: 3px 8px;
+}
+.button--toggle.button--icon:active,
+.button--toggle.button--icon.button--pressed {
+  padding: 3px 4px;
+}
+.button--toggle[aria-pressed=true],
+.button--toggle.button--checked {
+  background: var(--primary);
+  color: var(--foreground-hover);
+}
+.button--toggle[aria-pressed=true]:hover,
+.button--toggle.button--checked.button--hover {
+  background: var(--primary-hover);
+}
+.button--toggle[aria-pressed=true]:active,
+.button--toggle[aria-pressed=true].button--pressed {
+  background: var(--dropdown);
+}
+.button--toggle[aria-pressed=true][aria-disabled=true],
+.button--toggle[aria-pressed=true][aria-disabled=true]:hover,
+.button--toggle[aria-pressed=true]:disabled {
+  background: var(--primary);
+  color: var(--foreground-hover);
+}
+.button--toggle[aria-disabled=true]:active {
+  background: transparent;
+  color: var(--foreground);
+}
+.button--toggle[aria-pressed=true][aria-disabled=true]:active {
+  background: var(--primary);
+  color: var(--foreground-hover);
+}
+.button--small {
+  box-sizing: border-box;
+  height: 22px;
+  padding: 0 14px;
+}
+.button--small:active,
+.button--small.button--pressed {
+  padding: 1px 14px 0;
+}
+.button--caption {
+  box-sizing: border-box;
+  width: 42px;
+  height: 23px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--foreground);
+}
+.button--caption svg {
+  display: block;
+  width: 42px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+}
+.button--caption:hover,
+.button--caption.button--hover {
+  background: rgba(255, 255, 255, .157);
+  color: var(--foreground-hover);
+}
+.button--caption-close:hover,
+.button--caption-close.button--hover {
+  background: rgba(255, 79, 79, .588);
+}
+.button--caption:active,
+.button--caption.button--pressed {
+  background: transparent;
+  color: var(--foreground);
+  padding: 0;
+}
+.button--caption:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+.button__icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  margin-right: 4px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.button__icon--solo {
+  margin-right: 0;
+}
+
+/* design-system/src/HeaderRow/HeaderRow.css */
+.hr-row {
+  background: var(--recessed);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 13.333px;
+}
+.hr-cells {
+  display: flex;
+  gap: 1px;
+}
+.hr-cell {
+  position: relative;
+  box-sizing: border-box;
+  flex: var(--hr-grow, 1) 1 0px;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: 24px;
+  background: var(--header);
+  overflow: hidden;
+  white-space: nowrap;
+}
+.hr-cell.is-fixed,
+.hr-cell.is-gutter,
+.hr-cell.is-pinned {
+  flex: none;
+  width: var(--hr-fixed, 24px);
+}
+.hr-cell.is-hover,
+.hr-cell[aria-sort]:hover {
+  background: var(--dropdown);
+}
+.hr-cell[aria-sort] {
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.hr-cell[aria-sort]:focus-visible {
+  outline: 1px solid var(--primary);
+  outline-offset: -1px;
+}
+.hr-grip {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 4px;
+  height: 100%;
+  cursor: col-resize;
+  touch-action: none;
+}
+.hr-grip[hidden] {
+  display: none;
+}
+.hr-grip:focus-visible {
+  background: var(--primary);
+  outline: none;
+}
+.hr-cell.is-text {
+  padding: 0 3.5px;
+}
+.hr-cell.is-gutter {
+  padding-left: 4px;
+}
+.hr-cell.is-pinned {
+  justify-content: center;
+}
+.hr-spacer {
+  flex: none;
+  width: 16px;
+  background: var(--recessed);
+}
+.hr-spacer[hidden] {
+  display: none;
+}
+.hr-icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+.hr-sort {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  margin-left: 4px;
+  display: block;
+}
+.hr-sort path {
+  fill: currentColor;
+}
+.hr-sort[hidden] {
+  display: none;
+}
+.hr-rule {
+  height: 2px;
+  background: var(--recessed);
+}
+
+/* design-system/src/Scrollbar/Scrollbar.css */
+.sb {
+  position: relative;
+  flex: none;
+}
+.sb-v {
+  width: 16px;
+  height: 150px;
+}
+.sb-h {
+  width: 170px;
+  height: 16px;
+}
+.sb-box-v {
+  width: 12px;
+  height: 150px;
+}
+.sb-thumb {
+  position: absolute;
+  border-radius: 4px;
+  background: var(--hover);
+}
+.sb-v .sb-thumb {
+  left: 4px;
+  width: 8px;
+}
+.sb-box-v .sb-thumb {
+  left: 2px;
+  width: 8px;
+}
+.sb-h .sb-thumb {
+  top: 4px;
+  height: 8px;
+}
+.sb.is-hover .sb-thumb,
+.sb.is-drag .sb-thumb,
+.sb:hover .sb-thumb {
+  background: var(--hover-2);
+}
+.sb-scroll {
+  display: flex;
+}
+.sb-scroll.is-h {
+  flex-direction: column;
+}
+.sb[hidden] {
+  display: none;
+}
+.sb-scroll .sb-v,
+.sb-scroll .sb-box-v {
+  height: auto;
+  align-self: stretch;
+}
+.sb-scroll .sb-h {
+  width: auto;
+  align-self: stretch;
+}
+.sb-view {
+  overflow: auto;
+  scrollbar-width: none;
+  overscroll-behavior: contain;
+}
+.sb-view::-webkit-scrollbar {
+  display: none;
+}
+.sb-view:focus-visible {
+  outline: 1px solid var(--primary);
+  outline-offset: -1px;
+}
+
+/* design-system/src/TextInput/TextInput.css */
+.textinput {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  border-radius: 4px;
+  background: var(--input);
+  box-shadow: inset 0 0 0 1px var(--input-outline);
+  color: var(--foreground);
+  font: 400 13.333px/16px var(--font-sans);
+  cursor: text;
+}
+.textinput:hover,
+.textinput--hover {
+  box-shadow: inset 0 0 0 1px var(--hover);
+}
+.textinput--focus,
+.textinput--focus:hover {
+  box-shadow: inset 0 0 0 1px var(--primary);
+  color: var(--foreground-hover);
+}
+.textinput:focus-within {
+  box-shadow: inset 0 0 0 1px var(--primary);
+  color: var(--foreground-hover);
+}
+.textinput--readonly,
+.textinput--readonly:hover,
+.textinput--readonly:focus-within {
+  background: var(--header);
+  box-shadow: inset 0 0 0 1px var(--input-outline);
+  cursor: default;
+}
+.textinput--readonly:focus-within {
+  color: var(--foreground);
+}
+.textinput__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 3px 8px 4px;
+  white-space: nowrap;
+}
+.textinput__hint {
+  opacity: .35;
+}
+.textinput__caret {
+  display: inline-block;
+  width: 1.28px;
+  height: 16px;
+  vertical-align: top;
+  background: var(--white);
+}
+.textinput__sel {
+  background: var(--highlight);
+}
+.textinput--search {
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--secondary);
+}
+.textinput--search:hover,
+.textinput--search.textinput--hover {
+  box-shadow: inset 0 0 0 1px var(--hover);
+}
+.textinput--search.textinput--focus,
+.textinput--search.textinput--focus:hover {
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+.textinput--search:focus-within {
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+.textinput--search.textinput--readonly,
+.textinput--search.textinput--readonly:hover,
+.textinput--search.textinput--readonly:focus-within {
+  box-shadow: inset 0 0 0 1px var(--input-outline);
+}
+.textinput__glyph {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-left: 4px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.textinput__tail {
+  flex: none;
+  width: 7px;
+}
+.textinput__trail {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding-right: 2px;
+}
+.textinput--console {
+  font: 400 12px/16px var(--font-mono);
+}
+.textinput__field {
+  width: 0;
+  margin: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 16px;
+  caret-color: var(--white);
+  cursor: inherit;
+}
+.textinput__field::placeholder {
+  color: inherit;
+  opacity: .35;
+}
+.textinput__field::selection {
+  background: var(--highlight);
+  color: inherit;
+}
+.textinput__clear {
+  display: none;
+  cursor: default;
+}
+.textinput--filled .textinput__glass {
+  display: none;
+}
+.textinput--filled .textinput__clear {
+  display: block;
+}
+
+/* design-system/src/TreeRow/TreeRow.css */
+.tr-row {
+  display: flex;
+  align-items: center;
+  min-height: 20px;
+  color: var(--foreground);
+  background: var(--recessed);
+  font-family: var(--font-sans);
+  font-size: 13.333px;
+  line-height: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.tr-row[hidden] {
+  display: none;
+}
+.tr-row.is-odd {
+  background: var(--background);
+}
+.tr-row.is-parent {
+  background: var(--select-parent);
+}
+.tr-row.is-hover,
+:where(.tr-tree) .tr-row:hover {
+  background: var(--select-hover);
+}
+.tr-row.is-selected {
+  background: var(--select);
+  color: var(--foreground-hover);
+}
+.tr-row.is-selected.is-inactive,
+:where(.tr-tree):not(:focus-within) .tr-row.is-selected {
+  background: var(--select-inactive);
+}
+.tr-row.is-dim .tr-text {
+  color: #6c6c6c;
+}
+.tr-tree {
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.tr-tree .tr-row:focus {
+  outline: none;
+}
+.tr-tree .tr-row:focus-visible:not(.is-selected) {
+  outline: 1px solid var(--primary);
+  outline-offset: -1px;
+}
+.tr-indent {
+  flex: none;
+  width: calc(var(--tree-indent-base, 6px) + var(--depth, 0) * var(--tree-indent-step, 12px));
+}
+.tr-arrow {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  display: block;
+  color: color-mix(in srgb, var(--foreground) 75%, #000);
+  opacity: .6;
+}
+.tr-arrow path,
+.tr-icon path {
+  fill: currentColor;
+}
+.tr-row.is-open > .tr-arrow {
+  transform: rotate(90deg);
+}
+.tr-row.is-selected .tr-arrow {
+  color: var(--foreground);
+}
+.tr-arrow.is-hover,
+:where(.tr-tree) .tr-arrow:hover {
+  color: var(--foreground);
+}
+.tr-row.is-selected .tr-arrow.is-hover,
+:where(.tr-tree) .tr-row.is-selected .tr-arrow:hover {
+  color: var(--foreground-hover);
+}
+.tr-arrow.is-leaf {
+  visibility: hidden;
+}
+.tr-icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 1px 6px 1px 0;
+  display: block;
+}
+.tr-icon.is-object path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+.tr-icon.is-folder {
+  color: color-mix(in srgb, var(--accent-folder) 75%, #000);
+}
+.tr-row.is-selected .tr-icon.is-folder {
+  color: var(--accent-folder);
+}
+.tr-row.is-open .tr-folder-closed,
+.tr-row:not(.is-open) .tr-folder-open {
+  display: none;
+}
+.tr-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+}
+.tr-cell {
+  flex: none;
+  box-sizing: border-box;
+  width: var(--tr-cell-width, 80px);
+  overflow: hidden;
+}
+.tr-tree.is-compact {
+  --tree-indent-base: 0px;
+  --tree-indent-step: 10px;
+}
+.tr-tree.is-compact .tr-row {
+  min-height: 16px;
+  height: 16px;
+}
+.tr-tree.is-compact .tr-row[aria-level="1"] {
+  height: 19px;
+  padding-top: 3px;
+  box-sizing: border-box;
+}
+.tr-tree.is-compact .tr-arrow {
+  color: var(--foreground);
+  opacity: 1;
+}
+.tr-tree.is-compact .tr-row.is-selected .tr-arrow {
+  color: var(--foreground-hover);
+}
+.tr-tree.is-compact .tr-icon {
+  margin: 0 2px 0 0;
+}
+.tr-tree.is-compact .tr-icon.is-folder {
+  color: var(--accent-folder);
+}

@@ -2,9 +2,17 @@
 
 The custom title bar and frame of an editor window: app icon, a menu strip slot, an optional project badge, and minimize. This also covers maximize and close buttons inside a two-stroke window border.
 
+Built from the other components:
+
+- 3 `Button` (`button--caption`, `button--caption-close` on the last) for minimize, maximize or restore, and close. The caption variant is the 42 x 23 glyph cell with the translucent hover fill. 1 more `Button` (default look) brings back a hidden window.
+- 1 `TabWell` major tab (the single static major tab markup, with no `ue-tab-well` element) for the title-bar tab. No tab CSS is copied.
+- 1 `MenuBar` (`ue-menu-bar`) in the menu strip slot. Its look and behaviour belong to the `MenuBar` component.
+
+The window keeps only its own frame, title area layout, app icon, project badge and focus state.
+
 ## What the consumer provides
 
-- The menu strip content (`WindowMenuSlot`, `SWindowTitleBar.cpp:219`). The preview draws plain labels as a stand-in. The menu bar owns its own spacing and styling.
+- The menu strip content (`WindowMenuSlot`, `SWindowTitleBar.cpp:219`). The preview nests the `ue-menu-bar` component. The menu bar owns its own spacing and styling.
 - The major tab row. The docking area reserves space for it below the menu (`SDockingTabStack.cpp:891-898`).
 - Optional right-side content next to the buttons (`UpdateBackgroundContent`). The level editor puts the project badge there (`LevelEditor.cpp:234-253`).
 - A title text only for windows without a menu bar. The centred title is an `SBox` with padding 5, 2, 5, 2 and `NormalText` (`SWindowTitleBar.cpp:291`). The editor main window shows the project badge instead.

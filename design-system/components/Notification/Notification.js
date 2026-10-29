@@ -51,13 +51,57 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
+// design-system/src/_shared/own.ts
+function ownedBy(host, target) {
+  return target instanceof Element && target.closest(host.localName) === host;
+}
+
+// design-system/src/Button/Button.ts
+var PRESSED = "button--pressed";
+function isDisabled(button) {
+  return button.matches(":disabled") || button.getAttribute("aria-disabled") === "true";
+}
+var UeButtonElement = class extends UeElement {
+  #clicks = 0;
+  setup() {
+    const button = this.one(".button");
+    if (!button) throw new Error("ue-button needs a .button element");
+    this.on(button, "keydown", (event) => {
+      if (!ownedBy(this, event.target) || isDisabled(button) || event.repeat) return;
+      if (event.key !== "Enter" && event.key !== " ") return;
+      button.classList.add(PRESSED);
+      if (button.tagName !== "BUTTON") {
+        event.preventDefault();
+        if (event.key === "Enter") button.click();
+      }
+    });
+    this.on(button, "keyup", (event) => {
+      const wasPressed = button.classList.contains(PRESSED);
+      button.classList.remove(PRESSED);
+      if (wasPressed && button.tagName !== "BUTTON" && event.key === " ") button.click();
+    });
+    this.on(button, "focusout", () => button.classList.remove(PRESSED));
+    this.on(button, "click", () => {
+      if (isDisabled(button)) return;
+      let pressed = null;
+      if (button.hasAttribute("aria-pressed")) {
+        pressed = button.getAttribute("aria-pressed") !== "true";
+        button.setAttribute("aria-pressed", String(pressed));
+      }
+      this.#clicks++;
+      this.emit("ue-button-click", { label: button.getAttribute("aria-label") ?? button.textContent?.trim() ?? "", pressed, count: this.#clicks });
+    });
+  }
+};
+define("ue-button", UeButtonElement);
+
 // design-system/src/Notification/Notification.ts
 var UeNotificationElement = class extends UeElement {
   #shown = 0;
   setup() {
     this.on(this, "click", (event) => {
       if (!(event.target instanceof Element)) return;
-      const button = event.target.closest(".notification__btn");
+      const button = event.target.closest(".button[data-action]");
       if (!button) return;
       switch (button.dataset.action) {
         case "dismiss":

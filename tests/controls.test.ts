@@ -1324,7 +1324,7 @@ const toastGone = (page: Page, remaining: number): Promise<unknown> => page.wait
 scenario('Notification: Dismiss removes the toast and the stack closes up', 'Notification', async (page) => {
 	assert.equal(await toastCount(page), 1);
 	assert.ok((await stackHeight(page)) > 60);
-	await page.locator(NT + '.notification__btn[data-action="dismiss"]').click();
+	await page.locator(NT + '.button[data-action="dismiss"]').click();
 	await toastGone(page, 0);
 	assert.equal(await stackHeight(page), 0);
 });

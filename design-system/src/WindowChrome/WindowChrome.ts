@@ -1,5 +1,9 @@
 // <ue-window-chrome> wraps one live .windowChrome-frame, its restore button and its status line.
 import { UeElement, define } from '../_shared/element.ts';
+import '../Button/Button.ts';
+import '../DockTab/DockTab.css';
+import '../MenuBar/MenuBar.ts';
+import '../TabWell/TabWell.css';
 
 const MAXIMIZE_GLYPH = '#windowChrome-i-max';
 const RESTORE_GLYPH = '#windowChrome-i-restore';
@@ -9,7 +13,8 @@ class WindowChromeElement extends UeElement {
 		const frame = this.one('.windowChrome-frame');
 		if (!frame) throw new Error('ue-window-chrome needs a .windowChrome-frame child');
 		const status = this.one('.windowChrome-status');
-		const reopen = this.one('.windowChrome-reopen');
+		const reopenHost = this.one('.windowChrome-reopen');
+		const reopen = reopenHost?.querySelector<HTMLElement>('.button') ?? null;
 
 		// SWindowTitleBar.cpp:553-555 reads the active state of the native window. A window is active while focus sits inside its frame.
 		const setActive = (active: boolean): void => {
@@ -22,9 +27,9 @@ class WindowChromeElement extends UeElement {
 
 		const hideWindow = (label: string): void => {
 			frame.hidden = true;
-			if (!reopen) return;
+			if (!reopenHost || !reopen) return;
 			reopen.textContent = label;
-			reopen.hidden = false;
+			reopenHost.hidden = false;
 			reopen.focus();
 		};
 		const toggleMaximized = (button: HTMLElement): void => {
@@ -40,11 +45,11 @@ class WindowChromeElement extends UeElement {
 			const target = event.target instanceof Element ? event.target : null;
 			if (target?.closest('.windowChrome-reopen')) {
 				frame.hidden = false;
-				if (reopen) reopen.hidden = true;
+				if (reopenHost) reopenHost.hidden = true;
 				frame.focus();
 				return;
 			}
-			const button = target?.closest<HTMLElement>('.windowChrome-btn');
+			const button = target?.closest<HTMLElement>('.button[data-action]');
 			if (!button || !frame.contains(button)) return;
 			const action = button.dataset.action;
 			if (action === 'minimize') hideWindow('Window minimized: restore');
