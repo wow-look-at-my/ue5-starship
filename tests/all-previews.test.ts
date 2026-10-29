@@ -89,3 +89,55 @@ test('components/bundle.js exists, is a classic script, and defines every ue-* e
 		await page.close();
 	});
 });
+
+// Composition: each class is styled by one component, and markup that uses a component's classes sits inside that component's element.
+const src = path.join(root, 'src');
+const sources = fs.readdirSync(src, { withFileTypes: true }).filter((e) => e.isDirectory() && !e.name.startsWith('_')).map((e) => e.name).sort();
+
+function selectorClasses(css: string): Set<string> {
+	const out = new Set<string>();
+	for (const m of css.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/([^{}]+)\{/g)) {
+		if (m[1].trim().startsWith('@')) continue;
+		for (const c of m[1].matchAll(/\.(-?[_a-zA-Z][\w-]*)/g)) out.add(c[1]);
+	}
+	return out;
+}
+
+const previewStyle = (name: string): string => Array.from(fs.readFileSync(path.join(components, name, 'preview.html'), 'utf8').matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g), (m) => m[1]).join('\n');
+
+const owners = new Map<string, string[]>();
+for (const name of sources) {
+	for (const file of fs.readdirSync(path.join(src, name)).filter((f) => f.endsWith('.css'))) {
+		for (const cls of selectorClasses(fs.readFileSync(path.join(src, name, file), 'utf8'))) owners.set(cls, [...new Set([...(owners.get(cls) ?? []), name])]);
+	}
+}
+
+test('every class is styled by exactly one component stylesheet', () => {
+	assert.deepEqual(Array.from(owners).filter(([, list]) => list.length > 1).map(([cls, list]) => cls + ' in ' + list.join(' and ')), []);
+});
+
+for (const name of names) {
+	test(name + ': the preview style does not restyle another component', () => {
+		assert.deepEqual(Array.from(selectorClasses(previewStyle(name))).filter((cls) => owners.has(cls) && !owners.get(cls)?.includes(name)).map((cls) => cls + ' (' + owners.get(cls)?.join(', ') + ')'), []);
+	});
+
+	test(name + ': markup that uses a component class sits inside that component element', async () => {
+		const classTags = Object.fromEntries(Array.from(owners, ([cls, list]) => [cls, list.map(kebab)]));
+		await withBrowser(async (browser) => {
+			const { page } = await openPreview(browser, name);
+			const loose = await page.evaluate((map) => {
+				const found = new Set<string>();
+				for (const el of Array.from(document.body.querySelectorAll('[class]'))) {
+					if (el.closest('[data-pinned]')) continue;
+					for (const cls of Array.from(el.classList)) {
+						const tags = map[cls];
+						if (tags && !tags.some((tag) => el.closest(tag))) found.add(cls + ' outside ' + tags.join('/'));
+					}
+				}
+				return Array.from(found).sort();
+			}, classTags);
+			assert.deepEqual(loose, []);
+			await page.close();
+		});
+	});
+}
