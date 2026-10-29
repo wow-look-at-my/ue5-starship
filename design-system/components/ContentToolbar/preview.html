@@ -8,189 +8,41 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Condensed:wght@400;700&family=Roboto+Mono&display=swap">
 <style>body { font-family: var(--font-sans); }</style>
 <style>
-	/* SContentBrowser.cpp:764-767 SBorder Padding(3), Brushes.Panel */
-	.ContentToolbar { display: flex; align-items: center; background: var(--panel); padding: 3px; font: 400 13.333px/16px var(--font-sans); color: var(--foreground); }
-	.ContentToolbar svg { width: 16px; height: 16px; flex: none; display: block; }
-	.ContentToolbar button { font: inherit; color: inherit; border: 0; background: none; margin: 0; cursor: default; display: flex; align-items: center; }
-
-	/* SContentBrowser.cpp:772 slot Padding(5,0,0,0); StarshipStyle.cpp:6624 ToolBar BackgroundPadding(4,2,0,2) */
-	.ContentToolbar__tools { display: flex; align-items: center; margin-left: 5px; padding: 2px 0 2px 4px; }
-
-	/* StarshipStyle.cpp:6622-6623 separator: no brush, padding (4,0); SeparatorThickness 2 (ToolBarStyle.cpp:25) */
-	.ContentToolbar__sep { width: 2px; margin: 0 4px; }
-
-	/* Add: SPositiveActionButton -> "Button" style (StarshipCoreStyle.cpp:1372) + content padding (2, 1.5) = padding (14, 3), height 22 (ToolWidgetsStylePrivate.h DefaultButtonHeight) */
-	.ContentToolbar__add { gap: 3px; padding: 3px 14px; height: 22px; border-radius: 4px; background: var(--secondary); box-shadow: inset 0 0 0 1px var(--input); color: var(--foreground-hover); }
-	.ContentToolbar__add:hover { background: var(--hover); }
-	.ContentToolbar__add svg { color: var(--accent-green); } /* ToolWidgetsStyle.cpp:76 AccentGreen plus icon */
-
-	/* Import / Save All: SButton "SimpleButton" (StarshipCoreStyle.cpp:1405) ContentPadding(2) + padding (2,1) = (4,3); icon/label gap 3 (SContentBrowser.cpp:1857) */
-	.ContentToolbar__btn { gap: 3px; padding: 3px 4px; border-radius: 4px; }
-	.ContentToolbar__btn:hover { background: var(--dropdown); color: var(--foreground-hover); }
-
-	/* history arrows: SimpleButton, ContentPadding(1,0) + (2,1) = (3,1); SContentBrowser.cpp:778-812 */
-	.ContentToolbar__nav { padding: 1px 3px; border-radius: 4px; }
-	.ContentToolbar__nav:hover:not(:disabled) { background: var(--dropdown); color: var(--foreground-hover); }
-	.ContentToolbar__nav--back { margin-left: 10px; }   /* SContentBrowser.cpp:778 */
-	.ContentToolbar__nav--fwd { margin-left: 2px; }      /* SContentBrowser.cpp:797 */
-	.ContentToolbar__nav:disabled { opacity: .45; }      /* approximation of Slate DisabledEffect (SlateElementPixelShader.usf:514) */
-
-	/* path slot: SContentBrowser.cpp:816-820 Padding(2,0,0,0), fill */
-	.ContentToolbar__path { flex: 1; min-width: 0; display: flex; align-items: center; margin-left: 2px; }
-	.ContentToolbar__folder { color: var(--foreground); margin: 0 4px 0 6px; }  /* leading folder glyph: in reference image only, not in 5.5.3 source */
-	/* crumb: SNavigationBar.h:43-45 SimpleButton + ContentPadding(2,2) => (4,3) */
-	.ContentToolbar__crumb { padding: 3px 4px; border-radius: 4px; }
-	.ContentToolbar__crumb:hover { background: var(--dropdown); color: var(--foreground-hover); }
-	/* delimiter: SBreadcrumbTrail.h:198 ContentPadding(3,0) + (2,1) = (5,1), Icons.ChevronRight 16 (SNavigationBar.h:46) */
-	.ContentToolbar__delim { padding: 1px 5px; border-radius: 4px; }
-
-	/* Settings: SComboButton SimpleComboButton, no arrow (SContentBrowser.cpp:497); button padding (4,1) from SimpleButtonLabelAndIcon (StarshipCoreStyle.cpp:1398-1400); icon and label slots Padding(4,0) (SContentBrowser.cpp:504,513); slot Padding(5,0,0,0) (SContentBrowser.cpp:848) */
-	.ContentToolbar__settings { margin-left: 5px; padding: 1px 4px; border-radius: 4px; }
-	.ContentToolbar__settings:hover { background: var(--dropdown); color: var(--foreground-hover); }
-	.ContentToolbar__settings svg { margin: 0 4px; }
-	.ContentToolbar__settings span { margin: 0 4px; }
-
 	.demo { padding: 12px 16px; display: grid; gap: 12px; }
 	.demo small { color: var(--hover-2); font: 400 10.667px/1 var(--font-sans); display: block; margin-bottom: 4px; }
-
-	/* ---- live row (inside <ue-content-toolbar>); pinned specimens are plain HTML and skip these ---- */
-	.ContentToolbar { position: relative; }
-	/* SimpleButton pressed = Dropdown r4, foreground ForegroundHover, content padding shifts 1px down (StarshipCoreStyle.cpp:1389-1407) */
-	ue-content-toolbar .ContentToolbar__btn:active,
-	ue-content-toolbar .ContentToolbar__nav:active:not(:disabled),
-	ue-content-toolbar .ContentToolbar__crumb:active,
-	ue-content-toolbar .ContentToolbar__delim:active,
-	ue-content-toolbar .ContentToolbar__settings:active,
-	ue-content-toolbar .ContentToolbar__delim:hover,
-	ue-content-toolbar .ContentToolbar__btn:focus-visible,
-	ue-content-toolbar .ContentToolbar__nav:focus-visible:not(:disabled),
-	ue-content-toolbar .ContentToolbar__crumb:focus-visible,
-	ue-content-toolbar .ContentToolbar__delim:focus-visible,
-	ue-content-toolbar .ContentToolbar__settings:focus-visible { background: var(--dropdown); color: var(--foreground-hover); outline: 0; }
-	ue-content-toolbar .ContentToolbar__btn:active { padding: 4px 4px 2px; }
-	ue-content-toolbar .ContentToolbar__nav:active:not(:disabled) { padding: 2px 3px 0; }
-	ue-content-toolbar .ContentToolbar__crumb:active { padding: 4px 4px 2px; }
-	ue-content-toolbar .ContentToolbar__delim:active { padding: 2px 5px 0; }
-	ue-content-toolbar .ContentToolbar__settings:active { padding: 2px 4px 0; }
-	/* Add is a "Button": pressed fill Header (StarshipCoreStyle.cpp:1374), PressedButtonMargins shift the content 1px down (CoreStyle.h:112) */
-	ue-content-toolbar .ContentToolbar__add:active { background: var(--header); padding: 4px 14px 2px; }
-	ue-content-toolbar .ContentToolbar__add:focus-visible { background: var(--hover); outline: 0; }
-
-	/* popup menu: same declarations as PopupMenu/preview.html (Menu.Background, Menu.Outline, Menu.Button hovered Primary) */
-	.ContentToolbar__menu { position: absolute; z-index: 20; box-sizing: border-box; min-width: 200px; padding: 8px 0; background: var(--dropdown); box-shadow: inset 0 0 0 1px var(--dropdown-outline); color: var(--foreground-hover); }
-	.ContentToolbar .ContentToolbar__menuitem { width: 100%; padding: 3px 5px 3px 12px; gap: 8px; color: var(--foreground-hover); text-align: left; white-space: nowrap; border-radius: 0; }
-	.ContentToolbar .ContentToolbar__menuitem:hover, .ContentToolbar .ContentToolbar__menuitem:focus { background: var(--primary); outline: 0; }
-	.ContentToolbar .ContentToolbar__menuitem:disabled { opacity: .45; }
-	.ContentToolbar__menucheck { display: flex; width: 16px; height: 16px; margin-left: 2px; flex: none; }
-	.ContentToolbar__menusep { height: 1px; margin: 6px 12px; background: var(--white-25); }
 </style>
 </head>
 <body>
 <div class="demo">
-	<div>
-		<small>Live: hover and press the buttons. Click a crumb to navigate, then Back and Forward walk the history. Click a chevron for sub-folders. Add and Settings open menus (arrow keys, Enter, Escape).</small>
-		<ue-content-toolbar>
-			<div class="ContentToolbar" role="toolbar" aria-label="Content browser toolbar">
-				<div class="ContentToolbar__tools">
-					<button class="ContentToolbar__add" aria-haspopup="menu" aria-expanded="false">
-						<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square"><path d="M8 2.5v11M2.5 8h11"/></svg>
-						<span>Add</span>
-					</button>
-					<span class="ContentToolbar__sep"></span>
-					<button class="ContentToolbar__btn">
-						<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"><path d="M2 9v5h12V9"/><path d="M8 1.5v8M5 6.5l3 3 3-3"/><path d="M2 9V6.5h2"/></svg>
-						<span>Import</span>
-					</button>
-					<span class="ContentToolbar__sep"></span>
-					<button class="ContentToolbar__btn">
-						<svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 1h8l3 3v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zm1 1v4h6V2zm1 9v3h5v-3z"/><path d="M1 4h1.5v10H1z" opacity=".6"/></svg>
-						<span>Save All</span>
-					</button>
-				</div>
-				<button class="ContentToolbar__nav ContentToolbar__nav--back" aria-label="Back" disabled>
-					<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><path d="M11.5 8h-7M7.5 5l-3 3 3 3"/></svg>
-				</button>
-				<button class="ContentToolbar__nav ContentToolbar__nav--fwd" aria-label="Forward" disabled>
-					<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><path d="M4.5 8h7M8.5 5l3 3-3 3"/></svg>
-				</button>
-				<div class="ContentToolbar__path">
-					<svg class="ContentToolbar__folder" viewBox="0 0 16 16" fill="currentColor"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2H6l1.5 1.5H13.5A1.5 1.5 0 0 1 15 5v7.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5z"/></svg>
-					<button class="ContentToolbar__crumb">All</button>
-					<button class="ContentToolbar__delim" aria-label="Sub-folders of All"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"/></svg></button>
-					<button class="ContentToolbar__crumb">Content</button>
-					<button class="ContentToolbar__delim" aria-label="Sub-folders of Content"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"/></svg></button>
-					<button class="ContentToolbar__crumb">StarterContent</button>
-					<button class="ContentToolbar__delim" aria-label="Sub-folders of StarterContent"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"/></svg></button>
-				</div>
-				<button class="ContentToolbar__settings" aria-haspopup="menu" aria-expanded="false">
-					<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><circle cx="8" cy="8" r="2.25"/><path d="M8 1.5l1.2 1.7 2-.5.6 2 2 .7-.5 2 1.7 1.3-1.7 1.3.5 2-2 .7-.6 2-2-.5L8 14.5l-1.2-1.7-2 .5-.6-2-2-.7.5-2L1.5 8l1.7-1.3-.5-2 2-.7.6-2 2 .5z"/></svg>
-					<span>Settings</span>
-				</button>
-			</div>
-		</ue-content-toolbar>
-	</div>
-	<div>
-		<small>Default (history: back enabled, forward disabled), pinned</small>
-		<div class="ContentToolbar">
-			<div class="ContentToolbar__tools">
-				<button class="ContentToolbar__add">
-					<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square"><path d="M8 2.5v11M2.5 8h11"/></svg>
-					<span>Add</span>
-				</button>
-				<span class="ContentToolbar__sep"></span>
-				<button class="ContentToolbar__btn">
-					<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"><path d="M2 9v5h12V9"/><path d="M8 1.5v8M5 6.5l3 3 3-3"/><path d="M2 9V6.5h2"/></svg>
-					<span>Import</span>
-				</button>
-				<span class="ContentToolbar__sep"></span>
-				<button class="ContentToolbar__btn">
-					<svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 1h8l3 3v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zm1 1v4h6V2zm1 9v3h5v-3z"/><path d="M1 4h1.5v10H1z" opacity=".6"/></svg>
-					<span>Save All</span>
-				</button>
-			</div>
-			<button class="ContentToolbar__nav ContentToolbar__nav--back" aria-label="Back">
-				<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><path d="M11.5 8h-7M7.5 5l-3 3 3 3"/></svg>
-			</button>
-			<button class="ContentToolbar__nav ContentToolbar__nav--fwd" aria-label="Forward" disabled>
-				<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><path d="M4.5 8h7M8.5 5l3 3-3 3"/></svg>
-			</button>
-			<div class="ContentToolbar__path">
-				<svg class="ContentToolbar__folder" viewBox="0 0 16 16" fill="currentColor"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2H6l1.5 1.5H13.5A1.5 1.5 0 0 1 15 5v7.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5z"/></svg>
-				<button class="ContentToolbar__crumb">All</button>
-				<span class="ContentToolbar__delim"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"/></svg></span>
-				<button class="ContentToolbar__crumb">Content</button>
-				<span class="ContentToolbar__delim"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"/></svg></span>
-				<button class="ContentToolbar__crumb">StarterContent</button>
-				<span class="ContentToolbar__delim"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"/></svg></span>
-			</div>
-			<button class="ContentToolbar__settings">
-				<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><circle cx="8" cy="8" r="2.25"/><path d="M8 1.5l1.2 1.7 2-.5.6 2 2 .7-.5 2 1.7 1.3-1.7 1.3.5 2-2 .7-.6 2-2-.5L8 14.5l-1.2-1.7-2 .5-.6-2-2-.7.5-2L1.5 8l1.7-1.3-.5-2 2-.7.6-2 2 .5z"/></svg>
-				<span>Settings</span>
-			</button>
-		</div>
-	</div>
-	<div>
-		<small>Narrow: breadcrumb takes the remaining width, pinned</small>
-		<div class="ContentToolbar" style="width:520px">
-			<div class="ContentToolbar__tools">
-				<button class="ContentToolbar__add">
-					<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square"><path d="M8 2.5v11M2.5 8h11"/></svg>
-					<span>Add</span>
-				</button>
-			</div>
-			<button class="ContentToolbar__nav ContentToolbar__nav--back" aria-label="Back"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><path d="M11.5 8h-7M7.5 5l-3 3 3 3"/></svg></button>
-			<button class="ContentToolbar__nav ContentToolbar__nav--fwd" aria-label="Forward"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><path d="M4.5 8h7M8.5 5l3 3-3 3"/></svg></button>
-			<div class="ContentToolbar__path">
-				<button class="ContentToolbar__crumb">Game</button>
-				<span class="ContentToolbar__delim"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"/></svg></span>
-				<button class="ContentToolbar__crumb">Maps</button>
-			</div>
-			<button class="ContentToolbar__settings">
-				<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><circle cx="8" cy="8" r="2.25"/><path d="M8 1.5l1.2 1.7 2-.5.6 2 2 .7-.5 2 1.7 1.3-1.7 1.3.5 2-2 .7-.6 2-2-.5L8 14.5l-1.2-1.7-2 .5-.6-2-2-.7.5-2L1.5 8l1.7-1.3-.5-2 2-.7.6-2 2 .5z"/></svg>
-				<span>Settings</span>
-			</button>
-		</div>
-	</div>
+<div>
+<small>Live: hover and press the buttons. Click a crumb to navigate, then Back and Forward walk the history. Click a chevron for sub-folders. Add and Settings open menus (arrow keys, Enter, Escape).</small>
+<ue-content-toolbar>
+<div class="ContentToolbar" role="toolbar" aria-label="Content browser toolbar">
+	<div class="ContentToolbar__tools"><ue-combo-button mode="action" data-action="add"><div class="combobutton-anchor"><span class="combobutton combobutton--button" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M8 2.5v11M2.5 8h11"/></svg><span class="combobutton__label">Add</span></span><div class="combobutton-menu" hidden><ue-popup-menu><div class="popupmenu" role="menu" tabindex="0" aria-label="Add"><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Import to Current Folder</span></span></div><div class="popupmenu__sep"></div><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">New Folder</span></span></div><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Blueprint Class</span></span></div><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Level</span></span></div><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Material</span></span></div></div></ue-popup-menu></div></div></ue-combo-button><span class="ContentToolbar__sep"></span><ue-button data-action="import"><button type="button" class="button button--simple button--tight"><svg class="button__icon" viewBox="0 0 16 16"><path d="M2 9v5h12V9"/><path d="M8 1.5v8M5 6.5l3 3 3-3"/></svg>Import</button></ue-button><span class="ContentToolbar__sep"></span><ue-button data-action="save-all"><button type="button" class="button button--simple button--tight"><svg class="button__icon" viewBox="0 0 16 16"><path d="M3.5 1.5h7l3 3v8.5a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1v-10.5a1 1 0 0 1 1-1z"/><path d="M5.5 1.5v3.5h4v-3.5M5 14v-4h6v4"/></svg>Save All</button></ue-button></div>
+	<div class="ContentToolbar__nav"><ue-button data-action="back"><button type="button" class="button button--simple button--icon" aria-label="Back"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M11.5 8h-7M7.5 5l-3 3 3 3"/></svg></button></ue-button><ue-button data-action="forward"><button type="button" class="button button--simple button--icon" aria-label="Forward" disabled><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M4.5 8h7M8.5 5l3 3-3 3"/></svg></button></ue-button></div>
+	<div class="ContentToolbar__path"><svg class="ContentToolbar__folder" viewBox="0 0 16 16"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2H6l1.5 1.5H13.5A1.5 1.5 0 0 1 15 5v7.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5z"/></svg><div class="ContentToolbar__crumbs"><ue-button data-crumb="0"><button type="button" class="button button--simple button--tight">All</button></ue-button><ue-combo-button mode="action" data-crumb-menu="0"><div class="combobutton-anchor"><span class="combobutton combobutton--icon" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="Sub-folders of All"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M6 3.5L10.5 8 6 12.5"/></svg></span><div class="combobutton-menu" hidden><ue-popup-menu><div class="popupmenu" role="menu" tabindex="0"><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Content</span></span></div><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Plugins</span></span></div></div></ue-popup-menu></div></div></ue-combo-button><ue-button data-crumb="1"><button type="button" class="button button--simple button--tight">Content</button></ue-button><ue-combo-button mode="action" data-crumb-menu="1"><div class="combobutton-anchor"><span class="combobutton combobutton--icon" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="Sub-folders of Content"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M6 3.5L10.5 8 6 12.5"/></svg></span><div class="combobutton-menu" hidden><ue-popup-menu><div class="popupmenu" role="menu" tabindex="0"><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">StarterContent</span></span></div><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Developers</span></span></div></div></ue-popup-menu></div></div></ue-combo-button><ue-button data-crumb="2"><button type="button" class="button button--simple button--tight">StarterContent</button></ue-button><ue-combo-button mode="action" data-crumb-menu="2"><div class="combobutton-anchor"><span class="combobutton combobutton--icon" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="Sub-folders of StarterContent"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M6 3.5L10.5 8 6 12.5"/></svg></span><div class="combobutton-menu" hidden><ue-popup-menu><div class="popupmenu" role="menu" tabindex="0"><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Architecture</span></span></div><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Audio</span></span></div><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Blueprints</span></span></div><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">HDRI</span></span></div><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Maps</span></span></div><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Materials</span></span></div><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Particles</span></span></div><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Props</span></span></div><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Shapes</span></span></div><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Textures</span></span></div></div></ue-popup-menu></div></div></ue-combo-button></div></div>
+	<div class="ContentToolbar__end"><ue-combo-button mode="action" data-action="settings"><div class="combobutton-anchor"><span class="combobutton combobutton--simple" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false"><svg class="combobutton__icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.25"/><path d="M8 1.5l1.2 1.7 2-.5.6 2 2 .7-.5 2 1.7 1.3-1.7 1.3.5 2-2 .7-.6 2-2-.5L8 14.5l-1.2-1.7-2 .5-.6-2-2-.7.5-2L1.5 8l1.7-1.3-.5-2 2-.7.6-2 2 .5z"/></svg><span class="combobutton__label">Settings</span></span><div class="combobutton-menu combobutton-menu--end" hidden><ue-popup-menu><div class="popupmenu" role="menu" tabindex="0" aria-label="Settings"><div class="popupmenu__row" role="menuitemcheckbox" aria-checked="true" data-value="Show Folders"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Folders</span></span></div><div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false" data-value="Show Empty Folders"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Empty Folders</span></span></div><div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false" data-value="Show Favorites"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Favorites</span></span></div><div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false" data-value="Show Developers Content"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Developers Content</span></span></div><div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false" data-value="Show Engine Content"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Engine Content</span></span></div><div class="popupmenu__row" role="menuitemcheckbox" aria-checked="true" data-value="Show Plugin Content"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Plugin Content</span></span></div></div></ue-popup-menu></div></div></ue-combo-button></div>
+</div>
+</ue-content-toolbar>
+</div>
+<div>
+<small>Default (history: back enabled, forward disabled), pinned</small>
+<div class="ContentToolbar" role="toolbar" aria-label="Content browser toolbar" data-pinned>
+	<div class="ContentToolbar__tools"><span class="combobutton combobutton--button"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M8 2.5v11M2.5 8h11"/></svg><span class="combobutton__label">Add</span></span><span class="ContentToolbar__sep"></span><button type="button" class="button button--simple button--tight"><svg class="button__icon" viewBox="0 0 16 16"><path d="M2 9v5h12V9"/><path d="M8 1.5v8M5 6.5l3 3 3-3"/></svg>Import</button><span class="ContentToolbar__sep"></span><button type="button" class="button button--simple button--tight"><svg class="button__icon" viewBox="0 0 16 16"><path d="M3.5 1.5h7l3 3v8.5a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1v-10.5a1 1 0 0 1 1-1z"/><path d="M5.5 1.5v3.5h4v-3.5M5 14v-4h6v4"/></svg>Save All</button></div>
+	<div class="ContentToolbar__nav"><button type="button" class="button button--simple button--icon" aria-label="Back"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M11.5 8h-7M7.5 5l-3 3 3 3"/></svg></button><button type="button" class="button button--simple button--icon" aria-label="Forward" disabled><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M4.5 8h7M8.5 5l3 3-3 3"/></svg></button></div>
+	<div class="ContentToolbar__path"><svg class="ContentToolbar__folder" viewBox="0 0 16 16"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2H6l1.5 1.5H13.5A1.5 1.5 0 0 1 15 5v7.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5z"/></svg><div class="ContentToolbar__crumbs"><button type="button" class="button button--simple button--tight">All</button><span class="combobutton combobutton--icon" aria-label="Sub-folders of All"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M6 3.5L10.5 8 6 12.5"/></svg></span><button type="button" class="button button--simple button--tight">Content</button><span class="combobutton combobutton--icon" aria-label="Sub-folders of Content"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M6 3.5L10.5 8 6 12.5"/></svg></span><button type="button" class="button button--simple button--tight">StarterContent</button><span class="combobutton combobutton--icon" aria-label="Sub-folders of StarterContent"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M6 3.5L10.5 8 6 12.5"/></svg></span></div></div>
+	<div class="ContentToolbar__end"><span class="combobutton combobutton--simple"><svg class="combobutton__icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.25"/><path d="M8 1.5l1.2 1.7 2-.5.6 2 2 .7-.5 2 1.7 1.3-1.7 1.3.5 2-2 .7-.6 2-2-.5L8 14.5l-1.2-1.7-2 .5-.6-2-2-.7.5-2L1.5 8l1.7-1.3-.5-2 2-.7.6-2 2 .5z"/></svg><span class="combobutton__label">Settings</span></span></div>
+</div>
+</div>
+<div>
+<small>Narrow: breadcrumb takes the remaining width, pinned</small>
+<div style="width:520px"><div class="ContentToolbar" role="toolbar" aria-label="Content browser toolbar" data-pinned>
+	<div class="ContentToolbar__tools"><span class="combobutton combobutton--button"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M8 2.5v11M2.5 8h11"/></svg><span class="combobutton__label">Add</span></span></div>
+	<div class="ContentToolbar__nav"><button type="button" class="button button--simple button--icon" aria-label="Back"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M11.5 8h-7M7.5 5l-3 3 3 3"/></svg></button><button type="button" class="button button--simple button--icon" aria-label="Forward"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M4.5 8h7M8.5 5l3 3-3 3"/></svg></button></div>
+	<div class="ContentToolbar__path"><svg class="ContentToolbar__folder" viewBox="0 0 16 16"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2H6l1.5 1.5H13.5A1.5 1.5 0 0 1 15 5v7.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5z"/></svg><div class="ContentToolbar__crumbs"><button type="button" class="button button--simple button--tight">Game</button><span class="combobutton combobutton--icon" aria-label="Sub-folders of Game"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M6 3.5L10.5 8 6 12.5"/></svg></span><button type="button" class="button button--simple button--tight">Maps</button><span class="combobutton combobutton--icon" aria-label="Sub-folders of Maps"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M6 3.5L10.5 8 6 12.5"/></svg></span></div></div>
+	<div class="ContentToolbar__end"><span class="combobutton combobutton--simple"><svg class="combobutton__icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.25"/><path d="M8 1.5l1.2 1.7 2-.5.6 2 2 .7-.5 2 1.7 1.3-1.7 1.3.5 2-2 .7-.6 2-2-.5L8 14.5l-1.2-1.7-2 .5-.6-2-2-.7.5-2L1.5 8l1.7-1.3-.5-2 2-.7.6-2 2 .5z"/></svg><span class="combobutton__label">Settings</span></span></div>
+</div></div>
+</div>
 </div>
 </body>
 </html>

@@ -1,0 +1,5 @@
+/* Vertical filter layout slot Padding(6,4,0,0): SContentBrowser.cpp:1362. The buttons sit 2px apart: SContentBrowser.cpp:1369 Padding(0,0,2,0). */
+.AssetSearchBar { display: flex; align-items: center; gap: 2px; padding: 4px 0 4px 6px; font: 400 13.333px/16px var(--font-sans); color: var(--foreground); }
+
+/* The search field is 500px wide: SContentBrowser.cpp:1249,1380 */
+.AssetSearchBar__field { flex: 0 1 500px; min-width: 0; }

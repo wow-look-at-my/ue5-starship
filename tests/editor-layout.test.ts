@@ -58,7 +58,7 @@ test('typing in the content browser search changes the item count', async () => 
 		const { page } = await openLayout(browser);
 		const status = page.locator('ue-content-browser .ContentBrowser__status');
 		const before = await status.innerText();
-		await page.locator('ue-content-browser .ContentBrowser__input').fill('Mat');
+		await page.locator('ue-content-browser .textinput__field').fill('Mat');
 		assert.notEqual(await status.innerText(), before);
 	});
 });

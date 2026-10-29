@@ -1,9 +1,9 @@
-/* src/_shared/base.css */
+/* design-system/src/_shared/base.css */
 [data-pinned] {
   pointer-events: none;
 }
 
-/* src/Button/Button.css */
+/* design-system/src/Button/Button.css */
 .button {
   display: inline-flex;
   align-items: center;
@@ -154,6 +154,12 @@
 .button--toggle[aria-pressed=true][aria-disabled=true]:active {
   background: var(--primary);
   color: var(--foreground-hover);
+}
+.button--tight,
+.button--tight:active,
+.button--tight.button--pressed {
+  padding-left: 4px;
+  padding-right: 4px;
 }
 .button--small {
   box-sizing: border-box;

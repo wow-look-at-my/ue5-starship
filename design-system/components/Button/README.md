@@ -74,6 +74,7 @@ The element can be a `button` or any element with `role="button"` and `tabindex=
 | `button--simple` | Transparent, `--dropdown` on hover |
 | `button--icon` | Icon-only: padding 4 x 3, radius 4. Combine with `button--simple` or `button--toggle`. The icon is `button__icon button__icon--solo` |
 | `button--toggle` | A toggle with `aria-pressed="true\|false"`. Off looks like simple. On fills `--primary` (hover `--primary-hover`, pressed `--dropdown`). A click flips `aria-pressed` |
+| `button--tight` | Combine with `button--simple`. Side padding 4 instead of 8, at rest and pressed. For a consumer that sets `ContentPadding(2)` in place of the `SButton` default (4,2), as the Content Browser toolbar does (`SContentBrowser.cpp:1839,1857`) |
 | `button--small` | Fixed 22px height, padding 14 on both sides. For the Add button |
 | disabled | the `disabled` attribute on a `button`, or `aria-disabled="true"` on any element |
 

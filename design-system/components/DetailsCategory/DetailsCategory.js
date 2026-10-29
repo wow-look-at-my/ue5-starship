@@ -1,4 +1,4 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   #ready = false;
@@ -51,7 +51,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/_shared/popupmenu.ts
+// design-system/src/_shared/popupmenu.ts
 function wireMenu(wiring) {
   const { trigger, menu, itemSelector } = wiring;
   const items = () => Array.from(menu.querySelectorAll(itemSelector));
@@ -129,7 +129,7 @@ function wireMenu(wiring) {
   };
 }
 
-// src/DetailsCategory/DetailsCategory.ts
+// design-system/src/DetailsCategory/DetailsCategory.ts
 var DOWN = "#DetailsCategory-down";
 var RIGHT = "#DetailsCategory-right";
 var isIn = (el, selector) => el.closest(selector);

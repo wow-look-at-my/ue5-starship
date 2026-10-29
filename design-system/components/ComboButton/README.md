@@ -110,7 +110,7 @@ A check row never changes the label.
 | `combobutton--simple` | Transparent, `--dropdown` on hover, padding 4 x 1 |
 | `combobutton--icon` | Transparent icon plus chevron, no label, padding 4 x 3 |
 | `combobutton--small` | Property row size: `400 10.667px/1.172` font, fixed 22px height, no minimum width |
-| `combobutton--button` | The Button look: `--secondary` fill, fixed 22px height, padding 14, 3px gap |
+| `combobutton--button` | The Button look: `--secondary` fill, fixed 22px height, padding 14, 3px gap. The plus icon is `--accent-green` (`ToolWidgetsStyle.cpp:76`) |
 | `combobutton-anchor--fill` (on the anchor) | The trigger takes the free width of a row |
 | `combobutton-menu--end` (on the panel) | The panel aligns to the right edge of the trigger |
 

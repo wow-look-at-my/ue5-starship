@@ -1436,3 +1436,56 @@ scenario('ResetToDefault: Tab reaches the arrow and shows the Primary focus ring
 	await inks(page, button, 'outline-color', 'primary');
 });
 
+// ---------- variants the Content Browser needs ----------
+
+scenario('Button: the tight variant keeps 4px sides at rest and pressed', 'Button', async (page) => {
+	await page.evaluate(() => {
+		const host = document.createElement('ue-button');
+		host.id = 'tight';
+		host.innerHTML = '<button type="button" class="button button--simple button--tight">Import</button>';
+		document.body.append(host);
+	});
+	const tight = page.locator('#tight .button');
+	assert.equal(await prop(tight, 'padding-left'), '4px');
+	assert.equal(await prop(tight, 'padding-top'), '3px');
+	await tight.hover();
+	await hold(page);
+	assert.equal(await prop(tight, 'padding-left'), '4px', 'the pressed state keeps the sides');
+	assert.equal(await prop(tight, 'padding-top'), '4px', 'and drops the label 1px');
+	await release(page);
+});
+
+scenario('ComboButton: the Add variant draws its plus icon in AccentGreen', 'ComboButton', async (page) => {
+	await page.evaluate(() => {
+		const host = document.createElement('ue-combo-button');
+		host.id = 'add';
+		host.setAttribute('mode', 'action');
+		host.innerHTML = '<div class="combobutton-anchor"><span class="combobutton combobutton--button" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg><span class="combobutton__label">Add</span></span><div class="combobutton-menu" hidden><ue-popup-menu><div class="popupmenu" role="menu" tabindex="0"><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">New</span></span></div></div></ue-popup-menu></div></div>';
+		document.body.append(host);
+	});
+	const icon = page.locator('#add .combobutton__icon');
+	const probe = await page.evaluate(() => {
+		const el = document.createElement('i');
+		el.style.color = 'var(--accent-green)';
+		document.body.append(el);
+		return getComputedStyle(el).color;
+	});
+	assert.equal(await prop(icon, 'color'), probe);
+});
+
+scenario('ExpandableArea: the source variant draws the Header block with a recessed body', 'ExpandableArea', async (page) => {
+	await page.evaluate(() => {
+		const host = document.createElement('ue-expandable-area');
+		host.id = 'source';
+		host.innerHTML = '<div class="expandablearea expandablearea--source"><div class="expandablearea__header" role="button" tabindex="0" aria-expanded="true"><svg class="expandablearea__caret" viewBox="0 0 16 16"><path d="M6 4l4 4-4 4z"/></svg><span class="expandablearea__title">Sources</span></div><div class="expandablearea__body">Body</div></div>';
+		document.body.append(host);
+	});
+	const area = page.locator('#source .expandablearea');
+	assert.equal(await fill(area), await token(page, 'header'));
+	assert.equal(await prop(area, 'border-top-left-radius'), '0px');
+	assert.equal(await fill(page.locator('#source .expandablearea__body')), await token(page, 'recessed'));
+	assert.equal(await prop(page.locator('#source .expandablearea__title'), 'font-weight'), '700');
+	assert.equal(await prop(page.locator('#source .expandablearea__title'), 'font-size'), '13.333px');
+	assert.equal(Math.round((await page.locator('#source .expandablearea__header').boundingBox())?.height ?? 0), 24);
+});
+

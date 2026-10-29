@@ -1,0 +1,19 @@
+/* SContentBrowser.cpp:764-767 SBorder Padding(3), Brushes.Panel */
+.ContentToolbar { position: relative; display: flex; align-items: center; background: var(--panel); padding: 3px; font: 400 13.333px/16px var(--font-sans); color: var(--foreground); }
+
+/* SContentBrowser.cpp:772 slot Padding(5,0,0,0); StarshipStyle.cpp:6624 ToolBar BackgroundPadding(4,2,0,2) */
+.ContentToolbar__tools { display: flex; align-items: center; margin-left: 5px; padding: 2px 0 2px 4px; }
+
+/* StarshipStyle.cpp:6622-6623 separator: no brush, padding (4,0); SeparatorThickness 2 (ToolBarStyle.cpp:25) */
+.ContentToolbar__sep { flex: none; width: 2px; margin: 0 4px; }
+
+/* history arrows: SContentBrowser.cpp:778 back margin-left 10, :797 forward margin-left 2 */
+.ContentToolbar__nav { display: flex; gap: 2px; margin-left: 10px; }
+
+/* path slot: SContentBrowser.cpp:816-820 Padding(2,0,0,0), fill */
+.ContentToolbar__path { flex: 1; min-width: 0; display: flex; align-items: center; margin-left: 2px; }
+.ContentToolbar__folder { flex: none; width: 16px; height: 16px; margin: 0 4px 0 6px; fill: currentColor; } /* leading folder glyph: in the reference image only, not in 5.5.3 source */
+.ContentToolbar__crumbs { display: flex; align-items: center; min-width: 0; }
+
+/* Settings slot Padding(5,0,0,0): SContentBrowser.cpp:848 */
+.ContentToolbar__end { flex: none; display: flex; margin-left: 5px; }

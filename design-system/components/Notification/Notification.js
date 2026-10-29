@@ -1,4 +1,4 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   #ready = false;
@@ -51,7 +51,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/Notification/Notification.ts
+// design-system/src/Notification/Notification.ts
 var UeNotificationElement = class extends UeElement {
   #shown = 0;
   setup() {

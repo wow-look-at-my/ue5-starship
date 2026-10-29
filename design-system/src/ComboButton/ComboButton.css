@@ -39,7 +39,7 @@
 }
 .combobutton--button:not([aria-disabled="true"]):hover, .combobutton--button.combobutton--hover { background: var(--hover); box-shadow: inset 0 0 0 1px var(--input); } /* :1374 */
 .combobutton--button:not([aria-disabled="true"]):active, .combobutton--button.combobutton--open { background: var(--header); box-shadow: inset 0 0 0 1px var(--input); padding: 1px 14px 0; } /* :1375 */
-.combobutton--button .combobutton__icon { margin-right: 0; }
+.combobutton--button .combobutton__icon { margin-right: 0; color: var(--accent-green); } /* SPositiveActionButton plus icon AccentGreen, ToolWidgetsStyle.cpp:76 */
 
 .combobutton:focus-visible:not(.combobutton--open) { box-shadow: inset 0 0 0 1px var(--primary); } /* FocusRectangle 1px Primary r4, StarshipCoreStyle.cpp:218 */
 

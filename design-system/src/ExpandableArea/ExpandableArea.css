@@ -19,4 +19,9 @@
 .expandablearea__header[role="button"]:focus-visible { outline: 1px solid var(--primary); outline-offset: -1px; border-radius: 4px; } /* FocusRectangle 1px Primary r4 StarshipCoreStyle.cpp:218 */
 .expandablearea__header[role="button"] .expandablearea__caret { transition: transform .12s ease-out; } /* right triangle turned 90 degrees is the down triangle */
 .expandablearea__header[aria-expanded="true"] .expandablearea__caret { transform: rotate(90deg); }
+/* Source variant: the Content Browser sources column. A Header block with 2px top padding (SContentBrowser.cpp:908-909), a 24px header row with HeaderPadding (4,0) :1473, a NormalFontBold title :1484-1487 and a Recessed body :1554. */
+.expandablearea--source { border-radius: 0; background: var(--header); color: var(--foreground); padding-top: 2px; }
+.expandablearea--source .expandablearea__header { padding: 0 4px; min-height: 24px; }
+.expandablearea--source .expandablearea__title { font: 700 13.333px/16px var(--font-sans); }
+.expandablearea--source .expandablearea__body { padding: 0; background: var(--recessed); }
 @media (prefers-reduced-motion: reduce) { .expandablearea__header[role="button"] .expandablearea__caret { transition: none; } }

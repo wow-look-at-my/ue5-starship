@@ -1,4 +1,4 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   #ready = false;
@@ -51,7 +51,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/DetailsHeader/DetailsHeader.ts
+// design-system/src/DetailsHeader/DetailsHeader.ts
 var UeDetailsHeader = class extends UeElement {
   setup() {
     const lock = this.one(".DetailsHeader-lock");

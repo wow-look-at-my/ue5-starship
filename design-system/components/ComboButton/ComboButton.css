@@ -1,9 +1,9 @@
-/* src/_shared/base.css */
+/* design-system/src/_shared/base.css */
 [data-pinned] {
   pointer-events: none;
 }
 
-/* src/PopupMenu/PopupMenu.css */
+/* design-system/src/PopupMenu/PopupMenu.css */
 .popupmenu {
   box-sizing: border-box;
   padding: 8px 0;
@@ -177,7 +177,7 @@
   background: var(--white-25);
 }
 
-/* src/ComboButton/ComboButton.css */
+/* design-system/src/ComboButton/ComboButton.css */
 .combobutton {
   display: inline-flex;
   align-items: center;
@@ -310,6 +310,7 @@
 }
 .combobutton--button .combobutton__icon {
   margin-right: 0;
+  color: var(--accent-green);
 }
 .combobutton:focus-visible:not(.combobutton--open) {
   box-shadow: inset 0 0 0 1px var(--primary);

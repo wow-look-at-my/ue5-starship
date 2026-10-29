@@ -1,4 +1,4 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   #ready = false;
@@ -51,12 +51,12 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/_shared/own.ts
+// design-system/src/_shared/own.ts
 function ownedBy(host, target) {
   return target instanceof Element && target.closest(host.localName) === host;
 }
 
-// src/_shared/popup.ts
+// design-system/src/_shared/popup.ts
 function enabledRows(menu, rowSelector) {
   return Array.from(menu.querySelectorAll(rowSelector)).filter((row) => row.getAttribute("aria-disabled") !== "true");
 }
@@ -65,7 +65,7 @@ function rowLabel(row, labelSelector) {
   return (label ?? row).textContent?.trim() ?? "";
 }
 
-// src/PopupMenu/PopupMenu.ts
+// design-system/src/PopupMenu/PopupMenu.ts
 var ROW = ".popupmenu__row";
 var CURRENT = "popupmenu__row--hover";
 var OPEN = "popupmenu__row--open";

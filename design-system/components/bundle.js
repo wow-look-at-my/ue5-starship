@@ -1,6 +1,6 @@
 /* @ds-bundle: {"format":4,"namespace":"UEStarship","components":[]} */
 (() => {
-  // src/_shared/element.ts
+  // design-system/src/_shared/element.ts
   var UeElement = class extends HTMLElement {
     #disposers = [];
     #ready = false;
@@ -53,7 +53,7 @@
     if (!customElements.get(tag)) customElements.define(tag, ctor);
   }
 
-  // src/_shared/popupmenu.ts
+  // design-system/src/_shared/popupmenu.ts
   function wireMenu(wiring) {
     const { trigger, menu, itemSelector } = wiring;
     const items = () => Array.from(menu.querySelectorAll(itemSelector));
@@ -131,7 +131,7 @@
     };
   }
 
-  // src/AssetPicker/AssetPicker.ts
+  // design-system/src/AssetPicker/AssetPicker.ts
   var UeAssetPicker = class extends UeElement {
     setup() {
       const row = this.one(".AssetPicker-row");
@@ -173,215 +173,613 @@
   };
   define("ue-asset-picker", UeAssetPicker);
 
-  // src/_shared/contentMenu.ts
-  var TICK = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l3 3 6-7"/></svg>';
-  function openMenu(host, anchor, options) {
-    const menu = document.createElement("div");
-    menu.className = options.prefix + "__menu";
-    menu.setAttribute("role", "menu");
-    const items = [];
-    let open = true;
-    const close = () => {
-      if (!open) return;
-      open = false;
-      document.removeEventListener("pointerdown", outside, true);
-      menu.remove();
-      anchor.setAttribute("aria-expanded", "false");
-      options.onClose?.();
-    };
-    const outside = (event) => {
-      const target = event.target;
-      if (target instanceof Node && !menu.contains(target) && !anchor.contains(target)) close();
-    };
-    options.entries.forEach((entry, index) => {
-      if (entry.separator) {
-        const rule = document.createElement("div");
-        rule.className = options.prefix + "__menusep";
-        rule.setAttribute("role", "separator");
-        menu.append(rule);
-        return;
-      }
-      const item = document.createElement("button");
-      item.type = "button";
-      item.className = options.prefix + "__menuitem";
-      item.tabIndex = -1;
-      item.disabled = entry.disabled === true;
-      if (entry.checkable) {
-        item.setAttribute("role", "menuitemcheckbox");
-        item.setAttribute("aria-checked", String(entry.checked === true));
-      } else {
-        item.setAttribute("role", "menuitem");
-      }
-      const check = document.createElement("span");
-      check.className = options.prefix + "__menucheck";
-      if (entry.checked) check.innerHTML = TICK;
-      const label = document.createElement("span");
-      label.textContent = entry.label ?? "";
-      item.append(check, label);
-      item.addEventListener("click", () => {
-        close();
-        anchor.focus();
-        options.onPick(index);
-      });
-      items.push(item);
-      menu.append(item);
-    });
-    menu.addEventListener("keydown", (event) => {
-      const enabled = items.filter((item) => !item.disabled);
-      const at = enabled.indexOf(document.activeElement);
-      let next;
-      if (event.key === "ArrowDown") next = enabled[(at + 1) % enabled.length];
-      else if (event.key === "ArrowUp") next = enabled[(at - 1 + enabled.length) % enabled.length];
-      else if (event.key === "Home") next = enabled[0];
-      else if (event.key === "End") next = enabled[enabled.length - 1];
-      else if (event.key === "Escape") {
-        event.preventDefault();
-        event.stopPropagation();
-        close();
-        anchor.focus();
-        return;
-      } else if (event.key === "Tab") {
-        close();
-        return;
-      } else return;
-      event.preventDefault();
-      next?.focus();
-    });
-    host.append(menu);
-    const hostBox = host.getBoundingClientRect();
-    const anchorBox = anchor.getBoundingClientRect();
-    let left = anchorBox.left - hostBox.left;
-    if (left + menu.offsetWidth > hostBox.width) left = Math.max(0, anchorBox.right - hostBox.left - menu.offsetWidth);
-    menu.style.left = left + "px";
-    menu.style.top = anchorBox.bottom - hostBox.top + "px";
-    anchor.setAttribute("aria-expanded", "true");
-    document.addEventListener("pointerdown", outside, true);
-    items.find((item) => !item.disabled)?.focus();
-    return { element: menu, anchor, close };
+  // design-system/src/_shared/own.ts
+  function ownedBy(host, target) {
+    return target instanceof Element && target.closest(host.localName) === host;
   }
 
-  // src/AssetSearchBar/AssetSearchBar.ts
-  var PREFIX = "AssetSearchBar";
-  var CROSS = '<svg viewBox="0 0 16 16"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
-  var FILTERS = [
-    { name: "Static Mesh", color: "var(--accent-blue)" },
-    { name: "Material", color: "var(--accent-green)" },
-    { name: "Texture", color: "var(--accent-orange)" },
-    { name: "Blueprint", color: "var(--accent-purple)" },
-    { name: "Level", color: "var(--accent-pink)" }
-  ];
-  var AssetSearchBarElement = class extends UeElement {
-    #row;
-    #input;
-    #active = [];
-    #menu = null;
+  // design-system/src/Button/Button.ts
+  var PRESSED = "button--pressed";
+  function isDisabled(button) {
+    return button.matches(":disabled") || button.getAttribute("aria-disabled") === "true";
+  }
+  var UeButtonElement = class extends UeElement {
+    #clicks = 0;
     setup() {
-      const row = this.one(".AssetSearchBar");
-      const input = this.one(".AssetSearchBar__input");
-      if (!row || !input) throw new Error("ue-asset-search-bar needs a .AssetSearchBar row with a .AssetSearchBar__input");
-      this.#row = row;
-      this.#input = input;
-      this.#active = [];
-      this.#menu = null;
-      this.#sync();
-      this.on(input, "input", () => {
-        this.#sync();
-        this.emit("assetsearchbar:change", { text: input.value, filters: this.#active.slice() });
-      });
-      this.on(input, "keydown", (event) => {
-        if (event.key === "Escape" && input.value !== "") {
+      const button = this.one(".button");
+      if (!button) throw new Error("ue-button needs a .button element");
+      this.on(button, "keydown", (event) => {
+        if (!ownedBy(this, event.target) || isDisabled(button) || event.repeat) return;
+        if (event.key !== "Enter" && event.key !== " ") return;
+        button.classList.add(PRESSED);
+        if (button.tagName !== "BUTTON") {
           event.preventDefault();
-          this.#clear();
+          if (event.key === "Enter") button.click();
         }
       });
-      this.on(row, "click", (event) => this.#click(event));
-      this.on(this, "click", (event) => this.#pillClick(event));
-      this.onDispose(() => this.#menu?.close());
-    }
-    // Shows the in-field buttons only while the field has text.
-    #sync() {
-      const hasText = this.#input.value !== "";
-      for (const button of this.all(".AssetSearchBar__clear, .AssetSearchBar__plus")) button.hidden = !hasText;
-    }
-    #clear() {
-      this.#input.value = "";
-      this.#sync();
-      this.#input.focus();
-      this.emit("assetsearchbar:change", { text: "", filters: this.#active.slice() });
-    }
-    #click(event) {
-      const target = event.target instanceof Element ? event.target : null;
-      if (!target) return;
-      if (target.closest(".AssetSearchBar__clear")) {
-        this.#clear();
-      } else if (target.closest(".AssetSearchBar__plus") || target.closest(".AssetSearchBar__btn") && !target.closest(".AssetSearchBar__filter")) {
-        this.emit("assetsearchbar:save", { text: this.#input.value });
-      } else if (target.closest(".AssetSearchBar__filter")) {
-        this.#toggleMenu(target.closest(".AssetSearchBar__filter"));
-      }
-    }
-    #toggleMenu(anchor) {
-      if (!anchor) return;
-      const previous = this.#menu;
-      if (previous) {
-        previous.close();
-        if (previous.anchor === anchor) return;
-      }
-      anchor.setAttribute("aria-haspopup", "menu");
-      const entries = FILTERS.map((filter) => ({ label: filter.name, checkable: true, checked: this.#active.includes(filter.name) }));
-      this.#menu = openMenu(this.#row, anchor, {
-        prefix: PREFIX,
-        entries,
-        onPick: (index) => this.#toggleFilter(FILTERS[index].name),
-        onClose: () => {
-          this.#menu = null;
+      this.on(button, "keyup", (event) => {
+        const wasPressed = button.classList.contains(PRESSED);
+        button.classList.remove(PRESSED);
+        if (wasPressed && button.tagName !== "BUTTON" && event.key === " ") button.click();
+      });
+      this.on(button, "focusout", () => button.classList.remove(PRESSED));
+      this.on(button, "click", () => {
+        if (isDisabled(button)) return;
+        let pressed = null;
+        if (button.hasAttribute("aria-pressed")) {
+          pressed = button.getAttribute("aria-pressed") !== "true";
+          button.setAttribute("aria-pressed", String(pressed));
         }
+        this.#clicks++;
+        this.emit("ue-button-click", { label: button.getAttribute("aria-label") ?? button.textContent?.trim() ?? "", pressed, count: this.#clicks });
       });
     }
-    #toggleFilter(name) {
-      this.#active = this.#active.includes(name) ? this.#active.filter((each) => each !== name) : this.#active.concat(name);
-      this.#renderPills();
-      this.emit("assetsearchbar:change", { text: this.#input.value, filters: this.#active.slice() });
+  };
+  define("ue-button", UeButtonElement);
+
+  // design-system/src/_shared/popup.ts
+  function enabledRows(menu, rowSelector) {
+    return Array.from(menu.querySelectorAll(rowSelector)).filter((row) => row.getAttribute("aria-disabled") !== "true");
+  }
+  function moveRowFocus(rows, current, key) {
+    if (rows.length === 0) return false;
+    const index = current instanceof HTMLElement ? rows.indexOf(current) : -1;
+    let next;
+    if (key === "ArrowDown") next = index < 0 ? 0 : (index + 1) % rows.length;
+    else if (key === "ArrowUp") next = index < 0 ? rows.length - 1 : (index - 1 + rows.length) % rows.length;
+    else if (key === "Home") next = 0;
+    else if (key === "End") next = rows.length - 1;
+    else return false;
+    rows[next].focus();
+    return true;
+  }
+  function rowLabel(row, labelSelector) {
+    const label = row.querySelector(labelSelector);
+    return (label ?? row).textContent?.trim() ?? "";
+  }
+
+  // design-system/src/PopupMenu/PopupMenu.ts
+  var ROW = ".popupmenu__row";
+  var CURRENT = "popupmenu__row--hover";
+  var OPEN = "popupmenu__row--open";
+  var PRESSED2 = "popupmenu__row--pressed";
+  var KEYS = "popupmenu--keys";
+  function rowOf(target) {
+    return target instanceof Element ? target.closest(ROW) : null;
+  }
+  function isDisabled2(row) {
+    return row.getAttribute("aria-disabled") === "true";
+  }
+  function submenuOf(row) {
+    return row.querySelector(":scope > .popupmenu__sub");
+  }
+  function menuOf(row) {
+    return row.parentElement;
+  }
+  var UePopupMenuElement = class extends UeElement {
+    // The focusable .popupmenu list.
+    get root() {
+      const root = this.one(".popupmenu[tabindex]");
+      if (!root) throw new Error("ue-popup-menu needs a .popupmenu[tabindex] element");
+      return root;
     }
-    #pillClick(event) {
-      const remove = event.target instanceof Element ? event.target.closest(".AssetSearchBar__pillRemove") : null;
-      const name = remove?.closest(".AssetSearchBar__pill")?.getAttribute("aria-label")?.replace(/^Filter: /, "");
-      if (name) this.#toggleFilter(name);
+    // Focuses the list and marks `row` current. `keys` hides the hover highlight, as after an arrow key.
+    focusMenu(row, keys) {
+      const root = this.root;
+      root.focus({ preventScroll: true });
+      root.classList.toggle(KEYS, keys);
+      this.#show(root, row, null);
     }
-    #renderPills() {
-      let strip = this.one(".AssetSearchBar__pills");
-      if (!strip) {
-        strip = document.createElement("div");
-        strip.className = "AssetSearchBar__pills";
-        strip.setAttribute("role", "list");
-        this.#row.after(strip);
+    // Clears the current row and closes every submenu.
+    reset() {
+      const root = this.root;
+      root.classList.remove(KEYS);
+      this.#show(root, null, null);
+    }
+    // The enabled rows of the top level, in order.
+    topRows() {
+      return enabledRows(this.root, ":scope > " + ROW);
+    }
+    setup() {
+      void this.root;
+      this.on(this, "mousemove", (event) => {
+        const row = rowOf(event.target);
+        if (!row || !ownedBy(this, event.target)) return;
+        const root = this.root;
+        root.classList.remove(KEYS);
+        if (isDisabled2(row)) return;
+        const sub = submenuOf(row);
+        const open = sub !== null && !sub.hidden;
+        if (row.classList.contains(CURRENT) && (sub === null || open)) return;
+        this.#show(root, row, sub ? row : null);
+      });
+      this.on(this, "pointerdown", (event) => {
+        const row = rowOf(event.target);
+        if (row && ownedBy(this, event.target) && event.button === 0 && !isDisabled2(row)) row.classList.add(PRESSED2);
+      });
+      const release = () => {
+        for (const row of this.all(ROW + "." + PRESSED2)) row.classList.remove(PRESSED2);
+      };
+      this.on(this, "pointerup", release);
+      this.on(this, "pointercancel", release);
+      this.on(this, "pointerout", (event) => {
+        const row = rowOf(event.target);
+        if (row && !(event.relatedTarget instanceof Node && row.contains(event.relatedTarget))) row.classList.remove(PRESSED2);
+      });
+      this.on(this, "click", (event) => {
+        const row = rowOf(event.target);
+        if (!row || !ownedBy(this, event.target) || isDisabled2(row)) return;
+        const sub = submenuOf(row);
+        if (sub) {
+          this.#show(this.root, row, sub.hidden ? row : null);
+          return;
+        }
+        this.#show(this.root, row, null);
+        this.#activate(row);
+      });
+      this.on(this, "mouseout", (event) => {
+        const root = this.root;
+        if (!ownedBy(this, event.target) || event.relatedTarget instanceof Node && root.contains(event.relatedTarget)) return;
+        if (!root.classList.contains(KEYS)) this.#show(root, null, null);
+      });
+      this.on(this, "keydown", (event) => {
+        if (event.target === this.root) this.#key(event, this.root);
+      });
+      this.on(this, "focusout", (event) => {
+        const root = this.root;
+        if (!root.contains(event.target)) return;
+        if (!(event.relatedTarget instanceof Node && root.contains(event.relatedTarget))) this.#show(root, null, null);
+      });
+    }
+    // Marks one row current, opens the submenus on its path, and optionally opens the submenu of `open`.
+    #show(root, current, open) {
+      const keep = /* @__PURE__ */ new Set();
+      for (let row = current; row; row = row.parentElement?.closest(ROW) ?? null) {
+        if (row !== current) keep.add(row);
       }
-      strip.replaceChildren();
-      for (const name of this.#active) {
-        const filter = FILTERS.find((each) => each.name === name);
-        const pill = document.createElement("span");
-        pill.className = "AssetSearchBar__pill";
-        pill.setAttribute("role", "listitem");
-        pill.setAttribute("aria-label", "Filter: " + name);
-        const colour = document.createElement("span");
-        colour.className = "AssetSearchBar__pillColor";
-        colour.style.background = filter?.color ?? "var(--accent-gray)";
-        const label = document.createElement("span");
-        label.className = "AssetSearchBar__pillName";
-        label.textContent = name;
-        const remove = document.createElement("button");
-        remove.type = "button";
-        remove.className = "AssetSearchBar__pillRemove";
-        remove.setAttribute("aria-label", "Remove " + name + " filter");
-        remove.innerHTML = CROSS;
-        pill.append(colour, label, remove);
-        strip.append(pill);
+      if (open) keep.add(open);
+      for (const row of Array.from(root.querySelectorAll(ROW))) {
+        row.classList.toggle(CURRENT, row === current);
+        const sub = submenuOf(row);
+        if (sub) {
+          const isOpen = keep.has(row);
+          sub.hidden = !isOpen;
+          row.classList.toggle(OPEN, isOpen);
+          row.setAttribute("aria-expanded", String(isOpen));
+        }
       }
+    }
+    #activate(row) {
+      const role = row.getAttribute("role");
+      const label = rowLabel(row, ".popupmenu__label");
+      let checked = null;
+      let text = label;
+      if (role === "menuitemcheckbox") {
+        checked = row.getAttribute("aria-checked") !== "true";
+        row.setAttribute("aria-checked", String(checked));
+        text += checked ? " (checked)" : " (unchecked)";
+      } else if (role === "menuitemradio") {
+        for (const other of Array.from(menuOf(row)?.querySelectorAll(':scope > [role="menuitemradio"]') ?? [])) {
+          other.setAttribute("aria-checked", String(other === row));
+        }
+        checked = true;
+        text += " (selected)";
+      }
+      const detail = { label, role, checked, text, value: row.dataset.value ?? label, row };
+      this.emit("ue-menu-activate", detail);
+    }
+    #key(event, root) {
+      const current = root.querySelector(ROW + "." + CURRENT);
+      const menu = current ? menuOf(current) : root;
+      if (!menu) return;
+      const rows = enabledRows(menu, ":scope > " + ROW);
+      const index = current ? rows.indexOf(current) : -1;
+      const go = (next) => {
+        root.classList.add(KEYS);
+        if (next) this.#show(root, next, null);
+      };
+      switch (event.key) {
+        case "ArrowDown":
+          go(rows[index < 0 ? 0 : (index + 1) % rows.length]);
+          break;
+        case "ArrowUp":
+          go(rows[index < 0 ? rows.length - 1 : (index - 1 + rows.length) % rows.length]);
+          break;
+        case "Home":
+          go(rows[0]);
+          break;
+        case "End":
+          go(rows[rows.length - 1]);
+          break;
+        case "ArrowRight":
+          this.#enter(root, current);
+          break;
+        case "ArrowLeft":
+          this.#leave(root, current);
+          break;
+        case "Escape":
+          root.classList.add(KEYS);
+          if (current && menu !== root) {
+            this.#leave(root, current);
+            event.stopPropagation();
+          } else {
+            this.#show(root, null, null);
+          }
+          break;
+        case "Enter":
+        case " ":
+          root.classList.add(KEYS);
+          if (event.repeat || !current) break;
+          if (submenuOf(current)) this.#enter(root, current);
+          else this.#activate(current);
+          break;
+        default:
+          return;
+      }
+      event.preventDefault();
+    }
+    // Opens the submenu of the current row and moves to its first enabled row.
+    #enter(root, current) {
+      root.classList.add(KEYS);
+      const sub = current ? submenuOf(current) : null;
+      if (!current || !sub) return;
+      const first = enabledRows(sub, ":scope > " + ROW)[0];
+      this.#show(root, first ?? current, current);
+    }
+    // Closes the submenu that holds the current row and returns to its parent row.
+    #leave(root, current) {
+      root.classList.add(KEYS);
+      const parent = current ? menuOf(current)?.closest(ROW) ?? null : null;
+      if (parent) this.#show(root, parent, null);
+    }
+  };
+  define("ue-popup-menu", UePopupMenuElement);
+
+  // design-system/src/ComboButton/ComboButton.ts
+  var OPEN2 = "combobutton--open";
+  var ACTIVATE_KEYS = ["Enter", " ", "ArrowDown", "ArrowUp"];
+  var UeComboButtonElement = class extends UeElement {
+    #trigger;
+    #panel;
+    setup() {
+      const trigger = this.one(".combobutton");
+      const panel = this.one(".combobutton-menu");
+      if (!trigger || !panel) throw new Error("ue-combo-button needs a .combobutton trigger and a .combobutton-menu panel");
+      if (!panel.querySelector("ue-popup-menu")) throw new Error("the .combobutton-menu panel needs a ue-popup-menu");
+      this.#trigger = trigger;
+      this.#panel = panel;
+      const anchor = trigger.closest(".combobutton-anchor") ?? this;
+      if (!this.#isAction()) this.#markSelected(this.#labelText());
+      this.on(trigger, "click", () => {
+        if (this.#disabled()) return;
+        if (panel.hidden) this.#open(false, false);
+        else this.#close(false);
+      });
+      this.on(trigger, "keydown", (event) => {
+        if (event.target !== trigger || this.#disabled() || !ACTIVATE_KEYS.includes(event.key)) return;
+        event.preventDefault();
+        if (panel.hidden && !event.repeat) this.#open(true, event.key === "ArrowUp");
+      });
+      this.on(panel, "mousedown", (event) => event.preventDefault());
+      this.on(panel, "keydown", (event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          this.#close(true);
+        } else if (event.key === "Tab") {
+          this.#close(false);
+        }
+      });
+      this.on(this, "ue-menu-activate", (event) => {
+        if (ownedBy(this, event.target)) this.#pick(event.detail);
+      });
+      this.on(document, "pointerdown", (event) => {
+        if (!panel.hidden && !(event.target instanceof Node && anchor.contains(event.target))) this.#close(false);
+      });
+    }
+    #disabled() {
+      return this.#trigger.getAttribute("aria-disabled") === "true";
+    }
+    // Action mode keeps the label fixed. Value mode shows the picked row.
+    #isAction() {
+      return this.#trigger.classList.contains("combobutton--simple") || this.getAttribute("mode") === "action" || this.#label() === null;
+    }
+    #label() {
+      return this.#trigger.querySelector(".combobutton__label");
+    }
+    #labelText() {
+      return this.#label()?.textContent?.trim() ?? "";
+    }
+    // The popup menu is upgraded by its own module, which can load after this.
+    #popup() {
+      const popup = this.#panel.querySelector("ue-popup-menu");
+      if (!popup || typeof popup.focusMenu !== "function") throw new Error("ue-popup-menu is not defined");
+      return popup;
+    }
+    #rows() {
+      return Array.from(this.#panel.querySelectorAll(".popupmenu[tabindex] > .popupmenu__row")).filter((row) => row.getAttribute("aria-disabled") !== "true");
+    }
+    #markSelected(label) {
+      for (const row of this.#rows()) row.setAttribute("aria-selected", String(rowLabel(row, ".popupmenu__label") === label));
+    }
+    #open(keys, fromEnd) {
+      const popup = this.#popup();
+      this.#panel.hidden = false;
+      this.#trigger.classList.add(OPEN2);
+      this.#trigger.setAttribute("aria-expanded", "true");
+      const rows = this.#rows();
+      const selected = rows.find((row) => row.getAttribute("aria-selected") === "true" || row.getAttribute("aria-checked") === "true");
+      popup.focusMenu(keys ? selected ?? (fromEnd ? rows[rows.length - 1] : rows[0]) ?? null : null, keys);
+    }
+    #close(refocus) {
+      this.#panel.hidden = true;
+      this.#trigger.classList.remove(OPEN2);
+      this.#trigger.setAttribute("aria-expanded", "false");
+      this.#popup().reset();
+      if (refocus) this.#trigger.focus();
+    }
+    #pick(detail) {
+      const label = this.#label();
+      if (!this.#isAction() && label && detail.role !== "menuitemcheckbox") {
+        label.textContent = detail.label;
+        this.#markSelected(detail.label);
+      }
+      this.#close(true);
+      this.emit("ue-combo-pick", { value: detail.value, label: detail.label, checked: detail.checked });
+    }
+  };
+  define("ue-combo-button", UeComboButtonElement);
+
+  // design-system/src/FilterPills/FilterPills.ts
+  var CROSS = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+  var UeFilterPills = class extends UeElement {
+    #strip = null;
+    setup() {
+      const strip = this.all(".FilterPills-strip").find((candidate) => this.owns(candidate)) ?? this.#createStrip();
+      this.#strip = strip;
+      this.on(strip, "click", (event) => {
+        if (!this.owns(event.target)) return;
+        const target = event.target;
+        const remove = target.closest(".FilterPills-chipRemove");
+        const chip = remove?.closest(".FilterPills-chip");
+        if (chip) {
+          this.removeChip(this.#chipId(chip));
+          return;
+        }
+        const pill = target.closest(".FilterPills-pill");
+        if (pill && strip.contains(pill)) this.#select(pill, false);
+      });
+      this.on(strip, "keydown", (event) => {
+        if (!this.owns(event.target)) return;
+        const pills = this.#pills();
+        const at = pills.indexOf(document.activeElement);
+        if (at < 0) return;
+        let next = -1;
+        if (event.key === "ArrowRight" || event.key === "ArrowDown") next = (at + 1) % pills.length;
+        else if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = (at - 1 + pills.length) % pills.length;
+        else if (event.key === "Home") next = 0;
+        else if (event.key === "End") next = pills.length - 1;
+        if (next < 0) return;
+        event.preventDefault();
+        this.#select(pills[next], true);
+      });
+      if (this.#pills().length > 0 && !strip.hasAttribute("role")) strip.setAttribute("role", "tablist");
+      if (strip.classList.contains("FilterPills-strip--chips")) strip.setAttribute("role", "list");
+    }
+    #createStrip() {
+      const strip = document.createElement("div");
+      strip.className = "FilterPills-strip";
+      this.append(strip);
+      return strip;
+    }
+    #pills() {
+      return Array.from(this.#strip?.querySelectorAll(".FilterPills-pill") ?? []);
+    }
+    #chips() {
+      return Array.from(this.#strip?.querySelectorAll(".FilterPills-chip") ?? []);
+    }
+    #valueOf(pill) {
+      return pill.dataset.value ?? (pill.textContent ?? "").trim();
+    }
+    #chipId(chip) {
+      return chip.dataset.id ?? (chip.querySelector(".FilterPills-chipName")?.textContent ?? "").trim();
+    }
+    // The value of the checked pill, or an empty string when no pill is checked.
+    get value() {
+      const checked = this.#pills().find((pill) => pill.classList.contains("is-checked"));
+      return checked ? this.#valueOf(checked) : "";
+    }
+    // Checks the pill with this value. It fires ue-filter-change when that changes the checked pill.
+    set value(value) {
+      const pill = this.#pills().find((candidate) => this.#valueOf(candidate) === value);
+      if (pill) this.#select(pill, false);
+    }
+    #select(pill, focus) {
+      const changed = !pill.classList.contains("is-checked");
+      for (const other of this.#pills()) {
+        const on = other === pill;
+        other.classList.toggle("is-checked", on);
+        other.setAttribute("aria-selected", String(on));
+        other.tabIndex = on ? 0 : -1;
+      }
+      if (focus) pill.focus();
+      if (changed) this.emit("ue-filter-change", { value: this.#valueOf(pill), label: (pill.textContent ?? "").trim() });
+    }
+    // Replaces every pill. The first pill with checked set is checked; with none, no pill is checked.
+    setPills(pills) {
+      const strip = this.#strip;
+      if (!strip) return;
+      const drawn = pills.map((data) => {
+        const pill = document.createElement("button");
+        pill.type = "button";
+        pill.className = "FilterPills-pill" + (data.checked ? " is-checked" : "");
+        pill.setAttribute("role", "tab");
+        pill.setAttribute("aria-selected", String(data.checked === true));
+        pill.dataset.value = data.value;
+        pill.textContent = data.label;
+        return pill;
+      });
+      strip.replaceChildren(...drawn);
+      strip.setAttribute("role", "tablist");
+      const stop = drawn.find((pill) => pill.classList.contains("is-checked")) ?? drawn[0];
+      for (const pill of drawn) pill.tabIndex = pill === stop ? 0 : -1;
+    }
+    // The chips in order.
+    getChips() {
+      return this.#chips().map((chip) => ({ id: this.#chipId(chip), label: (chip.querySelector(".FilterPills-chipName")?.textContent ?? "").trim(), color: chip.querySelector(".FilterPills-chipColor")?.style.background || void 0 }));
+    }
+    // Adds a removable chip at the end. An id that is already there is ignored.
+    addChip(data) {
+      const strip = this.#strip;
+      if (!strip || this.#chips().some((chip2) => this.#chipId(chip2) === data.id)) return;
+      strip.classList.add("FilterPills-strip--chips");
+      strip.setAttribute("role", "list");
+      const chip = document.createElement("span");
+      chip.className = "FilterPills-chip";
+      chip.setAttribute("role", "listitem");
+      chip.dataset.id = data.id;
+      chip.setAttribute("aria-label", "Filter: " + data.label);
+      const color = document.createElement("span");
+      color.className = "FilterPills-chipColor";
+      if (data.color) color.style.background = data.color;
+      const name = document.createElement("span");
+      name.className = "FilterPills-chipName";
+      name.textContent = data.label;
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "FilterPills-chipRemove";
+      remove.setAttribute("aria-label", "Remove " + data.label + " filter");
+      remove.innerHTML = CROSS;
+      chip.append(color, name, remove);
+      strip.append(chip);
+      strip.hidden = false;
+      this.emit("ue-pill-add", { id: data.id, label: data.label, color: data.color });
+    }
+    // Removes the chip with this id. It fires ue-pill-remove.
+    removeChip(id) {
+      const chip = this.#chips().find((candidate) => this.#chipId(candidate) === id);
+      if (!chip) return;
+      const detail = { id, label: (chip.querySelector(".FilterPills-chipName")?.textContent ?? "").trim() };
+      chip.remove();
+      if (this.#strip && this.#chips().length === 0) this.#strip.hidden = true;
+      this.emit("ue-pill-remove", detail);
+    }
+    // Replaces every chip. It fires ue-pill-add for each new chip and ue-pill-remove for each chip that was dropped.
+    setChips(chips) {
+      const wanted = new Set(chips.map((chip) => chip.id));
+      for (const have of this.getChips()) if (!wanted.has(have.id)) this.removeChip(have.id);
+      for (const chip of chips) this.addChip(chip);
+    }
+  };
+  define("ue-filter-pills", UeFilterPills);
+
+  // design-system/src/TextInput/TextInput.ts
+  var UeTextInputElement = class extends UeElement {
+    setup() {
+      const box = this.one(".textinput");
+      const field = box?.querySelector(".textinput__field");
+      if (!box || !field) throw new Error("ue-text-input needs a .textinput box with a .textinput__field input");
+      const search = box.classList.contains("textinput--search");
+      const sync = () => {
+        if (search) box.classList.toggle("textinput--filled", field.value !== "");
+      };
+      const clear = () => {
+        field.value = "";
+        sync();
+        field.focus();
+        this.emit("ue-text-input", { value: "" });
+        this.emit("ue-text-clear", {});
+      };
+      sync();
+      this.on(field, "input", () => {
+        sync();
+        this.emit("ue-text-input", { value: field.value });
+      });
+      this.on(box, "click", (event) => {
+        if (!(event.target instanceof Element)) return;
+        if (event.target.closest(".textinput__clear")) clear();
+        else if (event.target !== field && !event.target.closest(".textinput__trail")) field.focus();
+      });
+      this.on(field, "keydown", (event) => {
+        if (!search || event.key !== "Escape" || field.readOnly || field.value === "") return;
+        event.preventDefault();
+        clear();
+      });
+    }
+  };
+  define("ue-text-input", UeTextInputElement);
+
+  // design-system/src/AssetSearchBar/AssetSearchBar.ts
+  var FILTERS = {
+    "Static Mesh": "var(--accent-blue)",
+    Material: "var(--accent-green)",
+    Texture: "var(--accent-orange)",
+    Blueprint: "var(--accent-purple)",
+    Level: "var(--accent-pink)"
+  };
+  var AssetSearchBarElement = class extends UeElement {
+    #input;
+    #chips;
+    setup() {
+      const input = this.one(".textinput__field");
+      const chips = this.one("ue-filter-pills");
+      if (!input || !chips) throw new Error("ue-asset-search-bar needs a .textinput__field input and a ue-filter-pills");
+      this.#input = input;
+      this.#chips = chips;
+      this.#syncPlus();
+      this.on(this, "ue-text-input", (event) => {
+        if (!this.#mine(event)) return;
+        this.#syncPlus();
+        this.#announce();
+      });
+      this.on(this, "ue-button-click", (event) => {
+        if (this.#mine(event) && event.target.dataset.action === "save") this.emit("assetsearchbar:save", { text: this.#input.value });
+      });
+      this.on(this, "ue-combo-pick", (event) => {
+        if (!this.#mine(event)) return;
+        const { label, checked } = event.detail;
+        if (checked) this.#chips.addChip({ id: label, label, color: FILTERS[label] });
+        else this.#chips.removeChip(label);
+      });
+      this.on(this, "ue-pill-add", (event) => {
+        if (this.#mine(event)) this.#announce();
+      });
+      this.on(this, "ue-pill-remove", (event) => {
+        if (!this.#mine(event)) return;
+        this.#uncheck(event.detail.id);
+        this.#announce();
+      });
+    }
+    get text() {
+      return this.#input.value;
+    }
+    // Sets the hint of the field.
+    setPlaceholder(text) {
+      this.#input.placeholder = text;
+    }
+    // Sets the text of the field as typing would, so the clear X and the change event follow.
+    setText(text) {
+      if (this.#input.value === text) return;
+      this.#input.value = text;
+      this.#input.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+    #mine(event) {
+      return this.owns(event.target);
+    }
+    // The save-search plus shows only while the field has text.
+    #syncPlus() {
+      for (const plus of this.all(".AssetSearchBar__plus")) plus.hidden = this.#input.value === "";
+    }
+    // A chip that went away leaves its menu row unchecked.
+    #uncheck(id) {
+      for (const row of this.all('.popupmenu__row[role="menuitemcheckbox"]')) if (row.dataset.value === id) row.setAttribute("aria-checked", "false");
+    }
+    #announce() {
+      this.emit("assetsearchbar:change", { text: this.#input.value, filters: this.#chips.getChips().map((chip) => chip.id) });
     }
   };
   define("ue-asset-search-bar", AssetSearchBarElement);
 
-  // src/_shared/tileGrid.ts
+  // design-system/src/_shared/tileGrid.ts
   function nearestInRow(tiles, from, down) {
     const tops = new Map(tiles.map((tile) => [tile, tile.getBoundingClientRect()]));
     const box = from.getBoundingClientRect();
@@ -401,7 +799,7 @@
     return line.reduce((best, tile) => distance(tile) < distance(best) ? tile : best);
   }
 
-  // src/AssetTile/AssetTile.ts
+  // design-system/src/AssetTile/AssetTile.ts
   var SELECTED = "is-selected";
   var FOLDER = '<svg class="AssetTile__folderIcon" viewBox="0 0 64 64" aria-hidden="true"><path d="M2 13a2 2 0 0 1 2-2h18l5 6h33a2 2 0 0 1 2 2v31a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="currentColor"/><path d="M2 13a2 2 0 0 1 2-2h18l5 6H2z" fill="#fff" opacity=".12"/><path d="M2 24h60v26a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="#000" opacity=".12"/></svg>';
   var CUBE = '<svg viewBox="0 0 32 32" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg>';
@@ -607,51 +1005,7 @@
   };
   define("ue-asset-tile", AssetTileElement);
 
-  // src/_shared/own.ts
-  function ownedBy(host, target) {
-    return target instanceof Element && target.closest(host.localName) === host;
-  }
-
-  // src/Button/Button.ts
-  var PRESSED = "button--pressed";
-  function isDisabled(button) {
-    return button.matches(":disabled") || button.getAttribute("aria-disabled") === "true";
-  }
-  var UeButtonElement = class extends UeElement {
-    #clicks = 0;
-    setup() {
-      const button = this.one(".button");
-      if (!button) throw new Error("ue-button needs a .button element");
-      this.on(button, "keydown", (event) => {
-        if (!ownedBy(this, event.target) || isDisabled(button) || event.repeat) return;
-        if (event.key !== "Enter" && event.key !== " ") return;
-        button.classList.add(PRESSED);
-        if (button.tagName !== "BUTTON") {
-          event.preventDefault();
-          if (event.key === "Enter") button.click();
-        }
-      });
-      this.on(button, "keyup", (event) => {
-        const wasPressed = button.classList.contains(PRESSED);
-        button.classList.remove(PRESSED);
-        if (wasPressed && button.tagName !== "BUTTON" && event.key === " ") button.click();
-      });
-      this.on(button, "focusout", () => button.classList.remove(PRESSED));
-      this.on(button, "click", () => {
-        if (isDisabled(button)) return;
-        let pressed = null;
-        if (button.hasAttribute("aria-pressed")) {
-          pressed = button.getAttribute("aria-pressed") !== "true";
-          button.setAttribute("aria-pressed", String(pressed));
-        }
-        this.#clicks++;
-        this.emit("ue-button-click", { label: button.getAttribute("aria-label") ?? button.textContent?.trim() ?? "", pressed, count: this.#clicks });
-      });
-    }
-  };
-  define("ue-button", UeButtonElement);
-
-  // src/Checkbox/Checkbox.ts
+  // design-system/src/Checkbox/Checkbox.ts
   function disabled(el) {
     return el.getAttribute("aria-disabled") === "true";
   }
@@ -708,319 +1062,568 @@
   };
   define("ue-checkbox", UeCheckboxElement);
 
-  // src/_shared/popup.ts
-  function enabledRows(menu, rowSelector) {
-    return Array.from(menu.querySelectorAll(rowSelector)).filter((row) => row.getAttribute("aria-disabled") !== "true");
+  // design-system/src/ContentToolbar/ContentToolbar.ts
+  var CHEVRON = '<svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M6 3.5L10.5 8 6 12.5"/></svg>';
+  var CHILDREN = {
+    All: ["Content", "Plugins"],
+    Content: ["StarterContent", "Developers"],
+    StarterContent: ["Architecture", "Audio", "Blueprints", "HDRI", "Maps", "Materials", "Particles", "Props", "Shapes", "Textures"]
+  };
+  var FALLBACK_CHILDREN = ["Architecture", "Audio", "Blueprints"];
+  var escape = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+  function crumbHtml(name, index, children) {
+    const rows = children.map((child2) => '<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">' + escape(child2) + "</span></span></div>").join("");
+    return '<ue-button data-crumb="' + index + '"><button type="button" class="button button--simple button--tight">' + escape(name) + '</button></ue-button><ue-combo-button mode="action" data-crumb-menu="' + index + '"><div class="combobutton-anchor"><span class="combobutton combobutton--icon" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="Sub-folders of ' + escape(name) + '">' + CHEVRON + '</span><div class="combobutton-menu" hidden><ue-popup-menu><div class="popupmenu" role="menu" tabindex="0">' + rows + "</div></ue-popup-menu></div></div></ue-combo-button>";
   }
-  function moveRowFocus(rows, current, key) {
-    if (rows.length === 0) return false;
-    const index = current instanceof HTMLElement ? rows.indexOf(current) : -1;
-    let next;
-    if (key === "ArrowDown") next = index < 0 ? 0 : (index + 1) % rows.length;
-    else if (key === "ArrowUp") next = index < 0 ? rows.length - 1 : (index - 1 + rows.length) % rows.length;
-    else if (key === "Home") next = 0;
-    else if (key === "End") next = rows.length - 1;
-    else return false;
-    rows[next].focus();
-    return true;
-  }
-  function rowLabel(row, labelSelector) {
-    const label = row.querySelector(labelSelector);
-    return (label ?? row).textContent?.trim() ?? "";
-  }
-
-  // src/PopupMenu/PopupMenu.ts
-  var ROW = ".popupmenu__row";
-  var CURRENT = "popupmenu__row--hover";
-  var OPEN = "popupmenu__row--open";
-  var PRESSED2 = "popupmenu__row--pressed";
-  var KEYS = "popupmenu--keys";
-  function rowOf(target) {
-    return target instanceof Element ? target.closest(ROW) : null;
-  }
-  function isDisabled2(row) {
-    return row.getAttribute("aria-disabled") === "true";
-  }
-  function submenuOf(row) {
-    return row.querySelector(":scope > .popupmenu__sub");
-  }
-  function menuOf(row) {
-    return row.parentElement;
-  }
-  var UePopupMenuElement = class extends UeElement {
-    // The focusable .popupmenu list.
-    get root() {
-      const root = this.one(".popupmenu[tabindex]");
-      if (!root) throw new Error("ue-popup-menu needs a .popupmenu[tabindex] element");
-      return root;
-    }
-    // Focuses the list and marks `row` current. `keys` hides the hover highlight, as after an arrow key.
-    focusMenu(row, keys) {
-      const root = this.root;
-      root.focus({ preventScroll: true });
-      root.classList.toggle(KEYS, keys);
-      this.#show(root, row, null);
-    }
-    // Clears the current row and closes every submenu.
-    reset() {
-      const root = this.root;
-      root.classList.remove(KEYS);
-      this.#show(root, null, null);
-    }
-    // The enabled rows of the top level, in order.
-    topRows() {
-      return enabledRows(this.root, ":scope > " + ROW);
+  var ContentToolbarElement = class extends UeElement {
+    // Names of the folders inside the folder at `path`. The chevron after a crumb lists them.
+    childrenOf = (path) => CHILDREN[path[path.length - 1]] ?? FALLBACK_CHILDREN;
+    #crumbs;
+    #path = [];
+    #history = [];
+    #index = 0;
+    get path() {
+      return this.#path;
     }
     setup() {
-      void this.root;
-      this.on(this, "mousemove", (event) => {
-        const row = rowOf(event.target);
-        if (!row || !ownedBy(this, event.target)) return;
-        const root = this.root;
-        root.classList.remove(KEYS);
-        if (isDisabled2(row)) return;
-        const sub = submenuOf(row);
-        const open = sub !== null && !sub.hidden;
-        if (row.classList.contains(CURRENT) && (sub === null || open)) return;
-        this.#show(root, row, sub ? row : null);
+      const crumbs = this.one(".ContentToolbar__crumbs");
+      if (!crumbs) throw new Error("ue-content-toolbar needs a .ContentToolbar__crumbs element");
+      this.#crumbs = crumbs;
+      this.#path = this.all("ue-button[data-crumb]").filter((host) => this.owns(host)).map((host) => (host.textContent ?? "").trim());
+      this.#history = [this.#path];
+      this.#index = 0;
+      this.#render();
+      this.on(this, "ue-button-click", (event) => {
+        if (!this.owns(event.target)) return;
+        const host = event.target.closest("ue-button");
+        if (host?.dataset.action === "back") this.#walk(-1);
+        else if (host?.dataset.action === "forward") this.#walk(1);
+        else if (host?.dataset.crumb !== void 0) this.#go(this.#path.slice(0, Number(host.dataset.crumb) + 1));
       });
-      this.on(this, "pointerdown", (event) => {
-        const row = rowOf(event.target);
-        if (row && ownedBy(this, event.target) && event.button === 0 && !isDisabled2(row)) row.classList.add(PRESSED2);
+      this.on(this, "ue-combo-pick", (event) => {
+        if (!this.owns(event.target)) return;
+        const host = event.target.closest("ue-combo-button");
+        if (host?.dataset.crumbMenu === void 0) return;
+        this.#go(this.#path.slice(0, Number(host.dataset.crumbMenu) + 1).concat(event.detail.label));
       });
-      const release = () => {
-        for (const row of this.all(ROW + "." + PRESSED2)) row.classList.remove(PRESSED2);
-      };
-      this.on(this, "pointerup", release);
-      this.on(this, "pointercancel", release);
-      this.on(this, "pointerout", (event) => {
-        const row = rowOf(event.target);
-        if (row && !(event.relatedTarget instanceof Node && row.contains(event.relatedTarget))) row.classList.remove(PRESSED2);
+    }
+    // Replaces the history. `index` is the entry that is current. The path follows it. No event fires.
+    setHistory(entries, index) {
+      this.#history = entries.map((entry) => entry.slice());
+      this.#index = index;
+      this.#path = this.#history[index].slice();
+      this.#render();
+    }
+    // Moves to `path` and records it in the history, as a navigation by another part of the page does. No event fires.
+    navigate(path) {
+      this.#record(path);
+      this.#render();
+    }
+    #record(path) {
+      this.#history = this.#history.slice(0, this.#index + 1);
+      this.#history.push(path.slice());
+      this.#index = this.#history.length - 1;
+      this.#path = path.slice();
+    }
+    #go(path) {
+      this.#record(path);
+      this.#render();
+      this.emit("contenttoolbar:navigate", { path: path.slice() });
+    }
+    #walk(delta) {
+      const next = this.#index + delta;
+      if (next < 0 || next >= this.#history.length) return;
+      const hadFocus = this.#navButton(delta < 0 ? "back" : "forward") === document.activeElement;
+      this.#index = next;
+      this.#path = this.#history[next].slice();
+      this.#render();
+      if (hadFocus) {
+        const own = this.#navButton(delta < 0 ? "back" : "forward");
+        (own && !own.disabled ? own : this.#navButton(delta < 0 ? "forward" : "back"))?.focus();
+      }
+      this.emit("contenttoolbar:navigate", { path: this.#path.slice() });
+    }
+    #navButton(action) {
+      return this.one('ue-button[data-action="' + action + '"] .button');
+    }
+    #render() {
+      this.#crumbs.innerHTML = this.#path.map((name, index) => crumbHtml(name, index, this.childrenOf(this.#path.slice(0, index + 1)))).join("");
+      const back = this.#navButton("back");
+      const forward = this.#navButton("forward");
+      if (back) back.disabled = this.#index === 0;
+      if (forward) forward.disabled = this.#index >= this.#history.length - 1;
+    }
+  };
+  define("ue-content-toolbar", ContentToolbarElement);
+
+  // design-system/src/ExpandableArea/ExpandableArea.ts
+  var INTERACTIVE = 'button, a[href], input, select, textarea, label, [tabindex], [role="button"], [role="checkbox"], [role="combobox"], [role="slider"], [role="spinbutton"], [role="menuitem"]';
+  function isNestedControl(target, header) {
+    for (let node = target; node && node !== header; node = node.parentElement) {
+      if (node.localName.startsWith("ue-") || node.matches(INTERACTIVE)) return true;
+    }
+    return false;
+  }
+  var UeExpandableAreaElement = class extends UeElement {
+    setup() {
+      const header = this.one('.expandablearea__header[role="button"]');
+      if (!header) throw new Error('ue-expandable-area needs a .expandablearea__header[role="button"]');
+      this.#apply(header, header.getAttribute("aria-expanded") === "true", false);
+      this.on(header, "click", (event) => {
+        if (ownedBy(this, event.target) && !isNestedControl(event.target, header)) this.#apply(header, header.getAttribute("aria-expanded") !== "true", true);
       });
-      this.on(this, "click", (event) => {
-        const row = rowOf(event.target);
-        if (!row || !ownedBy(this, event.target) || isDisabled2(row)) return;
-        const sub = submenuOf(row);
-        if (sub) {
-          this.#show(this.root, row, sub.hidden ? row : null);
+      this.on(header, "keydown", (event) => {
+        if (header !== event.target || event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        if (!event.repeat) this.#apply(header, header.getAttribute("aria-expanded") !== "true", true);
+      });
+    }
+    #apply(header, expanded, announce) {
+      header.setAttribute("aria-expanded", String(expanded));
+      const body = header.parentElement?.querySelector(":scope > .expandablearea__body");
+      if (body) body.hidden = !expanded;
+      if (announce) this.emit("ue-expand-toggle", { expanded });
+    }
+  };
+  define("ue-expandable-area", UeExpandableAreaElement);
+
+  // design-system/src/_shared/tree-controller.ts
+  var TreeController = class {
+    root;
+    parts;
+    hooks;
+    #anchor = null;
+    constructor(root, parts, hooks = {}) {
+      this.root = root;
+      this.parts = parts;
+      this.hooks = hooks;
+    }
+    rows() {
+      return Array.from(this.root.querySelectorAll(this.parts.row));
+    }
+    shown() {
+      return this.rows().filter((row) => !row.hidden);
+    }
+    selected() {
+      return this.rows().filter((row) => this.isSelected(row));
+    }
+    level(row) {
+      return parseInt(row.getAttribute("aria-level") ?? "1", 10) || 1;
+    }
+    isSelected(row) {
+      return row.classList.contains("is-selected");
+    }
+    isOpen(row) {
+      return row.getAttribute("aria-expanded") === "true";
+    }
+    hasChildren(row) {
+      if (this.hooks.lazy?.(row)) return true;
+      const next = row.nextElementSibling;
+      return next instanceof HTMLElement && next.matches(this.parts.row) && this.level(next) > this.level(row);
+    }
+    // Redraws every derived state from facts per row: aria-level, aria-expanded and the is-selected class.
+    refresh() {
+      const rows = this.rows();
+      const parents = /* @__PURE__ */ new Set();
+      rows.forEach((row, index) => {
+        if (!this.isSelected(row)) return;
+        let want = this.level(row);
+        for (let j = index - 1; j >= 0 && want > 1; j--) {
+          if (this.level(rows[j]) < want) {
+            parents.add(rows[j]);
+            want = this.level(rows[j]);
+          }
+        }
+      });
+      const shown = [];
+      let hideBelow = Infinity;
+      rows.forEach((row, index) => {
+        const level = this.level(row);
+        if (level > hideBelow) {
+          row.hidden = true;
           return;
         }
-        this.#show(this.root, row, null);
-        this.#activate(row);
-      });
-      this.on(this, "mouseout", (event) => {
-        const root = this.root;
-        if (!ownedBy(this, event.target) || event.relatedTarget instanceof Node && root.contains(event.relatedTarget)) return;
-        if (!root.classList.contains(KEYS)) this.#show(root, null, null);
-      });
-      this.on(this, "keydown", (event) => {
-        if (event.target === this.root) this.#key(event, this.root);
-      });
-      this.on(this, "focusout", (event) => {
-        const root = this.root;
-        if (!root.contains(event.target)) return;
-        if (!(event.relatedTarget instanceof Node && root.contains(event.relatedTarget))) this.#show(root, null, null);
-      });
-    }
-    // Marks one row current, opens the submenus on its path, and optionally opens the submenu of `open`.
-    #show(root, current, open) {
-      const keep = /* @__PURE__ */ new Set();
-      for (let row = current; row; row = row.parentElement?.closest(ROW) ?? null) {
-        if (row !== current) keep.add(row);
-      }
-      if (open) keep.add(open);
-      for (const row of Array.from(root.querySelectorAll(ROW))) {
-        row.classList.toggle(CURRENT, row === current);
-        const sub = submenuOf(row);
-        if (sub) {
-          const isOpen = keep.has(row);
-          sub.hidden = !isOpen;
-          row.classList.toggle(OPEN, isOpen);
-          row.setAttribute("aria-expanded", String(isOpen));
+        hideBelow = Infinity;
+        const kids = index + 1 < rows.length && this.level(rows[index + 1]) > level || (this.hooks.lazy?.(row) ?? false);
+        const stored = kids && this.isOpen(row);
+        const open = stored || kids && (this.hooks.forceOpen?.(row) ?? false);
+        const arrow = row.querySelector(this.parts.arrow);
+        arrow?.classList.toggle("is-leaf", !kids);
+        if (kids) {
+          row.setAttribute("aria-expanded", stored ? "true" : "false");
+          this.#swap(arrow, open ? this.parts.caretOpen : this.parts.caretClosed);
+          if (!open) hideBelow = level;
+        } else {
+          row.removeAttribute("aria-expanded");
         }
-      }
-    }
-    #activate(row) {
-      const role = row.getAttribute("role");
-      const label = rowLabel(row, ".popupmenu__label");
-      let checked = null;
-      let text = label;
-      if (role === "menuitemcheckbox") {
-        checked = row.getAttribute("aria-checked") !== "true";
-        row.setAttribute("aria-checked", String(checked));
-        text += checked ? " (checked)" : " (unchecked)";
-      } else if (role === "menuitemradio") {
-        for (const other of Array.from(menuOf(row)?.querySelectorAll(':scope > [role="menuitemradio"]') ?? [])) {
-          other.setAttribute("aria-checked", String(other === row));
+        if (this.parts.openClass) row.classList.toggle(this.parts.openClass, open);
+        this.#swap(row.querySelector(this.parts.folder), open ? this.parts.folderOpen : this.parts.folderClosed);
+        row.setAttribute("aria-selected", this.isSelected(row) ? "true" : "false");
+        if (this.hooks.excluded?.(row)) {
+          row.hidden = true;
+          return;
         }
-        checked = true;
-        text += " (selected)";
-      }
-      const detail = { label, role, checked, text, value: row.dataset.value ?? label, row };
-      this.emit("ue-menu-activate", detail);
+        row.hidden = false;
+        row.classList.toggle("is-odd", shown.length % 2 === 1);
+        row.classList.toggle("is-parent", parents.has(row) && !this.isSelected(row));
+        shown.push(row);
+      });
+      const current = shown.find((row) => row.tabIndex === 0) ?? shown.find((row) => this.isSelected(row)) ?? shown[0];
+      for (const row of rows) row.tabIndex = row === current ? 0 : -1;
+      this.hooks.changed?.();
     }
-    #key(event, root) {
-      const current = root.querySelector(ROW + "." + CURRENT);
-      const menu = current ? menuOf(current) : root;
-      if (!menu) return;
-      const rows = enabledRows(menu, ":scope > " + ROW);
-      const index = current ? rows.indexOf(current) : -1;
-      const go = (next) => {
-        root.classList.add(KEYS);
-        if (next) this.#show(root, next, null);
-      };
+    setSelection(list, anchor) {
+      const set = new Set(list);
+      for (const row of this.rows()) row.classList.toggle("is-selected", set.has(row));
+      if (anchor) this.#anchor = anchor;
+      this.refresh();
+      this.hooks.selected?.(this.selected());
+    }
+    setOpen(row, open) {
+      const was = this.isOpen(row);
+      row.setAttribute("aria-expanded", open ? "true" : "false");
+      this.refresh();
+      if (was !== open) this.hooks.toggled?.(row, open);
+    }
+    focusRow(row, reveal) {
+      for (const other of this.rows()) other.tabIndex = other === row ? 0 : -1;
+      row.focus({ preventScroll: true });
+      if (reveal) row.scrollIntoView({ block: "nearest" });
+    }
+    // Plain: replace the selection. Shift: range from the anchor. Ctrl or cmd: toggle the row.
+    pick(row, given, reveal) {
+      const mods = this.hooks.multi === false ? { shiftKey: false, ctrlKey: false, metaKey: false } : given;
+      const chosen = this.selected();
+      const toggle = mods.ctrlKey || mods.metaKey;
+      if (mods.shiftKey) {
+        const list = this.shown();
+        const from = list.indexOf(this.#anchor ?? row);
+        const to = list.indexOf(row);
+        const a = from < 0 ? to : from;
+        const span = list.slice(Math.min(a, to), Math.max(a, to) + 1);
+        this.setSelection(toggle ? chosen.concat(span) : span, null);
+      } else if (toggle) {
+        this.setSelection(this.isSelected(row) ? chosen.filter((r) => r !== row) : chosen.concat(row), row);
+      } else {
+        this.setSelection([row], row);
+      }
+      this.focusRow(row, reveal);
+    }
+    rowOf(target) {
+      if (!(target instanceof Element)) return null;
+      const row = target.closest(this.parts.row);
+      return row && this.root.contains(row) ? row : null;
+    }
+    // Returns true when the click was on a row.
+    click(event) {
+      const row = this.rowOf(event.target);
+      if (!row) return false;
+      const arrow = event.target.closest(this.parts.arrow);
+      if (arrow && !arrow.classList.contains("is-leaf")) {
+        this.setOpen(row, !this.isOpen(row));
+        this.focusRow(row, false);
+        return true;
+      }
+      this.pick(row, event, false);
+      return true;
+    }
+    doubleClick(event) {
+      const row = this.rowOf(event.target);
+      if (!row || event.target.closest(this.parts.arrow) || !this.hasChildren(row)) return;
+      this.setOpen(row, !this.isOpen(row));
+    }
+    // Returns true when the key was handled.
+    keyDown(event) {
+      const row = this.rowOf(event.target);
+      if (!row || event.altKey) return false;
+      const list = this.shown();
+      const i = list.indexOf(row);
+      const kids = this.hasChildren(row);
+      let target = null;
       switch (event.key) {
         case "ArrowDown":
-          go(rows[index < 0 ? 0 : (index + 1) % rows.length]);
+          target = list[Math.min(i + 1, list.length - 1)];
           break;
         case "ArrowUp":
-          go(rows[index < 0 ? rows.length - 1 : (index - 1 + rows.length) % rows.length]);
+          target = list[Math.max(i - 1, 0)];
           break;
         case "Home":
-          go(rows[0]);
+          target = list[0];
           break;
         case "End":
-          go(rows[rows.length - 1]);
-          break;
-        case "ArrowRight":
-          this.#enter(root, current);
+          target = list[list.length - 1];
           break;
         case "ArrowLeft":
-          this.#leave(root, current);
-          break;
-        case "Escape":
-          root.classList.add(KEYS);
-          if (current && menu !== root) {
-            this.#leave(root, current);
-            event.stopPropagation();
+          if (kids && this.isOpen(row)) {
+            this.setOpen(row, false);
           } else {
-            this.#show(root, null, null);
+            for (let j = i - 1; j >= 0; j--) {
+              if (this.level(list[j]) < this.level(row)) {
+                target = list[j];
+                break;
+              }
+            }
           }
           break;
-        case "Enter":
+        case "ArrowRight":
+          if (kids && !this.isOpen(row)) this.setOpen(row, true);
+          else if (kids) target = list[i + 1];
+          break;
         case " ":
-          root.classList.add(KEYS);
-          if (event.repeat || !current) break;
-          if (submenuOf(current)) this.#enter(root, current);
-          else this.#activate(current);
+        case "Enter":
+          this.pick(row, event, true);
           break;
         default:
-          return;
+          return false;
       }
       event.preventDefault();
+      if (target) this.pick(target, { shiftKey: event.shiftKey, ctrlKey: false, metaKey: false }, true);
+      return true;
     }
-    // Opens the submenu of the current row and moves to its first enabled row.
-    #enter(root, current) {
-      root.classList.add(KEYS);
-      const sub = current ? submenuOf(current) : null;
-      if (!current || !sub) return;
-      const first = enabledRows(sub, ":scope > " + ROW)[0];
-      this.#show(root, first ?? current, current);
-    }
-    // Closes the submenu that holds the current row and returns to its parent row.
-    #leave(root, current) {
-      root.classList.add(KEYS);
-      const parent = current ? menuOf(current)?.closest(ROW) ?? null : null;
-      if (parent) this.#show(root, parent, null);
+    #swap(svg, symbol) {
+      const use = svg?.querySelector("use");
+      if (use) use.setAttribute("href", "#" + symbol);
     }
   };
-  define("ue-popup-menu", UePopupMenuElement);
 
-  // src/ComboButton/ComboButton.ts
-  var OPEN2 = "combobutton--open";
-  var ACTIVATE_KEYS = ["Enter", " ", "ArrowDown", "ArrowUp"];
-  var UeComboButtonElement = class extends UeElement {
-    #trigger;
-    #panel;
+  // design-system/src/TreeRow/TreeRow.ts
+  var ARROW = '<svg class="tr-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4l4.5 4L6 12z"/></svg>';
+  var FOLDER2 = '<svg class="tr-icon is-folder" viewBox="0 0 16 16" aria-hidden="true"><path class="tr-folder-closed" d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.5 4.5V12a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H5.2L3.8 11V4.5a1 1 0 0 1 1-1h2L8 5h5.5"/></svg>';
+  var OBJECT = '<svg class="tr-icon is-object" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg>';
+  var TreeRow = class extends UeElement {
+    #tree = null;
+    #controller = null;
+    #filter = null;
+    #kept = /* @__PURE__ */ new Set();
+    #parentsOfKept = /* @__PURE__ */ new Set();
+    #lastIds = "";
     setup() {
-      const trigger = this.one(".combobutton");
-      const panel = this.one(".combobutton-menu");
-      if (!trigger || !panel) throw new Error("ue-combo-button needs a .combobutton trigger and a .combobutton-menu panel");
-      if (!panel.querySelector("ue-popup-menu")) throw new Error("the .combobutton-menu panel needs a ue-popup-menu");
-      this.#trigger = trigger;
-      this.#panel = panel;
-      const anchor = trigger.closest(".combobutton-anchor") ?? this;
-      if (!this.#isAction()) this.#markSelected(this.#labelText());
-      this.on(trigger, "click", () => {
-        if (this.#disabled()) return;
-        if (panel.hidden) this.#open(false, false);
-        else this.#close(false);
-      });
-      this.on(trigger, "keydown", (event) => {
-        if (event.target !== trigger || this.#disabled() || !ACTIVATE_KEYS.includes(event.key)) return;
-        event.preventDefault();
-        if (panel.hidden && !event.repeat) this.#open(true, event.key === "ArrowUp");
-      });
-      this.on(panel, "mousedown", (event) => event.preventDefault());
-      this.on(panel, "keydown", (event) => {
-        if (event.key === "Escape") {
-          event.preventDefault();
-          this.#close(true);
-        } else if (event.key === "Tab") {
-          this.#close(false);
+      const tree = this.#ownTree() ?? this.#createTree();
+      this.#tree = tree;
+      tree.setAttribute("role", "tree");
+      tree.setAttribute("aria-multiselectable", String(!this.#single()));
+      const controller = new TreeController(
+        tree,
+        {
+          row: ".tr-row",
+          arrow: ".tr-arrow",
+          folder: ".tr-icon.is-folder",
+          caretOpen: "",
+          caretClosed: "",
+          folderOpen: "",
+          folderClosed: "",
+          openClass: "is-open"
+        },
+        {
+          multi: !this.#single(),
+          excluded: (row) => this.#filter !== null && !this.#kept.has(row),
+          forceOpen: (row) => this.#filter !== null && this.#parentsOfKept.has(row),
+          lazy: (row) => row.dataset.expandable === "true",
+          toggled: (row, open) => {
+            this.emit("ue-tree-toggle", { id: this.#idOf(row), expanded: open });
+            if (!open && this.hasAttribute("collapse-selects") && this.#rows().some((each) => each.hidden && this.#controller?.isSelected(each))) this.select([this.#idOf(row)]);
+          },
+          selected: () => this.#announceSelection()
         }
+      );
+      this.#controller = controller;
+      this.on(tree, "click", (event) => {
+        if (this.owns(event.target)) controller.click(event);
       });
-      this.on(this, "ue-menu-activate", (event) => {
-        if (ownedBy(this, event.target)) this.#pick(event.detail);
+      this.on(tree, "dblclick", (event) => {
+        if (this.owns(event.target)) controller.doubleClick(event);
       });
-      this.on(document, "pointerdown", (event) => {
-        if (!panel.hidden && !(event.target instanceof Node && anchor.contains(event.target))) this.#close(false);
+      this.on(tree, "keydown", (event) => {
+        if (this.owns(event.target)) controller.keyDown(event);
       });
+      this.#lastIds = this.getSelectedIds().join("\n");
+      controller.refresh();
     }
-    #disabled() {
-      return this.#trigger.getAttribute("aria-disabled") === "true";
+    #single() {
+      return this.getAttribute("select") === "single";
     }
-    // Action mode keeps the label fixed. Value mode shows the picked row.
-    #isAction() {
-      return this.#trigger.classList.contains("combobutton--simple") || this.getAttribute("mode") === "action" || this.#label() === null;
+    // The first tree below this element that no nested instance owns.
+    #ownTree() {
+      return this.all(".tr-tree").find((tree) => tree.closest(this.localName) === this) ?? null;
     }
-    #label() {
-      return this.#trigger.querySelector(".combobutton__label");
-    }
-    #labelText() {
-      return this.#label()?.textContent?.trim() ?? "";
-    }
-    // The popup menu is upgraded by its own module, which can load after this.
-    #popup() {
-      const popup = this.#panel.querySelector("ue-popup-menu");
-      if (!popup || typeof popup.focusMenu !== "function") throw new Error("ue-popup-menu is not defined");
-      return popup;
+    #createTree() {
+      const tree = document.createElement("div");
+      tree.className = "tr-tree";
+      this.append(tree);
+      return tree;
     }
     #rows() {
-      return Array.from(this.#panel.querySelectorAll(".popupmenu[tabindex] > .popupmenu__row")).filter((row) => row.getAttribute("aria-disabled") !== "true");
+      return this.#controller?.rows() ?? [];
     }
-    #markSelected(label) {
-      for (const row of this.#rows()) row.setAttribute("aria-selected", String(rowLabel(row, ".popupmenu__label") === label));
+    #idOf(row) {
+      return row.dataset.id ?? (row.querySelector(".tr-text")?.textContent ?? "").trim();
     }
-    #open(keys, fromEnd) {
-      const popup = this.#popup();
-      this.#panel.hidden = false;
-      this.#trigger.classList.add(OPEN2);
-      this.#trigger.setAttribute("aria-expanded", "true");
-      const rows = this.#rows();
-      const selected = rows.find((row) => row.getAttribute("aria-selected") === "true" || row.getAttribute("aria-checked") === "true");
-      popup.focusMenu(keys ? selected ?? (fromEnd ? rows[rows.length - 1] : rows[0]) ?? null : null, keys);
+    #rowOf(id) {
+      return this.#rows().find((row) => this.#idOf(row) === id);
     }
-    #close(refocus) {
-      this.#panel.hidden = true;
-      this.#trigger.classList.remove(OPEN2);
-      this.#trigger.setAttribute("aria-expanded", "false");
-      this.#popup().reset();
-      if (refocus) this.#trigger.focus();
+    #info(row) {
+      return { id: this.#idOf(row), label: (row.querySelector(".tr-text")?.textContent ?? "").trim(), depth: (this.#controller?.level(row) ?? 1) - 1 };
     }
-    #pick(detail) {
-      const label = this.#label();
-      if (!this.#isAction() && label && detail.role !== "menuitemcheckbox") {
-        label.textContent = detail.label;
-        this.#markSelected(detail.label);
+    #announceSelection() {
+      const ids = this.getSelectedIds();
+      const key = ids.join("\n");
+      if (key === this.#lastIds) return;
+      this.#lastIds = key;
+      this.emit("ue-tree-select", { ids });
+    }
+    // Ids of the selected rows in tree order.
+    getSelectedIds() {
+      return this.#rows().filter((row) => row.classList.contains("is-selected")).map((row) => this.#idOf(row));
+    }
+    // Selects exactly these rows. Ids that name no row are ignored.
+    select(ids) {
+      const controller = this.#controller;
+      if (!controller) return;
+      const wanted = new Set(this.#single() ? ids.slice(0, 1) : ids);
+      const rows = this.#rows().filter((row) => wanted.has(this.#idOf(row)));
+      controller.setSelection(rows, rows[rows.length - 1] ?? null);
+    }
+    // Opens or closes one row.
+    setExpanded(id, expanded) {
+      const row = this.#rowOf(id);
+      if (row && this.#controller?.hasChildren(row)) this.#controller.setOpen(row, expanded);
+    }
+    // Replaces every row with rows drawn from data.
+    setRows(rows) {
+      const tree = this.#tree;
+      const controller = this.#controller;
+      if (!tree || !controller) return;
+      tree.replaceChildren(...rows.map((data) => this.#draw(data)));
+      this.#lastIds = this.getSelectedIds().join("\n");
+      this.#refilter();
+      controller.refresh();
+    }
+    // Adds one row after the last row. It does not touch the selection.
+    appendRow(data) {
+      if (!this.#tree || !this.#controller) return;
+      this.#tree.append(this.#draw(data));
+      this.#refilter();
+      this.#controller.refresh();
+    }
+    #draw(data) {
+      const depth = data.depth ?? 0;
+      const row = document.createElement("div");
+      row.className = "tr-row" + (data.selected ? " is-selected" : "") + (data.dim ? " is-dim" : "");
+      row.setAttribute("role", "treeitem");
+      row.setAttribute("aria-level", String(depth + 1));
+      row.setAttribute("aria-expanded", data.expanded ? "true" : "false");
+      row.dataset.id = data.id;
+      if (data.expandable) row.dataset.expandable = "true";
+      const icon = data.icon ?? "object";
+      const cells = (data.cells ?? []).map(() => '<span class="tr-cell"></span>').join("");
+      row.innerHTML = '<span class="tr-indent" style="--depth:' + depth + '"></span>' + ARROW + (icon === "folder" ? FOLDER2 : icon === "object" ? OBJECT : "") + '<span class="tr-text"></span>' + cells;
+      const text = row.querySelector(".tr-text");
+      if (text) text.textContent = data.label;
+      const cellEls = row.querySelectorAll(".tr-cell");
+      (data.cells ?? []).forEach((value, i) => {
+        cellEls[i].textContent = value;
+      });
+      return row;
+    }
+    // Shows only the rows the filter accepts and their ancestors. Ancestors open while the filter is set. Null clears it.
+    setFilter(filter) {
+      if (typeof filter === "string") {
+        const needle = filter.trim().toLowerCase();
+        this.#filter = needle === "" ? null : (row) => row.label.toLowerCase().includes(needle);
+      } else {
+        this.#filter = filter;
       }
-      this.#close(true);
-      this.emit("ue-combo-pick", { value: detail.value, label: detail.label, checked: detail.checked });
+      this.#refilter();
+      this.#controller?.refresh();
+    }
+    #refilter() {
+      this.#kept = /* @__PURE__ */ new Set();
+      this.#parentsOfKept = /* @__PURE__ */ new Set();
+      const filter = this.#filter;
+      const controller = this.#controller;
+      if (!filter || !controller) return;
+      const rows = this.#rows();
+      rows.forEach((row, index) => {
+        if (!filter(this.#info(row))) return;
+        this.#kept.add(row);
+        let want = controller.level(row);
+        for (let j = index - 1; j >= 0 && want > 1; j--) {
+          const level = controller.level(rows[j]);
+          if (level < want) {
+            this.#kept.add(rows[j]);
+            this.#parentsOfKept.add(rows[j]);
+            want = level;
+          }
+        }
+      });
     }
   };
-  define("ue-combo-button", UeComboButtonElement);
+  define("ue-tree-row", TreeRow);
 
-  // src/_shared/drag.ts
+  // design-system/src/SourcePanel/SourcePanel.ts
+  var SourcePanelElement = class extends UeElement {
+    #trees = [];
+    #collections = 0;
+    setup() {
+      this.#trees = this.all("ue-tree-row").filter((tree) => this.owns(tree));
+      this.#collections = this.#tree("collections")?.querySelectorAll(".tr-row").length ?? 0;
+      for (const area of this.#areas()) this.#markCollapsed(area);
+      this.on(this, "ue-tree-select", (event) => {
+        const tree = event.target;
+        if (!this.owns(tree) || !(tree instanceof TreeRow)) return;
+        const [id] = event.detail.ids;
+        if (id === void 0) return;
+        for (const other of this.#trees) if (other !== tree) other.select([]);
+        const name = tree.querySelector(".tr-row.is-selected .tr-text")?.textContent ?? "";
+        this.emit("sourcepanel:select", { id, name });
+      });
+      this.on(this, "ue-expand-toggle", (event) => {
+        if (!this.owns(event.target)) return;
+        const area = event.target.querySelector(".SourcePanel__area");
+        if (area) this.#markCollapsed(area);
+      });
+      this.on(this, "ue-button-click", (event) => {
+        if (!this.owns(event.target)) return;
+        if (event.target.dataset.action === "add-collection") this.#addCollection();
+      });
+    }
+    // Replaces the rows of the tree named by its `data-tree` attribute.
+    setRows(tree, rows) {
+      this.#tree(tree)?.setRows(rows);
+    }
+    // Selects the row with this id in whichever tree holds it. The other trees lose their selection.
+    select(id) {
+      for (const tree of this.#trees) tree.select([id]);
+    }
+    // Opens or closes the row with this id.
+    setExpanded(id, expanded) {
+      for (const tree of this.#trees) tree.setExpanded(id, expanded);
+    }
+    #tree(name) {
+      return this.#trees.find((tree) => tree.dataset.tree === name);
+    }
+    #areas() {
+      return this.all(".SourcePanel__area").filter((area) => this.owns(area));
+    }
+    // The area class `is-collapsed` lets a filling area give its height back.
+    #markCollapsed(area) {
+      area.classList.toggle("is-collapsed", area.querySelector(".expandablearea__header")?.getAttribute("aria-expanded") !== "true");
+    }
+    #addCollection() {
+      const tree = this.#tree("collections");
+      if (!tree) return;
+      const header = tree.closest(".SourcePanel__area")?.querySelector(".expandablearea__header");
+      if (header?.getAttribute("aria-expanded") !== "true") header?.click();
+      const label = "NewCollection" + (this.#collections + 1);
+      this.#collections++;
+      const id = "Collections/" + label;
+      tree.appendRow({ id, label, icon: "folder", depth: 0 });
+      this.select(id);
+    }
+  };
+  define("ue-source-panel", SourcePanelElement);
+
+  // design-system/src/_shared/drag.ts
   var THRESHOLD = 3;
   function drag(target, handlers) {
     let originX = 0;
@@ -1062,13 +1665,92 @@
     };
   }
 
-  // src/ContentBrowser/ContentBrowser.ts
-  var PREFIX2 = "ContentBrowser";
-  var INDENT_PX = 10;
-  var MIN_SOURCES = 120;
-  var MIN_ASSETS = 200;
-  var HANDLE_PX = 2;
-  var CHEVRON = '<span class="ContentBrowser__delim"><svg><use href="#cb-chev-r"/></svg></span>';
+  // design-system/src/Splitter/Splitter.ts
+  var DEFAULT_MIN = 20;
+  var DEFAULT_STEP = 5;
+  var DEFAULT_STEP_LARGE = 20;
+  var HIGHLIGHT = "splitter-handle--highlight";
+  function panesOf(handle) {
+    const before = handle.previousElementSibling;
+    const after = handle.nextElementSibling;
+    if (!(before instanceof HTMLElement) || !(after instanceof HTMLElement) || !handle.parentElement) return null;
+    return { before, after, vertical: getComputedStyle(handle.parentElement).flexDirection === "column" };
+  }
+  var extent = (pane, vertical) => pane.getBoundingClientRect()[vertical ? "height" : "width"];
+  var SplitterElement = class extends UeElement {
+    setup() {
+      const handle = this.all(".splitter-handle").find((candidate) => this.owns(candidate));
+      if (!handle) throw new Error("ue-splitter needs a .splitter-handle between two panes");
+      this.#wire(handle);
+    }
+    // A number attribute of this element, or the fallback when it is missing or not a number.
+    #number(name, fallback) {
+      const value = Number(this.getAttribute(name));
+      return this.hasAttribute(name) && Number.isFinite(value) ? value : fallback;
+    }
+    #wire(handle) {
+      let startSize = 0;
+      let total = 0;
+      const minStart = () => this.#number("data-min-start", DEFAULT_MIN);
+      const minEnd = () => this.#number("data-min-end", DEFAULT_MIN);
+      const resize = (size) => {
+        const panes2 = panesOf(handle);
+        if (!panes2) return;
+        const clamped = Math.min(Math.max(size, minStart()), total - minEnd());
+        panes2.before.style.flex = "0 0 " + clamped + "px";
+        panes2.after.style.flex = "1 1 0";
+        this.#publish(handle, panes2);
+        this.emit("ue-splitter-resize", { size: clamped, total, orientation: panes2.vertical ? "vertical" : "horizontal" });
+      };
+      const measure = () => {
+        const panes2 = panesOf(handle);
+        if (!panes2) return null;
+        startSize = extent(panes2.before, panes2.vertical);
+        total = startSize + extent(panes2.after, panes2.vertical);
+        return panes2;
+      };
+      const panes = panesOf(handle);
+      if (panes) {
+        handle.setAttribute("aria-orientation", panes.vertical ? "horizontal" : "vertical");
+        this.#publish(handle, panes);
+      }
+      this.onDispose(drag(handle, {
+        start: () => {
+          measure();
+          handle.classList.add(HIGHLIGHT);
+        },
+        move: (_event, dx, dy) => {
+          const current = panesOf(handle);
+          if (current) resize(startSize + (current.vertical ? dy : dx));
+        },
+        end: () => handle.classList.remove(HIGHLIGHT)
+      }));
+      this.on(handle, "keydown", (event) => {
+        const current = measure();
+        if (!current) return;
+        const grow = current.vertical ? "ArrowDown" : "ArrowRight";
+        const shrink = current.vertical ? "ArrowUp" : "ArrowLeft";
+        const step = event.shiftKey ? this.#number("data-step-shift", DEFAULT_STEP_LARGE) : this.#number("data-step", DEFAULT_STEP);
+        if (event.key === grow) resize(startSize + step);
+        else if (event.key === shrink) resize(startSize - step);
+        else if (event.key === "Home") resize(minStart());
+        else if (event.key === "End") resize(total - minEnd());
+        else return;
+        event.preventDefault();
+      });
+    }
+    // Publishes the position of the handle for assistive technology: the size of the pane before it.
+    #publish(handle, panes) {
+      const size = extent(panes.before, panes.vertical);
+      const total = size + extent(panes.after, panes.vertical);
+      handle.setAttribute("aria-valuemin", String(this.#number("data-min-start", DEFAULT_MIN)));
+      handle.setAttribute("aria-valuemax", String(Math.round(total - this.#number("data-min-end", DEFAULT_MIN))));
+      handle.setAttribute("aria-valuenow", String(Math.round(size)));
+    }
+  };
+  define("ue-splitter", SplitterElement);
+
+  // design-system/src/ContentBrowser/ContentBrowser.ts
   var STARTER = [
     ["Architecture", ["Walls", "Floors"]],
     ["Audio", ["Music", "Ambient"]],
@@ -1081,31 +1763,15 @@
     ["Shapes", ["Primitives"]],
     ["Textures", ["Brick", "Stone"]]
   ];
-  var ADD_ENTRIES = [
-    { label: "Import to Current Folder" },
-    { separator: true },
-    { label: "New Folder" },
-    { label: "Blueprint Class" },
-    { label: "Level" },
-    { label: "Material" }
-  ];
-  var SETTINGS_DEFAULTS = [
-    ["Show Folders", true],
-    ["Show Empty Folders", false],
-    ["Show Favorites", false],
-    ["Show Developers Content", false],
-    ["Show Engine Content", false],
-    ["Show Plugin Content", true]
-  ];
+  var INITIAL_PICKED = ["Blueprints"];
   function child(parent, name) {
-    const folder = { name, parent, kids: [] };
+    const folder = { id: parent.id + "/" + name, name, parent, kids: [] };
     parent.kids.push(folder);
     return folder;
   }
   function buildModel() {
-    const all = { name: "All", parent: null, kids: [] };
-    const content = child(all, "Content");
-    const start = child(content, "StarterContent");
+    const all = { id: "All", name: "All", parent: null, kids: [] };
+    const start = child(child(all, "Content"), "StarterContent");
     for (const [name, kids] of STARTER) {
       const folder = child(start, name);
       for (const kid of kids) child(folder, kid);
@@ -1114,604 +1780,119 @@
   }
   function pathOf(folder) {
     const path = [];
-    for (let at = folder; at; at = at.parent) path.unshift(at);
+    for (let at = folder; at; at = at.parent) path.unshift(at.name);
     return path;
   }
-  function escape(text) {
-    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;");
-  }
   var ContentBrowserElement = class extends UeElement {
-    #root;
-    #top;
-    #body;
+    #toolbar;
     #sources;
-    #split;
-    #tree;
-    #tiles;
+    #search;
+    #grid;
     #status;
-    #input;
     #all;
     #cur;
-    #open = /* @__PURE__ */ new Set();
-    #history = [];
-    #index = 0;
+    #byId = /* @__PURE__ */ new Map();
     #picked = /* @__PURE__ */ new Set();
-    #anchor = null;
-    #rowFolder = /* @__PURE__ */ new WeakMap();
-    #tileFolder = /* @__PURE__ */ new WeakMap();
-    #menu = null;
-    #checks = /* @__PURE__ */ new Map();
     setup() {
-      this.#root = this.#need(".ContentBrowser");
-      this.#top = this.#need(".ContentBrowser__top");
-      this.#body = this.#need(".ContentBrowser__body");
-      this.#sources = this.#need(".ContentBrowser__sources");
-      this.#split = this.#need(".ContentBrowser__split");
-      this.#tree = this.#need(".ContentBrowser__tree[data-folders]");
-      this.#tiles = this.#need(".ContentBrowser__tiles");
+      this.#toolbar = this.#need("ue-content-toolbar");
+      this.#sources = this.#need("ue-source-panel");
+      this.#search = this.#need("ue-asset-search-bar");
+      this.#grid = this.#need("ue-asset-tile");
       this.#status = this.#need(".ContentBrowser__status");
-      this.#input = this.#need(".ContentBrowser__input");
-      const keptNames = this.all(".ContentBrowser__tile.is-sel .ContentBrowser__label div").map((label) => (label.textContent ?? "").trim());
       const model = buildModel();
       this.#all = model.all;
       this.#cur = model.start;
-      this.#open = new Set(pathOf(model.start));
-      this.#history = [model.start.parent ?? model.start, model.start];
-      this.#index = 1;
-      this.#picked = new Set(model.start.kids.filter((folder) => keptNames.includes(folder.name)));
-      this.#anchor = null;
-      this.#menu = null;
-      this.#checks = new Map(SETTINGS_DEFAULTS);
-      for (const title of this.all(".ContentBrowser__title")) {
-        const area = title.closest(".ContentBrowser__area");
-        const body = area?.querySelector(".ContentBrowser__tree");
-        title.setAttribute("role", "button");
-        title.tabIndex = 0;
-        title.setAttribute("aria-expanded", String(body ? !body.hidden : false));
-      }
-      for (const control of this.all(".ContentBrowser__tool")) {
-        control.setAttribute("role", "button");
-        control.tabIndex = 0;
-        control.setAttribute("aria-pressed", "false");
-      }
-      this.#tree.setAttribute("role", "tree");
-      this.#tiles.setAttribute("role", "listbox");
-      this.#tiles.setAttribute("aria-multiselectable", "true");
-      this.#split.setAttribute("role", "separator");
-      this.#split.setAttribute("aria-orientation", "vertical");
-      this.#split.tabIndex = 0;
-      this.#setSourcesWidth(this.#sources.offsetWidth);
-      this.#render();
-      this.on(this.#root, "click", (event) => this.#click(event));
-      this.on(this.#root, "dblclick", (event) => {
-        const folder = this.#folderOfTile(event.target);
+      const index = (folder) => {
+        this.#byId.set(folder.id, folder);
+        folder.kids.forEach(index);
+      };
+      index(model.all);
+      this.on(this, "contenttoolbar:navigate", (event) => {
+        const folder = this.#byId.get(event.detail.path.join("/"));
+        if (folder) this.#show(folder);
+      });
+      this.on(this, "sourcepanel:select", (event) => {
+        const folder = this.#byId.get(event.detail.id);
         if (folder) this.#go(folder);
       });
-      this.on(this.#root, "keydown", (event) => this.#keydown(event));
-      this.on(this.#input, "input", () => this.#renderTiles());
-      let startWidth = 0;
-      this.onDispose(
-        drag(this.#split, {
-          start: () => {
-            startWidth = this.#sources.offsetWidth;
-            this.#split.classList.add("is-dragging");
-          },
-          move: (_event, dx) => this.#setSourcesWidth(startWidth + dx),
-          end: () => this.#split.classList.remove("is-dragging")
-        })
-      );
-      this.onDispose(() => this.#menu?.close());
+      this.on(this, "assetsearchbar:change", () => this.#renderAssets());
+      this.on(this, "ue-tile-select", (event) => this.#pick(event.detail.ids));
+      this.on(this, "ue-tile-open", (event) => {
+        const folder = this.#byId.get(event.detail.id);
+        if (folder) this.#go(folder);
+      });
+      const timer = setTimeout(() => this.#populate(), 0);
+      this.onDispose(() => clearTimeout(timer));
     }
     #need(selector) {
       const found = this.one(selector);
       if (!found) throw new Error("ue-content-browser needs " + selector);
       return found;
     }
+    #populate() {
+      const start = this.#cur;
+      const open = /* @__PURE__ */ new Set();
+      for (let at = start.parent; at; at = at.parent) open.add(at);
+      const rows = [];
+      const walk = (folder, depth) => {
+        rows.push({ id: folder.id, label: folder.name, depth, icon: "folder", expanded: open.has(folder) || folder === start, selected: folder === start });
+        for (const kid of folder.kids) walk(kid, depth + 1);
+      };
+      walk(this.#all, 0);
+      this.#sources.setRows("project", rows);
+      this.#toolbar.childrenOf = (path) => this.#byId.get(path.join("/"))?.kids.map((kid) => kid.name) ?? [];
+      this.#toolbar.setHistory([pathOf(start.parent ?? start), pathOf(start)], 1);
+      this.#picked = new Set(start.kids.filter((folder) => INITIAL_PICKED.includes(folder.name)));
+      this.#search.setPlaceholder("Search " + start.name);
+      this.#renderAssets();
+    }
     // ---- navigation ----
     #go(folder) {
       if (folder === this.#cur) return;
-      this.#history = this.#history.slice(0, this.#index + 1);
-      this.#history.push(folder);
-      this.#index = this.#history.length - 1;
+      this.#toolbar.navigate(pathOf(folder));
       this.#show(folder);
     }
-    #walk(delta) {
-      const next = this.#index + delta;
-      if (next < 0 || next >= this.#history.length) return;
-      const hadFocus = document.activeElement instanceof HTMLElement && document.activeElement.classList.contains("ContentBrowser__nav");
-      this.#index = next;
-      this.#show(this.#history[next]);
-      if (hadFocus) {
-        const own = this.one(delta < 0 ? ".ContentBrowser__nav--back" : ".ContentBrowser__nav--fwd");
-        const other = this.one(delta < 0 ? ".ContentBrowser__nav--fwd" : ".ContentBrowser__nav--back");
-        (own && !own.disabled ? own : other)?.focus();
-      }
-    }
     #show(folder) {
-      for (let at = folder.parent; at; at = at.parent) this.#open.add(at);
       this.#cur = folder;
       this.#picked.clear();
-      this.#anchor = null;
-      this.#input.value = "";
-      this.#render();
-      this.emit("contentbrowser:navigate", { path: pathOf(folder).map((each) => each.name) });
+      for (let at = folder.parent; at; at = at.parent) this.#sources.setExpanded(at.id, true);
+      this.#sources.select(folder.id);
+      this.#search.setPlaceholder("Search " + folder.name);
+      this.#search.setText("");
+      this.#renderAssets();
+      this.emit("contentbrowser:navigate", { path: pathOf(folder) });
     }
-    #toggleOpen(folder) {
-      if (this.#open.has(folder)) {
-        this.#open.delete(folder);
-        if (pathOf(this.#cur).includes(folder) && this.#cur !== folder) {
-          this.#go(folder);
-          return;
-        }
-      } else {
-        this.#open.add(folder);
-      }
-      this.#render();
-    }
-    // ---- rendering ----
-    #render() {
-      const active = document.activeElement;
-      const rowFolder = active ? this.#rowFolder.get(active) : void 0;
-      const tileFolder = active ? this.#tileFolder.get(active) : void 0;
-      this.#input.placeholder = "Search " + this.#cur.name;
-      this.#renderCrumbs();
-      this.#renderNav();
-      this.#renderTree();
-      this.#renderTiles();
-      if (rowFolder) this.#rowOf(rowFolder)?.focus();
-      else if (tileFolder) this.#tileOf(tileFolder)?.focus();
-    }
-    #renderCrumbs() {
-      const path = this.#need(".ContentBrowser__path");
-      for (const old of this.all(".ContentBrowser__crumb, .ContentBrowser__delim")) old.remove();
-      for (const folder of pathOf(this.#cur)) path.insertAdjacentHTML("beforeend", '<button class="ContentBrowser__crumb">' + escape(folder.name) + "</button>" + CHEVRON);
-    }
-    #renderNav() {
-      const back = this.one(".ContentBrowser__nav--back");
-      const fwd = this.one(".ContentBrowser__nav--fwd");
-      if (back) back.disabled = this.#index === 0;
-      if (fwd) fwd.disabled = this.#index >= this.#history.length - 1;
-    }
-    #renderTree() {
-      const lines = [];
-      const folders = [];
-      const parents = new Set(pathOf(this.#cur).slice(0, -1));
-      const walk = (folder, depth) => {
-        const kids = folder.kids.length > 0;
-        const open = kids && this.#open.has(folder);
-        const classes = ["ContentBrowser__row"];
-        if (parents.has(folder)) classes.push("ContentBrowser__row--parent");
-        if (depth === 0) classes.push("ContentBrowser__row--root");
-        const selected = folder === this.#cur;
-        if (selected) classes.push("ContentBrowser__row--sel");
-        const expanded = kids ? ' aria-expanded="' + open + '"' : "";
-        const style = depth > 0 ? ' style="padding-left:' + depth * INDENT_PX + 'px"' : "";
-        const caret = kids ? '<svg><use href="#cb-' + (open ? "cd" : "cr") + '"/></svg>' : "";
-        lines.push(
-          '<div class="' + classes.join(" ") + '" role="treeitem" aria-level="' + (depth + 1) + '" aria-selected="' + selected + '"' + expanded + ' tabindex="' + (selected ? 0 : -1) + '"' + style + '><span class="ContentBrowser__exp">' + caret + '</span><svg class="ContentBrowser__fi"><use href="#cb-' + (open ? "fo" : "fc") + '"/></svg><span class="ContentBrowser__name">' + escape(folder.name) + "</span></div>"
-        );
-        folders.push(folder);
-        if (open) for (const kid of folder.kids) walk(kid, depth + 1);
-      };
-      walk(this.#all, 0);
-      this.#tree.innerHTML = lines.join("");
-      this.#tree.querySelectorAll(".ContentBrowser__row").forEach((row, i) => this.#rowFolder.set(row, folders[i]));
-      this.#revealSelected();
-    }
-    // Scrolls only the tree, never the page.
-    #revealSelected() {
-      const row = this.#tree.querySelector(".ContentBrowser__row--sel");
-      if (!row || this.#tree.hidden) return;
-      const area = this.#tree.getBoundingClientRect();
-      const box = row.getBoundingClientRect();
-      if (box.top < area.top) this.#tree.scrollTop -= area.top - box.top;
-      else if (box.bottom > area.bottom) this.#tree.scrollTop += box.bottom - area.bottom;
-    }
-    #shownKids() {
-      const query = this.#input.value.trim().toLowerCase();
+    // ---- assets ----
+    #shown() {
+      const query = this.#search.text.trim().toLowerCase();
       return this.#cur.kids.filter((folder) => folder.name.toLowerCase().includes(query));
     }
-    #renderTiles() {
-      const shown = this.#shownKids();
-      const stop = shown.find((folder) => this.#picked.has(folder)) ?? shown[0];
-      this.#tiles.innerHTML = shown.map(
-        (folder) => '<div class="ContentBrowser__tile' + (this.#picked.has(folder) ? " is-sel" : "") + '" role="option" aria-selected="' + this.#picked.has(folder) + '" tabindex="' + (folder === stop ? 0 : -1) + '"><div class="ContentBrowser__card"><div class="ContentBrowser__thumb"><svg><use href="#cb-folder64"/></svg></div><div class="ContentBrowser__label"><div>' + escape(folder.name) + "</div></div></div></div>"
-      ).join("");
-      this.#tiles.querySelectorAll(".ContentBrowser__tile").forEach((tile, i) => this.#tileFolder.set(tile, shown[i]));
+    #renderAssets() {
+      const shown = this.#shown();
+      const hadFocus = this.#grid.contains(document.activeElement);
+      this.#grid.setTiles(shown.map((folder) => ({ id: folder.id, label: folder.name, kind: "folder", selected: this.#picked.has(folder) })));
+      if (hadFocus) this.#grid.querySelector('.AssetTile[tabindex="0"]')?.focus();
       this.#renderStatus(shown);
-      const clear = this.one(".ContentBrowser__clear");
-      if (clear) clear.hidden = this.#input.value === "";
+    }
+    // A pick replaces the selection among the shown tiles. A hidden tile keeps its mark.
+    #pick(ids) {
+      const shown = this.#shown();
+      for (const folder of shown) this.#picked.delete(folder);
+      for (const id of ids) {
+        const folder = this.#byId.get(id);
+        if (folder) this.#picked.add(folder);
+      }
+      this.#renderStatus(shown);
     }
     #renderStatus(shown) {
       const picked = shown.filter((folder) => this.#picked.has(folder)).length;
       const count = shown.length === 1 ? "1 item" : shown.length + " items";
       this.#status.textContent = picked === 0 ? count : count + " (" + picked + " selected)";
     }
-    #rowOf(folder) {
-      return Array.from(this.#tree.querySelectorAll(".ContentBrowser__row")).find((row) => this.#rowFolder.get(row) === folder);
-    }
-    #tileOf(folder) {
-      return Array.from(this.#tiles.querySelectorAll(".ContentBrowser__tile")).find((tile) => this.#tileFolder.get(tile) === folder);
-    }
-    #folderOfTile(target) {
-      const tile = target instanceof Element ? target.closest(".ContentBrowser__tile") : null;
-      return tile ? this.#tileFolder.get(tile) : void 0;
-    }
-    // ---- input ----
-    #pick(folder, toggle, range) {
-      const shown = this.#shownKids();
-      if (range && this.#anchor && shown.includes(this.#anchor)) {
-        const from = shown.indexOf(this.#anchor);
-        const to = shown.indexOf(folder);
-        this.#picked = new Set(shown.slice(Math.min(from, to), Math.max(from, to) + 1));
-      } else if (toggle) {
-        if (!this.#picked.delete(folder)) this.#picked.add(folder);
-        this.#anchor = folder;
-      } else {
-        this.#picked = /* @__PURE__ */ new Set([folder]);
-        this.#anchor = folder;
-      }
-      this.#syncTiles();
-      this.#tileOf(folder)?.focus();
-    }
-    // Updates the selection marks in place. The tiles must stay the same elements, or a double-click would lose its target.
-    #syncTiles() {
-      const shown = this.#shownKids();
-      const stop = shown.find((folder) => this.#picked.has(folder)) ?? shown[0];
-      for (const tile of this.#tiles.querySelectorAll(".ContentBrowser__tile")) {
-        const folder = this.#tileFolder.get(tile);
-        const picked = folder !== void 0 && this.#picked.has(folder);
-        tile.classList.toggle("is-sel", picked);
-        tile.setAttribute("aria-selected", String(picked));
-        tile.tabIndex = folder === stop ? 0 : -1;
-      }
-      this.#renderStatus(shown);
-    }
-    #setSourcesWidth(width) {
-      const room = this.#body.clientWidth - HANDLE_PX - MIN_ASSETS;
-      const clamped = Math.round(Math.max(MIN_SOURCES, Math.min(room, width)));
-      this.#sources.style.width = clamped + "px";
-      this.#split.setAttribute("aria-valuenow", String(clamped));
-    }
-    #clearSearch() {
-      this.#input.value = "";
-      this.#renderTiles();
-      this.#input.focus();
-    }
-    #toggleMenu(anchor, entries, onPick) {
-      const previous = this.#menu;
-      if (previous) {
-        previous.close();
-        if (previous.anchor === anchor) return;
-      }
-      anchor.setAttribute("aria-haspopup", "menu");
-      this.#menu = openMenu(this.#top, anchor, {
-        prefix: PREFIX2,
-        entries,
-        onPick,
-        onClose: () => {
-          this.#menu = null;
-        }
-      });
-    }
-    #setSection(area, open) {
-      const tree = area.querySelector(".ContentBrowser__tree");
-      const arrow = area.querySelector(".ContentBrowser__head .ContentBrowser__arrow use");
-      area.classList.toggle("is-collapsed", !open);
-      if (tree) tree.hidden = !open;
-      area.querySelector(".ContentBrowser__title")?.setAttribute("aria-expanded", String(open));
-      arrow?.setAttribute("href", open ? "#cb-cd" : "#cb-cr");
-    }
-    #click(event) {
-      const target = event.target instanceof Element ? event.target : null;
-      if (!target) return;
-      const button = target.closest("button");
-      if (button?.disabled) return;
-      if (target.closest(".ContentBrowser__crumb")) {
-        const at = this.all(".ContentBrowser__crumb").indexOf(target.closest(".ContentBrowser__crumb"));
-        const folder = pathOf(this.#cur)[at];
-        if (folder) this.#go(folder);
-      } else if (target.closest(".ContentBrowser__nav--back")) {
-        this.#walk(-1);
-      } else if (target.closest(".ContentBrowser__nav--fwd")) {
-        this.#walk(1);
-      } else if (target.closest(".ContentBrowser__add")) {
-        this.#toggleMenu(target.closest(".ContentBrowser__add"), ADD_ENTRIES, () => void 0);
-      } else if (target.closest(".ContentBrowser__settings")) {
-        const entries = Array.from(this.#checks, ([label, checked]) => ({ label, checkable: true, checked }));
-        this.#toggleMenu(target.closest(".ContentBrowser__settings"), entries, (index) => {
-          const label = entries[index].label ?? "";
-          this.#checks.set(label, !this.#checks.get(label));
-        });
-      } else if (target.closest(".ContentBrowser__clear")) {
-        this.#clearSearch();
-      } else if (target.closest(".ContentBrowser__tool")) {
-        const tool = target.closest(".ContentBrowser__tool");
-        tool.setAttribute("aria-pressed", String(tool.getAttribute("aria-pressed") !== "true"));
-      } else if (target.closest(".ContentBrowser__head")) {
-        const area = target.closest(".ContentBrowser__area");
-        if (area) this.#setSection(area, area.classList.contains("is-collapsed"));
-      } else if (target.closest(".ContentBrowser__row")) {
-        const row = target.closest(".ContentBrowser__row");
-        const folder = this.#rowFolder.get(row);
-        if (!folder) return;
-        if (target.closest(".ContentBrowser__exp")) this.#toggleOpen(folder);
-        else {
-          this.#go(folder);
-          this.#rowOf(folder)?.focus();
-        }
-      } else {
-        const folder = this.#folderOfTile(target);
-        if (folder) this.#pick(folder, event.ctrlKey || event.metaKey, event.shiftKey);
-      }
-    }
-    #keydown(event) {
-      const target = event.target instanceof HTMLElement ? event.target : null;
-      if (!target) return;
-      const activate = event.key === "Enter" || event.key === " ";
-      if (activate && target.matches(".ContentBrowser__title, .ContentBrowser__tool")) {
-        event.preventDefault();
-        target.click();
-      } else if (target === this.#input) {
-        if (event.key === "Escape" && this.#input.value !== "") {
-          event.preventDefault();
-          this.#clearSearch();
-        }
-      } else if (target === this.#split) {
-        const step = event.shiftKey ? 50 : 10;
-        if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
-          event.preventDefault();
-          this.#setSourcesWidth(this.#sources.offsetWidth + (event.key === "ArrowLeft" ? -step : step));
-        }
-      } else if (target.matches(".ContentBrowser__row")) {
-        this.#treeKey(event, target);
-      } else if (target.matches(".ContentBrowser__tile")) {
-        this.#tileKey(event, target);
-      }
-    }
-    #treeKey(event, row) {
-      const folder = this.#rowFolder.get(row);
-      if (!folder) return;
-      const rows = Array.from(this.#tree.querySelectorAll(".ContentBrowser__row"));
-      const at = rows.indexOf(row);
-      const open = folder.kids.length > 0 && this.#open.has(folder);
-      let go;
-      switch (event.key) {
-        case "ArrowDown":
-          go = this.#rowFolder.get(rows[at + 1]);
-          break;
-        case "ArrowUp":
-          go = this.#rowFolder.get(rows[at - 1]);
-          break;
-        case "Home":
-          go = this.#rowFolder.get(rows[0]);
-          break;
-        case "End":
-          go = this.#rowFolder.get(rows[rows.length - 1]);
-          break;
-        case "ArrowRight":
-          if (folder.kids.length > 0 && !open) this.#toggleOpen(folder);
-          else if (open) go = folder.kids[0];
-          break;
-        case "ArrowLeft":
-          if (open) this.#toggleOpen(folder);
-          else go = folder.parent ?? void 0;
-          break;
-        case "Enter":
-        case " ":
-          go = folder;
-          break;
-        default:
-          return;
-      }
-      event.preventDefault();
-      if (go) {
-        this.#go(go);
-        this.#rowOf(go)?.focus();
-      } else {
-        this.#rowOf(folder)?.focus();
-      }
-    }
-    #tileKey(event, tile) {
-      const folder = this.#tileFolder.get(tile);
-      if (!folder) return;
-      const tiles = Array.from(this.#tiles.querySelectorAll(".ContentBrowser__tile"));
-      const at = tiles.indexOf(tile);
-      let go;
-      switch (event.key) {
-        case "ArrowRight":
-          go = tiles[at + 1];
-          break;
-        case "ArrowLeft":
-          go = tiles[at - 1];
-          break;
-        case "ArrowDown":
-          go = nearestInRow(tiles, tile, true);
-          break;
-        case "ArrowUp":
-          go = nearestInRow(tiles, tile, false);
-          break;
-        case "Home":
-          go = tiles[0];
-          break;
-        case "End":
-          go = tiles[tiles.length - 1];
-          break;
-        case "Enter":
-          event.preventDefault();
-          this.#go(folder);
-          this.#tiles.querySelector(".ContentBrowser__tile")?.focus();
-          return;
-        case " ":
-          event.preventDefault();
-          this.#pick(folder, event.ctrlKey || event.metaKey, event.shiftKey);
-          return;
-        default:
-          return;
-      }
-      event.preventDefault();
-      const next = go ? this.#tileFolder.get(go) : void 0;
-      if (next) this.#pick(next, false, event.shiftKey);
-    }
   };
   define("ue-content-browser", ContentBrowserElement);
 
-  // src/ContentToolbar/ContentToolbar.ts
-  var CHEVRON2 = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"/></svg>';
-  var PREFIX3 = "ContentToolbar";
-  var CHILDREN = {
-    All: ["Content", "Plugins"],
-    Content: ["StarterContent", "Developers"],
-    StarterContent: ["Architecture", "Audio", "Blueprints", "HDRI", "Maps", "Materials", "Particles", "Props", "Shapes", "Textures"]
-  };
-  var FALLBACK_CHILDREN = ["Architecture", "Audio", "Blueprints"];
-  var ADD_ENTRIES2 = [
-    { label: "Import to Current Folder" },
-    { separator: true },
-    { label: "New Folder" },
-    { label: "Blueprint Class" },
-    { label: "Level" },
-    { label: "Material" }
-  ];
-  var SETTINGS_DEFAULTS2 = [
-    ["Show Folders", true],
-    ["Show Empty Folders", false],
-    ["Show Favorites", false],
-    ["Show Developers Content", false],
-    ["Show Engine Content", false],
-    ["Show Plugin Content", true]
-  ];
-  var ContentToolbarElement = class extends UeElement {
-    #root;
-    #history = [];
-    #index = 0;
-    #menu = null;
-    #checks = /* @__PURE__ */ new Map();
-    setup() {
-      const root = this.one(".ContentToolbar");
-      if (!root) throw new Error("ue-content-toolbar needs a .ContentToolbar child");
-      this.#root = root;
-      this.#history = [this.#trail()];
-      this.#index = 0;
-      this.#menu = null;
-      this.#checks = new Map(SETTINGS_DEFAULTS2);
-      this.#syncNav();
-      this.on(root, "click", (event) => this.#click(event));
-      this.onDispose(() => this.#menu?.close());
-    }
-    #trail() {
-      return this.all(".ContentToolbar__crumb").map((crumb) => (crumb.textContent ?? "").trim());
-    }
-    #nav(which) {
-      return this.one(".ContentToolbar__nav--" + which);
-    }
-    #click(event) {
-      const target = event.target instanceof Element ? event.target : null;
-      const button = target?.closest("button");
-      if (!button || !this.#root.contains(button) || button.disabled) return;
-      const list = button.classList;
-      if (list.contains("ContentToolbar__crumb")) {
-        const at = this.all(".ContentToolbar__crumb").indexOf(button);
-        this.#navigate(this.#trail().slice(0, at + 1), at);
-      } else if (list.contains("ContentToolbar__delim")) {
-        this.#openChildren(button);
-      } else if (list.contains("ContentToolbar__nav--back")) {
-        this.#walk(-1);
-      } else if (list.contains("ContentToolbar__nav--fwd")) {
-        this.#walk(1);
-      } else if (list.contains("ContentToolbar__add")) {
-        this.#toggleMenu(button, ADD_ENTRIES2, () => void 0);
-      } else if (list.contains("ContentToolbar__settings")) {
-        const entries = Array.from(this.#checks, ([label, checked]) => ({ label, checkable: true, checked }));
-        this.#toggleMenu(button, entries, (index) => {
-          const label = entries[index].label ?? "";
-          this.#checks.set(label, !this.#checks.get(label));
-        });
-      } else if (list.contains("ContentToolbar__btn")) {
-        this.emit("contenttoolbar:action", { label: (button.textContent ?? "").trim() });
-      }
-    }
-    #openChildren(delim) {
-      const delims = this.all(".ContentToolbar__delim");
-      const at = delims.indexOf(delim);
-      const trail = this.#trail().slice(0, at + 1);
-      const names = CHILDREN[trail[at]] ?? FALLBACK_CHILDREN;
-      this.#toggleMenu(
-        delim,
-        names.map((label) => ({ label })),
-        (index) => this.#navigate(trail.concat(names[index]), trail.length)
-      );
-    }
-    #toggleMenu(anchor, entries, onPick) {
-      const previous = this.#menu;
-      if (previous) {
-        previous.close();
-        if (previous.anchor === anchor) return;
-      }
-      anchor.setAttribute("aria-haspopup", "menu");
-      this.#menu = openMenu(this.#root, anchor, {
-        prefix: PREFIX3,
-        entries,
-        onPick,
-        onClose: () => {
-          this.#menu = null;
-        }
-      });
-    }
-    #navigate(trail, focusAt) {
-      const current = this.#history[this.#index];
-      if (trail.join("/") === current.join("/")) return;
-      this.#history = this.#history.slice(0, this.#index + 1);
-      this.#history.push(trail);
-      this.#index = this.#history.length - 1;
-      this.#renderTrail(focusAt);
-      this.#syncNav();
-      this.emit("contenttoolbar:navigate", { path: trail });
-    }
-    #walk(delta) {
-      const next = this.#index + delta;
-      if (next < 0 || next >= this.#history.length) return;
-      const hadFocus = this.#root.contains(document.activeElement) && document.activeElement instanceof HTMLButtonElement && document.activeElement.classList.contains("ContentToolbar__nav");
-      this.#index = next;
-      this.#renderTrail(-1);
-      this.#syncNav();
-      if (hadFocus) {
-        const own = this.#nav(delta < 0 ? "back" : "fwd");
-        const other = this.#nav(delta < 0 ? "fwd" : "back");
-        (own && !own.disabled ? own : other)?.focus();
-      }
-      this.emit("contenttoolbar:navigate", { path: this.#history[this.#index] });
-    }
-    #syncNav() {
-      const back = this.#nav("back");
-      const fwd = this.#nav("fwd");
-      if (back) back.disabled = this.#index === 0;
-      if (fwd) fwd.disabled = this.#index >= this.#history.length - 1;
-    }
-    // Rebuilds the crumbs and delimiters from the history entry.
-    #renderTrail(focusAt) {
-      const path = this.one(".ContentToolbar__path");
-      if (!path) throw new Error("ue-content-toolbar needs a .ContentToolbar__path");
-      const hadFocus = focusAt >= 0 && path.contains(document.activeElement);
-      for (const old of this.all(".ContentToolbar__crumb, .ContentToolbar__delim")) old.remove();
-      for (const name of this.#history[this.#index]) {
-        const crumb = document.createElement("button");
-        crumb.type = "button";
-        crumb.className = "ContentToolbar__crumb";
-        crumb.textContent = name;
-        const delim = document.createElement("button");
-        delim.type = "button";
-        delim.className = "ContentToolbar__delim";
-        delim.setAttribute("aria-label", "Sub-folders of " + name);
-        delim.innerHTML = CHEVRON2;
-        path.append(crumb, delim);
-      }
-      if (hadFocus) this.all(".ContentToolbar__crumb")[focusAt]?.focus();
-    }
-  };
-  define("ue-content-toolbar", ContentToolbarElement);
-
-  // src/Cover/Cover.ts
+  // design-system/src/Cover/Cover.ts
   var TOKENS = {
     primary: "primary",
     panel: "panel",
@@ -1733,7 +1914,7 @@
   };
   define("ue-cover", UeCoverElement);
 
-  // src/DetailsCategory/DetailsCategory.ts
+  // design-system/src/DetailsCategory/DetailsCategory.ts
   var DOWN = "#DetailsCategory-down";
   var RIGHT = "#DetailsCategory-right";
   var isIn = (el, selector) => el.closest(selector);
@@ -2035,7 +2216,7 @@
   };
   define("ue-details-category", UeDetailsCategory);
 
-  // src/DetailsHeader/DetailsHeader.ts
+  // design-system/src/DetailsHeader/DetailsHeader.ts
   var UeDetailsHeader = class extends UeElement {
     setup() {
       const lock = this.one(".DetailsHeader-lock");
@@ -2071,7 +2252,7 @@
   };
   define("ue-details-header", UeDetailsHeader);
 
-  // src/DetailsSearchRow/DetailsSearchRow.ts
+  // design-system/src/DetailsSearchRow/DetailsSearchRow.ts
   var UeDetailsSearchRow = class extends UeElement {
     setup() {
       const input = this.one(".DetailsSearchRow-text");
@@ -2129,7 +2310,7 @@
   };
   define("ue-details-search-row", UeDetailsSearchRow);
 
-  // src/_shared/tabstack.ts
+  // design-system/src/_shared/tabstack.ts
   var TARGET_KEYS = ["ArrowRight", "ArrowLeft", "Home", "End"];
   function targetElement(event) {
     return event.target instanceof Element ? event.target : null;
@@ -2278,7 +2459,7 @@
     }
   };
 
-  // src/DockTab/DockTab.ts
+  // design-system/src/DockTab/DockTab.ts
   var DockTabElement = class extends TabStackElement {
     names = {
       stack: "dockTab-stack",
@@ -2293,7 +2474,7 @@
   };
   define("ue-dock-tab", DockTabElement);
 
-  // src/EventStatus/EventStatus.ts
+  // design-system/src/EventStatus/EventStatus.ts
   var UeEventStatusElement = class extends UeElement {
     setup() {
       const host = this.parentElement;
@@ -2308,185 +2489,11 @@
   };
   define("ue-event-status", UeEventStatusElement);
 
-  // src/ExpandableArea/ExpandableArea.ts
-  var INTERACTIVE = 'button, a[href], input, select, textarea, label, [tabindex], [role="button"], [role="checkbox"], [role="combobox"], [role="slider"], [role="spinbutton"], [role="menuitem"]';
-  function isNestedControl(target, header) {
-    for (let node = target; node && node !== header; node = node.parentElement) {
-      if (node.localName.startsWith("ue-") || node.matches(INTERACTIVE)) return true;
-    }
-    return false;
-  }
-  var UeExpandableAreaElement = class extends UeElement {
-    setup() {
-      const header = this.one('.expandablearea__header[role="button"]');
-      if (!header) throw new Error('ue-expandable-area needs a .expandablearea__header[role="button"]');
-      this.#apply(header, header.getAttribute("aria-expanded") === "true", false);
-      this.on(header, "click", (event) => {
-        if (ownedBy(this, event.target) && !isNestedControl(event.target, header)) this.#apply(header, header.getAttribute("aria-expanded") !== "true", true);
-      });
-      this.on(header, "keydown", (event) => {
-        if (header !== event.target || event.key !== "Enter" && event.key !== " ") return;
-        event.preventDefault();
-        if (!event.repeat) this.#apply(header, header.getAttribute("aria-expanded") !== "true", true);
-      });
-    }
-    #apply(header, expanded, announce) {
-      header.setAttribute("aria-expanded", String(expanded));
-      const body = header.parentElement?.querySelector(":scope > .expandablearea__body");
-      if (body) body.hidden = !expanded;
-      if (announce) this.emit("ue-expand-toggle", { expanded });
-    }
-  };
-  define("ue-expandable-area", UeExpandableAreaElement);
-
-  // src/FilterPills/FilterPills.ts
-  var CROSS2 = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
-  var UeFilterPills = class extends UeElement {
-    #strip = null;
-    setup() {
-      const strip = this.all(".FilterPills-strip").find((candidate) => this.owns(candidate)) ?? this.#createStrip();
-      this.#strip = strip;
-      this.on(strip, "click", (event) => {
-        if (!this.owns(event.target)) return;
-        const target = event.target;
-        const remove = target.closest(".FilterPills-chipRemove");
-        const chip = remove?.closest(".FilterPills-chip");
-        if (chip) {
-          this.removeChip(this.#chipId(chip));
-          return;
-        }
-        const pill = target.closest(".FilterPills-pill");
-        if (pill && strip.contains(pill)) this.#select(pill, false);
-      });
-      this.on(strip, "keydown", (event) => {
-        if (!this.owns(event.target)) return;
-        const pills = this.#pills();
-        const at = pills.indexOf(document.activeElement);
-        if (at < 0) return;
-        let next = -1;
-        if (event.key === "ArrowRight" || event.key === "ArrowDown") next = (at + 1) % pills.length;
-        else if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = (at - 1 + pills.length) % pills.length;
-        else if (event.key === "Home") next = 0;
-        else if (event.key === "End") next = pills.length - 1;
-        if (next < 0) return;
-        event.preventDefault();
-        this.#select(pills[next], true);
-      });
-      if (this.#pills().length > 0 && !strip.hasAttribute("role")) strip.setAttribute("role", "tablist");
-      if (strip.classList.contains("FilterPills-strip--chips")) strip.setAttribute("role", "list");
-    }
-    #createStrip() {
-      const strip = document.createElement("div");
-      strip.className = "FilterPills-strip";
-      this.append(strip);
-      return strip;
-    }
-    #pills() {
-      return Array.from(this.#strip?.querySelectorAll(".FilterPills-pill") ?? []);
-    }
-    #chips() {
-      return Array.from(this.#strip?.querySelectorAll(".FilterPills-chip") ?? []);
-    }
-    #valueOf(pill) {
-      return pill.dataset.value ?? (pill.textContent ?? "").trim();
-    }
-    #chipId(chip) {
-      return chip.dataset.id ?? (chip.querySelector(".FilterPills-chipName")?.textContent ?? "").trim();
-    }
-    // The value of the checked pill, or an empty string when no pill is checked.
-    get value() {
-      const checked = this.#pills().find((pill) => pill.classList.contains("is-checked"));
-      return checked ? this.#valueOf(checked) : "";
-    }
-    // Checks the pill with this value. It fires ue-filter-change when that changes the checked pill.
-    set value(value) {
-      const pill = this.#pills().find((candidate) => this.#valueOf(candidate) === value);
-      if (pill) this.#select(pill, false);
-    }
-    #select(pill, focus) {
-      const changed = !pill.classList.contains("is-checked");
-      for (const other of this.#pills()) {
-        const on = other === pill;
-        other.classList.toggle("is-checked", on);
-        other.setAttribute("aria-selected", String(on));
-        other.tabIndex = on ? 0 : -1;
-      }
-      if (focus) pill.focus();
-      if (changed) this.emit("ue-filter-change", { value: this.#valueOf(pill), label: (pill.textContent ?? "").trim() });
-    }
-    // Replaces every pill. The first pill with checked set is checked; with none, no pill is checked.
-    setPills(pills) {
-      const strip = this.#strip;
-      if (!strip) return;
-      const drawn = pills.map((data) => {
-        const pill = document.createElement("button");
-        pill.type = "button";
-        pill.className = "FilterPills-pill" + (data.checked ? " is-checked" : "");
-        pill.setAttribute("role", "tab");
-        pill.setAttribute("aria-selected", String(data.checked === true));
-        pill.dataset.value = data.value;
-        pill.textContent = data.label;
-        return pill;
-      });
-      strip.replaceChildren(...drawn);
-      strip.setAttribute("role", "tablist");
-      const stop = drawn.find((pill) => pill.classList.contains("is-checked")) ?? drawn[0];
-      for (const pill of drawn) pill.tabIndex = pill === stop ? 0 : -1;
-    }
-    // The chips in order.
-    getChips() {
-      return this.#chips().map((chip) => ({ id: this.#chipId(chip), label: (chip.querySelector(".FilterPills-chipName")?.textContent ?? "").trim(), color: chip.querySelector(".FilterPills-chipColor")?.style.background || void 0 }));
-    }
-    // Adds a removable chip at the end. An id that is already there is ignored.
-    addChip(data) {
-      const strip = this.#strip;
-      if (!strip || this.#chips().some((chip2) => this.#chipId(chip2) === data.id)) return;
-      strip.classList.add("FilterPills-strip--chips");
-      strip.setAttribute("role", "list");
-      const chip = document.createElement("span");
-      chip.className = "FilterPills-chip";
-      chip.setAttribute("role", "listitem");
-      chip.dataset.id = data.id;
-      chip.setAttribute("aria-label", "Filter: " + data.label);
-      const color = document.createElement("span");
-      color.className = "FilterPills-chipColor";
-      if (data.color) color.style.background = data.color;
-      const name = document.createElement("span");
-      name.className = "FilterPills-chipName";
-      name.textContent = data.label;
-      const remove = document.createElement("button");
-      remove.type = "button";
-      remove.className = "FilterPills-chipRemove";
-      remove.setAttribute("aria-label", "Remove " + data.label + " filter");
-      remove.innerHTML = CROSS2;
-      chip.append(color, name, remove);
-      strip.append(chip);
-      strip.hidden = false;
-      this.emit("ue-pill-add", { id: data.id, label: data.label, color: data.color });
-    }
-    // Removes the chip with this id. It fires ue-pill-remove.
-    removeChip(id) {
-      const chip = this.#chips().find((candidate) => this.#chipId(candidate) === id);
-      if (!chip) return;
-      const detail = { id, label: (chip.querySelector(".FilterPills-chipName")?.textContent ?? "").trim() };
-      chip.remove();
-      if (this.#strip && this.#chips().length === 0) this.#strip.hidden = true;
-      this.emit("ue-pill-remove", detail);
-    }
-    // Replaces every chip. It fires ue-pill-add for each new chip and ue-pill-remove for each chip that was dropped.
-    setChips(chips) {
-      const wanted = new Set(chips.map((chip) => chip.id));
-      for (const have of this.getChips()) if (!wanted.has(have.id)) this.removeChip(have.id);
-      for (const chip of chips) this.addChip(chip);
-    }
-  };
-  define("ue-filter-pills", UeFilterPills);
-
-  // src/HeaderRow/HeaderRow.ts
+  // design-system/src/HeaderRow/HeaderRow.ts
   var CELL = ".hr-cell";
   var SORTABLE = ".hr-cell[aria-sort]";
   var GRIP = ".hr-grip";
-  var ARROW = ".hr-sort";
+  var ARROW2 = ".hr-sort";
   var GLYPH = {
     up: "M2 8l4-5 4 5z",
     down: "M2 4l4 5 4-5z",
@@ -2506,7 +2513,7 @@
   function paint(cell, mode, priority) {
     cell.setAttribute("aria-sort", mode);
     cell.dataset.priority = priority;
-    let arrow = cell.querySelector(ARROW);
+    let arrow = cell.querySelector(ARROW2);
     if (!arrow) {
       arrow = document.createElementNS(SVG_NS, "svg");
       arrow.setAttribute("class", "hr-sort");
@@ -2602,7 +2609,7 @@
   };
   define("ue-header-row", HeaderRow);
 
-  // src/MenuBar/MenuBar.ts
+  // design-system/src/MenuBar/MenuBar.ts
   var ITEM = ".menuBar-item";
   var ROW2 = ".menuBar-row";
   var MENU = ".menuBar-menu";
@@ -2725,7 +2732,7 @@
   };
   define("ue-menu-bar", MenuBar);
 
-  // src/Notification/Notification.ts
+  // design-system/src/Notification/Notification.ts
   var UeNotificationElement = class extends UeElement {
     #shown = 0;
     setup() {
@@ -2778,7 +2785,7 @@
   };
   define("ue-notification", UeNotificationElement);
 
-  // src/PlaceActorsPanel/PlaceActorsPanel.ts
+  // design-system/src/PlaceActorsPanel/PlaceActorsPanel.ts
   var CAT = ".placeActors-cat";
   var GROUP = ".placeActors-group";
   var ROW3 = ".placeActors-row";
@@ -2882,7 +2889,7 @@
   };
   define("ue-place-actors-panel", PlaceActorsPanel);
 
-  // src/ResetToDefault/ResetToDefault.ts
+  // design-system/src/ResetToDefault/ResetToDefault.ts
   var UeResetToDefaultElement = class extends UeElement {
     static observedAttributes = ["differs"];
     attributeChangedCallback() {
@@ -2907,206 +2914,7 @@
   };
   define("ue-reset-to-default", UeResetToDefaultElement);
 
-  // src/_shared/tree-controller.ts
-  var TreeController = class {
-    root;
-    parts;
-    hooks;
-    #anchor = null;
-    constructor(root, parts, hooks = {}) {
-      this.root = root;
-      this.parts = parts;
-      this.hooks = hooks;
-    }
-    rows() {
-      return Array.from(this.root.querySelectorAll(this.parts.row));
-    }
-    shown() {
-      return this.rows().filter((row) => !row.hidden);
-    }
-    selected() {
-      return this.rows().filter((row) => this.isSelected(row));
-    }
-    level(row) {
-      return parseInt(row.getAttribute("aria-level") ?? "1", 10) || 1;
-    }
-    isSelected(row) {
-      return row.classList.contains("is-selected");
-    }
-    isOpen(row) {
-      return row.getAttribute("aria-expanded") === "true";
-    }
-    hasChildren(row) {
-      if (this.hooks.lazy?.(row)) return true;
-      const next = row.nextElementSibling;
-      return next instanceof HTMLElement && next.matches(this.parts.row) && this.level(next) > this.level(row);
-    }
-    // Redraws every derived state from facts per row: aria-level, aria-expanded and the is-selected class.
-    refresh() {
-      const rows = this.rows();
-      const parents = /* @__PURE__ */ new Set();
-      rows.forEach((row, index) => {
-        if (!this.isSelected(row)) return;
-        let want = this.level(row);
-        for (let j = index - 1; j >= 0 && want > 1; j--) {
-          if (this.level(rows[j]) < want) {
-            parents.add(rows[j]);
-            want = this.level(rows[j]);
-          }
-        }
-      });
-      const shown = [];
-      let hideBelow = Infinity;
-      rows.forEach((row, index) => {
-        const level = this.level(row);
-        if (level > hideBelow) {
-          row.hidden = true;
-          return;
-        }
-        hideBelow = Infinity;
-        const kids = index + 1 < rows.length && this.level(rows[index + 1]) > level || (this.hooks.lazy?.(row) ?? false);
-        const stored = kids && this.isOpen(row);
-        const open = stored || kids && (this.hooks.forceOpen?.(row) ?? false);
-        const arrow = row.querySelector(this.parts.arrow);
-        arrow?.classList.toggle("is-leaf", !kids);
-        if (kids) {
-          row.setAttribute("aria-expanded", stored ? "true" : "false");
-          this.#swap(arrow, open ? this.parts.caretOpen : this.parts.caretClosed);
-          if (!open) hideBelow = level;
-        } else {
-          row.removeAttribute("aria-expanded");
-        }
-        if (this.parts.openClass) row.classList.toggle(this.parts.openClass, open);
-        this.#swap(row.querySelector(this.parts.folder), open ? this.parts.folderOpen : this.parts.folderClosed);
-        row.setAttribute("aria-selected", this.isSelected(row) ? "true" : "false");
-        if (this.hooks.excluded?.(row)) {
-          row.hidden = true;
-          return;
-        }
-        row.hidden = false;
-        row.classList.toggle("is-odd", shown.length % 2 === 1);
-        row.classList.toggle("is-parent", parents.has(row) && !this.isSelected(row));
-        shown.push(row);
-      });
-      const current = shown.find((row) => row.tabIndex === 0) ?? shown.find((row) => this.isSelected(row)) ?? shown[0];
-      for (const row of rows) row.tabIndex = row === current ? 0 : -1;
-      this.hooks.changed?.();
-    }
-    setSelection(list, anchor) {
-      const set = new Set(list);
-      for (const row of this.rows()) row.classList.toggle("is-selected", set.has(row));
-      if (anchor) this.#anchor = anchor;
-      this.refresh();
-      this.hooks.selected?.(this.selected());
-    }
-    setOpen(row, open) {
-      const was = this.isOpen(row);
-      row.setAttribute("aria-expanded", open ? "true" : "false");
-      this.refresh();
-      if (was !== open) this.hooks.toggled?.(row, open);
-    }
-    focusRow(row, reveal) {
-      for (const other of this.rows()) other.tabIndex = other === row ? 0 : -1;
-      row.focus({ preventScroll: true });
-      if (reveal) row.scrollIntoView({ block: "nearest" });
-    }
-    // Plain: replace the selection. Shift: range from the anchor. Ctrl or cmd: toggle the row.
-    pick(row, given, reveal) {
-      const mods = this.hooks.multi === false ? { shiftKey: false, ctrlKey: false, metaKey: false } : given;
-      const chosen = this.selected();
-      const toggle = mods.ctrlKey || mods.metaKey;
-      if (mods.shiftKey) {
-        const list = this.shown();
-        const from = list.indexOf(this.#anchor ?? row);
-        const to = list.indexOf(row);
-        const a = from < 0 ? to : from;
-        const span = list.slice(Math.min(a, to), Math.max(a, to) + 1);
-        this.setSelection(toggle ? chosen.concat(span) : span, null);
-      } else if (toggle) {
-        this.setSelection(this.isSelected(row) ? chosen.filter((r) => r !== row) : chosen.concat(row), row);
-      } else {
-        this.setSelection([row], row);
-      }
-      this.focusRow(row, reveal);
-    }
-    rowOf(target) {
-      if (!(target instanceof Element)) return null;
-      const row = target.closest(this.parts.row);
-      return row && this.root.contains(row) ? row : null;
-    }
-    // Returns true when the click was on a row.
-    click(event) {
-      const row = this.rowOf(event.target);
-      if (!row) return false;
-      const arrow = event.target.closest(this.parts.arrow);
-      if (arrow && !arrow.classList.contains("is-leaf")) {
-        this.setOpen(row, !this.isOpen(row));
-        this.focusRow(row, false);
-        return true;
-      }
-      this.pick(row, event, false);
-      return true;
-    }
-    doubleClick(event) {
-      const row = this.rowOf(event.target);
-      if (!row || event.target.closest(this.parts.arrow) || !this.hasChildren(row)) return;
-      this.setOpen(row, !this.isOpen(row));
-    }
-    // Returns true when the key was handled.
-    keyDown(event) {
-      const row = this.rowOf(event.target);
-      if (!row || event.altKey) return false;
-      const list = this.shown();
-      const i = list.indexOf(row);
-      const kids = this.hasChildren(row);
-      let target = null;
-      switch (event.key) {
-        case "ArrowDown":
-          target = list[Math.min(i + 1, list.length - 1)];
-          break;
-        case "ArrowUp":
-          target = list[Math.max(i - 1, 0)];
-          break;
-        case "Home":
-          target = list[0];
-          break;
-        case "End":
-          target = list[list.length - 1];
-          break;
-        case "ArrowLeft":
-          if (kids && this.isOpen(row)) {
-            this.setOpen(row, false);
-          } else {
-            for (let j = i - 1; j >= 0; j--) {
-              if (this.level(list[j]) < this.level(row)) {
-                target = list[j];
-                break;
-              }
-            }
-          }
-          break;
-        case "ArrowRight":
-          if (kids && !this.isOpen(row)) this.setOpen(row, true);
-          else if (kids) target = list[i + 1];
-          break;
-        case " ":
-        case "Enter":
-          this.pick(row, event, true);
-          break;
-        default:
-          return false;
-      }
-      event.preventDefault();
-      if (target) this.pick(target, { shiftKey: event.shiftKey, ctrlKey: false, metaKey: false }, true);
-      return true;
-    }
-    #swap(svg, symbol) {
-      const use = svg?.querySelector("use");
-      if (use) use.setAttribute("href", "#" + symbol);
-    }
-  };
-
-  // src/_shared/scroll-thumb.ts
+  // design-system/src/_shared/scroll-thumb.ts
   var MIN_THUMB = 35;
   var BAR_PADDING = 2;
   function thumbLayout(slot, viewport, content, offset) {
@@ -3202,7 +3010,7 @@
     };
   }
 
-  // src/SceneOutliner/SceneOutliner.ts
+  // design-system/src/SceneOutliner/SceneOutliner.ts
   var ROW4 = ".so-row";
   var SORTABLE2 = ".so-hcell[aria-sort]";
   var collator = new Intl.Collator(void 0, { numeric: true, sensitivity: "base" });
@@ -3406,7 +3214,7 @@
   };
   define("ue-scene-outliner", SceneOutliner);
 
-  // src/Scrollbar/Scrollbar.ts
+  // design-system/src/Scrollbar/Scrollbar.ts
   var Scrollbar = class extends UeElement {
     #visible = null;
     // True while the content overflows and the bar shows.
@@ -3441,7 +3249,7 @@
   };
   define("ue-scrollbar", Scrollbar);
 
-  // src/SegmentedControl/SegmentedControl.ts
+  // design-system/src/SegmentedControl/SegmentedControl.ts
   var UeSegmentedControl = class extends UeElement {
     #group = null;
     setup() {
@@ -3503,7 +3311,7 @@
   };
   define("ue-segmented-control", UeSegmentedControl);
 
-  // src/Slider/Slider.ts
+  // design-system/src/Slider/Slider.ts
   var HANDLE = 8;
   function attr(el, name, fallback) {
     const raw = el.dataset[name];
@@ -3601,236 +3409,7 @@
   };
   define("ue-slider", UeSliderElement);
 
-  // src/SourcePanel/SourcePanel.ts
-  var ROW5 = ".SourcePanel__row";
-  var SELECTED2 = "SourcePanel__row--selected";
-  var PARENT = "SourcePanel__row--parent";
-  var INDENT_PX2 = 10;
-  var SourcePanelElement = class extends UeElement {
-    #root;
-    setup() {
-      const root = this.one(".SourcePanel");
-      if (!root) throw new Error("ue-source-panel needs a .SourcePanel child");
-      this.#root = root;
-      root.setAttribute("role", "group");
-      for (const title of this.all(".SourcePanel__title")) {
-        const area = title.closest(".SourcePanel__area");
-        const body = area?.querySelector(".SourcePanel__body");
-        title.setAttribute("role", "button");
-        title.tabIndex = 0;
-        title.setAttribute("aria-expanded", String(body ? !body.hidden : false));
-      }
-      for (const control of this.all(".SourcePanel__tool, .SourcePanel__add")) {
-        control.setAttribute("role", "button");
-        control.tabIndex = 0;
-        if (control.classList.contains("SourcePanel__tool")) control.setAttribute("aria-pressed", "false");
-      }
-      for (const tree of this.all(".SourcePanel__tree")) this.#initTree(tree);
-      this.on(root, "click", (event) => this.#click(event));
-      this.on(root, "dblclick", (event) => this.#doubleClick(event));
-      this.on(root, "keydown", (event) => this.#keydown(event));
-    }
-    #rows(tree) {
-      return Array.from(tree.querySelectorAll(ROW5));
-    }
-    #visible(tree) {
-      return this.#rows(tree).filter((row) => !row.hidden);
-    }
-    #depth(row) {
-      const indent = row.querySelector(".SourcePanel__indent");
-      const px = indent ? parseFloat(indent.style.width) : 0;
-      return Math.round((Number.isNaN(px) ? 0 : px) / INDENT_PX2);
-    }
-    #hasKids(row) {
-      return row.querySelector(".SourcePanel__exp svg") !== null;
-    }
-    #isOpen(row) {
-      return row.getAttribute("aria-expanded") === "true";
-    }
-    #treeOf(row) {
-      return row.closest(".SourcePanel__tree");
-    }
-    #initTree(tree) {
-      tree.setAttribute("role", "tree");
-      for (const row of this.#rows(tree)) {
-        row.setAttribute("role", "treeitem");
-        row.setAttribute("aria-level", String(this.#depth(row) + 1));
-        row.setAttribute("aria-selected", String(row.classList.contains(SELECTED2)));
-        if (this.#hasKids(row)) {
-          const href = row.querySelector(".SourcePanel__exp use")?.getAttribute("href") ?? "";
-          row.setAttribute("aria-expanded", String(/caret-d$/.test(href)));
-        }
-      }
-      this.#rove(tree);
-    }
-    // Exactly one row per tree takes the Tab stop: the selected row, else the first visible row.
-    #rove(tree) {
-      const visible = this.#visible(tree);
-      const stop = visible.find((row) => row.classList.contains(SELECTED2)) ?? visible[0];
-      for (const row of this.#rows(tree)) row.tabIndex = row === stop ? 0 : -1;
-    }
-    #swap(element, from, to) {
-      const use = element?.querySelector("use");
-      const href = use?.getAttribute("href");
-      if (use && href) use.setAttribute("href", href.replace(from, to));
-    }
-    #select(row, focus) {
-      for (const other of this.all(ROW5)) {
-        other.classList.remove(SELECTED2, PARENT);
-        other.setAttribute("aria-selected", "false");
-      }
-      row.classList.add(SELECTED2);
-      row.setAttribute("aria-selected", "true");
-      const tree = this.#treeOf(row);
-      if (tree) {
-        const rows = this.#rows(tree);
-        let level = this.#depth(row);
-        for (let i = rows.indexOf(row) - 1; i >= 0 && level > 0; i--) {
-          const depth = this.#depth(rows[i]);
-          if (depth < level) {
-            rows[i].classList.add(PARENT);
-            level = depth;
-          }
-        }
-      }
-      for (const each of this.all(".SourcePanel__tree")) this.#rove(each);
-      if (focus) row.focus();
-      const name = row.querySelector(".SourcePanel__name")?.textContent ?? "";
-      this.emit("sourcepanel:select", { name });
-    }
-    #setOpen(row, open) {
-      const tree = this.#treeOf(row);
-      if (!tree || !this.#hasKids(row) || this.#isOpen(row) === open) return;
-      row.setAttribute("aria-expanded", String(open));
-      this.#swap(row.querySelector(".SourcePanel__exp"), /caret-[rd]$/, open ? "caret-d" : "caret-r");
-      this.#swap(row.querySelector(".SourcePanel__folder"), /-f[oc]$/, open ? "-fo" : "-fc");
-      const rows = this.#rows(tree);
-      const depth = this.#depth(row);
-      let skipBelow = null;
-      let selectedHidden = false;
-      for (let i = rows.indexOf(row) + 1; i < rows.length; i++) {
-        const child2 = rows[i];
-        const childDepth = this.#depth(child2);
-        if (childDepth <= depth) break;
-        if (skipBelow !== null && childDepth > skipBelow) {
-          child2.hidden = true;
-          continue;
-        }
-        skipBelow = null;
-        child2.hidden = !open;
-        if (!open && child2.classList.contains(SELECTED2)) selectedHidden = true;
-        if (open && this.#hasKids(child2) && !this.#isOpen(child2)) skipBelow = childDepth;
-      }
-      if (!open && !selectedHidden) selectedHidden = rows.some((each) => each.hidden && each.classList.contains(SELECTED2));
-      if (selectedHidden) this.#select(row, true);
-      else this.#rove(tree);
-    }
-    #setSection(area, open) {
-      const body = area.querySelector(".SourcePanel__body");
-      const title = area.querySelector(".SourcePanel__title");
-      if (!body) return;
-      body.hidden = !open;
-      title?.setAttribute("aria-expanded", String(open));
-      this.#swap(area.querySelector(".SourcePanel__header .SourcePanel__arrow"), /caret-[rd]$/, open ? "caret-d" : "caret-r");
-    }
-    #click(event) {
-      const target = event.target instanceof Element ? event.target : null;
-      if (!target) return;
-      const tool = target.closest(".SourcePanel__tool");
-      if (tool) {
-        tool.setAttribute("aria-pressed", String(tool.getAttribute("aria-pressed") !== "true"));
-        return;
-      }
-      if (target.closest(".SourcePanel__add")) {
-        this.#addCollection(target.closest(".SourcePanel__area"));
-        return;
-      }
-      const header = target.closest(".SourcePanel__header");
-      if (header) {
-        const area = header.closest(".SourcePanel__area");
-        const body = area?.querySelector(".SourcePanel__body");
-        if (area && body) this.#setSection(area, body.hidden);
-        return;
-      }
-      const row = target.closest(ROW5);
-      if (!row) return;
-      if (target.closest(".SourcePanel__exp")) {
-        this.#setOpen(row, !this.#isOpen(row));
-        return;
-      }
-      this.#select(row, true);
-    }
-    #doubleClick(event) {
-      const row = event.target instanceof Element ? event.target.closest(ROW5) : null;
-      if (row && !event.target.closest(".SourcePanel__exp")) this.#setOpen(row, !this.#isOpen(row));
-    }
-    #addCollection(area) {
-      const tree = area?.querySelector(".SourcePanel__tree");
-      if (!area || !tree) return;
-      this.#setSection(area, true);
-      const rows = this.#rows(tree);
-      const row = document.createElement("div");
-      row.className = "SourcePanel__row" + (rows.length === 0 ? " SourcePanel__row--root" : "");
-      row.innerHTML = '<span class="SourcePanel__indent" style="width:0"></span><span class="SourcePanel__exp"></span><svg class="SourcePanel__folder"><use href="#sp-fc"/></svg><span class="SourcePanel__name"></span>';
-      const name = row.querySelector(".SourcePanel__name");
-      if (name) name.textContent = "NewCollection" + (rows.length + 1);
-      row.setAttribute("role", "treeitem");
-      row.setAttribute("aria-level", "1");
-      row.setAttribute("aria-selected", "false");
-      tree.append(row);
-      this.#select(row, true);
-    }
-    #keydown(event) {
-      const target = event.target instanceof HTMLElement ? event.target : null;
-      if (!target) return;
-      const activate = event.key === "Enter" || event.key === " ";
-      if (activate && target.matches(".SourcePanel__title, .SourcePanel__tool, .SourcePanel__add")) {
-        event.preventDefault();
-        target.click();
-        return;
-      }
-      if (!target.matches(ROW5)) return;
-      const tree = this.#treeOf(target);
-      if (!tree) return;
-      const visible = this.#visible(tree);
-      const at = visible.indexOf(target);
-      const depth = this.#depth(target);
-      let go;
-      switch (event.key) {
-        case "ArrowDown":
-          go = visible[at + 1];
-          break;
-        case "ArrowUp":
-          go = visible[at - 1];
-          break;
-        case "Home":
-          go = visible[0];
-          break;
-        case "End":
-          go = visible[visible.length - 1];
-          break;
-        case "ArrowRight":
-          if (this.#hasKids(target) && !this.#isOpen(target)) this.#setOpen(target, true);
-          else if (this.#isOpen(target)) go = visible[at + 1];
-          break;
-        case "ArrowLeft":
-          if (this.#isOpen(target)) this.#setOpen(target, false);
-          else go = visible.slice(0, at).reverse().find((row) => this.#depth(row) < depth);
-          break;
-        case "Enter":
-        case " ":
-          go = target;
-          break;
-        default:
-          return;
-      }
-      event.preventDefault();
-      if (go) this.#select(go, true);
-    }
-  };
-  define("ue-source-panel", SourcePanelElement);
-
-  // src/SpinBox/SpinBox.ts
+  // design-system/src/SpinBox/SpinBox.ts
   var DRAG_TRIGGER = 5;
   var MIN_SLIDER_WIDTH = 100;
   function numberAttr(el, name) {
@@ -4000,96 +3579,11 @@
   };
   define("ue-spin-box", UeSpinBoxElement);
 
-  // src/Splitter/Splitter.ts
-  var DEFAULT_MIN = 20;
-  var DEFAULT_STEP = 5;
-  var DEFAULT_STEP_LARGE = 20;
-  var HIGHLIGHT = "splitter-handle--highlight";
-  function panesOf(handle) {
-    const before = handle.previousElementSibling;
-    const after = handle.nextElementSibling;
-    if (!(before instanceof HTMLElement) || !(after instanceof HTMLElement) || !handle.parentElement) return null;
-    return { before, after, vertical: getComputedStyle(handle.parentElement).flexDirection === "column" };
-  }
-  var extent = (pane, vertical) => pane.getBoundingClientRect()[vertical ? "height" : "width"];
-  var SplitterElement = class extends UeElement {
-    setup() {
-      const handle = this.all(".splitter-handle").find((candidate) => this.owns(candidate));
-      if (!handle) throw new Error("ue-splitter needs a .splitter-handle between two panes");
-      this.#wire(handle);
-    }
-    // A number attribute of this element, or the fallback when it is missing or not a number.
-    #number(name, fallback) {
-      const value = Number(this.getAttribute(name));
-      return this.hasAttribute(name) && Number.isFinite(value) ? value : fallback;
-    }
-    #wire(handle) {
-      let startSize = 0;
-      let total = 0;
-      const minStart = () => this.#number("data-min-start", DEFAULT_MIN);
-      const minEnd = () => this.#number("data-min-end", DEFAULT_MIN);
-      const resize = (size) => {
-        const panes2 = panesOf(handle);
-        if (!panes2) return;
-        const clamped = Math.min(Math.max(size, minStart()), total - minEnd());
-        panes2.before.style.flex = "0 0 " + clamped + "px";
-        panes2.after.style.flex = "1 1 0";
-        this.#publish(handle, panes2);
-        this.emit("ue-splitter-resize", { size: clamped, total, orientation: panes2.vertical ? "vertical" : "horizontal" });
-      };
-      const measure = () => {
-        const panes2 = panesOf(handle);
-        if (!panes2) return null;
-        startSize = extent(panes2.before, panes2.vertical);
-        total = startSize + extent(panes2.after, panes2.vertical);
-        return panes2;
-      };
-      const panes = panesOf(handle);
-      if (panes) {
-        handle.setAttribute("aria-orientation", panes.vertical ? "horizontal" : "vertical");
-        this.#publish(handle, panes);
-      }
-      this.onDispose(drag(handle, {
-        start: () => {
-          measure();
-          handle.classList.add(HIGHLIGHT);
-        },
-        move: (_event, dx, dy) => {
-          const current = panesOf(handle);
-          if (current) resize(startSize + (current.vertical ? dy : dx));
-        },
-        end: () => handle.classList.remove(HIGHLIGHT)
-      }));
-      this.on(handle, "keydown", (event) => {
-        const current = measure();
-        if (!current) return;
-        const grow = current.vertical ? "ArrowDown" : "ArrowRight";
-        const shrink = current.vertical ? "ArrowUp" : "ArrowLeft";
-        const step = event.shiftKey ? this.#number("data-step-shift", DEFAULT_STEP_LARGE) : this.#number("data-step", DEFAULT_STEP);
-        if (event.key === grow) resize(startSize + step);
-        else if (event.key === shrink) resize(startSize - step);
-        else if (event.key === "Home") resize(minStart());
-        else if (event.key === "End") resize(total - minEnd());
-        else return;
-        event.preventDefault();
-      });
-    }
-    // Publishes the position of the handle for assistive technology: the size of the pane before it.
-    #publish(handle, panes) {
-      const size = extent(panes.before, panes.vertical);
-      const total = size + extent(panes.after, panes.vertical);
-      handle.setAttribute("aria-valuemin", String(this.#number("data-min-start", DEFAULT_MIN)));
-      handle.setAttribute("aria-valuemax", String(Math.round(total - this.#number("data-min-end", DEFAULT_MIN))));
-      handle.setAttribute("aria-valuenow", String(Math.round(size)));
-    }
-  };
-  define("ue-splitter", SplitterElement);
-
-  // src/StatusBar/StatusBar.ts
+  // design-system/src/StatusBar/StatusBar.ts
   var DRAWER = ".statusBar-btn";
   var COMBO = ".statusBar-combo";
   var MENU2 = ".statusBar-menu";
-  var ROW6 = ".statusBar-row";
+  var ROW5 = ".statusBar-row";
   var MAX_LINES = 4;
   var StatusBar = class extends UeElement {
     setup() {
@@ -4097,10 +3591,10 @@
       const history = this.one(".statusBar-history");
       const recalled = [];
       let recallIndex = 0;
-      const openMenu2 = () => this.one(MENU2 + ".is-open");
+      const openMenu = () => this.one(MENU2 + ".is-open");
       const comboOf = (menu) => menu.parentElement?.querySelector(COMBO) ?? null;
       const close = (restoreFocus) => {
-        const menu = openMenu2();
+        const menu = openMenu();
         if (!menu) return;
         menu.classList.remove("is-open");
         const combo = comboOf(menu);
@@ -4115,7 +3609,7 @@
         menu.classList.add("is-open");
         combo.setAttribute("aria-expanded", "true");
         if (!focusFirst) return;
-        const rows = enabledRows(menu, ROW6);
+        const rows = enabledRows(menu, ROW5);
         if (rows.length > 0) rows[0].focus();
       };
       const toggleDrawer = (button) => {
@@ -4136,7 +3630,7 @@
       };
       const choose = (row) => {
         const label = row.textContent?.trim() ?? "";
-        for (const other of Array.from(row.parentElement?.querySelectorAll(ROW6) ?? [])) {
+        for (const other of Array.from(row.parentElement?.querySelectorAll(ROW5) ?? [])) {
           other.setAttribute("aria-checked", String(other === row));
         }
         const combo = comboOf(row.closest(MENU2) ?? row);
@@ -4160,7 +3654,7 @@
       this.on(this, "click", (event) => {
         const target = event.target;
         if (!(target instanceof Element)) return;
-        const row = target.closest(ROW6);
+        const row = target.closest(ROW5);
         if (row) {
           choose(row);
           return;
@@ -4176,7 +3670,7 @@
         else open(combo, false);
       });
       this.on(this, "pointerover", (event) => {
-        const row = event.target instanceof Element ? event.target.closest(ROW6) : null;
+        const row = event.target instanceof Element ? event.target.closest(ROW5) : null;
         if (row) row.focus({ preventScroll: true });
       });
       this.on(this, "keydown", (event) => {
@@ -4197,20 +3691,20 @@
           }
           return;
         }
-        const row = target.closest(ROW6);
+        const row = target.closest(ROW5);
         if (row) {
           if (key === "Escape") {
             event.preventDefault();
             close(true);
           } else if (key === "Tab") close(false);
-          else if (moveRowFocus(enabledRows(row.closest(MENU2) ?? row, ROW6), row, key)) event.preventDefault();
+          else if (moveRowFocus(enabledRows(row.closest(MENU2) ?? row, ROW5), row, key)) event.preventDefault();
           else if (key === "Enter" || key === " ") {
             event.preventDefault();
             row.click();
           }
           return;
         }
-        if (key === "Escape" && openMenu2()) {
+        if (key === "Escape" && openMenu()) {
           event.preventDefault();
           close(true);
         } else if ((key === "Enter" || key === " ") && target.matches(DRAWER + ", " + COMBO)) {
@@ -4224,7 +3718,7 @@
       this.on(document, "pointerdown", (event) => {
         const target = event.target;
         if (!(target instanceof Element)) return;
-        const menu = openMenu2();
+        const menu = openMenu();
         if (!menu || menu.contains(target)) return;
         const combo = comboOf(menu);
         if (combo && combo.contains(target)) return;
@@ -4234,7 +3728,7 @@
   };
   define("ue-status-bar", StatusBar);
 
-  // src/TabWell/TabWell.ts
+  // design-system/src/TabWell/TabWell.ts
   var TabWellElement = class extends TabStackElement {
     names = {
       stack: "tabWell-stack",
@@ -4249,47 +3743,11 @@
   };
   define("ue-tab-well", TabWellElement);
 
-  // src/TextInput/TextInput.ts
-  var UeTextInputElement = class extends UeElement {
-    setup() {
-      const box = this.one(".textinput");
-      const field = box?.querySelector(".textinput__field");
-      if (!box || !field) throw new Error("ue-text-input needs a .textinput box with a .textinput__field input");
-      const search = box.classList.contains("textinput--search");
-      const sync = () => {
-        if (search) box.classList.toggle("textinput--filled", field.value !== "");
-      };
-      const clear = () => {
-        field.value = "";
-        sync();
-        field.focus();
-        this.emit("ue-text-input", { value: "" });
-        this.emit("ue-text-clear", {});
-      };
-      sync();
-      this.on(field, "input", () => {
-        sync();
-        this.emit("ue-text-input", { value: field.value });
-      });
-      this.on(box, "click", (event) => {
-        if (!(event.target instanceof Element)) return;
-        if (event.target.closest(".textinput__clear")) clear();
-        else if (event.target !== field && !event.target.closest(".textinput__trail")) field.focus();
-      });
-      this.on(field, "keydown", (event) => {
-        if (!search || event.key !== "Escape" || field.readOnly || field.value === "") return;
-        event.preventDefault();
-        clear();
-      });
-    }
-  };
-  define("ue-text-input", UeTextInputElement);
-
-  // src/ToolBar/ToolBar.ts
+  // design-system/src/ToolBar/ToolBar.ts
   var CONTROL = ".toolBar-btn, .toolBar-modes, .toolBar-wrap, .toolBar-plate";
   var TOGGLE = ".toolBar-btn--toggle";
   var MENU3 = ".toolBar-menu";
-  var ROW7 = ".toolBar-row";
+  var ROW6 = ".toolBar-row";
   function isDisabled3(el) {
     return el.getAttribute("aria-disabled") === "true";
   }
@@ -4303,9 +3761,9 @@
         const slot = menu.closest(".toolBar-slot");
         return slot ? slot.querySelector(CONTROL) : null;
       };
-      const openMenu2 = () => this.one(MENU3 + ".is-open");
+      const openMenu = () => this.one(MENU3 + ".is-open");
       const close = (restoreFocus) => {
-        const menu = openMenu2();
+        const menu = openMenu();
         if (!menu) return;
         menu.classList.remove("is-open");
         const control = controlOf(menu);
@@ -4320,7 +3778,7 @@
         menu.classList.add("is-open");
         control.setAttribute("aria-expanded", "true");
         if (rows === "none") return;
-        const list = enabledRows(menu, ROW7);
+        const list = enabledRows(menu, ROW6);
         if (list.length > 0) (rows === "first" ? list[0] : list[list.length - 1]).focus();
       };
       const setPlaying = (bar, playing) => {
@@ -4342,7 +3800,7 @@
       this.on(this, "click", (event) => {
         const target = event.target;
         if (!(target instanceof Element)) return;
-        const row = target.closest(ROW7);
+        const row = target.closest(ROW6);
         if (row) {
           if (isDisabled3(row)) return;
           this.emit("ue-menu-select", { label: rowLabel(row, ".toolBar-label") });
@@ -4368,20 +3826,20 @@
       this.on(this, "pointerover", (event) => {
         const target = event.target;
         if (!(target instanceof Element)) return;
-        const row = target.closest(ROW7);
+        const row = target.closest(ROW6);
         if (row && !isDisabled3(row)) row.focus({ preventScroll: true });
       });
       this.on(this, "keydown", (event) => {
         const target = event.target;
         if (!(target instanceof HTMLElement)) return;
         const key = event.key;
-        const row = target.closest(ROW7);
+        const row = target.closest(ROW6);
         if (row) {
           if (key === "Escape") {
             event.preventDefault();
             close(true);
           } else if (key === "Tab") close(false);
-          else if (moveRowFocus(enabledRows(row.closest(MENU3) ?? row, ROW7), row, key)) event.preventDefault();
+          else if (moveRowFocus(enabledRows(row.closest(MENU3) ?? row, ROW6), row, key)) event.preventDefault();
           else if (key === "Enter" || key === " ") {
             event.preventDefault();
             row.click();
@@ -4391,7 +3849,7 @@
         const control = target.closest(CONTROL);
         if (!control) return;
         if (key === "Escape") {
-          if (!openMenu2()) return;
+          if (!openMenu()) return;
           event.preventDefault();
           close(true);
         } else if (key === "Enter" || key === " ") {
@@ -4413,7 +3871,7 @@
       this.on(document, "pointerdown", (event) => {
         const target = event.target;
         if (!(target instanceof Element)) return;
-        const menu = openMenu2();
+        const menu = openMenu();
         if (!menu || menu.contains(target)) return;
         const control = controlOf(menu);
         if (control && control.contains(target)) return;
@@ -4423,7 +3881,7 @@
   };
   define("ue-tool-bar", ToolBar);
 
-  // src/Tooltip/Tooltip.ts
+  // design-system/src/Tooltip/Tooltip.ts
   var SUMMON_DELAY = 150;
   var INTRO = 100;
   var OFFSET_X = 12;
@@ -4509,171 +3967,7 @@
   };
   define("ue-tooltip", UeTooltipElement);
 
-  // src/TreeRow/TreeRow.ts
-  var ARROW2 = '<svg class="tr-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4l4.5 4L6 12z"/></svg>';
-  var FOLDER2 = '<svg class="tr-icon is-folder" viewBox="0 0 16 16" aria-hidden="true"><path class="tr-folder-closed" d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.5 4.5V12a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H5.2L3.8 11V4.5a1 1 0 0 1 1-1h2L8 5h5.5"/></svg>';
-  var OBJECT = '<svg class="tr-icon is-object" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg>';
-  var TreeRow = class extends UeElement {
-    #tree = null;
-    #controller = null;
-    #filter = null;
-    #kept = /* @__PURE__ */ new Set();
-    #parentsOfKept = /* @__PURE__ */ new Set();
-    #lastIds = "";
-    setup() {
-      const tree = this.#ownTree() ?? this.#createTree();
-      this.#tree = tree;
-      tree.setAttribute("role", "tree");
-      tree.setAttribute("aria-multiselectable", String(!this.#single()));
-      const controller = new TreeController(
-        tree,
-        {
-          row: ".tr-row",
-          arrow: ".tr-arrow",
-          folder: ".tr-icon.is-folder",
-          caretOpen: "",
-          caretClosed: "",
-          folderOpen: "",
-          folderClosed: "",
-          openClass: "is-open"
-        },
-        {
-          multi: !this.#single(),
-          excluded: (row) => this.#filter !== null && !this.#kept.has(row),
-          forceOpen: (row) => this.#filter !== null && this.#parentsOfKept.has(row),
-          lazy: (row) => row.dataset.expandable === "true",
-          toggled: (row, open) => this.emit("ue-tree-toggle", { id: this.#idOf(row), expanded: open }),
-          selected: () => this.#announceSelection()
-        }
-      );
-      this.#controller = controller;
-      this.on(tree, "click", (event) => {
-        if (this.owns(event.target)) controller.click(event);
-      });
-      this.on(tree, "dblclick", (event) => {
-        if (this.owns(event.target)) controller.doubleClick(event);
-      });
-      this.on(tree, "keydown", (event) => {
-        if (this.owns(event.target)) controller.keyDown(event);
-      });
-      this.#lastIds = this.getSelectedIds().join("\n");
-      controller.refresh();
-    }
-    #single() {
-      return this.getAttribute("select") === "single";
-    }
-    // The first tree below this element that no nested instance owns.
-    #ownTree() {
-      return this.all(".tr-tree").find((tree) => tree.closest(this.localName) === this) ?? null;
-    }
-    #createTree() {
-      const tree = document.createElement("div");
-      tree.className = "tr-tree";
-      this.append(tree);
-      return tree;
-    }
-    #rows() {
-      return this.#controller?.rows() ?? [];
-    }
-    #idOf(row) {
-      return row.dataset.id ?? (row.querySelector(".tr-text")?.textContent ?? "").trim();
-    }
-    #rowOf(id) {
-      return this.#rows().find((row) => this.#idOf(row) === id);
-    }
-    #info(row) {
-      return { id: this.#idOf(row), label: (row.querySelector(".tr-text")?.textContent ?? "").trim(), depth: (this.#controller?.level(row) ?? 1) - 1 };
-    }
-    #announceSelection() {
-      const ids = this.getSelectedIds();
-      const key = ids.join("\n");
-      if (key === this.#lastIds) return;
-      this.#lastIds = key;
-      this.emit("ue-tree-select", { ids });
-    }
-    // Ids of the selected rows in tree order.
-    getSelectedIds() {
-      return this.#rows().filter((row) => row.classList.contains("is-selected")).map((row) => this.#idOf(row));
-    }
-    // Selects exactly these rows. Ids that name no row are ignored.
-    select(ids) {
-      const controller = this.#controller;
-      if (!controller) return;
-      const wanted = new Set(this.#single() ? ids.slice(0, 1) : ids);
-      const rows = this.#rows().filter((row) => wanted.has(this.#idOf(row)));
-      controller.setSelection(rows, rows[rows.length - 1] ?? null);
-    }
-    // Opens or closes one row.
-    setExpanded(id, expanded) {
-      const row = this.#rowOf(id);
-      if (row && this.#controller?.hasChildren(row)) this.#controller.setOpen(row, expanded);
-    }
-    // Replaces every row with rows drawn from data.
-    setRows(rows) {
-      const tree = this.#tree;
-      const controller = this.#controller;
-      if (!tree || !controller) return;
-      tree.replaceChildren(...rows.map((data) => this.#draw(data)));
-      this.#lastIds = this.getSelectedIds().join("\n");
-      this.#refilter();
-      controller.refresh();
-    }
-    #draw(data) {
-      const depth = data.depth ?? 0;
-      const row = document.createElement("div");
-      row.className = "tr-row" + (data.selected ? " is-selected" : "") + (data.dim ? " is-dim" : "");
-      row.setAttribute("role", "treeitem");
-      row.setAttribute("aria-level", String(depth + 1));
-      row.setAttribute("aria-expanded", data.expanded ? "true" : "false");
-      row.dataset.id = data.id;
-      if (data.expandable) row.dataset.expandable = "true";
-      const icon = data.icon ?? "object";
-      const cells = (data.cells ?? []).map(() => '<span class="tr-cell"></span>').join("");
-      row.innerHTML = '<span class="tr-indent" style="--depth:' + depth + '"></span>' + ARROW2 + (icon === "folder" ? FOLDER2 : icon === "object" ? OBJECT : "") + '<span class="tr-text"></span>' + cells;
-      const text = row.querySelector(".tr-text");
-      if (text) text.textContent = data.label;
-      const cellEls = row.querySelectorAll(".tr-cell");
-      (data.cells ?? []).forEach((value, i) => {
-        cellEls[i].textContent = value;
-      });
-      return row;
-    }
-    // Shows only the rows the filter accepts and their ancestors. Ancestors open while the filter is set. Null clears it.
-    setFilter(filter) {
-      if (typeof filter === "string") {
-        const needle = filter.trim().toLowerCase();
-        this.#filter = needle === "" ? null : (row) => row.label.toLowerCase().includes(needle);
-      } else {
-        this.#filter = filter;
-      }
-      this.#refilter();
-      this.#controller?.refresh();
-    }
-    #refilter() {
-      this.#kept = /* @__PURE__ */ new Set();
-      this.#parentsOfKept = /* @__PURE__ */ new Set();
-      const filter = this.#filter;
-      const controller = this.#controller;
-      if (!filter || !controller) return;
-      const rows = this.#rows();
-      rows.forEach((row, index) => {
-        if (!filter(this.#info(row))) return;
-        this.#kept.add(row);
-        let want = controller.level(row);
-        for (let j = index - 1; j >= 0 && want > 1; j--) {
-          const level = controller.level(rows[j]);
-          if (level < want) {
-            this.#kept.add(rows[j]);
-            this.#parentsOfKept.add(rows[j]);
-            want = level;
-          }
-        }
-      });
-    }
-  };
-  define("ue-tree-row", TreeRow);
-
-  // src/VectorInput/VectorInput.ts
+  // design-system/src/VectorInput/VectorInput.ts
   var round = (value, places) => Math.round(value * 10 ** places) / 10 ** places;
   function format2(value, unit) {
     let text = String(round(value, 4));
@@ -4855,7 +4149,7 @@
   };
   define("ue-vector-input", UeVectorInput);
 
-  // src/WindowChrome/WindowChrome.ts
+  // design-system/src/WindowChrome/WindowChrome.ts
   var MAXIMIZE_GLYPH = "#windowChrome-i-max";
   var RESTORE_GLYPH = "#windowChrome-i-restore";
   var WindowChromeElement = class extends UeElement {
@@ -4904,7 +4198,7 @@
   };
   define("ue-window-chrome", WindowChromeElement);
 
-  // bundle/main.ts
+  // design-system/bundle/main.ts
   window.UEStarship = {
     elements: Array.from(new Set(Array.from(document.querySelectorAll("*")).map((el) => el.localName).filter((tag) => tag.startsWith("ue-"))))
   };
