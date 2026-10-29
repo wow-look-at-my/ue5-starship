@@ -1,0 +1,43 @@
+/* Layout of the Details category tree. Every metric is cited in components/DetailsCategory/README.md. The value controls are primitives and nested composites. */
+.DetailsCategory-frame { background: var(--recessed); } /* tree sits on DetailsView.GridLine (Recessed): SDetailsView.cpp:430-436 */
+
+/* Category header row: GridLine border with bottom padding 1 (Classic style: top padding 0): SDetailCategoryTableRow.cpp:139-144, DetailsViewStyle.cpp:241-246 */
+.DetailsCategory-cat { padding-bottom: 1px; background: var(--recessed); }
+.DetailsCategory-catRow { display: flex; align-items: center; min-height: 26px; background: var(--header); cursor: pointer; } /* DetailsView.CategoryTop = Header; MinDesiredHeight 26: StarshipStyle.cpp:3188, SDetailCategoryTableRow.cpp:155, PropertyEditorConstants.h:28 */
+.DetailsCategory-arrow { flex: none; margin-left: 2px; width: 16px; height: 16px; fill: currentColor; color: color-mix(in srgb, var(--foreground) 60%, transparent); } /* caret 16x16, Foreground tint x SubduedForeground 0.6: StarshipCoreStyle.cpp:2072-2075, SDetailExpanderArrow.cpp:25-31, WidgetStyle.cpp:11 */
+.DetailsCategory-catRow:hover .DetailsCategory-arrow, .DetailsCategory-catRow.is-hover .DetailsCategory-arrow { color: color-mix(in srgb, var(--foreground-hover) 60%, transparent); } /* *_Hovered brush: StarshipCoreStyle.cpp:2073, 2075 */
+.DetailsCategory-title { flex: 1; min-width: 0; margin-left: 4px; font: 700 10.667px/1.172 var(--font-sans); color: var(--foreground-header); } /* SmallBold 8pt, ForegroundHeader: StarshipStyle.cpp:3265-3269, SDetailCategoryTableRow.cpp:88-97 */
+/* The caret is the right triangle. It turns down while its row is expanded. */
+[aria-expanded="true"] > .DetailsCategory-arrow, [aria-expanded="true"].DetailsCategory-rowArrow { transform: rotate(90deg); }
+
+/* Property row: 26px min + 1px GridLine bottom padding: SDetailSingleItemRow.cpp:732-738 */
+.DetailsCategory-row { display: flex; min-height: 27px; padding-bottom: 1px; background: var(--recessed); }
+.DetailsCategory-indent { flex: none; background: var(--panel); } /* 16px per level, paints GetRowBackgroundColor(i): SDetailRowIndent.cpp:33-48, 56-70 */
+.DetailsCategory-name, .DetailsCategory-value, .DetailsCategory-right { background: var(--panel); display: flex; align-items: center; min-width: 0; } /* GetRowBackgroundColor(0): PropertyEditorConstants.cpp:25-57 */
+.DetailsCategory-row.is-hover .DetailsCategory-name, .DetailsCategory-row.is-hover .DetailsCategory-value, .DetailsCategory-row.is-hover .DetailsCategory-right,
+.DetailsCategory-row:hover .DetailsCategory-name, .DetailsCategory-row:hover .DetailsCategory-value, .DetailsCategory-row:hover .DetailsCategory-right { background: var(--header); } /* hovered: Colors.Header: PropertyEditorConstants.cpp:45-47 */
+.DetailsCategory-row.is-nested .DetailsCategory-name, .DetailsCategory-row.is-nested .DetailsCategory-value { background: #282828; } /* level 1: Panel #242424 + 4 per channel: PropertyEditorConstants.cpp:40-54 */
+.DetailsCategory-row.is-nested.is-hover .DetailsCategory-name, .DetailsCategory-row.is-nested.is-hover .DetailsCategory-value,
+.DetailsCategory-row.is-nested:hover .DetailsCategory-name, .DetailsCategory-row.is-nested:hover .DetailsCategory-value { background: #333333; } /* Header #2f2f2f + 4 */
+.DetailsCategory-frame .is-hidden { display: none; } /* folded by a collapsed parent, the search or the section pill */
+.DetailsCategory-name { flex: 0 0 40%; font: 400 10.667px/1.172 var(--font-sans); color: var(--foreground); } /* NormalFont 8pt: StarshipStyle.cpp:3122; Name 40%, Value 60%: DetailsViewArgs.h:134 */
+.DetailsCategory-row.is-nested .DetailsCategory-name { flex-basis: calc(40% - 16px); } /* the indent comes out of the Name column */
+.DetailsCategory-nameInner { display: flex; align-items: center; min-width: 0; }
+.DetailsCategory-rowArrow { margin-left: 2px; width: 16px; height: 16px; flex: none; fill: currentColor; color: color-mix(in srgb, var(--foreground) 60%, transparent); visibility: hidden; } /* slot padding 2, 16px caret, Hidden when no children: SDetailSingleItemRow.cpp:503-510, SDetailExpanderArrow.cpp:36-44 */
+.DetailsCategory-rowArrow.has-children { visibility: visible; }
+.DetailsCategory-label { margin-left: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } /* name slot Padding(2,0,0,0): SDetailSingleItemRow.cpp:523-531 */
+.DetailsCategory-value { flex: 1; padding: 0 2px 0 12px; } /* RightRowPadding (12,0,2,0): SDetailSingleItemRow.cpp:39, 553 */
+.DetailsCategory-right { flex: 0 0 22px; justify-content: flex-end; } /* RightColumnMinWidth 22: DetailsViewArgs.h:135 */
+.DetailsCategory-split { flex: 0 0 1px; background: var(--recessed); } /* DetailsView.Splitter, 1px handle: SDetailSingleItemRow.cpp:426-428, StarshipStyle.cpp:3246-3249 */
+.DetailsCategory-catRow:focus-visible, .DetailsCategory-rowArrow:focus-visible, .DetailsCategory-advRow:focus-visible { outline: 1px solid var(--primary-hover); outline-offset: -1px; } /* browser keyboard ring: Slate draws none */
+
+/* "Advanced" dropdown row: Panel row, regular-weight Small label, MinHeight 26: DetailAdvancedDropdownNode.cpp:74-111 */
+.DetailsCategory-adv { padding-bottom: 1px; background: var(--recessed); }
+.DetailsCategory-advRow { display: flex; align-items: center; min-height: 26px; background: var(--panel); cursor: pointer; }
+.DetailsCategory-advRow:hover, .DetailsCategory-advRow.is-hover { background: var(--header); }
+.DetailsCategory-advRow .DetailsCategory-title { font-weight: 400; } /* Font(PropertyFontStyle) wins over the SmallBold TextStyle font: DetailAdvancedDropdownNode.cpp:85-86 */
+.DetailsCategory-empty { display: none; padding: 10px 12px; background: var(--panel); font: 400 10.667px/1.172 var(--font-sans); color: var(--foreground); }
+.DetailsCategory-empty.is-shown { display: block; }
+
+/* Live details panel: the header, the search row and the section pills stack above the tree. */
+.DetailsCategory-panel { position: relative; background: var(--panel); }

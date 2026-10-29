@@ -133,3 +133,7 @@ Panel width: the panel is at least as wide as the trigger. Set `--combobutton-me
 |---|---|---|
 | `ue-combo-pick` | `{ value, label, checked }` | A row is activated. `value` is the row `data-value` or its label. `checked` is the new state of a check or radio row, else `null` |
 | `ue-menu-activate` | see PopupMenu | Also bubbles from the nested popup menu |
+
+## Data API
+
+`el.value` is the value of the picked row in value mode. Setting it picks the row whose `data-value` (else label) matches, shows its label and marks it `aria-selected`. It throws when no row matches and fires no `ue-combo-pick`, because the owner that sets it already knows. Set it only after the element is upgraded, for example in an event handler.

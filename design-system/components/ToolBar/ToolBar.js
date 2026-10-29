@@ -307,6 +307,20 @@ var ACTIVATE_KEYS = ["Enter", " ", "ArrowDown", "ArrowUp"];
 var UeComboButtonElement = class extends UeElement {
   #trigger;
   #panel;
+  // In value mode: the value of the picked row. The setter picks the row whose value or label matches, shows its label and fires no ue-combo-pick. This is because the owner that sets it
+  // already knows.
+  get value() {
+    const picked = this.querySelector('.popupmenu__row[aria-selected="true"]');
+    return picked?.dataset.value ?? (picked ? rowLabel(picked, ".popupmenu__label") : "");
+  }
+  set value(next) {
+    const row = this.querySelectorAll(".popupmenu[tabindex] > .popupmenu__row");
+    const match = Array.from(row).find((each) => (each.dataset.value ?? rowLabel(each, ".popupmenu__label")) === next);
+    if (!match) throw new Error("ue-combo-button has no row with the value " + next);
+    const label = this.querySelector(".combobutton__label");
+    if (label) label.textContent = rowLabel(match, ".popupmenu__label");
+    for (const each of row) each.setAttribute("aria-selected", String(each === match));
+  }
   setup() {
     const trigger = this.one(".combobutton");
     const panel = this.one(".combobutton-menu");

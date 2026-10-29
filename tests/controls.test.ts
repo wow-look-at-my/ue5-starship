@@ -1564,3 +1564,55 @@ scenario('ExpandableArea: the source variant draws the Header block with a reces
 	assert.equal(Math.round((await page.locator('#source .expandablearea__header').boundingBox())?.height ?? 0), 24);
 });
 
+// ---------- Details row additions: small variants and data APIs ----------
+
+scenario('TextInput: the small variant sets the Details row font and nothing else', 'TextInput', async (page) => {
+	const small = tiBox(page, 6);
+	const normal = tiBox(page, 1);
+	assert.equal(await prop(small, 'font-size'), '10.667px');
+	assert.equal(await prop(normal, 'font-size'), '13.333px');
+	assert.equal(await prop(small, 'padding-top'), await prop(normal, 'padding-top'));
+	assert.equal(await prop(small, 'border-top-left-radius'), await prop(normal, 'border-top-left-radius'));
+});
+
+scenario('SpinBox: the small variant sets the Details row font, and value redraws the box without an event', 'SpinBox', async (page) => {
+	const small = page.locator('ue-spin-box .spinbox--small');
+	assert.equal(await prop(small, 'font-size'), '10.667px');
+	assert.equal(await prop(sbBox(page, 0), 'font-size'), '13.333px');
+	await record(page, 'ue-spin-change');
+	const host = page.locator('ue-spin-box').filter({ has: page.locator('.spinbox--small') });
+	type Api = HTMLElement & { value: number };
+	assert.equal(await host.evaluate((el) => (el as Api).value), 12.5);
+	await host.evaluate((el) => { (el as Api).value = 20; });
+	assert.equal(await sbValue(small), 20);
+	assert.equal(await sbText(small), '20.0');
+	assert.equal(await host.evaluate((el) => (el as Api).value), 20);
+	assert.deepEqual(await events(page, 'ue-spin-change'), [], 'setting value fires no event');
+	await small.focus();
+	await tap(page, 'ArrowUp');
+	assert.deepEqual(await events(page, 'ue-spin-change'), [{ value: 20.5, text: '20.5' }], 'a key step starts from the set value');
+});
+
+scenario('ComboButton: value reads the picked row, the setter picks a row by value or label and fires no event', 'ComboButton', async (page) => {
+	const host = page.locator('ue-combo-button').nth(0);
+	type Api = HTMLElement & { value: string };
+	assert.equal(await host.evaluate((el) => (el as Api).value), 'Location');
+	await record(page, 'ue-combo-pick');
+	await host.evaluate((el) => { (el as Api).value = 'Scale'; });
+	assert.equal(await cbLabel(cbTrigger(page, 0)), 'Scale');
+	await attr(cbRows(page, 0).nth(2), 'aria-selected', 'true');
+	await attr(cbRows(page, 0).nth(0), 'aria-selected', 'false');
+	assert.equal(await host.evaluate((el) => (el as Api).value), 'Scale');
+	assert.deepEqual(await events(page, 'ue-combo-pick'), [], 'setting value fires no event');
+	const failure = await host.evaluate((el) => {
+		try {
+			(el as Api).value = 'Nothing';
+			return '';
+		} catch (error) {
+			return String(error);
+		}
+	});
+	assert.match(failure, /no row with the value Nothing/);
+	assert.equal(await cbLabel(cbTrigger(page, 0)), 'Scale', 'a failed set changes nothing');
+});
+

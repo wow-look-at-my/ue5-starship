@@ -53,126 +53,6 @@
     if (!customElements.get(tag)) customElements.define(tag, ctor);
   }
 
-  // design-system/src/_shared/popupmenu.ts
-  function wireMenu(wiring) {
-    const { trigger, menu, itemSelector } = wiring;
-    const items = () => Array.from(menu.querySelectorAll(itemSelector));
-    const isOpen = () => menu.classList.contains("is-open");
-    const setOpen = (open2) => {
-      menu.classList.toggle("is-open", open2);
-      trigger.setAttribute("aria-expanded", String(open2));
-      wiring.onOpenChange?.(open2);
-    };
-    const open = () => {
-      setOpen(true);
-      const list = items();
-      const start = list.find((item) => item.getAttribute("aria-checked") === "true" || item.getAttribute("aria-selected") === "true") ?? list[0];
-      start?.focus();
-    };
-    const close = (returnFocus) => {
-      if (!isOpen()) return;
-      setOpen(false);
-      if (returnFocus) trigger.focus();
-    };
-    const move = (delta, absolute) => {
-      const list = items();
-      const at = list.indexOf(document.activeElement);
-      const next = absolute ?? (at < 0 ? 0 : (at + delta + list.length) % list.length);
-      list[next]?.focus();
-    };
-    const pick = (item) => {
-      wiring.onPick(item);
-      close(true);
-    };
-    const onTrigger = () => isOpen() ? close(false) : open();
-    const onTriggerKey = (event) => {
-      if (event.key === "ArrowDown" && !isOpen()) {
-        event.preventDefault();
-        open();
-      }
-    };
-    const onMenuClick = (event) => {
-      const item = event.target.closest(itemSelector);
-      if (item && menu.contains(item)) pick(item);
-    };
-    const onMenuKey = (event) => {
-      const active = document.activeElement;
-      if (event.key === "ArrowDown") move(1, null);
-      else if (event.key === "ArrowUp") move(-1, null);
-      else if (event.key === "Home") move(0, 0);
-      else if (event.key === "End") move(0, items().length - 1);
-      else if ((event.key === "Enter" || event.key === " ") && items().includes(active)) pick(active);
-      else if (event.key === "Escape") close(true);
-      else if (event.key === "Tab") close(false);
-      else return;
-      event.preventDefault();
-      event.stopPropagation();
-    };
-    const onOutside = (event) => {
-      const target = event.target;
-      if (isOpen() && !menu.contains(target) && !trigger.contains(target)) close(false);
-    };
-    trigger.addEventListener("click", onTrigger);
-    trigger.addEventListener("keydown", onTriggerKey);
-    menu.addEventListener("click", onMenuClick);
-    menu.addEventListener("keydown", onMenuKey);
-    document.addEventListener("pointerdown", onOutside);
-    return {
-      open,
-      close,
-      isOpen,
-      dispose: () => {
-        trigger.removeEventListener("click", onTrigger);
-        trigger.removeEventListener("keydown", onTriggerKey);
-        menu.removeEventListener("click", onMenuClick);
-        menu.removeEventListener("keydown", onMenuKey);
-        document.removeEventListener("pointerdown", onOutside);
-      }
-    };
-  }
-
-  // design-system/src/AssetPicker/AssetPicker.ts
-  var UeAssetPicker = class extends UeElement {
-    setup() {
-      const row = this.one(".AssetPicker-row");
-      const combo = this.one(".AssetPicker-combo");
-      const menu = this.one(".AssetPicker-menu");
-      const label = this.one(".AssetPicker-combo .label");
-      const thumb = this.one(".AssetPicker-thumbFrame");
-      const reset = this.one(".AssetPicker-reset");
-      if (!row || !combo || !menu || !label) return;
-      const fallback = row.dataset.default ?? "None";
-      const render = (value) => {
-        row.dataset.value = value;
-        label.textContent = value;
-        for (const item of menu.querySelectorAll(".AssetPicker-menuItem")) item.setAttribute("aria-selected", String(item.dataset.asset === value));
-        if (thumb) {
-          thumb.title = value === "None" ? "None" : "/Game/Props/" + value + "." + value;
-          thumb.setAttribute("aria-label", value);
-        }
-        if (reset) {
-          reset.classList.toggle("is-idle", value === fallback);
-          reset.tabIndex = value === fallback ? -1 : 0;
-        }
-        this.emit("ue-asset-change", { asset: value });
-      };
-      render(label.textContent ?? fallback);
-      const handle = wireMenu({
-        trigger: combo,
-        menu,
-        itemSelector: ".AssetPicker-menuItem",
-        onPick: (item) => render(item.dataset.asset ?? fallback)
-      });
-      this.onDispose(handle.dispose);
-      const use = this.one('[data-role="use"]');
-      if (use) this.on(use, "click", () => render(row.dataset.selection ?? fallback));
-      const browse = this.one('[data-role="browse"]');
-      if (browse) this.on(browse, "click", () => this.emit("ue-asset-browse", { asset: row.dataset.value ?? fallback }));
-      if (reset) this.on(reset, "click", () => render(fallback));
-    }
-  };
-  define("ue-asset-picker", UeAssetPicker);
-
   // design-system/src/_shared/own.ts
   function ownedBy(host, target) {
     return target instanceof Element && target.closest(host.localName) === host;
@@ -429,6 +309,20 @@
   var UeComboButtonElement = class extends UeElement {
     #trigger;
     #panel;
+    // In value mode: the value of the picked row. The setter picks the row whose value or label matches, shows its label and fires no ue-combo-pick. This is because the owner that sets it
+    // already knows.
+    get value() {
+      const picked = this.querySelector('.popupmenu__row[aria-selected="true"]');
+      return picked?.dataset.value ?? (picked ? rowLabel(picked, ".popupmenu__label") : "");
+    }
+    set value(next) {
+      const row = this.querySelectorAll(".popupmenu[tabindex] > .popupmenu__row");
+      const match = Array.from(row).find((each) => (each.dataset.value ?? rowLabel(each, ".popupmenu__label")) === next);
+      if (!match) throw new Error("ue-combo-button has no row with the value " + next);
+      const label = this.querySelector(".combobutton__label");
+      if (label) label.textContent = rowLabel(match, ".popupmenu__label");
+      for (const each of row) each.setAttribute("aria-selected", String(each === match));
+    }
     setup() {
       const trigger = this.one(".combobutton");
       const panel = this.one(".combobutton-menu");
@@ -531,6 +425,76 @@
     }
   };
   define("ue-combo-button", UeComboButtonElement);
+
+  // design-system/src/ResetToDefault/ResetToDefault.ts
+  var UeResetToDefaultElement = class extends UeElement {
+    static observedAttributes = ["differs"];
+    attributeChangedCallback() {
+      this.#sync();
+    }
+    setup() {
+      const button = this.one("button.resettodefault");
+      if (!button) throw new Error("ue-reset-to-default needs a button.resettodefault element");
+      this.#sync();
+      this.on(button, "click", () => {
+        if (this.hasAttribute("differs")) this.emit("ue-reset", {});
+      });
+    }
+    // The idle button keeps its slot but is invisible, disabled and out of the tab order.
+    #sync() {
+      const button = this.one("button.resettodefault");
+      if (!button) return;
+      const differs = this.hasAttribute("differs");
+      button.classList.toggle("resettodefault--idle", !differs);
+      button.disabled = !differs;
+    }
+  };
+  define("ue-reset-to-default", UeResetToDefaultElement);
+
+  // design-system/src/AssetPicker/AssetPicker.ts
+  var UeAssetPicker = class extends UeElement {
+    setup() {
+      const row = this.one(".AssetPicker-row");
+      const combo = this.one("ue-combo-button");
+      const thumb = this.one(".AssetPicker-thumbFrame");
+      const reset = this.one("ue-reset-to-default");
+      const label = this.one(".combobutton__label");
+      if (!row || !combo || !label) return;
+      const fallback = row.dataset.default ?? "None";
+      const show = (value) => {
+        row.dataset.value = value;
+        if (thumb) {
+          thumb.title = value === "None" ? "None" : "/Game/Props/" + value + "." + value;
+          thumb.setAttribute("aria-label", value);
+        }
+        reset?.toggleAttribute("differs", value !== fallback);
+      };
+      const change = (value) => {
+        show(value);
+        this.emit("ue-asset-change", { asset: value });
+      };
+      show(label.textContent?.trim() ?? fallback);
+      this.on(this, "ue-combo-pick", (event) => {
+        if (this.owns(event.target)) change(event.detail.value);
+      });
+      this.on(this, "ue-button-click", (event) => {
+        if (!this.owns(event.target)) return;
+        const role = event.target.querySelector("[data-role]")?.getAttribute("data-role");
+        if (role === "use") {
+          combo.value = row.dataset.selection ?? fallback;
+          change(combo.value);
+        } else if (role === "browse") {
+          this.emit("ue-asset-browse", { asset: row.dataset.value ?? fallback });
+        }
+      });
+      this.on(this, "ue-reset", (event) => {
+        if (!this.owns(event.target)) return;
+        combo.value = fallback;
+        change(fallback);
+      });
+    }
+  };
+  define("ue-asset-picker", UeAssetPicker);
 
   // design-system/src/FilterPills/FilterPills.ts
   var CROSS = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
@@ -1944,27 +1908,344 @@
   };
   define("ue-cover", UeCoverElement);
 
+  // design-system/src/DetailsHeader/DetailsHeader.ts
+  var UeDetailsHeader = class extends UeElement {
+    setup() {
+      const label = this.one(".DetailsHeader-label");
+      if (label) this.wireLabel(label);
+    }
+    // Enter commits, Escape restores the text from before the edit. The instance row shows the committed name.
+    wireLabel(label) {
+      let before = label.textContent ?? "";
+      this.on(label, "focus", () => {
+        before = label.textContent ?? "";
+      });
+      this.on(label, "keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          label.blur();
+        } else if (event.key === "Escape") {
+          label.textContent = before;
+          label.blur();
+        }
+      });
+      this.on(label, "blur", () => {
+        const text = (label.textContent ?? "").trim();
+        label.textContent = text === "" ? before : text;
+        for (const name of this.all(".DetailsHeader-instance .name")) name.textContent = label.textContent;
+      });
+    }
+  };
+  define("ue-details-header", UeDetailsHeader);
+
+  // design-system/src/DetailsSearchRow/DetailsSearchRow.ts
+  var UeDetailsSearchRow = class extends UeElement {
+    setup() {
+      this.on(this, "ue-text-input", (event) => {
+        if (this.owns(event.target)) this.emit("ue-search", { text: event.detail.value });
+      });
+      this.on(this, "ue-button-click", (event) => {
+        const star = this.owns(event.target) ? event.target.querySelector('[data-role="favorites"]') : null;
+        if (!star) return;
+        const on = event.detail.pressed === true;
+        star.title = on ? "Toggle Favorites (on)" : "Toggle Favorites";
+        this.emit("ue-favorites", { on });
+      });
+      this.on(this, "ue-combo-pick", (event) => {
+        if (!this.owns(event.target)) return;
+        const { value, checked } = event.detail;
+        this.emit("ue-view-option", { option: value, checked: checked === true });
+      });
+    }
+  };
+  define("ue-details-search-row", UeDetailsSearchRow);
+
+  // design-system/src/SpinBox/SpinBox.ts
+  var DRAG_TRIGGER = 5;
+  var MIN_SLIDER_WIDTH = 100;
+  function numberAttr(el, name) {
+    const raw = el.dataset[name];
+    if (raw === void 0 || raw === "") return null;
+    const value = Number(raw);
+    return Number.isFinite(value) ? value : null;
+  }
+  function rangeOf(box) {
+    const min = numberAttr(box, "min");
+    const max = numberAttr(box, "max");
+    return { min: min ?? -Infinity, max: max ?? Infinity, bounded: min !== null && max !== null, delta: numberAttr(box, "delta") ?? numberAttr(box, "step") ?? 0 };
+  }
+  function valueOf(box) {
+    return numberAttr(box, "value") ?? 0;
+  }
+  function format(value) {
+    const rounded = Math.round(value * 1e3) / 1e3;
+    return Number.isInteger(rounded) ? rounded.toFixed(1) : String(rounded);
+  }
+  function clamp(value, range) {
+    return Math.min(range.max, Math.max(range.min, value));
+  }
+  var UeSpinBoxElement = class extends UeElement {
+    #drags = /* @__PURE__ */ new WeakMap();
+    // The current value. The setter redraws the box and fires no ue-spin-change, because the owner that sets it already knows.
+    get value() {
+      const box = this.one(".spinbox");
+      return box ? valueOf(box) : 0;
+    }
+    set value(next) {
+      const box = this.one(".spinbox");
+      if (!box) throw new Error("ue-spin-box needs a .spinbox element");
+      box.dataset.value = String(next);
+      this.#render(box);
+    }
+    setup() {
+      const box = this.one(".spinbox");
+      if (!box) throw new Error("ue-spin-box needs a .spinbox element");
+      this.#render(box);
+      this.on(box, "pointerdown", (event) => {
+        if (event.button !== 0 || box.getAttribute("aria-disabled") === "true") return;
+        if (box.classList.contains("spinbox--text")) return;
+        box.setPointerCapture(event.pointerId);
+        this.#drags.set(box, { pointerId: event.pointerId, lastX: event.clientX, distance: 0, dragging: false, before: valueOf(box), internal: valueOf(box) });
+        box.focus();
+        event.preventDefault();
+      });
+      this.on(box, "pointermove", (event) => {
+        const state = this.#drags.get(box);
+        if (!state || state.pointerId !== event.pointerId) return;
+        const dx = event.clientX - state.lastX;
+        state.lastX = event.clientX;
+        if (!state.dragging) {
+          state.distance += Math.abs(dx);
+          if (state.distance > DRAG_TRIGGER) {
+            state.dragging = true;
+            box.classList.add("spinbox--active");
+          }
+          return;
+        }
+        this.#drag(box, state, dx);
+      });
+      const finish = (event) => {
+        const state = this.#drags.get(box);
+        if (!state || state.pointerId !== event.pointerId) return;
+        this.#drags.delete(box);
+        if (box.hasPointerCapture(event.pointerId)) box.releasePointerCapture(event.pointerId);
+        box.classList.remove("spinbox--active");
+        if (event.type === "pointercancel") return;
+        if (state.dragging) {
+          const range = rangeOf(box);
+          if (range.delta > 0) this.#set(box, clamp(Math.round(valueOf(box) / range.delta) * range.delta, range));
+        } else {
+          this.#enterText(box);
+        }
+      };
+      this.on(box, "pointerup", finish);
+      this.on(box, "pointercancel", finish);
+      this.on(box, "keydown", (event) => {
+        if (box.getAttribute("aria-disabled") === "true") return;
+        const state = this.#drags.get(box);
+        if (event.key === "Escape" && state?.dragging) {
+          this.#drags.delete(box);
+          if (box.hasPointerCapture(state.pointerId)) box.releasePointerCapture(state.pointerId);
+          box.classList.remove("spinbox--active");
+          this.#set(box, state.before);
+          event.preventDefault();
+          return;
+        }
+        if (event.target !== box) return;
+        const range = rangeOf(box);
+        if (event.key === "ArrowUp" || event.key === "ArrowRight") this.#set(box, clamp(valueOf(box) + range.delta, range));
+        else if (event.key === "ArrowDown" || event.key === "ArrowLeft") this.#set(box, clamp(valueOf(box) - range.delta, range));
+        else if (event.key === "Enter") this.#enterText(box);
+        else return;
+        event.preventDefault();
+      });
+      this.on(box, "focusout", (event) => {
+        if (event.target instanceof HTMLInputElement && event.target.classList.contains("spinbox__field")) this.#exitText(box, true, false);
+      });
+    }
+    // The value change of one mouse move while dragging, from SSpinBox::OnMouseMove.
+    #drag(box, state, dx) {
+      const range = rangeOf(box);
+      const width = Math.max(box.getBoundingClientRect().width, MIN_SLIDER_WIDTH);
+      let next;
+      if (range.bounded) {
+        const step = range.max - range.min <= 10 ? 0.1 : 1;
+        const filled = Math.min(width, Math.max(0, (state.internal - range.min) / (range.max - range.min) * width + dx * step));
+        next = range.min + filled / width * (range.max - range.min);
+      } else {
+        const sign = dx > 0 ? 1 : -1;
+        next = state.internal + sign * (Math.abs(dx) / width) * Math.max(Math.abs(state.internal), 1);
+      }
+      state.internal = clamp(next, range);
+      this.#set(box, state.internal);
+    }
+    #set(box, value) {
+      const before = valueOf(box);
+      box.dataset.value = String(value);
+      this.#render(box);
+      if (value !== before) this.emit("ue-spin-change", { value, text: format(value) + (box.dataset.unit ? " " + box.dataset.unit : "") });
+    }
+    #render(box) {
+      const range = rangeOf(box);
+      const value = valueOf(box);
+      box.setAttribute("aria-valuenow", String(value));
+      if (range.bounded) {
+        box.setAttribute("aria-valuemin", String(range.min));
+        box.setAttribute("aria-valuemax", String(range.max));
+        box.style.setProperty("--spinbox-fill", String((value - range.min) / (range.max - range.min)));
+      }
+      box.classList.toggle("spinbox--unbounded", !range.bounded);
+      const text = box.querySelector(".spinbox__text");
+      if (text && !box.classList.contains("spinbox--text")) text.textContent = format(value);
+      const unit = box.dataset.unit;
+      let suffix = box.querySelector(".spinbox__unit");
+      if (unit && !suffix && text) {
+        suffix = document.createElement("span");
+        suffix.className = "spinbox__unit";
+        text.after(suffix);
+      }
+      if (suffix) suffix.textContent = unit ?? "";
+    }
+    #enterText(box) {
+      const text = box.querySelector(".spinbox__text");
+      if (!text) return;
+      box.classList.add("spinbox--text");
+      const field = document.createElement("input");
+      field.className = "spinbox__field";
+      field.type = "text";
+      field.value = format(valueOf(box));
+      field.setAttribute("aria-label", "Value");
+      text.replaceChildren(field);
+      field.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          this.#exitText(box, true, true);
+        } else if (event.key === "Escape") {
+          event.preventDefault();
+          this.#exitText(box, false, true);
+        }
+      });
+      field.focus();
+      field.select();
+    }
+    #exitText(box, commit, refocus) {
+      const field = box.querySelector(".spinbox__field");
+      if (!field || !box.classList.contains("spinbox--text")) return;
+      const typed = Number(field.value.trim());
+      box.classList.remove("spinbox--text");
+      const range = rangeOf(box);
+      if (commit && field.value.trim() !== "" && Number.isFinite(typed)) this.#set(box, clamp(typed, range));
+      else this.#render(box);
+      if (refocus) box.focus();
+    }
+  };
+  define("ue-spin-box", UeSpinBoxElement);
+
+  // design-system/src/VectorInput/VectorInput.ts
+  var round = (value) => Math.round(value * 1e6) / 1e6;
+  var UeVectorInput = class extends UeElement {
+    // The values of each row as of the last change, which is the basis of the lock ratio.
+    #last = /* @__PURE__ */ new WeakMap();
+    setup() {
+      for (const row of this.all(".VectorInput-row")) {
+        if (!this.owns(row)) continue;
+        this.#last.set(row, this.#read(row));
+        this.#syncReset(row, this.#read(row));
+      }
+      this.on(this, "ue-spin-change", (event) => {
+        const row = this.#rowOf(event.target);
+        if (!row) return;
+        const fields = this.#fields(row);
+        const index = fields.indexOf(event.target);
+        const values = this.#read(row);
+        const before = this.#last.get(row) ?? values;
+        if (this.#locked(row)) {
+          for (let j = 0; j < fields.length; j++) {
+            if (j === index) continue;
+            values[j] = before[index] === 0 ? values[index] : round(before[j] * values[index] / before[index]);
+            fields[j].value = values[j];
+          }
+        }
+        this.#commit(row, values);
+      });
+      this.on(this, "ue-reset", (event) => {
+        const row = this.#rowOf(event.target);
+        if (!row) return;
+        const defaults = (row.dataset.default ?? "").split(",").map(Number);
+        this.#fields(row).forEach((field, i) => {
+          field.value = defaults[i];
+        });
+        this.#commit(row, defaults);
+      });
+      this.on(this, "ue-button-click", (event) => {
+        const lock = this.#rowOf(event.target) ? event.target.querySelector('[data-role="lock"]') : null;
+        if (lock) lock.title = event.detail.pressed ? "Scale uniformly (locked)" : "Scale uniformly (unlocked)";
+      });
+      this.on(this, "ue-combo-pick", (event) => {
+        if (this.#rowOf(event.target)) this.emit("ue-vector-space", { space: event.detail.label });
+      });
+    }
+    // The row of this element that holds the target, or null for a target of a nested instance.
+    #rowOf(target) {
+      if (!this.owns(target)) return null;
+      return target.closest(".VectorInput-row");
+    }
+    #fields(row) {
+      return Array.from(row.querySelectorAll("ue-spin-box"));
+    }
+    #read(row) {
+      return Array.from(row.querySelectorAll(".spinbox"), (box) => Number(box.dataset.value));
+    }
+    #locked(row) {
+      return row.querySelector('[data-role="lock"]')?.getAttribute("aria-pressed") === "true";
+    }
+    // Shows the reset arrow only while a value differs from its default.
+    #syncReset(row, values) {
+      const defaults = (row.dataset.default ?? "").split(",").map(Number);
+      row.querySelector("ue-reset-to-default")?.toggleAttribute("differs", values.some((value, i) => Math.abs(value - defaults[i]) > 1e-9));
+    }
+    #commit(row, values) {
+      this.#last.set(row, values);
+      this.#syncReset(row, values);
+      this.emit("ue-vector-change", { values });
+    }
+  };
+  define("ue-vector-input", UeVectorInput);
+
   // design-system/src/DetailsCategory/DetailsCategory.ts
-  var DOWN = "#DetailsCategory-down";
-  var RIGHT = "#DetailsCategory-right";
   var isIn = (el, selector) => el.closest(selector);
+  var isRow = (el) => el.classList.contains("DetailsCategory-row") || el.dataset.label !== void 0;
   var UeDetailsCategory = class extends UeElement {
+    #query = "";
+    #section = "";
+    #onlyModified = false;
     setup() {
       const frame = this.one(".DetailsCategory-frame");
       if (!frame) return;
+      this.#section = this.one(".FilterPills-pill.is-checked")?.dataset.value ?? "";
       this.wireFrame(frame);
-      if (this.one(".DetailsCategory-panel")) this.wirePanel(frame);
+      this.wireControls(frame);
       for (const row of this.all(".DetailsCategory-row")) this.syncReset(row);
       this.refresh(frame);
     }
-    query() {
-      return (this.one(".DetailsCategory-srInput")?.value ?? "").trim().toLowerCase();
-    }
-    section() {
-      return this.one(".DetailsCategory-pill.is-checked")?.dataset.section ?? "";
-    }
-    modifiedOnly() {
-      return this.one('[data-option="modified"]')?.getAttribute("aria-checked") === "true";
+    // The panel controls announce themselves with events. The tree only listens.
+    wireControls(frame) {
+      this.on(this, "ue-search", (event) => {
+        this.#query = event.detail.text.trim().toLowerCase();
+        this.refresh(frame);
+      });
+      this.on(this, "ue-filter-change", (event) => {
+        this.#section = event.detail.value;
+        this.refresh(frame);
+      });
+      this.on(this, "ue-view-option", (event) => {
+        const { option, checked } = event.detail;
+        if (option === "modified") this.#onlyModified = checked;
+        else if (option === "collapseAll" || option === "expandAll") {
+          for (const cat of this.all(".DetailsCategory-cat")) cat.classList.toggle("is-collapsed", option === "collapseAll");
+        }
+        this.refresh(frame);
+      });
     }
     wireFrame(frame) {
       this.on(frame, "click", (event) => {
@@ -1972,26 +2253,10 @@
         const catRow = isIn(target, ".DetailsCategory-catRow");
         const advRow = isIn(target, ".DetailsCategory-advRow");
         const arrow = isIn(target, ".DetailsCategory-rowArrow.has-children");
-        const check = isIn(target, '.DetailsCategory-check[role="checkbox"]');
-        const reset = isIn(target, '.DetailsCategory-reset[role="button"]');
         if (catRow) catRow.closest(".DetailsCategory-cat")?.classList.toggle("is-collapsed");
         else if (advRow) advRow.closest(".DetailsCategory-adv")?.classList.toggle("is-open");
         else if (arrow) arrow.closest(".DetailsCategory-row")?.classList.toggle("is-collapsed");
-        else if (check) {
-          const on = check.getAttribute("aria-checked") !== "true";
-          check.setAttribute("aria-checked", String(on));
-          check.classList.toggle("is-off", !on);
-          return;
-        } else if (reset) {
-          const row = reset.closest(".DetailsCategory-row");
-          const text = row?.querySelector(".DetailsCategory-text");
-          if (row && text) {
-            text.textContent = row.dataset.default ?? "";
-            this.syncReset(row);
-            this.refresh(frame);
-          }
-          return;
-        } else return;
+        else return;
         this.refresh(frame);
       });
       this.on(frame, "keydown", (event) => {
@@ -2003,172 +2268,91 @@
           this.refresh(frame);
           return;
         }
-        const activates = target.matches(".DetailsCategory-catRow, .DetailsCategory-advRow, .DetailsCategory-rowArrow, .DetailsCategory-check, .DetailsCategory-reset");
+        const activates = target.matches(".DetailsCategory-catRow, .DetailsCategory-advRow, .DetailsCategory-rowArrow");
         if (activates && (event.key === "Enter" || event.key === " ")) {
           event.preventDefault();
           target.dispatchEvent(new MouseEvent("click", { bubbles: true }));
         }
       });
       this.on(frame, "focusin", (event) => {
-        const text = isIn(event.target, ".DetailsCategory-text");
-        if (text) text.dataset.before = text.textContent ?? "";
+        const field = this.fieldOf(event.target);
+        if (field) field.dataset.before = field.value;
       });
       this.on(frame, "keydown", (event) => {
-        const text = isIn(event.target, ".DetailsCategory-text");
-        if (!text) return;
-        if (event.key === "Enter") {
-          event.preventDefault();
-          text.blur();
-        } else if (event.key === "Escape") {
-          text.textContent = text.dataset.before ?? "";
-          text.blur();
-        }
+        const field = this.fieldOf(event.target);
+        if (!field) return;
+        if (event.key === "Enter") field.blur();
+        else if (event.key === "Escape") {
+          field.value = field.dataset.before ?? "";
+          this.touched(field);
+          field.blur();
+        } else return;
+        event.preventDefault();
       });
-      this.on(frame, "focusout", (event) => {
-        const text = isIn(event.target, ".DetailsCategory-text");
-        const row = text?.closest(".DetailsCategory-row");
-        if (!text || !row) return;
-        text.textContent = (text.textContent ?? "").trim();
+      this.on(frame, "ue-text-input", (event) => this.touched(event.target));
+      this.on(frame, "ue-spin-change", (event) => this.touched(event.target));
+      this.on(frame, "ue-vector-change", () => this.refresh(frame));
+      this.on(frame, "ue-asset-change", () => this.refresh(frame));
+      this.on(frame, "ue-reset", (event) => {
+        const row = isIn(event.target, ".DetailsCategory-row");
+        if (!row) return;
+        const def = row.dataset.default ?? "";
+        const field = row.querySelector(".textinput__field");
+        const spin = row.querySelector("ue-spin-box");
+        if (field) field.value = def;
+        else if (spin) spin.value = Number(def);
         this.syncReset(row);
         this.refresh(frame);
       });
     }
-    // The reset arrow shows only while the text differs from the row default.
+    // The text field of a row value, or null for any other target.
+    fieldOf(target) {
+      const el = target;
+      const field = el instanceof HTMLInputElement && el.classList.contains("textinput__field") ? el : null;
+      return field && isIn(field, ".DetailsCategory-row") ? field : null;
+    }
+    touched(target) {
+      const row = isIn(target, ".DetailsCategory-row");
+      const frame = row?.closest(".DetailsCategory-frame");
+      if (!row || !frame) return;
+      this.syncReset(row);
+      this.refresh(frame);
+    }
+    valueOf(row) {
+      const field = row.querySelector(".textinput__field");
+      if (field) return field.value;
+      return row.querySelector(".spinbox")?.dataset.value ?? null;
+    }
+    // The reset arrow shows only while the value differs from the row default.
     syncReset(row) {
-      const text = row.querySelector(".DetailsCategory-text");
-      const reset = row.querySelector('.DetailsCategory-reset[role="button"]');
-      if (!text || !reset || row.dataset.default === void 0) return;
-      const idle = (text.textContent ?? "") === row.dataset.default;
-      reset.classList.toggle("is-idle", idle);
-      reset.tabIndex = idle ? -1 : 0;
+      const reset = row.querySelector("ue-reset-to-default");
+      const value = this.valueOf(row);
+      if (!reset || value === null || row.dataset.default === void 0) return;
+      reset.toggleAttribute("differs", value !== row.dataset.default);
     }
-    wirePanel(frame) {
-      const input = this.one(".DetailsCategory-srInput");
-      const clear = this.one(".DetailsCategory-srClear");
-      if (input && clear) {
-        const sync = () => {
-          input.classList.toggle("has-value", input.value !== "");
-          clear.classList.toggle("is-hidden", input.value === "");
-          this.refresh(frame);
-        };
-        const wipe = () => {
-          input.value = "";
-          sync();
-          input.focus();
-        };
-        this.on(input, "input", sync);
-        this.on(input, "keydown", (event) => {
-          if (event.key === "Escape" && input.value !== "") {
-            event.preventDefault();
-            wipe();
-          }
-        });
-        this.on(clear, "click", wipe);
-      }
-      const name = this.one(".DetailsCategory-hdrName");
-      if (name) {
-        let before = name.textContent ?? "";
-        this.on(name, "focus", () => {
-          before = name.textContent ?? "";
-        });
-        this.on(name, "keydown", (event) => {
-          if (event.key === "Enter") {
-            event.preventDefault();
-            name.blur();
-          } else if (event.key === "Escape") {
-            name.textContent = before;
-            name.blur();
-          }
-        });
-        this.on(name, "blur", () => {
-          const text = (name.textContent ?? "").trim();
-          name.textContent = text === "" ? before : text;
-        });
-      }
-      const lock = this.one('[data-role="lock"]');
-      if (lock) {
-        this.on(lock, "click", () => {
-          const on = lock.getAttribute("aria-pressed") !== "true";
-          lock.setAttribute("aria-pressed", String(on));
-          lock.querySelector("use")?.setAttribute("href", on ? "#DetailsCategory-locked" : "#DetailsCategory-unlock");
-        });
-      }
-      const star = this.one('[data-role="favorites"]');
-      if (star) {
-        this.on(star, "click", () => {
-          const on = star.getAttribute("aria-pressed") !== "true";
-          star.setAttribute("aria-pressed", String(on));
-          star.classList.toggle("is-on", on);
-        });
-      }
-      const gear = this.one('[data-role="options"]');
-      const menu = this.one(".DetailsCategory-menu");
-      if (gear && menu) {
-        const handle = wireMenu({
-          trigger: gear,
-          menu,
-          itemSelector: ".DetailsCategory-menuItem",
-          onPick: (item) => {
-            const option = item.dataset.option;
-            if (option === "modified") item.setAttribute("aria-checked", String(item.getAttribute("aria-checked") !== "true"));
-            else if (option === "collapseAll" || option === "expandAll") {
-              for (const cat of this.all(".DetailsCategory-cat")) cat.classList.toggle("is-collapsed", option === "collapseAll");
-            }
-            this.refresh(frame);
-          }
-        });
-        this.onDispose(handle.dispose);
-      }
-      const strip = this.one(".DetailsCategory-pills");
-      if (strip) {
-        const pills = () => Array.from(strip.querySelectorAll(".DetailsCategory-pill"));
-        const select = (pill, focus) => {
-          for (const other of pills()) {
-            other.classList.toggle("is-checked", other === pill);
-            other.setAttribute("aria-selected", String(other === pill));
-            other.tabIndex = other === pill ? 0 : -1;
-          }
-          if (focus) pill.focus();
-          this.refresh(frame);
-        };
-        this.on(strip, "click", (event) => {
-          const pill = isIn(event.target, ".DetailsCategory-pill");
-          if (pill) select(pill, false);
-        });
-        this.on(strip, "keydown", (event) => {
-          const all = pills();
-          const at = all.indexOf(document.activeElement);
-          if (at < 0) return;
-          let next = -1;
-          if (event.key === "ArrowRight" || event.key === "ArrowDown") next = (at + 1) % all.length;
-          else if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = (at - 1 + all.length) % all.length;
-          else if (event.key === "Home") next = 0;
-          else if (event.key === "End") next = all.length - 1;
-          if (next < 0) return;
-          event.preventDefault();
-          select(all[next], true);
-        });
-      }
-    }
-    // Recomputes which cats, rows and the Advanced bar show, and the arrow glyphs.
+    // Recomputes which cats, rows and the Advanced bar show, and the arrow states.
     refresh(frame) {
-      const query = this.query();
+      const query = this.#query;
       const searching = query !== "";
-      const section = this.section();
-      const onlyModified = this.modifiedOnly();
+      const section = this.#section;
+      const onlyModified = this.#onlyModified;
+      const children = [];
+      for (const child2 of Array.from(frame.children)) {
+        if (child2.localName.startsWith("ue-")) children.push(...Array.from(child2.children));
+        else children.push(child2);
+      }
       const items = [];
-      for (const el of Array.from(frame.children)) {
+      for (const el of children) {
         if (el.classList.contains("DetailsCategory-cat")) items.push({ el, kind: "cat", level: 0, matchesText: true, isModified: true });
         else if (el.classList.contains("DetailsCategory-adv")) items.push({ el, kind: "adv", level: 0, matchesText: true, isModified: true });
-        else if (el.classList.contains("DetailsCategory-row")) {
-          const label = (el.querySelector(".DetailsCategory-label")?.textContent ?? "").toLowerCase();
-          const reset = el.querySelector('.DetailsCategory-reset[role="button"]');
+        else if (isRow(el)) {
+          const label = (el.dataset.label ?? el.querySelector(".DetailsCategory-label")?.textContent ?? "").toLowerCase();
           items.push({
             el,
             kind: "row",
             level: el.querySelectorAll(":scope > .DetailsCategory-indent").length,
             matchesText: !searching || label.includes(query),
-            isModified: !onlyModified || reset !== null && !reset.classList.contains("is-idle")
+            isModified: !onlyModified || el.querySelector("ue-reset-to-default[differs]") !== null
           });
         }
       }
@@ -2214,13 +2398,11 @@
           catHasRows = false;
           inAdv = false;
           closed.length = 0;
-          this.setArrow(el.querySelector(".DetailsCategory-arrow use"), !catFolded);
           el.querySelector(".DetailsCategory-catRow")?.setAttribute("aria-expanded", String(!catFolded));
         } else if (item.kind === "adv") {
           inAdv = true;
           advOpen = el.classList.contains("is-open") || searching;
           el.classList.toggle("is-hidden", catHidden || catFolded || searching);
-          this.setArrow(el.querySelector(".DetailsCategory-arrow use"), advOpen);
           el.querySelector(".DetailsCategory-advRow")?.setAttribute("aria-expanded", String(advOpen));
         } else {
           closed.length = item.level;
@@ -2230,115 +2412,15 @@
           const toggle = el.querySelector(".DetailsCategory-rowArrow.has-children");
           const folded = toggle !== null && el.classList.contains("is-collapsed") && !searching;
           closed[item.level] = folded;
-          if (toggle) {
-            this.setArrow(toggle.querySelector("use"), !folded);
-            toggle.setAttribute("aria-expanded", String(!folded));
-          }
+          toggle?.setAttribute("aria-expanded", String(!folded));
           if (!hidden) catHasRows = true;
         }
       });
       finishCat();
       frame.querySelector(".DetailsCategory-empty")?.classList.toggle("is-shown", !anyCatShown && (searching || section !== "" || onlyModified));
     }
-    setArrow(use, expanded) {
-      use?.setAttribute("href", expanded ? DOWN : RIGHT);
-    }
   };
   define("ue-details-category", UeDetailsCategory);
-
-  // design-system/src/DetailsHeader/DetailsHeader.ts
-  var UeDetailsHeader = class extends UeElement {
-    setup() {
-      const lock = this.one(".DetailsHeader-lock");
-      const label = this.one(".DetailsHeader-label");
-      if (lock) this.on(lock, "click", () => this.setLocked(lock, lock.getAttribute("aria-pressed") !== "true"));
-      if (label) this.wireLabel(label);
-    }
-    setLocked(lock, locked) {
-      lock.setAttribute("aria-pressed", String(locked));
-      lock.querySelector("use")?.setAttribute("href", locked ? "#DetailsHeader-locked" : "#DetailsHeader-unlock");
-    }
-    // Enter commits, Escape restores the text from before the edit. The instance row shows the committed name.
-    wireLabel(label) {
-      let before = label.textContent ?? "";
-      this.on(label, "focus", () => {
-        before = label.textContent ?? "";
-      });
-      this.on(label, "keydown", (event) => {
-        if (event.key === "Enter") {
-          event.preventDefault();
-          label.blur();
-        } else if (event.key === "Escape") {
-          label.textContent = before;
-          label.blur();
-        }
-      });
-      this.on(label, "blur", () => {
-        const text = (label.textContent ?? "").trim();
-        label.textContent = text === "" ? before : text;
-        for (const name of this.all(".DetailsHeader-instance .name")) name.textContent = label.textContent;
-      });
-    }
-  };
-  define("ue-details-header", UeDetailsHeader);
-
-  // design-system/src/DetailsSearchRow/DetailsSearchRow.ts
-  var UeDetailsSearchRow = class extends UeElement {
-    setup() {
-      const input = this.one(".DetailsSearchRow-text");
-      const clear = this.one(".DetailsSearchRow-clear");
-      if (input && clear) this.wireSearch(input, clear);
-      const star = this.one('[data-role="favorites"]');
-      if (star) {
-        this.on(star, "click", () => {
-          const on = star.getAttribute("aria-pressed") !== "true";
-          star.setAttribute("aria-pressed", String(on));
-          star.classList.toggle("is-on", on);
-          star.title = on ? "Toggle Favorites (on)" : "Toggle Favorites";
-          this.emit("ue-favorites", { on });
-        });
-      }
-      const gear = this.one('[data-role="options"]');
-      const menu = this.one(".DetailsSearchRow-menu");
-      if (gear && menu) {
-        const handle = wireMenu({
-          trigger: gear,
-          menu,
-          itemSelector: ".DetailsSearchRow-menuItem",
-          onPick: (item) => {
-            if (item.getAttribute("role") === "menuitemcheckbox") item.setAttribute("aria-checked", String(item.getAttribute("aria-checked") !== "true"));
-            this.emit("ue-view-option", { option: item.dataset.option ?? "", checked: item.getAttribute("aria-checked") === "true" });
-          }
-        });
-        this.onDispose(handle.dispose);
-      }
-    }
-    wireSearch(input, clear) {
-      const sync = () => {
-        const hasText = input.value !== "";
-        input.classList.toggle("has-value", hasText);
-        clear.classList.toggle("is-hidden", !hasText);
-        this.emit("ue-search", { text: input.value });
-      };
-      const wipe = () => {
-        input.value = "";
-        sync();
-        input.focus();
-      };
-      this.on(input, "input", sync);
-      this.on(input, "keydown", (event) => {
-        if (event.key === "Escape" && input.value !== "") {
-          event.preventDefault();
-          wipe();
-        }
-      });
-      this.on(clear, "click", wipe);
-      this.on(clear, "keydown", (event) => {
-        if (event.key === "Enter" || event.key === " ") wipe();
-      });
-    }
-  };
-  define("ue-details-search-row", UeDetailsSearchRow);
 
   // design-system/src/_shared/tabstack.ts
   var TARGET_KEYS = ["ArrowRight", "ArrowLeft", "Home", "End"];
@@ -2869,31 +2951,6 @@
   };
   define("ue-place-actors-panel", PlaceActorsPanel);
 
-  // design-system/src/ResetToDefault/ResetToDefault.ts
-  var UeResetToDefaultElement = class extends UeElement {
-    static observedAttributes = ["differs"];
-    attributeChangedCallback() {
-      this.#sync();
-    }
-    setup() {
-      const button = this.one("button.resettodefault");
-      if (!button) throw new Error("ue-reset-to-default needs a button.resettodefault element");
-      this.#sync();
-      this.on(button, "click", () => {
-        if (this.hasAttribute("differs")) this.emit("ue-reset", {});
-      });
-    }
-    // The idle button keeps its slot but is invisible, disabled and out of the tab order.
-    #sync() {
-      const button = this.one("button.resettodefault");
-      if (!button) return;
-      const differs = this.hasAttribute("differs");
-      button.classList.toggle("resettodefault--idle", !differs);
-      button.disabled = !differs;
-    }
-  };
-  define("ue-reset-to-default", UeResetToDefaultElement);
-
   // design-system/src/_shared/scroll-thumb.ts
   var MIN_THUMB = 35;
   var BAR_PADDING = 2;
@@ -3227,176 +3284,6 @@
   };
   define("ue-slider", UeSliderElement);
 
-  // design-system/src/SpinBox/SpinBox.ts
-  var DRAG_TRIGGER = 5;
-  var MIN_SLIDER_WIDTH = 100;
-  function numberAttr(el, name) {
-    const raw = el.dataset[name];
-    if (raw === void 0 || raw === "") return null;
-    const value = Number(raw);
-    return Number.isFinite(value) ? value : null;
-  }
-  function rangeOf(box) {
-    const min = numberAttr(box, "min");
-    const max = numberAttr(box, "max");
-    return { min: min ?? -Infinity, max: max ?? Infinity, bounded: min !== null && max !== null, delta: numberAttr(box, "delta") ?? numberAttr(box, "step") ?? 0 };
-  }
-  function valueOf(box) {
-    return numberAttr(box, "value") ?? 0;
-  }
-  function format(value) {
-    const rounded = Math.round(value * 1e3) / 1e3;
-    return Number.isInteger(rounded) ? rounded.toFixed(1) : String(rounded);
-  }
-  function clamp(value, range) {
-    return Math.min(range.max, Math.max(range.min, value));
-  }
-  var UeSpinBoxElement = class extends UeElement {
-    #drags = /* @__PURE__ */ new WeakMap();
-    setup() {
-      const box = this.one(".spinbox");
-      if (!box) throw new Error("ue-spin-box needs a .spinbox element");
-      this.#render(box);
-      this.on(box, "pointerdown", (event) => {
-        if (event.button !== 0 || box.getAttribute("aria-disabled") === "true") return;
-        if (box.classList.contains("spinbox--text")) return;
-        box.setPointerCapture(event.pointerId);
-        this.#drags.set(box, { pointerId: event.pointerId, lastX: event.clientX, distance: 0, dragging: false, before: valueOf(box), internal: valueOf(box) });
-        box.focus();
-        event.preventDefault();
-      });
-      this.on(box, "pointermove", (event) => {
-        const state = this.#drags.get(box);
-        if (!state || state.pointerId !== event.pointerId) return;
-        const dx = event.clientX - state.lastX;
-        state.lastX = event.clientX;
-        if (!state.dragging) {
-          state.distance += Math.abs(dx);
-          if (state.distance > DRAG_TRIGGER) {
-            state.dragging = true;
-            box.classList.add("spinbox--active");
-          }
-          return;
-        }
-        this.#drag(box, state, dx);
-      });
-      const finish = (event) => {
-        const state = this.#drags.get(box);
-        if (!state || state.pointerId !== event.pointerId) return;
-        this.#drags.delete(box);
-        if (box.hasPointerCapture(event.pointerId)) box.releasePointerCapture(event.pointerId);
-        box.classList.remove("spinbox--active");
-        if (event.type === "pointercancel") return;
-        if (state.dragging) {
-          const range = rangeOf(box);
-          if (range.delta > 0) this.#set(box, clamp(Math.round(valueOf(box) / range.delta) * range.delta, range));
-        } else {
-          this.#enterText(box);
-        }
-      };
-      this.on(box, "pointerup", finish);
-      this.on(box, "pointercancel", finish);
-      this.on(box, "keydown", (event) => {
-        if (box.getAttribute("aria-disabled") === "true") return;
-        const state = this.#drags.get(box);
-        if (event.key === "Escape" && state?.dragging) {
-          this.#drags.delete(box);
-          if (box.hasPointerCapture(state.pointerId)) box.releasePointerCapture(state.pointerId);
-          box.classList.remove("spinbox--active");
-          this.#set(box, state.before);
-          event.preventDefault();
-          return;
-        }
-        if (event.target !== box) return;
-        const range = rangeOf(box);
-        if (event.key === "ArrowUp" || event.key === "ArrowRight") this.#set(box, clamp(valueOf(box) + range.delta, range));
-        else if (event.key === "ArrowDown" || event.key === "ArrowLeft") this.#set(box, clamp(valueOf(box) - range.delta, range));
-        else if (event.key === "Enter") this.#enterText(box);
-        else return;
-        event.preventDefault();
-      });
-      this.on(box, "focusout", (event) => {
-        if (event.target instanceof HTMLInputElement && event.target.classList.contains("spinbox__field")) this.#exitText(box, true, false);
-      });
-    }
-    // The value change of one mouse move while dragging, from SSpinBox::OnMouseMove.
-    #drag(box, state, dx) {
-      const range = rangeOf(box);
-      const width = Math.max(box.getBoundingClientRect().width, MIN_SLIDER_WIDTH);
-      let next;
-      if (range.bounded) {
-        const step = range.max - range.min <= 10 ? 0.1 : 1;
-        const filled = Math.min(width, Math.max(0, (state.internal - range.min) / (range.max - range.min) * width + dx * step));
-        next = range.min + filled / width * (range.max - range.min);
-      } else {
-        const sign = dx > 0 ? 1 : -1;
-        next = state.internal + sign * (Math.abs(dx) / width) * Math.max(Math.abs(state.internal), 1);
-      }
-      state.internal = clamp(next, range);
-      this.#set(box, state.internal);
-    }
-    #set(box, value) {
-      const before = valueOf(box);
-      box.dataset.value = String(value);
-      this.#render(box);
-      if (value !== before) this.emit("ue-spin-change", { value, text: format(value) + (box.dataset.unit ? " " + box.dataset.unit : "") });
-    }
-    #render(box) {
-      const range = rangeOf(box);
-      const value = valueOf(box);
-      box.setAttribute("aria-valuenow", String(value));
-      if (range.bounded) {
-        box.setAttribute("aria-valuemin", String(range.min));
-        box.setAttribute("aria-valuemax", String(range.max));
-        box.style.setProperty("--spinbox-fill", String((value - range.min) / (range.max - range.min)));
-      }
-      box.classList.toggle("spinbox--unbounded", !range.bounded);
-      const text = box.querySelector(".spinbox__text");
-      if (text && !box.classList.contains("spinbox--text")) text.textContent = format(value);
-      const unit = box.dataset.unit;
-      let suffix = box.querySelector(".spinbox__unit");
-      if (unit && !suffix && text) {
-        suffix = document.createElement("span");
-        suffix.className = "spinbox__unit";
-        text.after(suffix);
-      }
-      if (suffix) suffix.textContent = unit ?? "";
-    }
-    #enterText(box) {
-      const text = box.querySelector(".spinbox__text");
-      if (!text) return;
-      box.classList.add("spinbox--text");
-      const field = document.createElement("input");
-      field.className = "spinbox__field";
-      field.type = "text";
-      field.value = format(valueOf(box));
-      field.setAttribute("aria-label", "Value");
-      text.replaceChildren(field);
-      field.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
-          event.preventDefault();
-          this.#exitText(box, true, true);
-        } else if (event.key === "Escape") {
-          event.preventDefault();
-          this.#exitText(box, false, true);
-        }
-      });
-      field.focus();
-      field.select();
-    }
-    #exitText(box, commit, refocus) {
-      const field = box.querySelector(".spinbox__field");
-      if (!field || !box.classList.contains("spinbox--text")) return;
-      const typed = Number(field.value.trim());
-      box.classList.remove("spinbox--text");
-      const range = rangeOf(box);
-      if (commit && field.value.trim() !== "" && Number.isFinite(typed)) this.#set(box, clamp(typed, range));
-      else this.#render(box);
-      if (refocus) box.focus();
-    }
-  };
-  define("ue-spin-box", UeSpinBoxElement);
-
   // design-system/src/StatusBar/StatusBar.ts
   var DRAWER = ".statusBar-seg--drawer .button";
   var MAX_LINES = 4;
@@ -3601,188 +3488,6 @@
     };
   };
   define("ue-tooltip", UeTooltipElement);
-
-  // design-system/src/VectorInput/VectorInput.ts
-  var round = (value, places) => Math.round(value * 10 ** places) / 10 ** places;
-  function format2(value, unit) {
-    let text = String(round(value, 4));
-    if (!text.includes(".")) text += ".0";
-    return unit === "" ? text : text + " " + unit;
-  }
-  var UeVectorInput = class extends UeElement {
-    setup() {
-      for (const row of this.all(".VectorInput-row")) this.wireRow(row);
-    }
-    wireRow(row) {
-      const fields = Array.from(row.querySelectorAll(".VectorInput-field"));
-      if (fields.length === 0) return;
-      const reset = row.querySelector(".VectorInput-reset");
-      const lock = row.querySelector(".VectorInput-lock");
-      const unit = row.dataset.unit ?? "";
-      const step = Number(row.dataset.step ?? "1");
-      const defaults = (row.dataset.default ?? "").split(",").map(Number);
-      const read = () => fields.map((field) => Number(field.dataset.value));
-      const isLocked = () => lock?.classList.contains("is-locked") ?? false;
-      const isEditing = (field) => field.classList.contains("is-editing");
-      const write = (values, notify) => {
-        fields.forEach((field, i) => {
-          field.dataset.value = String(values[i]);
-          field.setAttribute("aria-valuenow", String(values[i]));
-          const text = field.querySelector(".VectorInput-value-text");
-          if (text && !isEditing(field)) text.textContent = format2(values[i], unit);
-        });
-        const differs = values.some((value, i) => Math.abs(value - defaults[i]) > 1e-9);
-        reset?.classList.toggle("is-placeholder", !differs);
-        if (reset) reset.tabIndex = differs ? 0 : -1;
-        if (notify) this.emit("ue-vector-change", { values });
-      };
-      const change = (values, index, next, basis) => {
-        const out = values.slice();
-        out[index] = next;
-        if (!isLocked()) return out;
-        for (let j = 0; j < out.length; j++) {
-          if (j !== index) out[j] = basis[index] === 0 ? next : basis[j] * next / basis[index];
-        }
-        return out;
-      };
-      fields.forEach((field, index) => this.wireField(field, index, { read, write, change, isEditing, step, unit }));
-      if (reset) this.on(reset, "click", () => write(defaults, true));
-      if (lock) {
-        this.on(lock, "click", () => {
-          const on = !isLocked();
-          lock.classList.toggle("is-locked", on);
-          lock.setAttribute("aria-pressed", String(on));
-          lock.title = on ? "Scale uniformly (locked)" : "Scale uniformly (unlocked)";
-          lock.querySelector("use")?.setAttribute("href", on ? "#VectorInput-locked" : "#VectorInput-unlock");
-        });
-      }
-      const combo = row.querySelector(".VectorInput-combo");
-      const menu = row.querySelector(".VectorInput-menu");
-      if (combo && menu) {
-        const handle = wireMenu({
-          trigger: combo,
-          menu,
-          itemSelector: ".VectorInput-menuItem",
-          onPick: (item) => {
-            for (const other of menu.querySelectorAll(".VectorInput-menuItem")) other.setAttribute("aria-checked", String(other === item));
-            this.emit("ue-vector-space", { space: (item.textContent ?? "").trim() });
-          }
-        });
-        this.onDispose(handle.dispose);
-      }
-      write(read(), false);
-    }
-    wireField(field, index, row) {
-      const text = field.querySelector(".VectorInput-value-text");
-      if (!text) return;
-      let startValues = [];
-      let live = 0;
-      let lastX = 0;
-      let dragging = false;
-      let cancelled = false;
-      const leaveEdit = () => {
-        field.classList.remove("is-editing", "is-active");
-        text.contentEditable = "false";
-      };
-      const enterEdit = () => {
-        field.classList.add("is-editing", "is-active");
-        text.contentEditable = "plaintext-only";
-        text.textContent = String(round(row.read()[index], 4));
-        text.focus();
-        const selection = window.getSelection();
-        selection?.removeAllRanges();
-        const range = document.createRange();
-        range.selectNodeContents(text);
-        selection?.addRange(range);
-      };
-      const commit = (refocus) => {
-        const raw = (text.textContent ?? "").replace(/[^0-9eE+.-]/g, "");
-        const next = Number(raw);
-        leaveEdit();
-        const values = row.read();
-        row.write(raw === "" || Number.isNaN(next) ? values : row.change(values, index, next, values), true);
-        if (refocus) field.focus();
-      };
-      const cancelEdit = () => {
-        leaveEdit();
-        row.write(row.read(), false);
-        field.focus();
-      };
-      this.onDispose(
-        drag(field, {
-          start: (event) => {
-            if (row.isEditing(field)) return;
-            startValues = row.read();
-            live = startValues[index];
-            lastX = event.clientX;
-            dragging = false;
-            cancelled = false;
-          },
-          move: (event) => {
-            if (row.isEditing(field) || cancelled) return;
-            if (!dragging) {
-              dragging = true;
-              lastX = event.clientX;
-              field.classList.add("is-active");
-              return;
-            }
-            const dx = event.clientX - lastX;
-            lastX = event.clientX;
-            const width = Math.max(field.getBoundingClientRect().width, 100);
-            live += Math.sign(dx) * (Math.abs(dx) / width) * Math.max(Math.abs(live), 1);
-            row.write(row.change(row.read(), index, live, startValues), false);
-          },
-          end: () => {
-            if (row.isEditing(field)) return;
-            if (!dragging) {
-              enterEdit();
-              return;
-            }
-            dragging = false;
-            field.classList.remove("is-active");
-            if (cancelled) return;
-            const snapped = round(Math.round(live / row.step) * row.step, 6);
-            row.write(row.change(row.read(), index, snapped, startValues), true);
-          }
-        })
-      );
-      this.on(document, "keydown", (event) => {
-        if (event.key !== "Escape" || !dragging || cancelled) return;
-        cancelled = true;
-        field.classList.remove("is-active");
-        row.write(startValues, true);
-      });
-      this.on(field, "keydown", (event) => {
-        if (row.isEditing(field)) return;
-        let sign = 0;
-        if (event.key === "ArrowUp" || event.key === "ArrowRight") sign = 1;
-        else if (event.key === "ArrowDown" || event.key === "ArrowLeft") sign = -1;
-        else if (event.key === "Enter") {
-          event.preventDefault();
-          enterEdit();
-          return;
-        }
-        if (sign === 0) return;
-        event.preventDefault();
-        const values = row.read();
-        row.write(row.change(values, index, round(values[index] + sign * row.step, 6), values), true);
-      });
-      this.on(text, "keydown", (event) => {
-        if (event.key === "Enter") commit(true);
-        else if (event.key === "Escape") cancelEdit();
-        else {
-          event.stopPropagation();
-          return;
-        }
-        event.preventDefault();
-        event.stopPropagation();
-      });
-      this.on(text, "blur", () => {
-        if (row.isEditing(field)) commit(false);
-      });
-    }
-  };
-  define("ue-vector-input", UeVectorInput);
 
   // design-system/src/WindowChrome/WindowChrome.ts
   var MAXIMIZE_GLYPH = "#windowChrome-i-max";

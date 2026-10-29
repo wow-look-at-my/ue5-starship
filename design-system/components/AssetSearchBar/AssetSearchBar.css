@@ -912,6 +912,9 @@
   gap: 2px;
   padding-right: 2px;
 }
+.textinput--small {
+  font: 400 10.667px/1.172 var(--font-sans);
+}
 .textinput--console {
   font: 400 12px/16px var(--font-mono);
 }

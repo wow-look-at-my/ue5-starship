@@ -77,6 +77,17 @@ function clamp(value, range) {
 }
 var UeSpinBoxElement = class extends UeElement {
   #drags = /* @__PURE__ */ new WeakMap();
+  // The current value. The setter redraws the box and fires no ue-spin-change, because the owner that sets it already knows.
+  get value() {
+    const box = this.one(".spinbox");
+    return box ? valueOf(box) : 0;
+  }
+  set value(next) {
+    const box = this.one(".spinbox");
+    if (!box) throw new Error("ue-spin-box needs a .spinbox element");
+    box.dataset.value = String(next);
+    this.#render(box);
+  }
   setup() {
     const box = this.one(".spinbox");
     if (!box) throw new Error("ue-spin-box needs a .spinbox element");

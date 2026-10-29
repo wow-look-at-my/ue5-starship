@@ -716,6 +716,161 @@
   display: none;
 }
 
+/* design-system/src/ResetToDefault/ResetToDefault.css */
+.resettodefault {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  padding: 2px;
+  color: var(--foreground);
+  cursor: default;
+}
+.resettodefault:hover,
+.resettodefault--hover {
+  color: var(--foreground-hover);
+}
+.resettodefault:active,
+.resettodefault--pressed {
+  color: var(--foreground-hover);
+  padding: 3px 2px 1px;
+}
+.resettodefault:focus-visible {
+  outline: 1px solid var(--primary);
+  outline-offset: -1px;
+  border-radius: 4px;
+}
+.resettodefault--idle {
+  visibility: hidden;
+}
+.resettodefault__glyph {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* design-system/src/AssetPicker/AssetPicker.css */
+.AssetPicker-frame {
+  background: var(--recessed);
+}
+.AssetPicker-row {
+  display: flex;
+  min-height: 27px;
+  padding-bottom: 1px;
+  background: var(--recessed);
+}
+.AssetPicker-name,
+.AssetPicker-value,
+.AssetPicker-right {
+  background: var(--panel);
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.AssetPicker-name {
+  box-sizing: border-box;
+  flex: 0 0 40%;
+  padding-left: 20px;
+  font: 400 10.667px/1.172 var(--font-sans);
+  color: var(--foreground);
+}
+.AssetPicker-value {
+  flex: 1;
+  padding: 0 2px 0 12px;
+  align-items: flex-start;
+}
+.AssetPicker-right {
+  flex: 0 0 22px;
+  justify-content: flex-end;
+}
+.AssetPicker-split {
+  flex: 0 0 1px;
+  background: var(--recessed);
+}
+.AssetPicker-row:hover .AssetPicker-name,
+.AssetPicker-row:hover .AssetPicker-value,
+.AssetPicker-row:hover .AssetPicker-right {
+  background: var(--header);
+}
+.AssetPicker-thumbSlot {
+  flex: none;
+  margin: 3px 5px 0 0;
+  padding: 0 4px 4px 0;
+  align-self: flex-start;
+}
+.AssetPicker-thumbFrame {
+  position: relative;
+  padding: 1px;
+  width: 50px;
+  height: 50px;
+  border-radius: 4px;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, .55);
+}
+.AssetPicker-thumb {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  background:
+    linear-gradient(
+      160deg,
+      var(--hover-2),
+      var(--dropdown));
+  color: var(--header);
+}
+.AssetPicker-thumb svg {
+  position: absolute;
+  inset: 8px;
+  width: 32px;
+  height: 32px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+  stroke-linejoin: round;
+}
+.AssetPicker-strip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: #29f1f2;
+}
+.AssetPicker-thumbBorder {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px var(--input-outline);
+  pointer-events: none;
+}
+.AssetPicker-thumbFrame:hover .AssetPicker-thumbBorder {
+  box-shadow: inset 0 0 0 1px var(--hover-2);
+}
+.AssetPicker-col {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+}
+.AssetPicker-buttons {
+  display: flex;
+  gap: 4px;
+  padding: 2px 4px 2px 0;
+}
+
 /* design-system/src/FilterPills/FilterPills.css */
 .FilterPills-strip {
   display: flex;
@@ -911,6 +1066,9 @@
   align-items: center;
   gap: 2px;
   padding-right: 2px;
+}
+.textinput--small {
+  font: 400 10.667px/1.172 var(--font-sans);
 }
 .textinput--console {
   font: 400 12px/16px var(--font-mono);
@@ -1686,6 +1844,474 @@
   padding: 5px 8px;
 }
 
+/* design-system/src/DetailsHeader/DetailsHeader.css */
+.DetailsHeader-frame {
+  background: var(--panel);
+  padding-bottom: 6px;
+}
+.DetailsHeader {
+  padding: 4px 0 0 10px;
+}
+.DetailsHeader-name {
+  display: flex;
+  align-items: center;
+  min-height: 22px;
+}
+.DetailsHeader-icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.25;
+  stroke-linejoin: round;
+  color: var(--foreground);
+}
+.DetailsHeader-label {
+  flex: 1;
+  min-width: 0;
+  padding: 0 3px 0 8px;
+  font: 400 14.667px/1.172 var(--font-sans);
+  color: var(--white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-block: 2px;
+  margin-block: -2px;
+  border-radius: 4px;
+  outline: 0;
+}
+.DetailsHeader-label:hover,
+.DetailsHeader-label.is-hover {
+  background: var(--input);
+  box-shadow: inset 0 0 0 1px var(--hover);
+}
+.DetailsHeader-label:focus,
+.DetailsHeader-label.is-focused {
+  background: var(--input);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+.DetailsHeader-actions {
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: 4px;
+  padding-right: 4px;
+}
+.DetailsHeader-positive {
+  color: var(--accent-green);
+}
+.DetailsHeader-actions [data-role=lock]:not([aria-pressed=true]) .DetailsHeader-shackle--shut,
+.DetailsHeader-actions [data-role=lock][aria-pressed=true] .DetailsHeader-shackle--open {
+  display: none;
+}
+.DetailsHeader-instanceBox {
+  margin: 4px 2px 0;
+  padding: 4px;
+  background: var(--recessed);
+  border-radius: 4px;
+}
+.DetailsHeader-instance {
+  display: flex;
+  align-items: center;
+  padding: 4px 0;
+  background: var(--select-inactive);
+  color: var(--foreground-hover);
+  font: 400 13.333px/1.172 var(--font-sans);
+}
+.DetailsHeader-instance svg {
+  width: 16px;
+  height: 16px;
+  margin-left: 4px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.25;
+  stroke-linejoin: round;
+}
+.DetailsHeader-instance .name {
+  margin-left: 6px;
+}
+.DetailsHeader-instance .ctx {
+  margin-left: 4px;
+}
+
+/* design-system/src/DetailsSearchRow/DetailsSearchRow.css */
+.DetailsSearchRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.DetailsSearchRow + .DetailsSearchRow {
+  margin-top: 2px;
+}
+.DetailsSearchRow-searchSlot {
+  flex: 1;
+  min-width: 0;
+  padding: 6px;
+}
+
+/* design-system/src/SpinBox/SpinBox.css */
+.spinbox {
+  --spinbox-fill: .4;
+  position: relative;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 1px 2px;
+  border-radius: 4px;
+  background: var(--input);
+  box-shadow: inset 0 0 0 1px var(--input-outline);
+  color: var(--foreground-hover);
+  font: 400 13.333px/16px var(--font-sans);
+  cursor: ew-resize;
+  user-select: none;
+  outline: 0;
+}
+.spinbox__fill {
+  position: absolute;
+  left: 1px;
+  top: 1px;
+  bottom: 1px;
+  width: calc(var(--spinbox-fill) * 100% - 2px);
+  border-radius: 4px;
+  background: var(--dropdown);
+}
+.spinbox--small {
+  font: 400 10.667px/1.172 var(--font-sans);
+}
+.spinbox__text {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 2.5px 7px;
+  white-space: nowrap;
+}
+.spinbox__text:has(+ .spinbox__unit) {
+  flex: 0 1 auto;
+  padding-right: 0;
+}
+.spinbox--text .spinbox__text {
+  flex: 1 1 auto;
+}
+.spinbox__unit {
+  position: relative;
+  flex: none;
+  padding: 2.5px 7px 2.5px 3px;
+  opacity: .6;
+  white-space: nowrap;
+}
+.spinbox:hover,
+.spinbox--hover {
+  box-shadow: inset 0 0 0 1px var(--hover);
+}
+.spinbox:hover .spinbox__fill,
+.spinbox--hover .spinbox__fill {
+  background: var(--hover);
+}
+.spinbox--active,
+.spinbox--active:hover {
+  box-shadow: inset 0 0 0 1px var(--primary);
+  cursor: ew-resize;
+}
+.spinbox--active .spinbox__fill,
+.spinbox--active:hover .spinbox__fill {
+  background: var(--primary);
+}
+.spinbox--text,
+.spinbox--text:hover {
+  box-shadow: inset 0 0 0 1px var(--primary);
+  cursor: text;
+}
+.spinbox--text .spinbox__fill {
+  display: none;
+}
+.spinbox--unbounded .spinbox__fill {
+  display: none;
+}
+.spinbox--disabled,
+.spinbox--disabled:hover {
+  opacity: .45;
+  box-shadow: inset 0 0 0 1px var(--input-outline);
+}
+.spinbox--disabled:hover .spinbox__fill {
+  background: var(--dropdown);
+}
+.spinbox__caret {
+  display: inline-block;
+  width: 1.28px;
+  height: 16px;
+  vertical-align: top;
+  background: var(--white);
+}
+.spinbox:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+.spinbox--active:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+.spinbox[aria-disabled=true],
+.spinbox[aria-disabled=true]:hover {
+  opacity: .45;
+  box-shadow: inset 0 0 0 1px var(--input-outline);
+  cursor: default;
+}
+.spinbox[aria-disabled=true]:hover .spinbox__fill {
+  background: var(--dropdown);
+}
+.spinbox__field {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 16px;
+  caret-color: var(--white);
+  user-select: text;
+  cursor: text;
+}
+.spinbox__field::selection {
+  background: var(--highlight);
+  color: inherit;
+}
+.spinbox__axis {
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  bottom: 3px;
+  width: 2px;
+  z-index: 2;
+}
+.spinbox__axis--x {
+  background: var(--axis-x);
+}
+.spinbox__axis--y {
+  background: var(--axis-y);
+}
+.spinbox__axis--z {
+  background: var(--axis-z);
+}
+
+/* design-system/src/VectorInput/VectorInput.css */
+.VectorInput-frame {
+  background: var(--recessed);
+}
+.VectorInput-row {
+  display: flex;
+  min-height: 27px;
+  padding-bottom: 1px;
+  background: var(--recessed);
+}
+.VectorInput-name,
+.VectorInput-value,
+.VectorInput-right {
+  background: var(--panel);
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.VectorInput-row:hover .VectorInput-name,
+.VectorInput-row:hover .VectorInput-value,
+.VectorInput-row:hover .VectorInput-right {
+  background: var(--header);
+}
+.VectorInput-name {
+  box-sizing: border-box;
+  flex: 0 0 40%;
+  padding-left: 20px;
+}
+.VectorInput-value {
+  flex: 1;
+  padding: 0 2px 0 12px;
+}
+.VectorInput-right {
+  flex: 0 0 22px;
+  justify-content: flex-end;
+  width: 22px;
+}
+.VectorInput-split {
+  flex: 0 0 1px;
+  background: var(--recessed);
+}
+.VectorInput-lockSlot {
+  display: inline-flex;
+  margin-left: 4px;
+}
+.VectorInput-name [data-role=lock]:not([aria-pressed=true]) .VectorInput-shackle--shut,
+.VectorInput-name [data-role=lock][aria-pressed=true] .VectorInput-shackle--open {
+  display: none;
+}
+.VectorInput-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  flex: 1;
+  min-width: 0;
+}
+
+/* design-system/src/DetailsCategory/DetailsCategory.css */
+.DetailsCategory-frame {
+  background: var(--recessed);
+}
+.DetailsCategory-cat {
+  padding-bottom: 1px;
+  background: var(--recessed);
+}
+.DetailsCategory-catRow {
+  display: flex;
+  align-items: center;
+  min-height: 26px;
+  background: var(--header);
+  cursor: pointer;
+}
+.DetailsCategory-arrow {
+  flex: none;
+  margin-left: 2px;
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+.DetailsCategory-catRow:hover .DetailsCategory-arrow,
+.DetailsCategory-catRow.is-hover .DetailsCategory-arrow {
+  color: color-mix(in srgb, var(--foreground-hover) 60%, transparent);
+}
+.DetailsCategory-title {
+  flex: 1;
+  min-width: 0;
+  margin-left: 4px;
+  font: 700 10.667px/1.172 var(--font-sans);
+  color: var(--foreground-header);
+}
+[aria-expanded=true] > .DetailsCategory-arrow,
+[aria-expanded=true].DetailsCategory-rowArrow {
+  transform: rotate(90deg);
+}
+.DetailsCategory-row {
+  display: flex;
+  min-height: 27px;
+  padding-bottom: 1px;
+  background: var(--recessed);
+}
+.DetailsCategory-indent {
+  flex: none;
+  background: var(--panel);
+}
+.DetailsCategory-name,
+.DetailsCategory-value,
+.DetailsCategory-right {
+  background: var(--panel);
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.DetailsCategory-row.is-hover .DetailsCategory-name,
+.DetailsCategory-row.is-hover .DetailsCategory-value,
+.DetailsCategory-row.is-hover .DetailsCategory-right,
+.DetailsCategory-row:hover .DetailsCategory-name,
+.DetailsCategory-row:hover .DetailsCategory-value,
+.DetailsCategory-row:hover .DetailsCategory-right {
+  background: var(--header);
+}
+.DetailsCategory-row.is-nested .DetailsCategory-name,
+.DetailsCategory-row.is-nested .DetailsCategory-value {
+  background: #282828;
+}
+.DetailsCategory-row.is-nested.is-hover .DetailsCategory-name,
+.DetailsCategory-row.is-nested.is-hover .DetailsCategory-value,
+.DetailsCategory-row.is-nested:hover .DetailsCategory-name,
+.DetailsCategory-row.is-nested:hover .DetailsCategory-value {
+  background: #333333;
+}
+.DetailsCategory-frame .is-hidden {
+  display: none;
+}
+.DetailsCategory-name {
+  flex: 0 0 40%;
+  font: 400 10.667px/1.172 var(--font-sans);
+  color: var(--foreground);
+}
+.DetailsCategory-row.is-nested .DetailsCategory-name {
+  flex-basis: calc(40% - 16px);
+}
+.DetailsCategory-nameInner {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.DetailsCategory-rowArrow {
+  margin-left: 2px;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  fill: currentColor;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+  visibility: hidden;
+}
+.DetailsCategory-rowArrow.has-children {
+  visibility: visible;
+}
+.DetailsCategory-label {
+  margin-left: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.DetailsCategory-value {
+  flex: 1;
+  padding: 0 2px 0 12px;
+}
+.DetailsCategory-right {
+  flex: 0 0 22px;
+  justify-content: flex-end;
+}
+.DetailsCategory-split {
+  flex: 0 0 1px;
+  background: var(--recessed);
+}
+.DetailsCategory-catRow:focus-visible,
+.DetailsCategory-rowArrow:focus-visible,
+.DetailsCategory-advRow:focus-visible {
+  outline: 1px solid var(--primary-hover);
+  outline-offset: -1px;
+}
+.DetailsCategory-adv {
+  padding-bottom: 1px;
+  background: var(--recessed);
+}
+.DetailsCategory-advRow {
+  display: flex;
+  align-items: center;
+  min-height: 26px;
+  background: var(--panel);
+  cursor: pointer;
+}
+.DetailsCategory-advRow:hover,
+.DetailsCategory-advRow.is-hover {
+  background: var(--header);
+}
+.DetailsCategory-advRow .DetailsCategory-title {
+  font-weight: 400;
+}
+.DetailsCategory-empty {
+  display: none;
+  padding: 10px 12px;
+  background: var(--panel);
+  font: 400 10.667px/1.172 var(--font-sans);
+  color: var(--foreground);
+}
+.DetailsCategory-empty.is-shown {
+  display: block;
+}
+.DetailsCategory-panel {
+  position: relative;
+  background: var(--panel);
+}
+
 /* design-system/src/TabWell/TabWell.css */
 :is(.dockTab-well, .tabWell-well) {
   display: flex;
@@ -2050,50 +2676,6 @@
   color: var(--foreground-hover);
 }
 
-/* design-system/src/ResetToDefault/ResetToDefault.css */
-.resettodefault {
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-  width: 20px;
-  height: 20px;
-  margin: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  padding: 2px;
-  color: var(--foreground);
-  cursor: default;
-}
-.resettodefault:hover,
-.resettodefault--hover {
-  color: var(--foreground-hover);
-}
-.resettodefault:active,
-.resettodefault--pressed {
-  color: var(--foreground-hover);
-  padding: 3px 2px 1px;
-}
-.resettodefault:focus-visible {
-  outline: 1px solid var(--primary);
-  outline-offset: -1px;
-  border-radius: 4px;
-}
-.resettodefault--idle {
-  visibility: hidden;
-}
-.resettodefault__glyph {
-  width: 16px;
-  height: 16px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
 /* design-system/src/Scrollbar/Scrollbar.css */
 .sb {
   position: relative;
@@ -2224,149 +2806,6 @@
   outline: 1px solid var(--primary);
   outline-offset: 3px;
   border-radius: 4px;
-}
-
-/* design-system/src/SpinBox/SpinBox.css */
-.spinbox {
-  --spinbox-fill: .4;
-  position: relative;
-  display: flex;
-  align-items: center;
-  box-sizing: border-box;
-  width: 100%;
-  padding: 1px 2px;
-  border-radius: 4px;
-  background: var(--input);
-  box-shadow: inset 0 0 0 1px var(--input-outline);
-  color: var(--foreground-hover);
-  font: 400 13.333px/16px var(--font-sans);
-  cursor: ew-resize;
-  user-select: none;
-  outline: 0;
-}
-.spinbox__fill {
-  position: absolute;
-  left: 1px;
-  top: 1px;
-  bottom: 1px;
-  width: calc(var(--spinbox-fill) * 100% - 2px);
-  border-radius: 4px;
-  background: var(--dropdown);
-}
-.spinbox__text {
-  position: relative;
-  flex: 1 1 auto;
-  min-width: 0;
-  padding: 2.5px 7px;
-  white-space: nowrap;
-}
-.spinbox__text:has(+ .spinbox__unit) {
-  flex: 0 1 auto;
-  padding-right: 0;
-}
-.spinbox--text .spinbox__text {
-  flex: 1 1 auto;
-}
-.spinbox__unit {
-  position: relative;
-  flex: none;
-  padding: 2.5px 7px 2.5px 3px;
-  opacity: .6;
-  white-space: nowrap;
-}
-.spinbox:hover,
-.spinbox--hover {
-  box-shadow: inset 0 0 0 1px var(--hover);
-}
-.spinbox:hover .spinbox__fill,
-.spinbox--hover .spinbox__fill {
-  background: var(--hover);
-}
-.spinbox--active,
-.spinbox--active:hover {
-  box-shadow: inset 0 0 0 1px var(--primary);
-  cursor: ew-resize;
-}
-.spinbox--active .spinbox__fill,
-.spinbox--active:hover .spinbox__fill {
-  background: var(--primary);
-}
-.spinbox--text,
-.spinbox--text:hover {
-  box-shadow: inset 0 0 0 1px var(--primary);
-  cursor: text;
-}
-.spinbox--text .spinbox__fill {
-  display: none;
-}
-.spinbox--unbounded .spinbox__fill {
-  display: none;
-}
-.spinbox--disabled,
-.spinbox--disabled:hover {
-  opacity: .45;
-  box-shadow: inset 0 0 0 1px var(--input-outline);
-}
-.spinbox--disabled:hover .spinbox__fill {
-  background: var(--dropdown);
-}
-.spinbox__caret {
-  display: inline-block;
-  width: 1.28px;
-  height: 16px;
-  vertical-align: top;
-  background: var(--white);
-}
-.spinbox:focus-visible {
-  box-shadow: inset 0 0 0 1px var(--primary);
-}
-.spinbox--active:focus-visible {
-  box-shadow: inset 0 0 0 1px var(--primary);
-}
-.spinbox[aria-disabled=true],
-.spinbox[aria-disabled=true]:hover {
-  opacity: .45;
-  box-shadow: inset 0 0 0 1px var(--input-outline);
-  cursor: default;
-}
-.spinbox[aria-disabled=true]:hover .spinbox__fill {
-  background: var(--dropdown);
-}
-.spinbox__field {
-  display: block;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  line-height: 16px;
-  caret-color: var(--white);
-  user-select: text;
-  cursor: text;
-}
-.spinbox__field::selection {
-  background: var(--highlight);
-  color: inherit;
-}
-.spinbox__axis {
-  position: absolute;
-  left: 3px;
-  top: 3px;
-  bottom: 3px;
-  width: 2px;
-  z-index: 2;
-}
-.spinbox__axis--x {
-  background: var(--axis-x);
-}
-.spinbox__axis--y {
-  background: var(--axis-y);
-}
-.spinbox__axis--z {
-  background: var(--axis-z);
 }
 
 /* design-system/src/Tooltip/Tooltip.css */

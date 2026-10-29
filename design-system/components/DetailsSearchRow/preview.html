@@ -8,111 +8,62 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Condensed:wght@400;700&family=Roboto+Mono&display=swap">
 <style>body { font-family: var(--font-sans); }</style>
 <style>
-	/* Every metric below is cited in README.md. Icons are 16x16 stroke approximations of the Starship SVGs. */
+	/* Demo layout only. The component layout is src/DetailsSearchRow/DetailsSearchRow.css. */
 	.DetailsSearchRow-frame { width: 360px; background: var(--panel); } /* SBorder Brushes.Panel: SDetailsView.cpp:391-395 */
-	.DetailsSearchRow { position: relative; display: flex; align-items: center; } /* SDetailsView.cpp:276 */
-	.DetailsSearchRow + .DetailsSearchRow { margin-top: 2px; }
-	.DetailsSearchRow-searchSlot { flex: 1; min-width: 0; padding: 6px; } /* Padding(6.f), FillWidth(1): SDetailsView.cpp:278-280 */
-	.DetailsSearchRow-search {
-		display: flex; align-items: center;
-		background: var(--input); border-radius: 999px; /* HalfHeightRadius: SlateBrush.h:161-167 */
-		box-shadow: inset 0 0 0 1px var(--secondary); /* SearchBoxEditStyle normal: StarshipCoreStyle.cpp:1303 */
-		cursor: text;
-	}
-	.DetailsSearchRow-search:hover { box-shadow: inset 0 0 0 1px var(--hover); } /* StarshipCoreStyle.cpp:1304 */
-	.DetailsSearchRow-search.is-focused, .DetailsSearchRow-search:focus-within { box-shadow: inset 0 0 0 1px var(--primary); } /* StarshipCoreStyle.cpp:1305 */
-	.DetailsSearchRow-glass { width: 14px; height: 14px; margin-left: 4px; flex: none; color: var(--foreground); } /* ImagePadding(4,0,0,0), ImageSizeOverride 14: StarshipCoreStyle.cpp:1315-1316 */
-	.DetailsSearchRow-text {
-		flex: 1; min-width: 0; padding: 3px 8px 4px; /* NormalEditableTextBox padding (8,3,8,4): StarshipCoreStyle.cpp:1289 */
-		font: 400 13.333px/1.172 var(--font-sans); /* StyleFonts.Normal 10pt: StarshipCoreStyle.cpp:36 */
-		color: var(--foreground); white-space: nowrap; overflow: hidden;
-	}
-	.DetailsSearchRow-search.is-focused .DetailsSearchRow-text, .DetailsSearchRow-search:focus-within .DetailsSearchRow-text, .DetailsSearchRow-text.has-value { color: var(--foreground-hover); } /* focused foreground White: StarshipCoreStyle.cpp:1293 */
-	.DetailsSearchRow-hint { opacity: .35; } /* hint text alpha 0.35: SlateEditableTextLayout.cpp:3563 */
-	/* The live search box: a real input with the same box as the .DetailsSearchRow-text div (padding 8,3,8,4; one 13.333px line). */
-	input.DetailsSearchRow-text { box-sizing: content-box; height: 15.627px; border: 0; background: transparent; outline: 0; margin: 0; width: 0; }
-	input.DetailsSearchRow-text::placeholder { color: var(--foreground); opacity: .35; } /* same as .DetailsSearchRow-hint */
-	.DetailsSearchRow-clear { width: 20px; height: 16px; padding-left: 4px; flex: none; color: var(--foreground); cursor: pointer; } /* ThinHoverOnlyButton, ContentPadding = ImagePadding: SSearchBox.cpp:156-157 */
-	.DetailsSearchRow-clear:hover, .DetailsSearchRow-clear.is-hover { color: var(--foreground-hover); } /* hovered foreground: StarshipCoreStyle.cpp:1395 */
-	.DetailsSearchRow-clear.is-hidden { display: none; } /* SSearchBox shows the clear button only with text: SSearchBox.cpp:156 */
-	.DetailsSearchRow-tail { width: 7px; flex: none; } /* SSpacer(7,0): SSearchBox.cpp:176-179 */
-	.DetailsSearchRow-btn {
-		display: inline-flex; align-items: center; justify-content: center; flex: none;
-		border: 0; margin: 0; border-radius: 4px; background: transparent; cursor: pointer;
-		color: var(--foreground); /* SimpleButton normal foreground: StarshipCoreStyle.cpp:1394 */
-	}
-	.DetailsSearchRow-btn:hover, .DetailsSearchRow-btn:active, .DetailsSearchRow-btn.is-hover, .DetailsSearchRow-btn.is-pressed { background: var(--dropdown); color: var(--foreground-hover); } /* hover and pressed: StarshipCoreStyle.cpp:1391-1396 */
-	.DetailsSearchRow-btn svg { width: 16px; height: 16px; flex: none; }
-	.DetailsSearchRow-btn:focus-visible { outline: 1px solid var(--primary-hover); outline-offset: 1px; } /* browser keyboard ring: Slate draws none */
-	.DetailsSearchRow-btn:disabled { opacity: .45; cursor: default; } /* alpha x .45: SlateElementPixelShader.usf:535 */
-	/* SButton default ContentPadding (4,2) + SimpleButton NormalPadding (2,1) = (6,3): SDetailsView.cpp:298-309, StarshipCoreStyle.cpp:1405-1407 */
-	.DetailsSearchRow-btn.is-button { width: 28px; height: 22px; }
-	/* SComboButton ContentPadding(0) + (2,1) = (2,1): SDetailsView.cpp:350 */
-	.DetailsSearchRow-btn.is-combo { width: 20px; height: 18px; }
-	.DetailsSearchRow-btn.is-on { color: var(--accent-blue); } /* GetToggleFavoritesColor: SDetailsView.cpp:1177-1183 */
-
-	/* View options menu: the PopupMenu look. Entries: SDetailsView.cpp:105-262 */
-	.DetailsSearchRow-menu {
-		display: none; position: absolute; z-index: 10; top: 100%; right: 6px; width: 260px; box-sizing: border-box; padding: 8px 0;
-		background: var(--dropdown); box-shadow: inset 0 0 0 1px var(--dropdown-outline); /* Menu.Background and Menu.Outline: StarshipCoreStyle.cpp:2302-2303 */
-		font: 400 13.333px/16px var(--font-sans); color: var(--foreground-hover); user-select: none; /* Menu.Label: StarshipCoreStyle.cpp:2321 */
-	}
-	.DetailsSearchRow-menu.is-open { display: block; }
-	.DetailsSearchRow-menuItem { display: flex; align-items: center; padding: 3px 5px 3px 12px; outline: 0; cursor: pointer; } /* Menu.Block.Padding: StarshipCoreStyle.cpp:2314-2316 */
-	.DetailsSearchRow-menuItem:hover, .DetailsSearchRow-menuItem:focus, .DetailsSearchRow-menuItem.is-hover { background: var(--primary); } /* hovered brush Primary: StarshipCoreStyle.cpp:2420-2421 */
-	.DetailsSearchRow-menuMark { position: relative; flex: none; width: 16px; height: 16px; margin: 0 8px 0 2px; } /* check cell 16x16: StarshipCoreStyle.cpp:2347 */
-	.DetailsSearchRow-menuItem[aria-checked="true"] .DetailsSearchRow-menuMark::after { content: ""; position: absolute; left: 5px; top: 1px; width: 4px; height: 9px; border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); }
-	.DetailsSearchRow-menuSep { height: 1px; margin: 6px 12px; background: var(--white-25); } /* Menu.Separator White25: StarshipCoreStyle.cpp:2318-2319 */
-	/* Preview captions only */
 	.DetailsSearchRow-cap { width: 360px; box-sizing: border-box; margin: 0; padding: 6px 8px 12px; font: 400 10.667px/1.4 var(--font-sans); color: var(--foreground); opacity: .8; }
 	.DetailsSearchRow-cap b { color: var(--foreground-hover); }
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-	<symbol id="DetailsSearchRow-glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.75" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m10.6 10.6 3.4 3.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
-	<symbol id="DetailsSearchRow-close" viewBox="0 0 16 16"><path d="m4 4 8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
-	<symbol id="DetailsSearchRow-table" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="1.25" fill="none" stroke="currentColor" stroke-width="1.25"/><path d="M2 6.5h12M2 9.75h12M6.5 6.5V13" fill="none" stroke="currentColor" stroke-width="1.25"/></symbol>
-	<symbol id="DetailsSearchRow-star" viewBox="0 0 16 16"><path d="m8 2 1.8 3.9 4.2.5-3.1 2.9.8 4.2L8 11.4l-3.7 2.1.8-4.2L2 6.4l4.2-.5z" fill="currentColor"/></symbol>
-	<symbol id="DetailsSearchRow-gear" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.25" fill="none" stroke="currentColor" stroke-width="1.25"/><path d="M8 1.75v2M8 12.25v2M1.75 8h2M12.25 8h2M3.6 3.6 5 5M11 11l1.4 1.4M12.4 3.6 11 5M5 11l-1.4 1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
-</svg>
 <div class="DetailsSearchRow-frame">
 	<ue-details-search-row>
 	<div class="DetailsSearchRow">
 		<div class="DetailsSearchRow-searchSlot">
-			<div class="DetailsSearchRow-search">
-				<svg class="DetailsSearchRow-glass"><use href="#DetailsSearchRow-glass"/></svg>
-				<input class="DetailsSearchRow-text" type="text" placeholder="Search" aria-label="Search" spellcheck="false" autocomplete="off">
-				<svg class="DetailsSearchRow-clear is-hidden" role="button" aria-label="Clear search" tabindex="-1"><use href="#DetailsSearchRow-close"/></svg>
-				<span class="DetailsSearchRow-tail"></span>
+			<ue-text-input>
+				<div class="textinput textinput--search">
+					<svg class="textinput__glyph textinput__glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+					<svg class="textinput__glyph textinput__clear" role="button" aria-label="Clear search" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+					<input class="textinput__text textinput__field" type="text" placeholder="Search" aria-label="Search" spellcheck="false" autocomplete="off">
+					<span class="textinput__tail"></span>
+				</div>
+			</ue-text-input>
+		</div>
+		<ue-button><button class="button button--simple button--icon" data-role="matrix" aria-label="Edit Selection in Property Matrix" title="Edit Selection in Property Matrix"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="1.25"/><path d="M2 6.5h12M2 9.75h12M6.5 6.5V13"/></svg></button></ue-button>
+		<ue-button><button class="button button--toggle button--icon" data-role="favorites" aria-pressed="false" aria-label="Toggle Favorites" title="Toggle Favorites"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="m8 2 1.8 3.9 4.2.5-3.1 2.9.8 4.2L8 11.4l-3.7 2.1.8-4.2L2 6.4l4.2-.5z"/></svg></button></ue-button>
+		<ue-combo-button>
+			<div class="combobutton-anchor">
+				<span class="combobutton combobutton--icon" data-role="options" role="combobox" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="View options" title="View options">
+					<svg class="combobutton__icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.25"/><path d="M8 1.75v2M8 12.25v2M1.75 8h2M12.25 8h2M3.6 3.6 5 5M11 11l1.4 1.4M12.4 3.6 11 5M5 11l-1.4 1.4"/></svg>
+					<svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg>
+				</span>
+				<div class="combobutton-menu combobutton-menu--end" style="--combobutton-menu-min-width: 260px" hidden>
+					<ue-popup-menu>
+						<div class="popupmenu" role="menu" tabindex="0" aria-label="View options">
+							<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false" data-value="modified"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Only Modified Properties</span></span></div>
+							<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false" data-value="advanced"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show All Advanced Details</span></span></div>
+							<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false" data-value="childOnMatch"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Child On Category Match</span></span></div>
+							<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="true" data-value="sections"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Sections</span></span></div>
+							<div class="popupmenu__sep"></div>
+							<div class="popupmenu__row" role="menuitem" data-value="collapseAll"><span class="popupmenu__check"></span><span class="popupmenu__body"><span class="popupmenu__label">Collapse All Categories</span></span></div>
+							<div class="popupmenu__row" role="menuitem" data-value="expandAll"><span class="popupmenu__check"></span><span class="popupmenu__body"><span class="popupmenu__label">Expand All Categories</span></span></div>
+						</div>
+					</ue-popup-menu>
+				</div>
 			</div>
-		</div>
-		<button class="DetailsSearchRow-btn is-button" title="Edit Selection in Property Matrix"><svg><use href="#DetailsSearchRow-table"/></svg></button>
-		<button class="DetailsSearchRow-btn is-button" data-role="favorites" aria-pressed="false" title="Toggle Favorites"><svg><use href="#DetailsSearchRow-star"/></svg></button>
-		<button class="DetailsSearchRow-btn is-combo" data-role="options" aria-haspopup="menu" aria-expanded="false" title="View options"><svg><use href="#DetailsSearchRow-gear"/></svg></button>
-		<div class="DetailsSearchRow-menu" role="menu" aria-label="View options">
-			<div class="DetailsSearchRow-menuItem" role="menuitemcheckbox" aria-checked="false" tabindex="-1" data-option="modified"><span class="DetailsSearchRow-menuMark"></span>Show Only Modified Properties</div>
-			<div class="DetailsSearchRow-menuItem" role="menuitemcheckbox" aria-checked="false" tabindex="-1" data-option="advanced"><span class="DetailsSearchRow-menuMark"></span>Show All Advanced Details</div>
-			<div class="DetailsSearchRow-menuItem" role="menuitemcheckbox" aria-checked="false" tabindex="-1" data-option="childOnMatch"><span class="DetailsSearchRow-menuMark"></span>Show Child On Category Match</div>
-			<div class="DetailsSearchRow-menuItem" role="menuitemcheckbox" aria-checked="true" tabindex="-1" data-option="sections"><span class="DetailsSearchRow-menuMark"></span>Show Sections</div>
-			<div class="DetailsSearchRow-menuSep" role="separator"></div>
-			<div class="DetailsSearchRow-menuItem" role="menuitem" tabindex="-1" data-option="collapseAll"><span class="DetailsSearchRow-menuMark"></span>Collapse All Categories</div>
-			<div class="DetailsSearchRow-menuItem" role="menuitem" tabindex="-1" data-option="expandAll"><span class="DetailsSearchRow-menuMark"></span>Expand All Categories</div>
-		</div>
+		</ue-combo-button>
 	</div>
 	</ue-details-search-row>
-	<div class="DetailsSearchRow">
+	<div class="DetailsSearchRow" data-pinned>
 		<div class="DetailsSearchRow-searchSlot">
-			<div class="DetailsSearchRow-search is-focused">
-				<svg class="DetailsSearchRow-glass"><use href="#DetailsSearchRow-glass"/></svg>
-				<div class="DetailsSearchRow-text has-value">scale</div>
-				<svg class="DetailsSearchRow-clear"><use href="#DetailsSearchRow-close"/></svg>
-				<span class="DetailsSearchRow-tail"></span>
+			<div class="textinput textinput--search textinput--focus">
+				<svg class="textinput__glyph" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+				<span class="textinput__text">scale<span class="textinput__caret"></span></span>
+				<span class="textinput__tail"></span>
 			</div>
 		</div>
-		<button class="DetailsSearchRow-btn is-button" title="Edit Selection in Property Matrix"><svg><use href="#DetailsSearchRow-table"/></svg></button>
-		<button class="DetailsSearchRow-btn is-button is-on" title="Toggle Favorites (on)"><svg><use href="#DetailsSearchRow-star"/></svg></button>
-		<button class="DetailsSearchRow-btn is-combo" title="View options"><svg><use href="#DetailsSearchRow-gear"/></svg></button>
+		<button class="button button--simple button--icon" tabindex="-1" aria-label="Edit Selection in Property Matrix"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="1.25"/><path d="M2 6.5h12M2 9.75h12M6.5 6.5V13"/></svg></button>
+		<button class="button button--toggle button--icon" aria-pressed="true" tabindex="-1" aria-label="Toggle Favorites (on)"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="m8 2 1.8 3.9 4.2.5-3.1 2.9.8 4.2L8 11.4l-3.7 2.1.8-4.2L2 6.4l4.2-.5z"/></svg></button>
+		<span class="combobutton combobutton--icon" tabindex="-1" aria-label="View options"><svg class="combobutton__icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.25"/><path d="M8 1.75v2M8 12.25v2M1.75 8h2M12.25 8h2M3.6 3.6 5 5M11 11l1.4 1.4M12.4 3.6 11 5M5 11l-1.4 1.4"/></svg><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
 	</div>
 </div>
 <p class="DetailsSearchRow-cap"><b>Live</b> (row 1). Click the box and type: the clear X shows with text, click it or press Escape to clear. Click the star to toggle favorites, hover and press the table button, click the gear for the view options menu (arrow keys, Enter, Escape). <b>Pinned</b> (row 2): focused box with text, favorites on.</p>
