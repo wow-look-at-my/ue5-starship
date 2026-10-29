@@ -1,4 +1,4 @@
-// design-system/src/_shared/element.ts
+// src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   #ready = false;
@@ -51,7 +51,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// design-system/src/_shared/drag.ts
+// src/_shared/drag.ts
 var THRESHOLD = 3;
 function drag(target, handlers) {
   let originX = 0;
@@ -93,7 +93,7 @@ function drag(target, handlers) {
   };
 }
 
-// design-system/src/_shared/contentMenu.ts
+// src/_shared/contentMenu.ts
 var TICK = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l3 3 6-7"/></svg>';
 function openMenu(host, anchor, options) {
   const menu = document.createElement("div");
@@ -180,7 +180,7 @@ function openMenu(host, anchor, options) {
   return { element: menu, anchor, close };
 }
 
-// design-system/src/_shared/tileGrid.ts
+// src/_shared/tileGrid.ts
 function nearestInRow(tiles, from, down) {
   const tops = new Map(tiles.map((tile) => [tile, tile.getBoundingClientRect()]));
   const box = from.getBoundingClientRect();
@@ -200,7 +200,7 @@ function nearestInRow(tiles, from, down) {
   return line.reduce((best, tile) => distance(tile) < distance(best) ? tile : best);
 }
 
-// design-system/src/ContentBrowser/ContentBrowser.ts
+// src/ContentBrowser/ContentBrowser.ts
 var PREFIX = "ContentBrowser";
 var INDENT_PX = 10;
 var MIN_SOURCES = 120;

@@ -1,9 +1,9 @@
-/* design-system/src/_shared/base.css */
+/* src/_shared/base.css */
 [data-pinned] {
   pointer-events: none;
 }
 
-/* design-system/src/AssetTile/AssetTile.css */
+/* src/AssetTile/AssetTile.css */
 .AssetTile-grid {
   display: flex;
   flex-wrap: wrap;
@@ -175,7 +175,7 @@
   outline-offset: 1px;
 }
 
-/* design-system/src/Button/Button.css */
+/* src/Button/Button.css */
 .button {
   display: inline-flex;
   align-items: center;
@@ -351,7 +351,7 @@
   margin-right: 0;
 }
 
-/* design-system/src/Checkbox/Checkbox.css */
+/* src/Checkbox/Checkbox.css */
 .checkbox {
   display: inline-flex;
   align-items: center;
@@ -486,7 +486,7 @@
   color: var(--foreground-hover);
 }
 
-/* design-system/src/PopupMenu/PopupMenu.css */
+/* src/PopupMenu/PopupMenu.css */
 .popupmenu {
   box-sizing: border-box;
   padding: 8px 0;
@@ -660,7 +660,7 @@
   background: var(--white-25);
 }
 
-/* design-system/src/ComboButton/ComboButton.css */
+/* src/ComboButton/ComboButton.css */
 .combobutton {
   display: inline-flex;
   align-items: center;
@@ -826,7 +826,7 @@
   display: none;
 }
 
-/* design-system/src/TabWell/TabWell.css */
+/* src/TabWell/TabWell.css */
 :is(.dockTab-well, .tabWell-well) {
   display: flex;
   align-items: flex-end;
@@ -854,7 +854,7 @@
   display: none;
 }
 
-/* design-system/src/DockTab/DockTab.css */
+/* src/DockTab/DockTab.css */
 :is(.dockTab, .tabWell-tab) {
   position: relative;
   display: inline-flex;
@@ -980,7 +980,7 @@
   outline-offset: -2px;
 }
 
-/* design-system/src/ExpandableArea/ExpandableArea.css */
+/* src/ExpandableArea/ExpandableArea.css */
 .expandablearea {
   border-radius: 4px;
   background: var(--panel);
@@ -1033,7 +1033,7 @@
   }
 }
 
-/* design-system/src/FilterPills/FilterPills.css */
+/* src/FilterPills/FilterPills.css */
 .FilterPills-strip {
   display: flex;
   flex-wrap: wrap;
@@ -1132,7 +1132,7 @@
   display: block;
 }
 
-/* design-system/src/HeaderRow/HeaderRow.css */
+/* src/HeaderRow/HeaderRow.css */
 .hr-row {
   background: var(--recessed);
   color: var(--foreground);
@@ -1231,7 +1231,7 @@
   background: var(--recessed);
 }
 
-/* design-system/src/ResetToDefault/ResetToDefault.css */
+/* src/ResetToDefault/ResetToDefault.css */
 .resettodefault {
   box-sizing: border-box;
   display: inline-flex;
@@ -1275,7 +1275,7 @@
   stroke-linejoin: round;
 }
 
-/* design-system/src/Scrollbar/Scrollbar.css */
+/* src/Scrollbar/Scrollbar.css */
 .sb {
   position: relative;
   flex: none;
@@ -1345,7 +1345,7 @@
   outline-offset: -1px;
 }
 
-/* design-system/src/SegmentedControl/SegmentedControl.css */
+/* src/SegmentedControl/SegmentedControl.css */
 .SegmentedControl {
   display: flex;
   flex: 1;
@@ -1456,7 +1456,7 @@
   color: var(--foreground-hover);
 }
 
-/* design-system/src/Slider/Slider.css */
+/* src/Slider/Slider.css */
 .slider {
   --slider-value: .5;
   position: relative;
@@ -1518,7 +1518,7 @@
   border-radius: 4px;
 }
 
-/* design-system/src/SpinBox/SpinBox.css */
+/* src/SpinBox/SpinBox.css */
 .spinbox {
   --spinbox-fill: .4;
   position: relative;
@@ -1661,7 +1661,7 @@
   background: var(--axis-z);
 }
 
-/* design-system/src/Splitter/Splitter.css */
+/* src/Splitter/Splitter.css */
 .splitter {
   display: flex;
   background: var(--panel);
@@ -1730,7 +1730,7 @@
   bottom: -3px;
 }
 
-/* design-system/src/TextInput/TextInput.css */
+/* src/TextInput/TextInput.css */
 .textinput {
   display: flex;
   align-items: center;
@@ -1861,7 +1861,7 @@
   display: block;
 }
 
-/* design-system/src/Tooltip/Tooltip.css */
+/* src/Tooltip/Tooltip.css */
 .tooltip {
   display: block;
   box-sizing: border-box;
@@ -1900,7 +1900,7 @@
   color: var(--black);
 }
 
-/* design-system/src/TreeRow/TreeRow.css */
+/* src/TreeRow/TreeRow.css */
 .tr-row {
   display: flex;
   align-items: center;

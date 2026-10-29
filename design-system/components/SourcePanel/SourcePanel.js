@@ -1,4 +1,4 @@
-// design-system/src/_shared/element.ts
+// src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   #ready = false;
@@ -51,7 +51,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// design-system/src/SourcePanel/SourcePanel.ts
+// src/SourcePanel/SourcePanel.ts
 var ROW = ".SourcePanel__row";
 var SELECTED = "SourcePanel__row--selected";
 var PARENT = "SourcePanel__row--parent";

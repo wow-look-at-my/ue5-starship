@@ -1,6 +1,6 @@
 /* @ds-bundle: {"format":4,"namespace":"UEStarship","components":[]} */
 (() => {
-  // design-system/src/_shared/element.ts
+  // src/_shared/element.ts
   var UeElement = class extends HTMLElement {
     #disposers = [];
     #ready = false;
@@ -53,7 +53,7 @@
     if (!customElements.get(tag)) customElements.define(tag, ctor);
   }
 
-  // design-system/src/_shared/popupmenu.ts
+  // src/_shared/popupmenu.ts
   function wireMenu(wiring) {
     const { trigger, menu, itemSelector } = wiring;
     const items = () => Array.from(menu.querySelectorAll(itemSelector));
@@ -131,7 +131,7 @@
     };
   }
 
-  // design-system/src/AssetPicker/AssetPicker.ts
+  // src/AssetPicker/AssetPicker.ts
   var UeAssetPicker = class extends UeElement {
     setup() {
       const row = this.one(".AssetPicker-row");
@@ -173,7 +173,7 @@
   };
   define("ue-asset-picker", UeAssetPicker);
 
-  // design-system/src/_shared/contentMenu.ts
+  // src/_shared/contentMenu.ts
   var TICK = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l3 3 6-7"/></svg>';
   function openMenu(host, anchor, options) {
     const menu = document.createElement("div");
@@ -260,7 +260,7 @@
     return { element: menu, anchor, close };
   }
 
-  // design-system/src/AssetSearchBar/AssetSearchBar.ts
+  // src/AssetSearchBar/AssetSearchBar.ts
   var PREFIX = "AssetSearchBar";
   var CROSS = '<svg viewBox="0 0 16 16"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
   var FILTERS = [
@@ -381,7 +381,7 @@
   };
   define("ue-asset-search-bar", AssetSearchBarElement);
 
-  // design-system/src/_shared/tileGrid.ts
+  // src/_shared/tileGrid.ts
   function nearestInRow(tiles, from, down) {
     const tops = new Map(tiles.map((tile) => [tile, tile.getBoundingClientRect()]));
     const box = from.getBoundingClientRect();
@@ -401,7 +401,7 @@
     return line.reduce((best, tile) => distance(tile) < distance(best) ? tile : best);
   }
 
-  // design-system/src/AssetTile/AssetTile.ts
+  // src/AssetTile/AssetTile.ts
   var SELECTED = "is-selected";
   var FOLDER = '<svg class="AssetTile__folderIcon" viewBox="0 0 64 64" aria-hidden="true"><path d="M2 13a2 2 0 0 1 2-2h18l5 6h33a2 2 0 0 1 2 2v31a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="currentColor"/><path d="M2 13a2 2 0 0 1 2-2h18l5 6H2z" fill="#fff" opacity=".12"/><path d="M2 24h60v26a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="#000" opacity=".12"/></svg>';
   var CUBE = '<svg viewBox="0 0 32 32" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg>';
@@ -607,12 +607,12 @@
   };
   define("ue-asset-tile", AssetTileElement);
 
-  // design-system/src/_shared/own.ts
+  // src/_shared/own.ts
   function ownedBy(host, target) {
     return target instanceof Element && target.closest(host.localName) === host;
   }
 
-  // design-system/src/Button/Button.ts
+  // src/Button/Button.ts
   var PRESSED = "button--pressed";
   function isDisabled(button) {
     return button.matches(":disabled") || button.getAttribute("aria-disabled") === "true";
@@ -651,7 +651,7 @@
   };
   define("ue-button", UeButtonElement);
 
-  // design-system/src/Checkbox/Checkbox.ts
+  // src/Checkbox/Checkbox.ts
   function disabled(el) {
     return el.getAttribute("aria-disabled") === "true";
   }
@@ -708,7 +708,7 @@
   };
   define("ue-checkbox", UeCheckboxElement);
 
-  // design-system/src/_shared/popup.ts
+  // src/_shared/popup.ts
   function enabledRows(menu, rowSelector) {
     return Array.from(menu.querySelectorAll(rowSelector)).filter((row) => row.getAttribute("aria-disabled") !== "true");
   }
@@ -729,7 +729,7 @@
     return (label ?? row).textContent?.trim() ?? "";
   }
 
-  // design-system/src/PopupMenu/PopupMenu.ts
+  // src/PopupMenu/PopupMenu.ts
   var ROW = ".popupmenu__row";
   var CURRENT = "popupmenu__row--hover";
   var OPEN = "popupmenu__row--open";
@@ -926,7 +926,7 @@
   };
   define("ue-popup-menu", UePopupMenuElement);
 
-  // design-system/src/ComboButton/ComboButton.ts
+  // src/ComboButton/ComboButton.ts
   var OPEN2 = "combobutton--open";
   var ACTIVATE_KEYS = ["Enter", " ", "ArrowDown", "ArrowUp"];
   var UeComboButtonElement = class extends UeElement {
@@ -1020,7 +1020,7 @@
   };
   define("ue-combo-button", UeComboButtonElement);
 
-  // design-system/src/_shared/drag.ts
+  // src/_shared/drag.ts
   var THRESHOLD = 3;
   function drag(target, handlers) {
     let originX = 0;
@@ -1062,7 +1062,7 @@
     };
   }
 
-  // design-system/src/ContentBrowser/ContentBrowser.ts
+  // src/ContentBrowser/ContentBrowser.ts
   var PREFIX2 = "ContentBrowser";
   var INDENT_PX = 10;
   var MIN_SOURCES = 120;
@@ -1556,7 +1556,7 @@
   };
   define("ue-content-browser", ContentBrowserElement);
 
-  // design-system/src/ContentToolbar/ContentToolbar.ts
+  // src/ContentToolbar/ContentToolbar.ts
   var CHEVRON2 = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"/></svg>';
   var PREFIX3 = "ContentToolbar";
   var CHILDREN = {
@@ -1711,7 +1711,7 @@
   };
   define("ue-content-toolbar", ContentToolbarElement);
 
-  // design-system/src/Cover/Cover.ts
+  // src/Cover/Cover.ts
   var TOKENS = {
     primary: "primary",
     panel: "panel",
@@ -1733,7 +1733,7 @@
   };
   define("ue-cover", UeCoverElement);
 
-  // design-system/src/DetailsCategory/DetailsCategory.ts
+  // src/DetailsCategory/DetailsCategory.ts
   var DOWN = "#DetailsCategory-down";
   var RIGHT = "#DetailsCategory-right";
   var isIn = (el, selector) => el.closest(selector);
@@ -2035,7 +2035,7 @@
   };
   define("ue-details-category", UeDetailsCategory);
 
-  // design-system/src/DetailsHeader/DetailsHeader.ts
+  // src/DetailsHeader/DetailsHeader.ts
   var UeDetailsHeader = class extends UeElement {
     setup() {
       const lock = this.one(".DetailsHeader-lock");
@@ -2071,7 +2071,7 @@
   };
   define("ue-details-header", UeDetailsHeader);
 
-  // design-system/src/DetailsSearchRow/DetailsSearchRow.ts
+  // src/DetailsSearchRow/DetailsSearchRow.ts
   var UeDetailsSearchRow = class extends UeElement {
     setup() {
       const input = this.one(".DetailsSearchRow-text");
@@ -2129,7 +2129,7 @@
   };
   define("ue-details-search-row", UeDetailsSearchRow);
 
-  // design-system/src/_shared/tabstack.ts
+  // src/_shared/tabstack.ts
   var TARGET_KEYS = ["ArrowRight", "ArrowLeft", "Home", "End"];
   function targetElement(event) {
     return event.target instanceof Element ? event.target : null;
@@ -2278,7 +2278,7 @@
     }
   };
 
-  // design-system/src/DockTab/DockTab.ts
+  // src/DockTab/DockTab.ts
   var DockTabElement = class extends TabStackElement {
     names = {
       stack: "dockTab-stack",
@@ -2293,7 +2293,7 @@
   };
   define("ue-dock-tab", DockTabElement);
 
-  // design-system/src/EventStatus/EventStatus.ts
+  // src/EventStatus/EventStatus.ts
   var UeEventStatusElement = class extends UeElement {
     setup() {
       const host = this.parentElement;
@@ -2308,7 +2308,7 @@
   };
   define("ue-event-status", UeEventStatusElement);
 
-  // design-system/src/ExpandableArea/ExpandableArea.ts
+  // src/ExpandableArea/ExpandableArea.ts
   var INTERACTIVE = 'button, a[href], input, select, textarea, label, [tabindex], [role="button"], [role="checkbox"], [role="combobox"], [role="slider"], [role="spinbutton"], [role="menuitem"]';
   function isNestedControl(target, header) {
     for (let node = target; node && node !== header; node = node.parentElement) {
@@ -2339,7 +2339,7 @@
   };
   define("ue-expandable-area", UeExpandableAreaElement);
 
-  // design-system/src/FilterPills/FilterPills.ts
+  // src/FilterPills/FilterPills.ts
   var CROSS2 = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
   var UeFilterPills = class extends UeElement {
     #strip = null;
@@ -2482,7 +2482,7 @@
   };
   define("ue-filter-pills", UeFilterPills);
 
-  // design-system/src/HeaderRow/HeaderRow.ts
+  // src/HeaderRow/HeaderRow.ts
   var CELL = ".hr-cell";
   var SORTABLE = ".hr-cell[aria-sort]";
   var GRIP = ".hr-grip";
@@ -2602,7 +2602,7 @@
   };
   define("ue-header-row", HeaderRow);
 
-  // design-system/src/MenuBar/MenuBar.ts
+  // src/MenuBar/MenuBar.ts
   var ITEM = ".menuBar-item";
   var ROW2 = ".menuBar-row";
   var MENU = ".menuBar-menu";
@@ -2725,7 +2725,7 @@
   };
   define("ue-menu-bar", MenuBar);
 
-  // design-system/src/Notification/Notification.ts
+  // src/Notification/Notification.ts
   var UeNotificationElement = class extends UeElement {
     #shown = 0;
     setup() {
@@ -2778,7 +2778,7 @@
   };
   define("ue-notification", UeNotificationElement);
 
-  // design-system/src/PlaceActorsPanel/PlaceActorsPanel.ts
+  // src/PlaceActorsPanel/PlaceActorsPanel.ts
   var CAT = ".placeActors-cat";
   var GROUP = ".placeActors-group";
   var ROW3 = ".placeActors-row";
@@ -2882,7 +2882,7 @@
   };
   define("ue-place-actors-panel", PlaceActorsPanel);
 
-  // design-system/src/ResetToDefault/ResetToDefault.ts
+  // src/ResetToDefault/ResetToDefault.ts
   var UeResetToDefaultElement = class extends UeElement {
     static observedAttributes = ["differs"];
     attributeChangedCallback() {
@@ -2907,7 +2907,7 @@
   };
   define("ue-reset-to-default", UeResetToDefaultElement);
 
-  // design-system/src/_shared/tree-controller.ts
+  // src/_shared/tree-controller.ts
   var TreeController = class {
     root;
     parts;
@@ -3106,7 +3106,7 @@
     }
   };
 
-  // design-system/src/_shared/scroll-thumb.ts
+  // src/_shared/scroll-thumb.ts
   var MIN_THUMB = 35;
   var BAR_PADDING = 2;
   function thumbLayout(slot, viewport, content, offset) {
@@ -3202,7 +3202,7 @@
     };
   }
 
-  // design-system/src/SceneOutliner/SceneOutliner.ts
+  // src/SceneOutliner/SceneOutliner.ts
   var ROW4 = ".so-row";
   var SORTABLE2 = ".so-hcell[aria-sort]";
   var collator = new Intl.Collator(void 0, { numeric: true, sensitivity: "base" });
@@ -3406,7 +3406,7 @@
   };
   define("ue-scene-outliner", SceneOutliner);
 
-  // design-system/src/Scrollbar/Scrollbar.ts
+  // src/Scrollbar/Scrollbar.ts
   var Scrollbar = class extends UeElement {
     #visible = null;
     // True while the content overflows and the bar shows.
@@ -3441,7 +3441,7 @@
   };
   define("ue-scrollbar", Scrollbar);
 
-  // design-system/src/SegmentedControl/SegmentedControl.ts
+  // src/SegmentedControl/SegmentedControl.ts
   var UeSegmentedControl = class extends UeElement {
     #group = null;
     setup() {
@@ -3503,7 +3503,7 @@
   };
   define("ue-segmented-control", UeSegmentedControl);
 
-  // design-system/src/Slider/Slider.ts
+  // src/Slider/Slider.ts
   var HANDLE = 8;
   function attr(el, name, fallback) {
     const raw = el.dataset[name];
@@ -3601,7 +3601,7 @@
   };
   define("ue-slider", UeSliderElement);
 
-  // design-system/src/SourcePanel/SourcePanel.ts
+  // src/SourcePanel/SourcePanel.ts
   var ROW5 = ".SourcePanel__row";
   var SELECTED2 = "SourcePanel__row--selected";
   var PARENT = "SourcePanel__row--parent";
@@ -3830,7 +3830,7 @@
   };
   define("ue-source-panel", SourcePanelElement);
 
-  // design-system/src/SpinBox/SpinBox.ts
+  // src/SpinBox/SpinBox.ts
   var DRAG_TRIGGER = 5;
   var MIN_SLIDER_WIDTH = 100;
   function numberAttr(el, name) {
@@ -4000,7 +4000,7 @@
   };
   define("ue-spin-box", UeSpinBoxElement);
 
-  // design-system/src/Splitter/Splitter.ts
+  // src/Splitter/Splitter.ts
   var DEFAULT_MIN = 20;
   var DEFAULT_STEP = 5;
   var DEFAULT_STEP_LARGE = 20;
@@ -4085,7 +4085,7 @@
   };
   define("ue-splitter", SplitterElement);
 
-  // design-system/src/StatusBar/StatusBar.ts
+  // src/StatusBar/StatusBar.ts
   var DRAWER = ".statusBar-btn";
   var COMBO = ".statusBar-combo";
   var MENU2 = ".statusBar-menu";
@@ -4234,7 +4234,7 @@
   };
   define("ue-status-bar", StatusBar);
 
-  // design-system/src/TabWell/TabWell.ts
+  // src/TabWell/TabWell.ts
   var TabWellElement = class extends TabStackElement {
     names = {
       stack: "tabWell-stack",
@@ -4249,7 +4249,7 @@
   };
   define("ue-tab-well", TabWellElement);
 
-  // design-system/src/TextInput/TextInput.ts
+  // src/TextInput/TextInput.ts
   var UeTextInputElement = class extends UeElement {
     setup() {
       const box = this.one(".textinput");
@@ -4285,7 +4285,7 @@
   };
   define("ue-text-input", UeTextInputElement);
 
-  // design-system/src/ToolBar/ToolBar.ts
+  // src/ToolBar/ToolBar.ts
   var CONTROL = ".toolBar-btn, .toolBar-modes, .toolBar-wrap, .toolBar-plate";
   var TOGGLE = ".toolBar-btn--toggle";
   var MENU3 = ".toolBar-menu";
@@ -4423,7 +4423,7 @@
   };
   define("ue-tool-bar", ToolBar);
 
-  // design-system/src/Tooltip/Tooltip.ts
+  // src/Tooltip/Tooltip.ts
   var SUMMON_DELAY = 150;
   var INTRO = 100;
   var OFFSET_X = 12;
@@ -4509,7 +4509,7 @@
   };
   define("ue-tooltip", UeTooltipElement);
 
-  // design-system/src/TreeRow/TreeRow.ts
+  // src/TreeRow/TreeRow.ts
   var ARROW2 = '<svg class="tr-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4l4.5 4L6 12z"/></svg>';
   var FOLDER2 = '<svg class="tr-icon is-folder" viewBox="0 0 16 16" aria-hidden="true"><path class="tr-folder-closed" d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.5 4.5V12a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H5.2L3.8 11V4.5a1 1 0 0 1 1-1h2L8 5h5.5"/></svg>';
   var OBJECT = '<svg class="tr-icon is-object" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg>';
@@ -4673,7 +4673,7 @@
   };
   define("ue-tree-row", TreeRow);
 
-  // design-system/src/VectorInput/VectorInput.ts
+  // src/VectorInput/VectorInput.ts
   var round = (value, places) => Math.round(value * 10 ** places) / 10 ** places;
   function format2(value, unit) {
     let text = String(round(value, 4));
@@ -4855,7 +4855,7 @@
   };
   define("ue-vector-input", UeVectorInput);
 
-  // design-system/src/WindowChrome/WindowChrome.ts
+  // src/WindowChrome/WindowChrome.ts
   var MAXIMIZE_GLYPH = "#windowChrome-i-max";
   var RESTORE_GLYPH = "#windowChrome-i-restore";
   var WindowChromeElement = class extends UeElement {
@@ -4904,7 +4904,7 @@
   };
   define("ue-window-chrome", WindowChromeElement);
 
-  // design-system/bundle/main.ts
+  // bundle/main.ts
   window.UEStarship = {
     elements: Array.from(new Set(Array.from(document.querySelectorAll("*")).map((el) => el.localName).filter((tag) => tag.startsWith("ue-"))))
   };

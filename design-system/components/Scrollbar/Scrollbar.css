@@ -1,9 +1,9 @@
-/* design-system/src/_shared/base.css */
+/* src/_shared/base.css */
 [data-pinned] {
   pointer-events: none;
 }
 
-/* design-system/src/Scrollbar/Scrollbar.css */
+/* src/Scrollbar/Scrollbar.css */
 .sb {
   position: relative;
   flex: none;

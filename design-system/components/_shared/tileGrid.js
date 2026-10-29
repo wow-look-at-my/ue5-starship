@@ -1,4 +1,4 @@
-// design-system/src/_shared/tileGrid.ts
+// src/_shared/tileGrid.ts
 function nearestInRow(tiles, from, down) {
   const tops = new Map(tiles.map((tile) => [tile, tile.getBoundingClientRect()]));
   const box = from.getBoundingClientRect();
