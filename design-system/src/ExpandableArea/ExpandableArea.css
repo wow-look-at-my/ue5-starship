@@ -1,0 +1,22 @@
+.expandablearea {
+	border-radius: 4px; /* ExpandableArea.Border radius 4 StarshipCoreStyle.cpp:568 */
+	background: var(--panel); /* fill Panel :568 */
+	color: var(--foreground-hover); /* inherited default foreground, white WidgetStyle.h:21 */
+}
+.expandablearea__header {
+	display: flex; align-items: center;
+	padding: 2px 4px; /* HeaderPadding (4,2) SExpandableArea.h:41; NoBorder padding 0 StarshipCoreStyle.cpp:240 */
+	cursor: default; user-select: none;
+}
+.expandablearea__caret {
+	flex: none; width: 16px; height: 16px; margin-right: 3px; /* caret 16x16 :564-565; AreaTitlePadding (0,0,3,0) SExpandableArea.h:40 */
+	fill: var(--foreground); stroke: var(--foreground); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; /* tint Foreground :564; approximation of the SVG */
+}
+.expandablearea__title { font: 700 10.667px/13px var(--font-sans); } /* ExpandableArea.TitleFont SmallBold 8pt :567; line box derived */
+.expandablearea__body { padding: 1px; } /* body padding 1 SExpandableArea.h:42 */
+.expandablearea__body[hidden] { display: none; }
+.expandablearea__header[role="button"] { outline: 0; }
+.expandablearea__header[role="button"]:focus-visible { outline: 1px solid var(--primary); outline-offset: -1px; border-radius: 4px; } /* FocusRectangle 1px Primary r4 StarshipCoreStyle.cpp:218 */
+.expandablearea__header[role="button"] .expandablearea__caret { transition: transform .12s ease-out; } /* right triangle turned 90 degrees is the down triangle */
+.expandablearea__header[aria-expanded="true"] .expandablearea__caret { transform: rotate(90deg); }
+@media (prefers-reduced-motion: reduce) { .expandablearea__header[role="button"] .expandablearea__caret { transition: none; } }

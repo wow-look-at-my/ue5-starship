@@ -2,3 +2,134 @@
 [data-pinned] {
   pointer-events: none;
 }
+
+/* design-system/src/TextInput/TextInput.css */
+.textinput {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  border-radius: 4px;
+  background: var(--input);
+  box-shadow: inset 0 0 0 1px var(--input-outline);
+  color: var(--foreground);
+  font: 400 13.333px/16px var(--font-sans);
+  cursor: text;
+}
+.textinput:hover,
+.textinput--hover {
+  box-shadow: inset 0 0 0 1px var(--hover);
+}
+.textinput--focus,
+.textinput--focus:hover {
+  box-shadow: inset 0 0 0 1px var(--primary);
+  color: var(--foreground-hover);
+}
+.textinput:focus-within {
+  box-shadow: inset 0 0 0 1px var(--primary);
+  color: var(--foreground-hover);
+}
+.textinput--readonly,
+.textinput--readonly:hover,
+.textinput--readonly:focus-within {
+  background: var(--header);
+  box-shadow: inset 0 0 0 1px var(--input-outline);
+  cursor: default;
+}
+.textinput--readonly:focus-within {
+  color: var(--foreground);
+}
+.textinput__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 3px 8px 4px;
+  white-space: nowrap;
+}
+.textinput__hint {
+  opacity: .35;
+}
+.textinput__caret {
+  display: inline-block;
+  width: 1.28px;
+  height: 16px;
+  vertical-align: top;
+  background: var(--white);
+}
+.textinput__sel {
+  background: var(--highlight);
+}
+.textinput--search {
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--secondary);
+}
+.textinput--search:hover,
+.textinput--search.textinput--hover {
+  box-shadow: inset 0 0 0 1px var(--hover);
+}
+.textinput--search.textinput--focus,
+.textinput--search.textinput--focus:hover {
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+.textinput--search:focus-within {
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+.textinput--search.textinput--readonly,
+.textinput--search.textinput--readonly:hover,
+.textinput--search.textinput--readonly:focus-within {
+  box-shadow: inset 0 0 0 1px var(--input-outline);
+}
+.textinput__glyph {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-left: 4px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.textinput__tail {
+  flex: none;
+  width: 7px;
+}
+.textinput__trail {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding-right: 2px;
+}
+.textinput--console {
+  font: 400 12px/16px var(--font-mono);
+}
+.textinput__field {
+  width: 0;
+  margin: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 16px;
+  caret-color: var(--white);
+  cursor: inherit;
+}
+.textinput__field::placeholder {
+  color: inherit;
+  opacity: .35;
+}
+.textinput__field::selection {
+  background: var(--highlight);
+  color: inherit;
+}
+.textinput__clear {
+  display: none;
+  cursor: default;
+}
+.textinput--filled .textinput__glass {
+  display: none;
+}
+.textinput--filled .textinput__clear {
+  display: block;
+}

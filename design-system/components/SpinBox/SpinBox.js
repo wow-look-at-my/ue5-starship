@@ -59,7 +59,7 @@ function numberAttr(el, name) {
 function rangeOf(box) {
   const min = numberAttr(box, "min");
   const max = numberAttr(box, "max");
-  return { min: min ?? -Infinity, max: max ?? Infinity, bounded: min !== null && max !== null, delta: numberAttr(box, "delta") ?? 0 };
+  return { min: min ?? -Infinity, max: max ?? Infinity, bounded: min !== null && max !== null, delta: numberAttr(box, "delta") ?? numberAttr(box, "step") ?? 0 };
 }
 function valueOf(box) {
   return numberAttr(box, "value") ?? 0;
@@ -71,26 +71,23 @@ function format(value) {
 function clamp(value, range) {
   return Math.min(range.max, Math.max(range.min, value));
 }
-function boxOf(target) {
-  return target instanceof Element ? target.closest(".spinbox") : null;
-}
 var UeSpinBoxElement = class extends UeElement {
   #drags = /* @__PURE__ */ new WeakMap();
   setup() {
-    for (const box of this.all(".spinbox")) this.#render(box);
-    this.on(this, "pointerdown", (event) => {
-      const box = boxOf(event.target);
-      if (!box || event.button !== 0 || box.getAttribute("aria-disabled") === "true") return;
+    const box = this.one(".spinbox");
+    if (!box) throw new Error("ue-spin-box needs a .spinbox element");
+    this.#render(box);
+    this.on(box, "pointerdown", (event) => {
+      if (event.button !== 0 || box.getAttribute("aria-disabled") === "true") return;
       if (box.classList.contains("spinbox--text")) return;
       box.setPointerCapture(event.pointerId);
       this.#drags.set(box, { pointerId: event.pointerId, lastX: event.clientX, distance: 0, dragging: false, before: valueOf(box), internal: valueOf(box) });
       box.focus();
       event.preventDefault();
     });
-    this.on(this, "pointermove", (event) => {
-      const box = boxOf(event.target);
-      const state = box ? this.#drags.get(box) : void 0;
-      if (!box || !state || state.pointerId !== event.pointerId) return;
+    this.on(box, "pointermove", (event) => {
+      const state = this.#drags.get(box);
+      if (!state || state.pointerId !== event.pointerId) return;
       const dx = event.clientX - state.lastX;
       state.lastX = event.clientX;
       if (!state.dragging) {
@@ -104,9 +101,8 @@ var UeSpinBoxElement = class extends UeElement {
       this.#drag(box, state, dx);
     });
     const finish = (event) => {
-      const box = boxOf(event.target);
-      const state = box ? this.#drags.get(box) : void 0;
-      if (!box || !state || state.pointerId !== event.pointerId) return;
+      const state = this.#drags.get(box);
+      if (!state || state.pointerId !== event.pointerId) return;
       this.#drags.delete(box);
       if (box.hasPointerCapture(event.pointerId)) box.releasePointerCapture(event.pointerId);
       box.classList.remove("spinbox--active");
@@ -118,11 +114,10 @@ var UeSpinBoxElement = class extends UeElement {
         this.#enterText(box);
       }
     };
-    this.on(this, "pointerup", finish);
-    this.on(this, "pointercancel", finish);
-    this.on(this, "keydown", (event) => {
-      const box = boxOf(event.target);
-      if (!box || box.getAttribute("aria-disabled") === "true") return;
+    this.on(box, "pointerup", finish);
+    this.on(box, "pointercancel", finish);
+    this.on(box, "keydown", (event) => {
+      if (box.getAttribute("aria-disabled") === "true") return;
       const state = this.#drags.get(box);
       if (event.key === "Escape" && state?.dragging) {
         this.#drags.delete(box);
@@ -140,11 +135,8 @@ var UeSpinBoxElement = class extends UeElement {
       else return;
       event.preventDefault();
     });
-    this.on(this, "focusout", (event) => {
-      if (event.target instanceof HTMLInputElement && event.target.classList.contains("spinbox__field")) {
-        const box = boxOf(event.target);
-        if (box) this.#exitText(box, true, false);
-      }
+    this.on(box, "focusout", (event) => {
+      if (event.target instanceof HTMLInputElement && event.target.classList.contains("spinbox__field")) this.#exitText(box, true, false);
     });
   }
   // The value change of one mouse move while dragging, from SSpinBox::OnMouseMove.
@@ -167,11 +159,7 @@ var UeSpinBoxElement = class extends UeElement {
     const before = valueOf(box);
     box.dataset.value = String(value);
     this.#render(box);
-    if (value !== before) {
-      const status = this.one(".spinbox-status");
-      if (status) status.textContent = "Last change: " + format(value);
-      this.emit("ue-spin-change", { value });
-    }
+    if (value !== before) this.emit("ue-spin-change", { value, text: format(value) + (box.dataset.unit ? " " + box.dataset.unit : "") });
   }
   #render(box) {
     const range = rangeOf(box);
@@ -182,8 +170,17 @@ var UeSpinBoxElement = class extends UeElement {
       box.setAttribute("aria-valuemax", String(range.max));
       box.style.setProperty("--spinbox-fill", String((value - range.min) / (range.max - range.min)));
     }
+    box.classList.toggle("spinbox--unbounded", !range.bounded);
     const text = box.querySelector(".spinbox__text");
     if (text && !box.classList.contains("spinbox--text")) text.textContent = format(value);
+    const unit = box.dataset.unit;
+    let suffix = box.querySelector(".spinbox__unit");
+    if (unit && !suffix && text) {
+      suffix = document.createElement("span");
+      suffix.className = "spinbox__unit";
+      text.after(suffix);
+    }
+    if (suffix) suffix.textContent = unit ?? "";
   }
   #enterText(box) {
     const text = box.querySelector(".spinbox__text");

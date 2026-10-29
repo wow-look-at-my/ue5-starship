@@ -1,0 +1,39 @@
+.textinput {
+	display: flex; align-items: center; box-sizing: border-box; width: 100%;
+	border-radius: 4px; /* InputFocusRadius CoreStyle.h:117 */
+	background: var(--input); /* StarshipCoreStyle.cpp:1284 */
+	box-shadow: inset 0 0 0 1px var(--input-outline); /* outline thickness CoreStyle.h:118; :1284 */
+	color: var(--foreground); /* ForegroundColor :1290 */
+	font: 400 13.333px/16px var(--font-sans); /* Normal 10pt :1288 */
+	cursor: text;
+}
+.textinput:hover, .textinput--hover { box-shadow: inset 0 0 0 1px var(--hover); } /* :1285 */
+.textinput--focus, .textinput--focus:hover { box-shadow: inset 0 0 0 1px var(--primary); color: var(--foreground-hover); } /* :1286, FocusedForegroundColor White :1293 */
+.textinput:focus-within { box-shadow: inset 0 0 0 1px var(--primary); color: var(--foreground-hover); } /* a live field with the keyboard focus: :1286, :1293 */
+.textinput--readonly, .textinput--readonly:hover, .textinput--readonly:focus-within { background: var(--header); box-shadow: inset 0 0 0 1px var(--input-outline); cursor: default; } /* :1287 */
+.textinput--readonly:focus-within { color: var(--foreground); } /* ReadOnlyForegroundColor UseForeground :1292 */
+.textinput__text { flex: 1 1 auto; min-width: 0; padding: 3px 8px 4px; white-space: nowrap; } /* Padding (8,3,8,4) :1289 */
+.textinput__hint { opacity: .35; } /* hint = foreground at alpha .35 SlateEditableTextLayout.cpp:3563 */
+.textinput__caret { display: inline-block; width: 1.28px; height: 16px; vertical-align: top; background: var(--white); } /* width clamp(.08 x 16, 1, 2) TextEditHelper.h:18, .cpp:17; brush White :1272 */
+.textinput__sel { background: var(--highlight); } /* SelectedBackgroundColor Highlight :1174, brush :1264 */
+
+.textinput--search { border-radius: 999px; box-shadow: inset 0 0 0 1px var(--secondary); } /* no radius given = half height :1303 */
+.textinput--search:hover, .textinput--search.textinput--hover { box-shadow: inset 0 0 0 1px var(--hover); } /* :1304 */
+.textinput--search.textinput--focus, .textinput--search.textinput--focus:hover { box-shadow: inset 0 0 0 1px var(--primary); } /* :1305 */
+.textinput--search:focus-within { box-shadow: inset 0 0 0 1px var(--primary); } /* :1305 */
+.textinput--search.textinput--readonly, .textinput--search.textinput--readonly:hover, .textinput--search.textinput--readonly:focus-within { box-shadow: inset 0 0 0 1px var(--input-outline); } /* :1306 */
+.textinput__glyph {
+	flex: none; width: 14px; height: 14px; margin-left: 4px; /* ImageSizeOverride 14 :1316, ImagePadding (4,0,0,0) :1315 */
+	fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; /* approximation of the SVG */
+}
+.textinput__tail { flex: none; width: 7px; } /* end spacer SSearchBox.cpp:172-177 */
+.textinput__trail { flex: none; display: flex; align-items: center; gap: 2px; padding-right: 2px; } /* extra trailing buttons inside the field */
+
+.textinput--console { font: 400 12px/16px var(--font-mono); } /* the status bar command line: Log.Normal Mono 9pt = 12px OutputLogStyle.cpp:54, radius 4 from the base */
+
+.textinput__field { width: 0; margin: 0; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; line-height: 16px; caret-color: var(--white); cursor: inherit; } /* a real <input> inside .textinput__text; caret White :1272 */
+.textinput__field::placeholder { color: inherit; opacity: .35; } /* hint = foreground at alpha .35 SlateEditableTextLayout.cpp:3563 */
+.textinput__field::selection { background: var(--highlight); color: inherit; } /* SelectedBackgroundColor Highlight :1174 */
+.textinput__clear { display: none; cursor: default; }
+.textinput--filled .textinput__glass { display: none; } /* the clear button replaces the glass while the text is non-empty, SSearchBox.cpp:148-170 */
+.textinput--filled .textinput__clear { display: block; }

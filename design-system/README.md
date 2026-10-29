@@ -36,7 +36,7 @@ Each component folder holds a README with an exact metrics table and a live prev
 
 The EditorLayout card shows the whole window assembled from the components, with the viewport placeholder in the centre tab. Copy its arrangement. Place Actors sits at the left. The viewport in the middle, Details above Outliner at the right, Content Browser across the bottom and the status bar last.
 
-Groups: Docking (DockTab, TabWell, WindowChrome, Splitter), Toolbars (MenuBar, ToolBar, PlaceActorsPanel, StatusBar), Details (DetailsHeader, DetailsSearchRow, FilterPills, DetailsCategory, VectorInput, SegmentedControl, AssetPicker), Outliner (TreeRow, HeaderRow, SceneOutliner, Scrollbar), Content Browser (ContentToolbar, SourcePanel, AssetTile, AssetSearchBar, ContentBrowser), Controls (Button, ComboButton, Checkbox, TextInput, SpinBox, Slider, Tooltip, PopupMenu, Notification, ExpandableArea), Layout (EditorLayout).
+Groups: Docking (DockTab, TabWell, WindowChrome, Splitter), Toolbars (MenuBar, ToolBar, PlaceActorsPanel, StatusBar), Details (DetailsHeader, DetailsSearchRow, FilterPills, DetailsCategory, VectorInput, SegmentedControl, AssetPicker), Outliner (TreeRow, HeaderRow, SceneOutliner, Scrollbar), Content Browser (ContentToolbar, SourcePanel, AssetTile, AssetSearchBar, ContentBrowser), Controls (Button, ComboButton, Checkbox, TextInput, SpinBox, Slider, Tooltip, PopupMenu, Notification, ExpandableArea, ResetToDefault), Layout (EditorLayout).
 
 Use `axis-x`, `axis-y` and `axis-z` for the 2px edge bars on vector fields.
 

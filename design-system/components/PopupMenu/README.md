@@ -55,3 +55,54 @@ So a label with an icon starts at x = 12 + 2 + 8 + 2 + 2 + 16 + 6 + 2 = 50 and a
 - Do not draw rounded rows or an inner shadow.
 - Do not tint icons with Primary. They are white at 60% alpha.
 - Do not add a gap between the popup and its parent. The source defines none.
+
+## Markup contract
+
+One `<ue-popup-menu>` wraps exactly one list. The list is a `.popupmenu` with `role="menu"` and `tabindex="0"`. Rows, separators and headings are its direct children. The CSS lives in `src/PopupMenu/PopupMenu.css`. The markup works in any component.
+
+```html
+<ue-popup-menu>
+	<div class="popupmenu" role="menu" tabindex="0" aria-label="View">
+		<div class="popupmenu__heading">View</div>
+		<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Copy</span><span class="popupmenu__keys">Ctrl+C</span></span></div>
+		<div class="popupmenu__sep"></div>
+	</div>
+</ue-popup-menu>
+```
+
+| Row kind | Markup |
+|---|---|
+| Plain | `.popupmenu__row[role=menuitem] > .popupmenu__body > .popupmenu__label` |
+| Icon | add `<span class="popupmenu__icon"><svg viewBox="0 0 16 16">...</svg></span>` before the label, inside `.popupmenu__body` |
+| Key binding | add `<span class="popupmenu__keys">Ctrl+C</span>` after the label, inside `.popupmenu__body` |
+| Check | `role="menuitemcheckbox" aria-checked="true\|false"`. First child `<span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span>`. The tick hides while `aria-checked="false"` |
+| Radio | `role="menuitemradio" aria-checked="true\|false"`. First child `<span class="popupmenu__check"><span class="popupmenu__radio"></span></span>`. The dot turns white while checked. A pick clears `aria-checked` on the sibling radio rows |
+| Check column gap | a row without a mark in a menu that has marks starts with an empty `<span class="popupmenu__check"></span>` |
+| Disabled | `aria-disabled="true"`. Keys and the pointer skip it |
+| Separator | `<div class="popupmenu__sep"></div>` |
+| Heading | `<div class="popupmenu__heading">Text</div>` |
+| Submenu | the row has `aria-haspopup="menu"`, a trailing `<svg class="popupmenu__arrow" viewBox="0 0 16 16"><path d="M6 3.5l4.5 4.5L6 12.5"/></svg>` and a last child `<div class="popupmenu popupmenu__sub" role="menu" hidden>` with its own rows |
+
+An optional `data-value` on a row replaces the label as the event `value`.
+
+## Variants
+
+| Class on `.popupmenu` | Look |
+|---|---|
+| none | Menu look: 8px vertical padding, rows padded 12 left and 5 right |
+| `popupmenu--small` | 10.667px text, as the asset picker list uses |
+| `popupmenu--combo` | ComboBox list look: no vertical padding, rows padded 8 on both sides, no check column. A `ue-combo-button` panel uses it for value pickers |
+
+The list takes the width of its container. Give it a width in the page that uses it. Inside a combo button panel the panel sizes it.
+
+## Dropdown use
+
+A `ue-combo-button` panel holds a `ue-popup-menu`. The panel stays hidden until the combo button opens it. The combo button calls `focusMenu(row, keys)` to focus the list and `reset()` to clear it, and owns open, close, outside click and Escape. The menu owns row navigation and activation.
+
+## Events
+
+| Event | Detail | When |
+|---|---|---|
+| `ue-menu-activate` | `{ label, role, checked, text, value, row }` | A row is activated by click, Enter or Space. A submenu row only opens its submenu. `checked` is the new state of a check or radio row, else `null`. `text` is the label plus the new state, such as `Show Grid (checked)` |
+
+Keys on the focused list: Up, Down, Home and End move. Right opens a submenu. Left closes it. Enter and Space activate. Escape closes a submenu, and at the top level it clears the current row and bubbles on.

@@ -1,4 +1,4 @@
-<!-- @dsCard group="Controls" height=200 subtitle="ComboButton and SimpleComboButton with caret: normal, hovered, open, disabled, plus the ComboBox popup" -->
+<!-- @dsCard group="Controls" height=340 subtitle="ComboButton and SimpleComboButton with caret: normal, hovered, open, disabled, plus the ComboBox popup" -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -15,70 +15,138 @@
 	.combobutton-row { display: flex; align-items: center; gap: 12px; }
 	.combobutton-live { flex: 1 1 100%; display: flex; flex-direction: column; gap: 8px; }
 	.combobutton-status { color: var(--foreground-hover); }
-	[data-pinned] { pointer-events: none; } /* a pinned specimen shows one forced state and ignores the pointer */
-
 	.combobutton-spacer { height: 78px; }
+	.combobutton-row--end { justify-content: flex-end; width: 360px; }
+	.combobutton-panel-demo { --combobutton-menu-min-width: 200px; }
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-	<symbol id="combobutton-caret" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></symbol>
-</svg>
 <div class="combobutton-page">
-	<ue-combo-button class="combobutton-live-host">
-		<div class="combobutton-live">
-			<span class="combobutton-cap">Live: click, or Tab then Enter, Space or Down to open. Arrows and hover highlight, Enter picks, Escape or an outside click closes.</span>
-			<div class="combobutton-row">
+	<div class="combobutton-live">
+		<span class="combobutton-cap">Live: click, or Tab then Enter, Space or Down to open. Arrows and hover highlight, Enter picks, Escape or an outside click closes.</span>
+		<div class="combobutton-row">
+			<ue-combo-button>
 				<div class="combobutton-anchor">
-					<span class="combobutton" role="combobox" tabindex="0" aria-haspopup="listbox" aria-expanded="false" style="min-width:160px"><span class="combobutton__label">Location</span><svg class="combobutton__arrow"><use href="#combobutton-caret"/></svg></span>
-					<div class="combobutton-menu" role="listbox" hidden>
-						<div class="combobutton-row-item" role="option">Location</div>
-						<div class="combobutton-row-item" role="option">Rotation</div>
-						<div class="combobutton-row-item" role="option">Scale</div>
+					<span class="combobutton" role="combobox" tabindex="0" aria-haspopup="menu" aria-expanded="false" style="min-width:160px"><span class="combobutton__label">Location</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
+					<div class="combobutton-menu" hidden>
+						<ue-popup-menu>
+							<div class="popupmenu popupmenu--combo" role="menu" tabindex="0" aria-label="Transform type">
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Location</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Rotation</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Scale</span></span></div>
+							</div>
+						</ue-popup-menu>
 					</div>
 				</div>
+			</ue-combo-button>
+			<ue-combo-button>
 				<div class="combobutton-anchor">
-					<span class="combobutton combobutton--simple" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false"><span class="combobutton__label">Settings</span><svg class="combobutton__arrow"><use href="#combobutton-caret"/></svg></span>
-					<div class="combobutton-menu" role="menu" hidden>
-						<div class="combobutton-row-item" role="menuitem">Editor Preferences</div>
-						<div class="combobutton-row-item" role="menuitem">Project Settings</div>
-						<div class="combobutton-row-item" role="menuitem">Plugins</div>
+					<span class="combobutton combobutton--simple" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false"><span class="combobutton__label">Settings</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
+					<div class="combobutton-menu combobutton-panel-demo" hidden>
+						<ue-popup-menu>
+							<div class="popupmenu" role="menu" tabindex="0" aria-label="Settings">
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Editor Preferences</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Project Settings</span></span></div>
+								<div class="popupmenu__sep"></div>
+								<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="true"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Plugins</span></span></div>
+							</div>
+						</ue-popup-menu>
 					</div>
 				</div>
-				<span class="combobutton" role="combobox" aria-disabled="true" aria-expanded="false"><span class="combobutton__label">Location</span><svg class="combobutton__arrow"><use href="#combobutton-caret"/></svg></span>
-			</div>
-			<span class="combobutton-cap combobutton-status">Picked: nothing yet</span>
-			<div class="combobutton-spacer"></div>
+			</ue-combo-button>
+			<span class="combobutton" role="combobox" aria-disabled="true" aria-expanded="false"><span class="combobutton__label">Location</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
 		</div>
-	</ue-combo-button>
+		<span class="combobutton-cap">Variants: icon-only, small (property row), button look, and a panel aligned to the end</span>
+		<div class="combobutton-row">
+			<ue-combo-button>
+				<div class="combobutton-anchor">
+					<span class="combobutton combobutton--icon" role="button" tabindex="0" aria-label="Add" aria-haspopup="menu" aria-expanded="false"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
+					<div class="combobutton-menu" hidden>
+						<ue-popup-menu>
+							<div class="popupmenu" role="menu" tabindex="0" aria-label="Add">
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Cube</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Sphere</span></span></div>
+							</div>
+						</ue-popup-menu>
+					</div>
+				</div>
+			</ue-combo-button>
+			<ue-combo-button>
+				<div class="combobutton-anchor">
+					<span class="combobutton combobutton--small" role="combobox" tabindex="0" aria-haspopup="menu" aria-expanded="false" style="min-width:90px"><span class="combobutton__label">BlockAll</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
+					<div class="combobutton-menu" hidden>
+						<ue-popup-menu>
+							<div class="popupmenu popupmenu--combo popupmenu--small" role="menu" tabindex="0" aria-label="Collision">
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">BlockAll</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">OverlapAll</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">NoCollision</span></span></div>
+							</div>
+						</ue-popup-menu>
+					</div>
+				</div>
+			</ue-combo-button>
+			<ue-combo-button mode="action">
+				<div class="combobutton-anchor">
+					<span class="combobutton combobutton--button" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg><span class="combobutton__label">Add</span></span>
+					<div class="combobutton-menu" hidden>
+						<ue-popup-menu>
+							<div class="popupmenu" role="menu" tabindex="0" aria-label="Add component">
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Light</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Camera</span></span></div>
+							</div>
+						</ue-popup-menu>
+					</div>
+				</div>
+			</ue-combo-button>
+		</div>
+		<div class="combobutton-row combobutton-row--end">
+			<ue-combo-button>
+				<div class="combobutton-anchor">
+					<span class="combobutton" role="combobox" tabindex="0" aria-haspopup="menu" aria-expanded="false"><span class="combobutton__label">Right edge</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
+					<div class="combobutton-menu combobutton-menu--end" hidden>
+						<ue-popup-menu>
+							<div class="popupmenu popupmenu--combo" role="menu" tabindex="0" aria-label="Edge">
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Right edge</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">A much longer label than the trigger holds</span></span></div>
+							</div>
+						</ue-popup-menu>
+					</div>
+				</div>
+			</ue-combo-button>
+		</div>
+		<ue-event-status class="combobutton-cap combobutton-status" event="ue-combo-pick" template="Picked: {value}">Picked: nothing yet</ue-event-status>
+		<div class="combobutton-spacer"></div>
+	</div>
 	<div class="combobutton-col">
 		<span class="combobutton-cap">Pinned: forced states for reference, not interactive</span>
 		<span class="combobutton-cap">ComboButton</span>
 		<div class="combobutton-row">
-			<span class="combobutton" data-pinned><span class="combobutton__label">Location</span><svg class="combobutton__arrow"><use href="#combobutton-caret"/></svg></span>
-			<span class="combobutton combobutton--hover" data-pinned><span class="combobutton__label">Location</span><svg class="combobutton__arrow"><use href="#combobutton-caret"/></svg></span>
-			<span class="combobutton combobutton--disabled" data-pinned><span class="combobutton__label">Location</span><svg class="combobutton__arrow"><use href="#combobutton-caret"/></svg></span>
+			<span class="combobutton" data-pinned><span class="combobutton__label">Location</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
+			<span class="combobutton combobutton--hover" data-pinned><span class="combobutton__label">Location</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
+			<span class="combobutton combobutton--disabled" data-pinned><span class="combobutton__label">Location</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
 		</div>
 		<span class="combobutton-cap">Normal, hovered, disabled</span>
 		<span class="combobutton-cap" style="margin-top:6px">SimpleComboButton (borderless)</span>
 		<div class="combobutton-row">
-			<span class="combobutton combobutton--simple" data-pinned><span class="combobutton__label">Settings</span><svg class="combobutton__arrow"><use href="#combobutton-caret"/></svg></span>
-			<span class="combobutton combobutton--simple combobutton--hover" data-pinned><span class="combobutton__label">Settings</span><svg class="combobutton__arrow"><use href="#combobutton-caret"/></svg></span>
+			<span class="combobutton combobutton--simple" data-pinned><span class="combobutton__label">Settings</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
+			<span class="combobutton combobutton--simple combobutton--hover" data-pinned><span class="combobutton__label">Settings</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
 		</div>
 		<span class="combobutton-cap">Normal, hovered</span>
 	</div>
 	<div class="combobutton-col">
 		<span class="combobutton-cap">Open (mouse down) with ComboBox popup</span>
 		<div class="combobutton-anchor" data-pinned>
-			<span class="combobutton combobutton--open" data-pinned style="min-width:160px"><span class="combobutton__label">Rotation</span><svg class="combobutton__arrow"><use href="#combobutton-caret"/></svg></span>
+			<span class="combobutton combobutton--open" data-pinned style="min-width:160px"><span class="combobutton__label">Rotation</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
 			<div class="combobutton-menu">
-				<div class="combobutton-row-item">Location</div>
-				<div class="combobutton-row-item combobutton-row-item--hover">Rotation</div>
-				<div class="combobutton-row-item combobutton-row-item--focus">Scale</div>
+				<div class="popupmenu popupmenu--combo">
+					<div class="popupmenu__row"><span class="popupmenu__body"><span class="popupmenu__label">Location</span></span></div>
+					<div class="popupmenu__row popupmenu__row--hover"><span class="popupmenu__body"><span class="popupmenu__label">Rotation</span></span></div>
+					<div class="popupmenu__row"><span class="popupmenu__body"><span class="popupmenu__label">Scale</span></span></div>
+				</div>
 			</div>
 		</div>
 		<div class="combobutton-spacer"></div>
-		<span class="combobutton-cap">Hovered row fills with Primary. The ring marks keyboard focus.</span>
+		<span class="combobutton-cap">Hovered row fills with Primary.</span>
 	</div>
 </div>
 </body>

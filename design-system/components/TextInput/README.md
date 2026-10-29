@@ -47,6 +47,38 @@ The search style copies the editable text box and replaces the brushes (`SCS:130
 | End spacer | 7px, so the rounded end does not clip the text | `SSearchBox.cpp:172-177` |
 | Up and down result arrows | 16x16 chevrons, shown only when a search delegate is bound | `SCS:1311-1312`; `SSearchBox.cpp:57-120` (not drawn) |
 
+## Markup contract
+
+One `<ue-text-input>` wraps exactly one `.textinput` box. The CSS lives in `src/TextInput/TextInput.css`. Glyphs are inline `svg` elements with a `viewBox`.
+
+```html
+<ue-text-input>
+	<div class="textinput textinput--search">
+		<svg class="textinput__glyph textinput__glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+		<svg class="textinput__glyph textinput__clear" role="button" aria-label="Clear search" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+		<input class="textinput__text textinput__field" type="text" placeholder="Search..." aria-label="Search">
+		<span class="textinput__tail"></span>
+	</div>
+</ue-text-input>
+```
+
+| Variant | Markup |
+|---|---|
+| Editable box | `.textinput > input.textinput__text.textinput__field` |
+| Read-only | add `textinput--readonly` and the `readonly` attribute on the input |
+| Search | add `textinput--search`. Needs `.textinput__glass`, `.textinput__clear` and `.textinput__tail` as above. The pill radius applies. The clear X shows only while the field has text and replaces the glass. Escape clears the field, only in this variant |
+| Trailing buttons | put `<span class="textinput__trail">` with the buttons between the input and the tail. A click on the slot does not focus the field |
+| Console | add `textinput--console` for the status bar command line: 12px mono text, 4px radius. Escape does nothing special |
+
+Forced state classes for pinned specimens: `textinput--hover`, `textinput--focus`. A pinned specimen holds `.textinput__text` spans, `.textinput__hint`, `.textinput__sel` and `.textinput__caret` in place of an input.
+
+## Events
+
+| Event | Detail | When |
+|---|---|---|
+| `ue-text-input` | `{ value }` | The text changes by typing, paste, clear button or Escape |
+| `ue-text-clear` | `{}` | The search clear button or Escape empties the field. `ue-text-input` with an empty value fires first |
+
 ## Do
 
 - Use `EditableTextBox` for values and names, `SearchBox` for filters.

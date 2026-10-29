@@ -1,6 +1,9 @@
-// <ue-popup-menu> wraps live .popupmenu blocks. One row at a time is current, the hovered or keyboard row.
+// <ue-popup-menu> wraps one .popupmenu list. One row at a time is current,
+// the hovered or keyboard row.
 import { UeElement, define } from '../_shared/element.ts';
+import { ownedBy } from '../_shared/own.ts';
 import { enabledRows, rowLabel } from '../_shared/popup.ts';
+import './PopupMenu.css';
 
 const ROW = '.popupmenu__row';
 const CURRENT = 'popupmenu__row--hover';
@@ -10,10 +13,6 @@ const KEYS = 'popupmenu--keys';
 
 function rowOf(target: EventTarget | null): HTMLElement | null {
 	return target instanceof Element ? target.closest<HTMLElement>(ROW) : null;
-}
-
-function rootOf(node: Element | null): HTMLElement | null {
-	return node?.closest<HTMLElement>('.popupmenu[tabindex]') ?? null;
 }
 
 function isDisabled(row: HTMLElement): boolean {
@@ -29,12 +28,53 @@ function menuOf(row: HTMLElement): HTMLElement | null {
 	return row.parentElement;
 }
 
+export interface MenuActivateDetail {
+	label: string;
+	role: string | null;
+	// Null for a plain row.
+	checked: boolean | null;
+	// The label, plus the new state for a check or radio row.
+	text: string;
+	// The data-value attribute of the row, or its label.
+	value: string;
+	row: HTMLElement;
+}
+
 export class UePopupMenuElement extends UeElement {
+	// The focusable .popupmenu list.
+	get root(): HTMLElement {
+		const root = this.one('.popupmenu[tabindex]');
+		if (!root) throw new Error('ue-popup-menu needs a .popupmenu[tabindex] element');
+		return root;
+	}
+
+	// Focuses the list and marks `row` current. `keys` hides the hover highlight, as after an arrow key.
+	focusMenu(row: HTMLElement | null, keys: boolean): void {
+		const root = this.root;
+		root.focus({ preventScroll: true });
+		root.classList.toggle(KEYS, keys);
+		this.#show(root, row, null);
+	}
+
+	// Clears the current row and closes every submenu.
+	reset(): void {
+		const root = this.root;
+		root.classList.remove(KEYS);
+		this.#show(root, null, null);
+	}
+
+	// The enabled rows of the top level, in order.
+	topRows(): HTMLElement[] {
+		return enabledRows(this.root, ':scope > ' + ROW);
+	}
+
 	protected setup(): void {
+		void this.root;
+
 		this.on(this, 'mousemove', (event) => {
 			const row = rowOf(event.target);
-			const root = rootOf(row);
-			if (!row || !root) return;
+			if (!row || !ownedBy(this, event.target)) return;
+			const root = this.root;
 			root.classList.remove(KEYS);
 			if (isDisabled(row)) return;
 			const sub = submenuOf(row);
@@ -45,7 +85,7 @@ export class UePopupMenuElement extends UeElement {
 
 		this.on(this, 'pointerdown', (event) => {
 			const row = rowOf(event.target);
-			if (row && event.button === 0 && !isDisabled(row)) row.classList.add(PRESSED);
+			if (row && ownedBy(this, event.target) && event.button === 0 && !isDisabled(row)) row.classList.add(PRESSED);
 		});
 		const release = (): void => {
 			for (const row of this.all(ROW + '.' + PRESSED)) row.classList.remove(PRESSED);
@@ -59,31 +99,30 @@ export class UePopupMenuElement extends UeElement {
 
 		this.on(this, 'click', (event) => {
 			const row = rowOf(event.target);
-			const root = rootOf(row);
-			if (!row || !root || isDisabled(row)) return;
+			if (!row || !ownedBy(this, event.target) || isDisabled(row)) return;
 			const sub = submenuOf(row);
 			if (sub) {
-				this.#show(root, row, sub.hidden ? row : null);
+				this.#show(this.root, row, sub.hidden ? row : null);
 				return;
 			}
-			this.#show(root, row, null);
+			this.#show(this.root, row, null);
 			this.#activate(row);
 		});
 
 		this.on(this, 'mouseout', (event) => {
-			const root = rootOf(event.target instanceof Element ? event.target : null);
-			if (!root || (event.relatedTarget instanceof Node && root.contains(event.relatedTarget))) return;
+			const root = this.root;
+			if (!ownedBy(this, event.target) || (event.relatedTarget instanceof Node && root.contains(event.relatedTarget))) return;
 			if (!root.classList.contains(KEYS)) this.#show(root, null, null);
 		});
 
 		this.on(this, 'keydown', (event) => {
-			const root = event.target instanceof HTMLElement && event.target.matches('.popupmenu[tabindex]') ? event.target : null;
-			if (root) this.#key(event, root);
+			if (event.target === this.root) this.#key(event, this.root);
 		});
 
 		this.on(this, 'focusout', (event) => {
-			const root = rootOf(event.target instanceof Element ? event.target : null);
-			if (root && !(event.relatedTarget instanceof Node && root.contains(event.relatedTarget))) this.#show(root, null, null);
+			const root = this.root;
+			if (!root.contains(event.target as Node)) return;
+			if (!(event.relatedTarget instanceof Node && root.contains(event.relatedTarget))) this.#show(root, null, null);
 		});
 	}
 
@@ -109,20 +148,21 @@ export class UePopupMenuElement extends UeElement {
 	#activate(row: HTMLElement): void {
 		const role = row.getAttribute('role');
 		const label = rowLabel(row, '.popupmenu__label');
-		let text = 'Activated: ' + label;
+		let checked: boolean | null = null;
+		let text = label;
 		if (role === 'menuitemcheckbox') {
-			const on = row.getAttribute('aria-checked') !== 'true';
-			row.setAttribute('aria-checked', String(on));
-			text += on ? ' (checked)' : ' (unchecked)';
+			checked = row.getAttribute('aria-checked') !== 'true';
+			row.setAttribute('aria-checked', String(checked));
+			text += checked ? ' (checked)' : ' (unchecked)';
 		} else if (role === 'menuitemradio') {
 			for (const other of Array.from(menuOf(row)?.querySelectorAll<HTMLElement>(':scope > [role="menuitemradio"]') ?? [])) {
 				other.setAttribute('aria-checked', String(other === row));
 			}
+			checked = true;
 			text += ' (selected)';
 		}
-		const status = row.closest('.popupmenu-live')?.querySelector('.popupmenu-status');
-		if (status) status.textContent = text;
-		this.emit('ue-menu-activate', { label });
+		const detail: MenuActivateDetail = { label, role, checked, text, value: row.dataset.value ?? label, row };
+		this.emit('ue-menu-activate', detail);
 	}
 
 	#key(event: KeyboardEvent, root: HTMLElement): void {
@@ -144,13 +184,17 @@ export class UePopupMenuElement extends UeElement {
 			case 'ArrowLeft': this.#leave(root, current); break;
 			case 'Escape':
 				root.classList.add(KEYS);
-				if (current && menu !== root) this.#leave(root, current);
-				else this.#show(root, null, null);
+				if (current && menu !== root) {
+					this.#leave(root, current);
+					event.stopPropagation();
+				} else {
+					this.#show(root, null, null);
+				}
 				break;
 			case 'Enter':
 			case ' ':
 				root.classList.add(KEYS);
-				if (!current) break;
+				if (event.repeat || !current) break;
 				if (submenuOf(current)) this.#enter(root, current);
 				else this.#activate(current);
 				break;

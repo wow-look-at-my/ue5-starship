@@ -1,0 +1,45 @@
+<!-- @dsCard group="Controls" height=190 subtitle="Reset to default arrow beside a property value: visible when the value differs, an invisible slot when it equals the default" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ResetToDefault</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Condensed:wght@400;700&family=Roboto+Mono&display=swap">
+<style>body { font-family: var(--font-sans); }</style>
+<style>
+	.resettodefault-page { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+	.resettodefault-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px; }
+	.resettodefault-cap { font: 400 10.667px/1.2 var(--font-sans); color: var(--foreground); opacity: .7; }
+	.resettodefault-status { color: var(--foreground-hover); opacity: 1; }
+	.resettodefault-value { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 4px; background: var(--input); box-shadow: inset 0 0 0 1px var(--input-outline); font: 400 13.333px/16px var(--font-sans); color: var(--foreground); }
+	.resettodefault-slot { outline: 1px dashed var(--input-outline); outline-offset: 1px; } /* demo only: shows the slot an idle arrow keeps */
+</style>
+</head>
+<body>
+<div class="resettodefault-page">
+	<span class="resettodefault-cap">Live: the arrow shows only while the value differs from its default. Click it to ask for the reset. An idle arrow keeps its slot (dashed outline here) so the rows line up.</span>
+	<div class="resettodefault-row">
+		<span class="resettodefault-value">Mass 120.0</span>
+		<ue-reset-to-default differs>
+			<button class="resettodefault" type="button" title="Reset this property to its default value." aria-label="Reset to default"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button>
+			<ue-event-status class="resettodefault-cap resettodefault-status" event="ue-reset" template="Reset requested">Reset: not clicked</ue-event-status>
+		</ue-reset-to-default>
+	</div>
+	<div class="resettodefault-row">
+		<span class="resettodefault-value">Mass 100.0</span>
+		<ue-reset-to-default>
+			<button class="resettodefault resettodefault-slot" type="button" title="Reset this property to its default value." aria-label="Reset to default"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button>
+		</ue-reset-to-default>
+		<span class="resettodefault-cap">Value equals the default: idle</span>
+	</div>
+	<span class="resettodefault-cap">Pinned: each state forced for reference, not interactive</span>
+	<div class="resettodefault-row">
+		<button class="resettodefault" data-pinned type="button" aria-label="Normal"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button>
+		<button class="resettodefault resettodefault--hover" data-pinned type="button" aria-label="Hovered"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button>
+		<button class="resettodefault resettodefault--pressed" data-pinned type="button" aria-label="Pressed"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button>
+		<span class="resettodefault-cap">Normal, hovered, pressed (the glyph drops 1px)</span>
+	</div>
+</div>
+</body>
+</html>

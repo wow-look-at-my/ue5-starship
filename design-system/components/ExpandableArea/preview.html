@@ -1,4 +1,4 @@
-<!-- @dsCard group="Controls" height=140 subtitle="ExpandableArea: collapsed and expanded, caret, bold small title, rounded panel body" -->
+<!-- @dsCard group="Controls" height=210 subtitle="ExpandableArea: collapsed and expanded, caret, bold small title, rounded panel body" -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -13,77 +13,65 @@
 	.expandablearea-col { display: flex; flex-direction: column; gap: 6px; width: 260px; }
 	.expandablearea-cap { font: 400 10.667px/1.2 var(--font-sans); color: var(--foreground); opacity: .7; }
 
-	.expandablearea {
-		border-radius: 4px; /* ExpandableArea.Border radius 4 StarshipCoreStyle.cpp:568 */
-		background: var(--panel); /* fill Panel :568 */
-		color: var(--foreground-hover); /* inherited default foreground, white WidgetStyle.h:21 */
-	}
-	.expandablearea__header {
-		display: flex; align-items: center;
-		padding: 2px 4px; /* HeaderPadding (4,2) SExpandableArea.h:41; NoBorder padding 0 StarshipCoreStyle.cpp:240 */
-		cursor: default; user-select: none;
-	}
-	.expandablearea__caret {
-		flex: none; width: 16px; height: 16px; margin-right: 3px; /* caret 16x16 :564-565; AreaTitlePadding (0,0,3,0) SExpandableArea.h:40 */
-		fill: none; stroke: var(--foreground); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; /* tint Foreground :564; approximation of the SVG */
-	}
-	.expandablearea__title { font: 700 10.667px/13px var(--font-sans); } /* ExpandableArea.TitleFont SmallBold 8pt :567; line box derived */
-	.expandablearea__body { padding: 1px; } /* body padding 1 SExpandableArea.h:42 */
-	.expandablearea__body[hidden] { display: none; }
-	[data-pinned] { pointer-events: none; } /* a pinned specimen shows one state and ignores the pointer */
 	.expandablearea-live { display: flex; flex-wrap: wrap; gap: 20px 32px; flex: 1 1 100%; }
-	.expandablearea__header[role="button"] { outline: 0; }
-	.expandablearea__header[role="button"]:focus-visible { outline: 1px solid var(--primary); outline-offset: -1px; border-radius: 4px; } /* FocusRectangle 1px Primary r4 StarshipCoreStyle.cpp:218 */
-	.expandablearea__header[role="button"] .expandablearea__caret { transition: transform .12s ease-out; } /* right triangle turned 90 degrees is the down triangle */
-	.expandablearea__header[aria-expanded="true"] .expandablearea__caret { transform: rotate(90deg); }
-	@media (prefers-reduced-motion: reduce) { .expandablearea__header[role="button"] .expandablearea__caret { transition: none; } }
-	.expandablearea__row { padding: 4px 8px; font: 400 13.333px/16px var(--font-sans); color: var(--foreground); } /* consumer content; sample only */
+	.expandablearea-header-tools { margin-left: auto; display: flex; align-items: center; gap: 6px; } /* demo only: controls that sit in a header */
+	.expandablearea-row { padding: 4px 8px; font: 400 13.333px/16px var(--font-sans); color: var(--foreground); } /* consumer content; sample only */
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-	<symbol id="expandablearea-right" viewBox="0 0 16 16"><path d="M6 4l4 4-4 4z"/></symbol>
-	<symbol id="expandablearea-down" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4z"/></symbol>
-</svg>
 <div class="expandablearea-page">
-	<ue-expandable-area>
-		<div class="expandablearea-live">
-			<div class="expandablearea-col">
-				<span class="expandablearea-cap">Live: click the header, or Tab to it and press Enter or Space. The header has no hover fill in the engine.</span>
+	<div class="expandablearea-live">
+		<div class="expandablearea-col">
+			<span class="expandablearea-cap">Live: click the header, or Tab to it and press Enter or Space. The header has no hover fill in the engine.</span>
+			<ue-expandable-area>
 				<div class="expandablearea">
-					<div class="expandablearea__header" role="button" tabindex="0" aria-expanded="false"><svg class="expandablearea__caret" style="fill:var(--foreground)"><use href="#expandablearea-right"/></svg><span class="expandablearea__title">Advanced</span></div>
+					<div class="expandablearea__header" role="button" tabindex="0" aria-expanded="false"><svg class="expandablearea__caret" viewBox="0 0 16 16"><path d="M6 4l4 4-4 4z"/></svg><span class="expandablearea__title">Advanced</span></div>
 					<div class="expandablearea__body" hidden>
-						<div class="expandablearea__row">Enable Gravity</div>
-						<div class="expandablearea__row">Mass Scale</div>
+						<div class="expandablearea-row">Enable Gravity</div>
+						<div class="expandablearea-row">Mass Scale</div>
 					</div>
 				</div>
-			</div>
-			<div class="expandablearea-col">
-				<span class="expandablearea-cap">Live, starts expanded</span>
-				<div class="expandablearea">
-					<div class="expandablearea__header" role="button" tabindex="0" aria-expanded="true"><svg class="expandablearea__caret" style="fill:var(--foreground)"><use href="#expandablearea-right"/></svg><span class="expandablearea__title">Transform</span></div>
-					<div class="expandablearea__body">
-						<div class="expandablearea__row">Location</div>
-						<div class="expandablearea__row">Rotation</div>
-					</div>
-				</div>
-			</div>
+				<ue-event-status class="expandablearea-cap" event="ue-expand-toggle" template="Expanded: {expanded}">Expanded: false</ue-event-status>
+			</ue-expandable-area>
 		</div>
-	</ue-expandable-area>
+		<div class="expandablearea-col">
+			<span class="expandablearea-cap">Live, starts expanded</span>
+			<ue-expandable-area>
+				<div class="expandablearea">
+					<div class="expandablearea__header" role="button" tabindex="0" aria-expanded="true"><svg class="expandablearea__caret" viewBox="0 0 16 16"><path d="M6 4l4 4-4 4z"/></svg><span class="expandablearea__title">Transform</span></div>
+					<div class="expandablearea__body">
+						<div class="expandablearea-row">Location</div>
+						<div class="expandablearea-row">Rotation</div>
+					</div>
+				</div>
+			</ue-expandable-area>
+		</div>
+		<div class="expandablearea-col">
+			<span class="expandablearea-cap">Live, controls in the header do not fold the area</span>
+			<ue-expandable-area>
+				<div class="expandablearea">
+					<div class="expandablearea__header" role="button" tabindex="0" aria-expanded="true"><svg class="expandablearea__caret" viewBox="0 0 16 16"><path d="M6 4l4 4-4 4z"/></svg><span class="expandablearea__title">Lighting</span><span class="expandablearea-header-tools"><ue-button><button class="button button--simple button--small" aria-label="Add light">Add</button></ue-button></span></div>
+					<div class="expandablearea__body">
+						<div class="expandablearea-row">Intensity</div>
+					</div>
+				</div>
+			</ue-expandable-area>
+		</div>
+	</div>
 	<span class="expandablearea-cap" style="flex:1 1 100%;max-width:none">Pinned: collapsed and expanded for reference, not interactive</span>
 	<div class="expandablearea-col">
 		<span class="expandablearea-cap">Collapsed</span>
 		<div class="expandablearea" data-pinned>
-			<div class="expandablearea__header"><svg class="expandablearea__caret" style="fill:var(--foreground)"><use href="#expandablearea-right"/></svg><span class="expandablearea__title">Advanced</span></div>
+			<div class="expandablearea__header"><svg class="expandablearea__caret" viewBox="0 0 16 16"><path d="M6 4l4 4-4 4z"/></svg><span class="expandablearea__title">Advanced</span></div>
 		</div>
 	</div>
 	<div class="expandablearea-col">
 		<span class="expandablearea-cap">Expanded</span>
 		<div class="expandablearea" data-pinned>
-			<div class="expandablearea__header"><svg class="expandablearea__caret" style="fill:var(--foreground)"><use href="#expandablearea-down"/></svg><span class="expandablearea__title">Transform</span></div>
+			<div class="expandablearea__header"><svg class="expandablearea__caret" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4z"/></svg><span class="expandablearea__title">Transform</span></div>
 			<div class="expandablearea__body">
-				<div class="expandablearea__row">Location</div>
-				<div class="expandablearea__row">Rotation</div>
+				<div class="expandablearea-row">Location</div>
+				<div class="expandablearea-row">Rotation</div>
 			</div>
 		</div>
 	</div>

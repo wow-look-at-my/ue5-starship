@@ -1,0 +1,21 @@
+.slider { --slider-value: .5; position: relative; width: 200px; height: 8px; } /* desired height = max(BarThickness 4, thumb 8) SSlider.cpp:151-159 */
+.slider__bar {
+	position: absolute; left: 4px; right: 4px; top: 2px; height: 4px; /* BarThickness 4 StarshipCoreStyle.cpp:580; bar spans handle-half to width minus handle-half SSlider.cpp:93-94, 114-115 */
+	border-radius: 2px; /* :574 */
+	background: var(--input); /* fill Input :574 */
+	box-shadow: inset 0 0 0 1px var(--input); /* outline Input 1px :574 */
+}
+.slider__thumb {
+	position: absolute; top: 0; width: 8px; height: 8px; /* Icon8x8 :577 */
+	left: calc(4px + var(--slider-value) * (100% - 16px)); /* IndentHandle on: track = width - 2 x handle, offset + handle/2 SSlider.cpp:84-91, SSlider.h:29 */
+	border-radius: 50%; /* no radius given = half height :577 */
+	background: var(--foreground); /* Foreground :577 */
+}
+.slider:hover .slider__thumb, .slider--hover .slider__thumb { background: var(--foreground-hover); } /* :578 */
+.slider:active .slider__thumb { background: var(--foreground-hover); } /* the pointer stays over the captured slider, so the hovered brush shows while dragging; the style has no pressed brush :571-580 */
+.slider--disabled, .slider[aria-disabled="true"] { opacity: .45; } /* alpha x .45 SlateElementPixelShader.usf:535 */
+.slider--disabled .slider__bar, .slider[aria-disabled="true"] .slider__bar { box-shadow: inset 0 0 0 1px var(--recessed); } /* DisabledBarImage outline Recessed :576 */
+.slider--disabled:hover .slider__thumb, .slider[aria-disabled="true"]:hover .slider__thumb, .slider[aria-disabled="true"]:active .slider__thumb { background: var(--foreground); } /* :579 */
+.slider[role="slider"] { cursor: default; outline: 0; touch-action: none; }
+.slider[role="slider"]::before { content: ""; position: absolute; inset: -6px 0; } /* taller hit area for the pointer; not part of the style */
+.slider[role="slider"]:focus-visible { outline: 1px solid var(--primary); outline-offset: 3px; border-radius: 4px; } /* FocusRectangle 1px Primary r4 StarshipCoreStyle.cpp:218 */

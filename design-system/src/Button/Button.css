@@ -1,0 +1,51 @@
+.button {
+	display: inline-flex; align-items: center; justify-content: center; margin: 0; border: 0; outline: 0;
+	padding: 3.5px 16px; /* ButtonMargins (12,1.5) CoreStyle.h:110 + SButton ContentPadding (4,2) SButton.h:42 */
+	border-radius: 4px; /* StarshipCoreStyle.cpp:1373 */
+	background: var(--secondary); /* :1373 */
+	box-shadow: inset 0 0 0 1px var(--input); /* outline Input, InputFocusThickness CoreStyle.h:118 */
+	color: var(--foreground-hover); /* NormalForeground :1377 */
+	font: 400 13.333px/16px var(--font-sans); /* NormalText 10pt :1170; line box 16px is derived */
+	white-space: nowrap; cursor: default; user-select: none;
+}
+.button:hover, .button--hover { background: var(--hover); } /* :1374 */
+.button:active, .button.button--pressed { background: var(--header); padding: 4.5px 16px 2.5px; } /* :1375, PressedButtonMargins (12,2.5,12,0.5) CoreStyle.h:112 */
+.button--disabled, .button--disabled:hover, .button:disabled, .button:disabled:hover, .button[aria-disabled="true"], .button[aria-disabled="true"]:hover { background: var(--secondary); opacity: .45; color: var(--foreground); } /* SlateElementPixelShader.usf:535 alpha x .45; DisabledForeground :1380 */
+.button--disabled-brush, .button--disabled-brush:hover { background: var(--dropdown); box-shadow: inset 0 0 0 1px var(--recessed); color: var(--foreground); } /* Disabled brush :1376; used when ShowEffectWhenDisabled=false, SButton.cpp:140 */
+.button--focus, .button:focus-visible { box-shadow: inset 0 0 0 1px var(--primary); } /* FocusRectangle 1px Primary r4 :218 */
+
+.button--primary { background: var(--primary); } /* :1357 */
+.button--primary:hover, .button--primary.button--hover { background: var(--primary-hover); } /* :1358 */
+.button--primary:active, .button--primary.button--pressed { background: var(--primary-press); } /* :1359 */
+.button--primary.button--disabled, .button--primary.button--disabled:hover, .button--primary:disabled, .button--primary:disabled:hover, .button--primary[aria-disabled="true"], .button--primary[aria-disabled="true"]:hover { background: var(--primary); }
+.button--primary.button--disabled-brush, .button--primary.button--disabled-brush:hover { background: var(--dropdown); } /* :1360 */
+.button--bold { font-weight: 700; } /* PrimaryButtonText NormalBold :1421 */
+
+.button--simple, .button--toggle {
+	background: transparent; box-shadow: none; color: var(--foreground); /* NoResource :1390, NormalForeground :1394 */
+	padding: 3px 8px; /* SimpleButtonLabelAndIcon (4,1) :1402 + ContentPadding (4,2) */
+}
+.button--simple:hover, .button--simple.button--hover, .button--toggle:hover, .button--toggle.button--hover { background: var(--dropdown); color: var(--foreground-hover); } /* :1391, :1395 */
+.button--simple:active, .button--simple.button--pressed { background: var(--dropdown); color: var(--foreground-hover); padding: 4px 8px 2px; } /* :1392, pressed (4,2,4,0) :1403 */
+.button--simple.button--disabled, .button--simple.button--disabled:hover, .button--simple:disabled, .button--simple:disabled:hover, .button--simple[aria-disabled="true"], .button--simple[aria-disabled="true"]:hover,
+.button--toggle.button--disabled, .button--toggle.button--disabled:hover, .button--toggle:disabled, .button--toggle:disabled:hover, .button--toggle[aria-disabled="true"], .button--toggle[aria-disabled="true"]:hover { background: transparent; color: var(--foreground); }
+
+.button--icon { padding: 3px 4px; } /* icon-only trigger, 4px radius from the base */
+.button--icon:active, .button--icon.button--pressed { padding: 4px 4px 2px; }
+
+/* A toggle has no pressed padding shift, only the Dropdown fill. */
+.button--toggle:active, .button--toggle.button--pressed { background: var(--dropdown); color: var(--foreground-hover); padding: 3px 8px; } /* CheckedPressedImage and UncheckedPressedImage Dropdown :1629, :1632 */
+.button--toggle.button--icon:active, .button--toggle.button--icon.button--pressed { padding: 3px 4px; }
+.button--toggle[aria-pressed="true"], .button--toggle.button--checked { background: var(--primary); color: var(--foreground-hover); } /* CheckedImage Primary r4, CheckedForeground ForegroundHover :1627, :1636 */
+.button--toggle[aria-pressed="true"]:hover, .button--toggle.button--checked.button--hover { background: var(--primary-hover); } /* CheckedHoveredImage PrimaryHover :1628 */
+.button--toggle[aria-pressed="true"]:active, .button--toggle[aria-pressed="true"].button--pressed { background: var(--dropdown); }
+.button--toggle[aria-pressed="true"][aria-disabled="true"], .button--toggle[aria-pressed="true"][aria-disabled="true"]:hover, .button--toggle[aria-pressed="true"]:disabled { background: var(--primary); color: var(--foreground-hover); }
+
+.button--toggle[aria-disabled="true"]:active { background: transparent; color: var(--foreground); }
+.button--toggle[aria-pressed="true"][aria-disabled="true"]:active { background: var(--primary); color: var(--foreground-hover); }
+
+.button--small { box-sizing: border-box; height: 22px; padding: 0 14px; } /* Add button: ComboButton content padding (2,1.5) + Button padding (12,1.5) ToolWidgetsStyle.cpp:16-21, fixed 22px */
+.button--small:active, .button--small.button--pressed { padding: 1px 14px 0; }
+
+.button__icon { width: 16px; height: 16px; flex: none; margin-right: 4px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; } /* gap is consumer choice */
+.button__icon--solo { margin-right: 0; }

@@ -59,3 +59,66 @@ The source has no separate open brush. The button uses click method MouseDown (`
 - Do not draw a separate selected-row highlight. The `ComboBox.Row` style has none.
 - Do not add a gap or shadow between the button and the popup. The source defines none.
 - Do not give the popup rounded corners. The popup brush radius is 0.
+
+## Markup contract
+
+One `<ue-combo-button>` is one trigger and one dropdown panel. This is the trigger and dropdown primitive for the whole system: value pickers, toolbar combos, gear menus, Add menus and status bar combos. The CSS lives in `src/ComboButton/ComboButton.css`. The panel rows come from `ue-popup-menu`, so rows, check marks, radio marks, separators, headings and submenus follow the PopupMenu README.
+
+```html
+<ue-combo-button>
+	<div class="combobutton-anchor">
+		<span class="combobutton" role="combobox" tabindex="0" aria-haspopup="menu" aria-expanded="false">
+			<span class="combobutton__label">Location</span>
+			<svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg>
+		</span>
+		<div class="combobutton-menu" hidden>
+			<ue-popup-menu>
+				<div class="popupmenu popupmenu--combo" role="menu" tabindex="0">
+					<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Location</span></span></div>
+				</div>
+			</ue-popup-menu>
+		</div>
+	</div>
+</ue-combo-button>
+```
+
+| Part | Rule |
+|---|---|
+| `.combobutton-anchor` | Required. It is the positioning box of the panel and the outside-click boundary |
+| `.combobutton` | The trigger. Needs `tabindex="0"`, `aria-haspopup="menu"` and `aria-expanded`. `aria-disabled="true"` disables it |
+| `.combobutton__label` | The text. Omit it for an icon-only trigger |
+| `.combobutton__icon` | An optional leading inline `svg` with a `viewBox` |
+| `.combobutton__arrow` | The chevron, an inline `svg` with a `viewBox` |
+| `.combobutton-menu` | The panel. Carries `hidden`. Holds exactly one `ue-popup-menu` |
+
+The host owns open and close, an outside click, Escape, Down, Up, Enter and Space on the trigger, and the focus return to the trigger. The popup menu owns row keys and activation.
+
+## Modes
+
+| Mode | How | Behavior |
+|---|---|---|
+| Value | default | The trigger label follows the pick. The picked row gets `aria-selected="true"`, the others `false` |
+| Action | `combobutton--simple` on the trigger, or `mode="action"` on the host, or a trigger without a label | The label stays fixed. Rows only fire events |
+
+A check row never changes the label.
+
+## Variants
+
+| Class | Look |
+|---|---|
+| none | Boxed trigger, `--input` fill, 120px minimum width |
+| `combobutton--simple` | Transparent, `--dropdown` on hover, padding 4 x 1 |
+| `combobutton--icon` | Transparent icon plus chevron, no label, padding 4 x 3 |
+| `combobutton--small` | Property row size: `400 10.667px/1.172` font, fixed 22px height, no minimum width |
+| `combobutton--button` | The Button look: `--secondary` fill, fixed 22px height, padding 14, 3px gap |
+| `combobutton-anchor--fill` (on the anchor) | The trigger takes the free width of a row |
+| `combobutton-menu--end` (on the panel) | The panel aligns to the right edge of the trigger |
+
+Panel width: the panel is at least as wide as the trigger. Set `--combobutton-menu-min-width` on the panel to change the minimum. Use `popupmenu--combo` on the list for value pickers and `popupmenu--small` for 10.667px rows.
+
+## Events
+
+| Event | Detail | When |
+|---|---|---|
+| `ue-combo-pick` | `{ value, label, checked }` | A row is activated. `value` is the row `data-value` or its label. `checked` is the new state of a check or radio row, else `null` |
+| `ue-menu-activate` | see PopupMenu | Also bubbles from the nested popup menu |

@@ -14,72 +14,28 @@
 	.spinbox-item { display: flex; flex-direction: column; gap: 4px; width: 132px; }
 	.spinbox-cap { font: 400 10.667px/1.2 var(--font-sans); color: var(--foreground); opacity: .7; }
 
-	.spinbox {
-		--spinbox-fill: .4; /* fraction of the range */
-		position: relative; box-sizing: border-box; width: 100%;
-		padding: 1px 2px; /* SSpinBox ContentPadding (2,1) SSpinBox.h:92 */
-		border-radius: 4px; /* InputFocusRadius CoreStyle.h:117 */
-		background: var(--input); /* StarshipCoreStyle.cpp:598 */
-		box-shadow: inset 0 0 0 1px var(--input-outline); /* :598, thickness CoreStyle.h:118 */
-		color: var(--foreground-hover); /* ForegroundColor :605 */
-		font: 400 13.333px/16px var(--font-sans); /* NormalFont SSpinBox.h:91 */
-		cursor: ew-resize; user-select: none;
-	}
-	.spinbox__fill {
-		position: absolute; left: 1px; top: 1px; bottom: 1px; /* InsetPadding 1 :607, SSpinBox.h:401 */
-		width: calc(var(--spinbox-fill) * 100% - 2px); /* fill = fraction x width minus inset SSpinBox.h:394-401 */
-		border-radius: 4px; /* :601-603 */
-		background: var(--dropdown); /* InactiveFillBrush :603 */
-	}
-	.spinbox__text { position: relative; padding: 2.5px 7px; white-space: nowrap; } /* TextPadding (7,2.5,7,2.5) :606 */
-	.spinbox:hover, .spinbox--hover { box-shadow: inset 0 0 0 1px var(--hover); } /* :599 */
-	.spinbox:hover .spinbox__fill, .spinbox--hover .spinbox__fill { background: var(--hover); } /* HoveredFillBrush :602 */
-	.spinbox--active, .spinbox--active:hover { box-shadow: inset 0 0 0 1px var(--primary); cursor: ew-resize; } /* ActiveBackgroundBrush :600 */
-	.spinbox--active .spinbox__fill, .spinbox--active:hover .spinbox__fill { background: var(--primary); } /* ActiveFillBrush :601 */
-	.spinbox--text, .spinbox--text:hover { box-shadow: inset 0 0 0 1px var(--primary); cursor: text; } /* text mode counts as active, fill hidden SSpinBox.h:343, 396 */
-	.spinbox--text .spinbox__fill { display: none; }
-	.spinbox--unbounded .spinbox__fill { display: none; } /* no fill without a slider range SSpinBox.h:370 */
-	.spinbox--disabled, .spinbox--disabled:hover { opacity: .45; box-shadow: inset 0 0 0 1px var(--input-outline); } /* alpha x .45 SlateElementPixelShader.usf:535 */
-	.spinbox--disabled:hover .spinbox__fill { background: var(--dropdown); }
-	.spinbox__caret { display: inline-block; width: 1.28px; height: 16px; vertical-align: top; background: var(--white); } /* TextEditHelper.h:18 */
-
-	.spinbox { outline: 0; }
-	.spinbox:focus-visible { box-shadow: inset 0 0 0 1px var(--primary); } /* FocusRectangle 1px Primary r4 StarshipCoreStyle.cpp:218 */
-	.spinbox--active:focus-visible { box-shadow: inset 0 0 0 1px var(--primary); }
-	.spinbox[aria-disabled="true"], .spinbox[aria-disabled="true"]:hover { opacity: .45; box-shadow: inset 0 0 0 1px var(--input-outline); cursor: default; } /* alpha x .45 SlateElementPixelShader.usf:535 */
-	.spinbox[aria-disabled="true"]:hover .spinbox__fill { background: var(--dropdown); }
-	.spinbox__field { display: block; width: 100%; margin: 0; padding: 0; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; line-height: 16px; caret-color: var(--white); user-select: text; cursor: text; } /* the text-entry <input>; caret White TextEditHelper.h:18 */
-	.spinbox__field::selection { background: var(--highlight); color: inherit; } /* SelectedBackgroundColor Highlight StarshipCoreStyle.cpp:1174 */
 	.spinbox-live { display: flex; flex-direction: column; gap: 8px; }
 	.spinbox-status { color: var(--foreground-hover); opacity: 1; }
-	[data-pinned] { pointer-events: none; } /* a pinned specimen shows one forced state and ignores the pointer */
-
-	.spinbox__axis { position: absolute; left: 3px; top: 3px; bottom: 3px; width: 2px; z-index: 2; } /* LabelPadding 3, strip 2px SNumericEntryBox.h:451-456, SVectorInputBox.h:454 */
-	.spinbox__axis--x { background: #cb2600; } /* Red label (0.594,0.0197,0) linear -> sRGB, SNumericEntryBox.h:813 */
-	.spinbox__axis--y { background: #67a900; } /* Green (0.1349,0.3959,0) :816 */
-	.spinbox__axis--z { background: #2c7eed; } /* Blue (0.0251,0.207,0.85) :819 */
-	.spinbox--axis .spinbox__text { padding-left: 7px; }
 </style>
 </head>
 <body>
 <div class="spinbox-page">
-	<ue-spin-box>
-		<div class="spinbox-live">
-			<span class="spinbox-cap">Live: drag sideways to change the value, click without dragging to type (Enter commits, Escape cancels), Up and Down arrows step, values clamp to the range.</span>
-			<div class="spinbox-row">
-				<div class="spinbox-item"><div class="spinbox" tabindex="0" role="spinbutton" data-value="0.4" data-min="0" data-max="1" data-delta="0.01"><span class="spinbox__fill"></span><span class="spinbox__text">0.4</span></div><span class="spinbox-cap">Range 0 to 1</span></div>
-				<div class="spinbox-item"><div class="spinbox" tabindex="0" role="spinbutton" data-value="40" data-min="0" data-max="100" data-delta="1"><span class="spinbox__fill"></span><span class="spinbox__text">40.0</span></div><span class="spinbox-cap">Range 0 to 100</span></div>
-				<div class="spinbox-item"><div class="spinbox spinbox--unbounded" tabindex="0" role="spinbutton" data-value="1200" data-delta="10"><span class="spinbox__fill"></span><span class="spinbox__text">1200.0</span></div><span class="spinbox-cap">No range, no fill</span></div>
-				<div class="spinbox-item"><div class="spinbox" role="spinbutton" aria-disabled="true" data-value="40" data-min="0" data-max="100" data-delta="1"><span class="spinbox__fill"></span><span class="spinbox__text">40.0</span></div><span class="spinbox-cap">Disabled</span></div>
-			</div>
-			<div class="spinbox-row">
-				<div class="spinbox-item" style="width:96px"><div class="spinbox spinbox--unbounded spinbox--axis" tabindex="0" role="spinbutton" data-value="-210" data-delta="1"><span class="spinbox__axis spinbox__axis--x"></span><span class="spinbox__text">-210.0</span></div><span class="spinbox-cap">Vector X</span></div>
-				<div class="spinbox-item" style="width:96px"><div class="spinbox spinbox--unbounded spinbox--axis" tabindex="0" role="spinbutton" data-value="-120" data-delta="1"><span class="spinbox__axis spinbox__axis--y"></span><span class="spinbox__text">-120.0</span></div><span class="spinbox-cap">Vector Y</span></div>
-				<div class="spinbox-item" style="width:96px"><div class="spinbox spinbox--unbounded spinbox--axis" tabindex="0" role="spinbutton" data-value="32" data-delta="1"><span class="spinbox__axis spinbox__axis--z"></span><span class="spinbox__text">32.0</span></div><span class="spinbox-cap">Vector Z</span></div>
-			</div>
-			<span class="spinbox-cap spinbox-status">Last change: none yet</span>
+	<div class="spinbox-live">
+		<span class="spinbox-cap">Live: drag sideways to change the value, click without dragging to type (Enter commits, Escape cancels), Up and Down arrows step, values clamp to the range.</span>
+		<div class="spinbox-row">
+			<div class="spinbox-item"><ue-spin-box><div class="spinbox" tabindex="0" role="spinbutton" data-value="0.4" data-min="0" data-max="1" data-delta="0.01"><span class="spinbox__fill"></span><span class="spinbox__text">0.4</span></div></ue-spin-box><span class="spinbox-cap">Range 0 to 1</span></div>
+			<div class="spinbox-item"><ue-spin-box><div class="spinbox" tabindex="0" role="spinbutton" data-value="40" data-min="0" data-max="100" data-delta="1"><span class="spinbox__fill"></span><span class="spinbox__text">40.0</span></div></ue-spin-box><span class="spinbox-cap">Range 0 to 100</span></div>
+			<div class="spinbox-item"><ue-spin-box><div class="spinbox" tabindex="0" role="spinbutton" data-value="1200" data-delta="10"><span class="spinbox__fill"></span><span class="spinbox__text">1200.0</span></div></ue-spin-box><span class="spinbox-cap">No range, no fill, no clamp, step 10</span></div>
+			<div class="spinbox-item"><ue-spin-box><div class="spinbox" role="spinbutton" aria-disabled="true" data-value="40" data-min="0" data-max="100" data-delta="1"><span class="spinbox__fill"></span><span class="spinbox__text">40.0</span></div></ue-spin-box><span class="spinbox-cap">Disabled</span></div>
 		</div>
-	</ue-spin-box>
+		<div class="spinbox-row">
+			<div class="spinbox-item" style="width:96px"><ue-spin-box><div class="spinbox" tabindex="0" role="spinbutton" data-value="-210" data-step="1"><span class="spinbox__axis spinbox__axis--x"></span><span class="spinbox__text">-210.0</span></div></ue-spin-box><span class="spinbox-cap">Vector X</span></div>
+			<div class="spinbox-item" style="width:96px"><ue-spin-box><div class="spinbox" tabindex="0" role="spinbutton" data-value="-120" data-step="1"><span class="spinbox__axis spinbox__axis--y"></span><span class="spinbox__text">-120.0</span></div></ue-spin-box><span class="spinbox-cap">Vector Y</span></div>
+			<div class="spinbox-item" style="width:96px"><ue-spin-box><div class="spinbox" tabindex="0" role="spinbutton" data-value="32" data-step="1"><span class="spinbox__axis spinbox__axis--z"></span><span class="spinbox__text">32.0</span></div></ue-spin-box><span class="spinbox-cap">Vector Z</span></div>
+			<div class="spinbox-item" style="width:110px"><ue-spin-box><div class="spinbox" tabindex="0" role="spinbutton" data-value="90" data-step="5" data-unit="cm"><span class="spinbox__text">90.0</span></div></ue-spin-box><span class="spinbox-cap">Unit suffix, step 5</span></div>
+		</div>
+		<ue-event-status class="spinbox-cap spinbox-status" event="ue-spin-change" template="Last change: {text}">Last change: none yet</ue-event-status>
+	</div>
 	<span class="spinbox-cap">Pinned: forced states for reference, not interactive</span>
 	<div class="spinbox-row">
 		<div class="spinbox-item"><div class="spinbox" data-pinned><span class="spinbox__fill"></span><span class="spinbox__text">0.4</span></div><span class="spinbox-cap">Normal</span></div>

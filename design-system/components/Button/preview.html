@@ -1,4 +1,4 @@
-<!-- @dsCard group="Controls" height=270 subtitle="Button, PrimaryButton, SimpleButton: normal, hovered, pressed, disabled, focus" -->
+<!-- @dsCard group="Controls" height=300 subtitle="Button, PrimaryButton, SimpleButton: normal, hovered, pressed, disabled, focus" -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -16,68 +16,30 @@
 	.button-live { display: flex; flex-direction: column; gap: 8px; }
 	.button-live-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; }
 	.button-count { color: var(--foreground-hover); }
-	[data-pinned] { pointer-events: none; } /* a pinned specimen shows one forced state and ignores the pointer */
-
-	.button {
-		display: inline-flex; align-items: center; justify-content: center; margin: 0; border: 0; outline: 0;
-		padding: 3.5px 16px; /* ButtonMargins (12,1.5) CoreStyle.h:110 + SButton ContentPadding (4,2) SButton.h:42 */
-		border-radius: 4px; /* StarshipCoreStyle.cpp:1373 */
-		background: var(--secondary); /* :1373 */
-		box-shadow: inset 0 0 0 1px var(--input); /* outline Input, InputFocusThickness CoreStyle.h:118 */
-		color: var(--foreground-hover); /* NormalForeground :1377 */
-		font: 400 13.333px/16px var(--font-sans); /* NormalText 10pt :1170; line box 16px is derived */
-		white-space: nowrap; cursor: default; user-select: none;
-	}
-	.button:hover, .button--hover { background: var(--hover); } /* :1374 */
-	.button:active, .button.button--pressed { background: var(--header); padding: 4.5px 16px 2.5px; } /* :1375, PressedButtonMargins (12,2.5,12,0.5) CoreStyle.h:112 */
-	.button--disabled, .button--disabled:hover, .button:disabled, .button:disabled:hover { background: var(--secondary); opacity: .45; color: var(--foreground); } /* SlateElementPixelShader.usf:535 alpha x .45; DisabledForeground :1380 */
-	.button--disabled-brush, .button--disabled-brush:hover { background: var(--dropdown); box-shadow: inset 0 0 0 1px var(--recessed); color: var(--foreground); } /* Disabled brush :1376; used when ShowEffectWhenDisabled=false, SButton.cpp:140 */
-	.button--focus, .button:focus-visible { box-shadow: inset 0 0 0 1px var(--primary); } /* FocusRectangle 1px Primary r4 :218 */
-
-	.button--primary { background: var(--primary); } /* :1357 */
-	.button--primary:hover, .button--primary.button--hover { background: var(--primary-hover); } /* :1358 */
-	.button--primary:active, .button--primary.button--pressed { background: var(--primary-press); } /* :1359 */
-	.button--primary.button--disabled, .button--primary.button--disabled:hover, .button--primary:disabled, .button--primary:disabled:hover { background: var(--primary); }
-	.button--primary.button--disabled-brush, .button--primary.button--disabled-brush:hover { background: var(--dropdown); } /* :1360 */
-	.button--bold { font-weight: 700; } /* PrimaryButtonText NormalBold :1421 */
-
-	.button--simple {
-		background: transparent; box-shadow: none; color: var(--foreground); /* NoResource :1390, NormalForeground :1394 */
-		padding: 3px 8px; /* SimpleButtonLabelAndIcon (4,1) :1402 + ContentPadding (4,2) */
-	}
-	.button--simple:hover, .button--simple.button--hover { background: var(--dropdown); color: var(--foreground-hover); } /* :1391, :1395 */
-	.button--simple:active, .button--simple.button--pressed { background: var(--dropdown); color: var(--foreground-hover); padding: 4px 8px 2px; } /* :1392, pressed (4,2,4,0) :1403 */
-	.button--simple.button--disabled, .button--simple.button--disabled:hover, .button--simple:disabled, .button--simple:disabled:hover { background: transparent; color: var(--foreground); }
-	.button--simple.button--focus, .button--simple:focus-visible { box-shadow: inset 0 0 0 1px var(--primary); }
-	.button--icon { padding: 3px 6px; } /* SimpleButton (2,1) :1406 + ContentPadding (4,2) */
-	.button--icon:active, .button--icon.button--pressed { padding: 4px 6px 2px; } /* (2,2,2,0) :1407 */
-
-	.button__icon { width: 16px; height: 16px; flex: none; margin-right: 4px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; } /* gap is consumer choice */
-	.button__icon--solo { margin-right: 0; }
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-	<symbol id="button-plus" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></symbol>
-	<symbol id="button-save" viewBox="0 0 16 16"><path d="M3 3h8l2 2v8H3zM5 3v3h5V3M5 13V9h6v4"/></symbol>
-	<symbol id="button-gear" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2M3.8 3.8l1.4 1.4M10.8 10.8l1.4 1.4M12.2 3.8l-1.4 1.4M5.2 10.8l-1.4 1.4"/></symbol>
-</svg>
 <div class="button-page">
-	<ue-button>
-		<div class="button-live">
-			<span class="button-head">Live</span>
-			<div class="button-live-row">
-				<button class="button">Import</button>
-				<button class="button button--primary">Create</button>
-				<button class="button button--primary button--bold">Create</button>
-				<button class="button button--simple"><svg class="button__icon"><use href="#button-save"/></svg>Save All</button>
-				<button class="button button--simple button--icon" aria-label="Settings"><svg class="button__icon button__icon--solo"><use href="#button-gear"/></svg></button>
-				<button class="button" disabled>Import</button>
-				<button class="button button--primary" disabled>Create</button>
-			</div>
-			<span class="button-note">Try: hover, hold the mouse down (the label drops 1px), click, Tab to focus then press Space or Enter. <span class="button-count">Clicks: 0</span></span>
+	<div class="button-live">
+		<span class="button-head">Live</span>
+		<div class="button-live-row">
+			<ue-button><button class="button">Import</button></ue-button>
+			<ue-button><button class="button button--primary">Create</button></ue-button>
+			<ue-button><button class="button button--primary button--bold">Create</button></ue-button>
+			<ue-button><button class="button button--simple"><svg class="button__icon" viewBox="0 0 16 16"><path d="M3 3h8l2 2v8H3zM5 3v3h5V3M5 13V9h6v4"/></svg>Save All</button></ue-button>
+			<ue-button><button class="button button--simple button--icon" aria-label="Settings"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2M3.8 3.8l1.4 1.4M10.8 10.8l1.4 1.4M12.2 3.8l-1.4 1.4M5.2 10.8l-1.4 1.4"/></svg></button></ue-button>
+			<ue-button><button class="button" disabled>Import</button></ue-button>
+			<ue-button><button class="button button--primary" disabled>Create</button></ue-button>
 		</div>
-	</ue-button>
+		<div class="button-live-row">
+			<ue-button><button class="button button--toggle" aria-pressed="false">Snap</button></ue-button>
+			<ue-button><button class="button button--toggle button--icon" aria-pressed="true" aria-label="Grid"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M3 3h10v10H3zM3 8h10M8 3v10"/></svg></button></ue-button>
+			<ue-button><button class="button button--small"><svg class="button__icon" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>Add</button></ue-button>
+			<ue-button><span class="button button--simple" role="button" tabindex="0">Span button</span></ue-button>
+		</div>
+		<span class="button-note">Try: hover, hold the mouse down (the label drops 1px), click, Tab to focus then press Space or Enter. The toggles flip on each click.</span>
+		<ue-event-status class="button-note button-count" event="ue-button-click" template="Last click: {label}">Last click: none yet</ue-event-status>
+	</div>
 	<span class="button-head">Pinned: each state forced for reference, not interactive</span>
 	<div class="button-grid">
 		<span class="button-head"></span>
@@ -113,20 +75,44 @@
 		<span><button class="button button--primary button--bold button--focus" data-pinned>Create</button></span>
 
 		<span class="button-name">SimpleButtonLabelAndIcon</span>
-		<span><button class="button button--simple" data-pinned><svg class="button__icon"><use href="#button-save"/></svg>Save All</button></span>
-		<span><button class="button button--simple button--hover" data-pinned><svg class="button__icon"><use href="#button-save"/></svg>Save All</button></span>
-		<span><button class="button button--simple button--pressed" data-pinned><svg class="button__icon"><use href="#button-save"/></svg>Save All</button></span>
-		<span><button class="button button--simple button--disabled" data-pinned><svg class="button__icon"><use href="#button-save"/></svg>Save All</button></span>
+		<span><button class="button button--simple" data-pinned><svg class="button__icon" viewBox="0 0 16 16"><path d="M3 3h8l2 2v8H3zM5 3v3h5V3M5 13V9h6v4"/></svg>Save All</button></span>
+		<span><button class="button button--simple button--hover" data-pinned><svg class="button__icon" viewBox="0 0 16 16"><path d="M3 3h8l2 2v8H3zM5 3v3h5V3M5 13V9h6v4"/></svg>Save All</button></span>
+		<span><button class="button button--simple button--pressed" data-pinned><svg class="button__icon" viewBox="0 0 16 16"><path d="M3 3h8l2 2v8H3zM5 3v3h5V3M5 13V9h6v4"/></svg>Save All</button></span>
+		<span><button class="button button--simple button--disabled" data-pinned><svg class="button__icon" viewBox="0 0 16 16"><path d="M3 3h8l2 2v8H3zM5 3v3h5V3M5 13V9h6v4"/></svg>Save All</button></span>
 		<span></span>
-		<span><button class="button button--simple button--focus" data-pinned><svg class="button__icon"><use href="#button-save"/></svg>Save All</button></span>
+		<span><button class="button button--simple button--focus" data-pinned><svg class="button__icon" viewBox="0 0 16 16"><path d="M3 3h8l2 2v8H3zM5 3v3h5V3M5 13V9h6v4"/></svg>Save All</button></span>
 
 		<span class="button-name">SimpleButton (icon only)</span>
-		<span><button class="button button--simple button--icon" data-pinned><svg class="button__icon button__icon--solo"><use href="#button-gear"/></svg></button></span>
-		<span><button class="button button--simple button--icon button--hover" data-pinned><svg class="button__icon button__icon--solo"><use href="#button-gear"/></svg></button></span>
-		<span><button class="button button--simple button--icon button--pressed" data-pinned><svg class="button__icon button__icon--solo"><use href="#button-gear"/></svg></button></span>
-		<span><button class="button button--simple button--icon button--disabled" data-pinned><svg class="button__icon button__icon--solo"><use href="#button-gear"/></svg></button></span>
+		<span><button class="button button--simple button--icon" data-pinned><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2M3.8 3.8l1.4 1.4M10.8 10.8l1.4 1.4M12.2 3.8l-1.4 1.4M5.2 10.8l-1.4 1.4"/></svg></button></span>
+		<span><button class="button button--simple button--icon button--hover" data-pinned><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2M3.8 3.8l1.4 1.4M10.8 10.8l1.4 1.4M12.2 3.8l-1.4 1.4M5.2 10.8l-1.4 1.4"/></svg></button></span>
+		<span><button class="button button--simple button--icon button--pressed" data-pinned><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2M3.8 3.8l1.4 1.4M10.8 10.8l1.4 1.4M12.2 3.8l-1.4 1.4M5.2 10.8l-1.4 1.4"/></svg></button></span>
+		<span><button class="button button--simple button--icon button--disabled" data-pinned><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2M3.8 3.8l1.4 1.4M10.8 10.8l1.4 1.4M12.2 3.8l-1.4 1.4M5.2 10.8l-1.4 1.4"/></svg></button></span>
 		<span></span>
-		<span><button class="button button--simple button--icon button--focus" data-pinned><svg class="button__icon button__icon--solo"><use href="#button-gear"/></svg></button></span>
+		<span><button class="button button--simple button--icon button--focus" data-pinned><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2M3.8 3.8l1.4 1.4M10.8 10.8l1.4 1.4M12.2 3.8l-1.4 1.4M5.2 10.8l-1.4 1.4"/></svg></button></span>
+
+		<span class="button-name">Toggle, off</span>
+		<span><button class="button button--toggle" data-pinned>Snap</button></span>
+		<span><button class="button button--toggle button--hover" data-pinned>Snap</button></span>
+		<span><button class="button button--toggle button--pressed" data-pinned>Snap</button></span>
+		<span><button class="button button--toggle button--disabled" data-pinned>Snap</button></span>
+		<span></span>
+		<span><button class="button button--toggle button--focus" data-pinned>Snap</button></span>
+
+		<span class="button-name">Toggle, on</span>
+		<span><button class="button button--toggle button--checked" data-pinned>Snap</button></span>
+		<span><button class="button button--toggle button--checked button--hover" data-pinned>Snap</button></span>
+		<span><button class="button button--toggle button--checked button--pressed" data-pinned>Snap</button></span>
+		<span><button class="button button--toggle button--checked button--disabled" data-pinned>Snap</button></span>
+		<span></span>
+		<span><button class="button button--toggle button--checked button--focus" data-pinned>Snap</button></span>
+
+		<span class="button-name">Small (Add)</span>
+		<span><button class="button button--small" data-pinned>Add</button></span>
+		<span><button class="button button--small button--hover" data-pinned>Add</button></span>
+		<span><button class="button button--small button--pressed" data-pinned>Add</button></span>
+		<span><button class="button button--small button--disabled" data-pinned>Add</button></span>
+		<span></span>
+		<span><button class="button button--small button--focus" data-pinned>Add</button></span>
 	</div>
 	<div class="button-note">Disabled uses the normal brush at 45% alpha (the engine default). The style's own Disabled brush only shows when ShowEffectWhenDisabled is false. Icons are approximations of the Starship SVGs.</div>
 </div>
