@@ -1,4 +1,4 @@
-// design-system/src/_shared/tree-controller.ts
+// src/_shared/tree-controller.ts
 var TreeController = class {
   root;
   parts;

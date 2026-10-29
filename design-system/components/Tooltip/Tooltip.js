@@ -1,4 +1,4 @@
-// design-system/src/_shared/element.ts
+// src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   #ready = false;
@@ -51,12 +51,12 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// design-system/src/_shared/own.ts
+// src/_shared/own.ts
 function ownedBy(host, target) {
   return target instanceof Element && target.closest(host.localName) === host;
 }
 
-// design-system/src/Tooltip/Tooltip.ts
+// src/Tooltip/Tooltip.ts
 var SUMMON_DELAY = 150;
 var INTRO = 100;
 var OFFSET_X = 12;

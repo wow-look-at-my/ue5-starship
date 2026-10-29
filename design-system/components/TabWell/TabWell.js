@@ -1,4 +1,4 @@
-// design-system/src/_shared/element.ts
+// src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   #ready = false;
@@ -51,7 +51,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// design-system/src/_shared/tabstack.ts
+// src/_shared/tabstack.ts
 var TARGET_KEYS = ["ArrowRight", "ArrowLeft", "Home", "End"];
 function targetElement(event) {
   return event.target instanceof Element ? event.target : null;
@@ -200,7 +200,7 @@ var TabStackElement = class extends UeElement {
   }
 };
 
-// design-system/src/TabWell/TabWell.ts
+// src/TabWell/TabWell.ts
 var TabWellElement = class extends TabStackElement {
   names = {
     stack: "tabWell-stack",

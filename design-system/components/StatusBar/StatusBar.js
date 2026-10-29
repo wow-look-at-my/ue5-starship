@@ -1,4 +1,4 @@
-// design-system/src/_shared/element.ts
+// src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   #ready = false;
@@ -51,7 +51,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// design-system/src/_shared/popup.ts
+// src/_shared/popup.ts
 function enabledRows(menu, rowSelector) {
   return Array.from(menu.querySelectorAll(rowSelector)).filter((row) => row.getAttribute("aria-disabled") !== "true");
 }
@@ -68,7 +68,7 @@ function moveRowFocus(rows, current, key) {
   return true;
 }
 
-// design-system/src/StatusBar/StatusBar.ts
+// src/StatusBar/StatusBar.ts
 var DRAWER = ".statusBar-btn";
 var COMBO = ".statusBar-combo";
 var MENU = ".statusBar-menu";

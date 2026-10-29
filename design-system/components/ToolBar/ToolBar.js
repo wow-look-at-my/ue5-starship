@@ -1,4 +1,4 @@
-// design-system/src/_shared/element.ts
+// src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   #ready = false;
@@ -51,7 +51,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// design-system/src/_shared/popup.ts
+// src/_shared/popup.ts
 function enabledRows(menu, rowSelector) {
   return Array.from(menu.querySelectorAll(rowSelector)).filter((row) => row.getAttribute("aria-disabled") !== "true");
 }
@@ -72,7 +72,7 @@ function rowLabel(row, labelSelector) {
   return (label ?? row).textContent?.trim() ?? "";
 }
 
-// design-system/src/ToolBar/ToolBar.ts
+// src/ToolBar/ToolBar.ts
 var CONTROL = ".toolBar-btn, .toolBar-modes, .toolBar-wrap, .toolBar-plate";
 var TOGGLE = ".toolBar-btn--toggle";
 var MENU = ".toolBar-menu";

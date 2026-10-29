@@ -1,9 +1,9 @@
-/* design-system/src/_shared/base.css */
+/* src/_shared/base.css */
 [data-pinned] {
   pointer-events: none;
 }
 
-/* design-system/src/SegmentedControl/SegmentedControl.css */
+/* src/SegmentedControl/SegmentedControl.css */
 .SegmentedControl {
   display: flex;
   flex: 1;

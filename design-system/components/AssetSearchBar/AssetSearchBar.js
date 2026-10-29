@@ -1,4 +1,4 @@
-// design-system/src/_shared/element.ts
+// src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   #ready = false;
@@ -51,7 +51,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// design-system/src/_shared/contentMenu.ts
+// src/_shared/contentMenu.ts
 var TICK = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l3 3 6-7"/></svg>';
 function openMenu(host, anchor, options) {
   const menu = document.createElement("div");
@@ -138,7 +138,7 @@ function openMenu(host, anchor, options) {
   return { element: menu, anchor, close };
 }
 
-// design-system/src/AssetSearchBar/AssetSearchBar.ts
+// src/AssetSearchBar/AssetSearchBar.ts
 var PREFIX = "AssetSearchBar";
 var CROSS = '<svg viewBox="0 0 16 16"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
 var FILTERS = [

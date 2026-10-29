@@ -1,4 +1,4 @@
-// design-system/src/_shared/element.ts
+// src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   #ready = false;
@@ -51,7 +51,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// design-system/src/Slider/Slider.ts
+// src/Slider/Slider.ts
 var HANDLE = 8;
 function attr(el, name, fallback) {
   const raw = el.dataset[name];

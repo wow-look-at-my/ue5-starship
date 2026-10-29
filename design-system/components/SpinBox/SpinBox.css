@@ -1,9 +1,9 @@
-/* design-system/src/_shared/base.css */
+/* src/_shared/base.css */
 [data-pinned] {
   pointer-events: none;
 }
 
-/* design-system/src/SpinBox/SpinBox.css */
+/* src/SpinBox/SpinBox.css */
 .spinbox {
   --spinbox-fill: .4;
   position: relative;

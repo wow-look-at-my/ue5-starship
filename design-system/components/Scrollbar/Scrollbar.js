@@ -1,4 +1,4 @@
-// design-system/src/_shared/element.ts
+// src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   #ready = false;
@@ -51,7 +51,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// design-system/src/_shared/drag.ts
+// src/_shared/drag.ts
 var THRESHOLD = 3;
 function drag(target, handlers) {
   let originX = 0;
@@ -93,7 +93,7 @@ function drag(target, handlers) {
   };
 }
 
-// design-system/src/_shared/scroll-thumb.ts
+// src/_shared/scroll-thumb.ts
 var MIN_THUMB = 35;
 var BAR_PADDING = 2;
 function thumbLayout(slot, viewport, content, offset) {
@@ -189,7 +189,7 @@ function bindBar(view, bar, thumb, vertical, onFits) {
   };
 }
 
-// design-system/src/Scrollbar/Scrollbar.ts
+// src/Scrollbar/Scrollbar.ts
 var Scrollbar = class extends UeElement {
   #visible = null;
   // True while the content overflows and the bar shows.

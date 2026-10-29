@@ -1,9 +1,9 @@
-/* design-system/src/_shared/base.css */
+/* src/_shared/base.css */
 [data-pinned] {
   pointer-events: none;
 }
 
-/* design-system/src/Splitter/Splitter.css */
+/* src/Splitter/Splitter.css */
 .splitter {
   display: flex;
   background: var(--panel);

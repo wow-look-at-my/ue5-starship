@@ -1,9 +1,9 @@
-/* design-system/src/_shared/base.css */
+/* src/_shared/base.css */
 [data-pinned] {
   pointer-events: none;
 }
 
-/* design-system/src/TreeRow/TreeRow.css */
+/* src/TreeRow/TreeRow.css */
 .tr-row {
   display: flex;
   align-items: center;
