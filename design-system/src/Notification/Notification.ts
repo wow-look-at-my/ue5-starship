@@ -1,6 +1,7 @@
 // <ue-notification> lets live toasts be dismissed (the stack closes up) and adds new toasts from its template.
 import { UeElement, define } from '../_shared/element.ts';
 import '../Button/Button.ts';
+import './Notification.css';
 
 export class UeNotificationElement extends UeElement {
 	#shown = 0;

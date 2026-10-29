@@ -366,9 +366,9 @@
   stroke-width: 1.25;
   stroke-linejoin: round;
 }
-.DetailsHeader-instance .name {
+.DetailsHeader-instance .DetailsHeader-instanceName {
   margin-left: 6px;
 }
-.DetailsHeader-instance .ctx {
+.DetailsHeader-instance .DetailsHeader-instanceContext {
   margin-left: 4px;
 }

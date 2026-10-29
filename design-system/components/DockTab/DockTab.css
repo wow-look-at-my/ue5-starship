@@ -3,36 +3,8 @@
   pointer-events: none;
 }
 
-/* design-system/src/TabWell/TabWell.css */
-:is(.dockTab-well, .tabWell-well) {
-  display: flex;
-  align-items: flex-end;
-  gap: 2px;
-  background: var(--background);
-  padding: 0;
-  min-height: 25px;
-}
-:is(.dockTab-well--major, .tabWell-well--major) {
-  background: var(--title);
-  min-height: 30.8px;
-}
-:is(.dockTab-stack, .tabWell-stack) {
-  display: flex;
-  flex-direction: column;
-}
-:is(.dockTab-body, .tabWell-content) {
-  background: var(--panel);
-  padding: 0;
-}
-:is(.dockTab-well--major + .dockTab-body, .tabWell-content--major) {
-  background: var(--background);
-}
-[data-panel][hidden] {
-  display: none;
-}
-
 /* design-system/src/DockTab/DockTab.css */
-:is(.dockTab, .tabWell-tab) {
+.dockTab {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -47,13 +19,13 @@
   font: 400 13.333px/1.2 var(--font-sans);
   white-space: nowrap;
 }
-:is(.dockTab-icon, .tabWell-icon) {
+.dockTab-icon {
   display: flex;
   flex: none;
   padding: 1px;
   margin-right: 5px;
 }
-:is(.dockTab-icon, .tabWell-icon, .dockTab-close, .tabWell-close) svg {
+:is(.dockTab-icon, .dockTab-close) svg {
   display: block;
   width: 16px;
   height: 16px;
@@ -63,12 +35,12 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-:is(.dockTab-label, .tabWell-label) {
+.dockTab-label {
   padding: 2px 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-:is(.dockTab-close, .tabWell-close) {
+.dockTab-close {
   display: flex;
   flex: none;
   padding: 1.5px 0 0;
@@ -83,17 +55,17 @@
   color: var(--foreground-hover);
 }
 .dockTab--hovered .dockTab-close,
-:is(.dockTab--foreground, .tabWell-tab--foreground) :is(.dockTab-close, .tabWell-close) {
+.dockTab--foreground .dockTab-close {
   visibility: visible;
 }
-:is(.dockTab--foreground, .tabWell-tab--foreground) {
+.dockTab--foreground {
   background: var(--panel);
   color: var(--foreground);
 }
-:is(.dockTab--active, .tabWell-tab--active) {
+.dockTab--active {
   color: var(--foreground-hover);
 }
-:is(.dockTab--active, .tabWell-tab--active)::before {
+.dockTab--active::before {
   content: "";
   position: absolute;
   top: 0;
@@ -115,44 +87,44 @@
   background: #18a0fb;
   opacity: .5;
 }
-:is(.dockTab--major, .tabWell-tab--major) {
+.dockTab--major {
   height: auto;
   max-width: 210px;
   padding: 3.4px 10px 3.4px 4px;
 }
-:is(.dockTab--major.dockTab--hovered, .dockTab--major.dockTab--foreground, .dockTab--major.dockTab--active, .tabWell-tab--major.tabWell-tab--foreground, .tabWell-tab--major.tabWell-tab--active) {
+:is(.dockTab--major.dockTab--hovered, .dockTab--major.dockTab--foreground, .dockTab--major.dockTab--active) {
   color: var(--white);
 }
-:is(.dockTab--major, .tabWell-tab--major) :is(.dockTab-icon, .tabWell-icon) {
+.dockTab--major .dockTab-icon {
   padding: 4px;
   border-radius: 4px;
 }
 .dockTab-icon--tinted {
   background: var(--accent-orange);
 }
-:is(.dockTab--major.dockTab--active, .tabWell-tab--major.tabWell-tab--active)::before {
+.dockTab--major.dockTab--active::before {
   content: none;
 }
-:is(.dockTab, .tabWell-tab):not(.dockTab--foreground, .tabWell-tab--foreground):hover {
+.dockTab:not(.dockTab--foreground):hover {
   background: color-mix(in srgb, var(--panel) 80%, transparent);
 }
-:is(.dockTab, .tabWell-tab):hover {
+.dockTab:hover {
   color: var(--foreground-hover);
 }
-:is(.dockTab--major, .tabWell-tab--major):hover {
+.dockTab--major:hover {
   color: var(--white);
 }
-:is(.dockTab, .tabWell-tab):hover :is(.dockTab-close, .tabWell-close),
-:is(.dockTab, .tabWell-tab):focus-visible :is(.dockTab-close, .tabWell-close) {
+.dockTab:hover .dockTab-close,
+.dockTab:focus-visible .dockTab-close {
   visibility: visible;
 }
-:is(.dockTab-close, .tabWell-close):hover {
+.dockTab-close:hover {
   color: var(--foreground-hover);
 }
-:is(.dockTab-close, .tabWell-close):active {
+.dockTab-close:active {
   color: var(--foreground);
 }
-:is(.dockTab, .tabWell-tab):focus-visible {
+.dockTab:focus-visible {
   outline: 1px solid var(--primary);
   outline-offset: -2px;
 }

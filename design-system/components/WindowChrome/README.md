@@ -5,7 +5,7 @@ The custom title bar and frame of an editor window: app icon, a menu strip slot,
 Built from the other components:
 
 - 3 `Button` (`button--caption`, `button--caption-close` on the last) for minimize, maximize or restore, and close. The caption variant is the 42 x 23 glyph cell with the translucent hover fill. 1 more `Button` (default look) brings back a hidden window.
-- 1 `TabWell` major tab (the single static major tab markup, with no `ue-tab-well` element) for the title-bar tab. No tab CSS is copied.
+- 1 `TabWell` major tab (a pinned `ue-tab-well` with one major `ue-dock-tab`) for the title-bar tab. No tab CSS is copied.
 - 1 `MenuBar` (`ue-menu-bar`) in the menu strip slot. Its look and behaviour belong to the `MenuBar` component.
 
 The window keeps only its own frame, title area layout, app icon, project badge and focus state.

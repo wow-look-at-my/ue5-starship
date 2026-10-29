@@ -2,6 +2,7 @@
 import { UeElement, define } from '../_shared/element.ts';
 import '../SegmentedControl/SegmentedControl.ts';
 import '../TextInput/TextInput.ts';
+import './PlaceActorsPanel.css';
 
 const GROUP = '.placeActors-group';
 const ROW = '.placeActors-row';

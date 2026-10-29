@@ -1522,6 +1522,9 @@
 
 /* design-system/src/ContentBrowser/ContentBrowser.css */
 .ContentBrowser {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   background: var(--background);
   font: 400 13.333px/16px var(--font-sans);
   color: var(--foreground);
@@ -1531,6 +1534,8 @@
   background: var(--recessed);
 }
 .ContentBrowser .ContentBrowser__body {
+  flex: 1 1 auto;
+  min-height: 0;
   background: var(--background);
 }
 .ContentBrowser .ContentBrowser__sources {

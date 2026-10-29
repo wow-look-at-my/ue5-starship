@@ -32,14 +32,14 @@ const names = (tabs: Locator): Promise<string[]> => tabs.evaluateAll((els) => el
 test('DockTab: hover shows the hovered fill, the hovered text colour and the close button', async () => {
 	await withBrowser(async (browser) => {
 		const { page, errors } = await openPreview(browser, 'DockTab');
-		const outliner = page.locator('ue-dock-tab').nth(0).locator('.dockTab[data-tab="outliner"]');
+		const outliner = page.locator('ue-tab-well:not([data-pinned])').nth(0).locator('.dockTab[data-tab="outliner"]');
 		const close = outliner.locator('.dockTab-close');
 		assert.equal(await bg(outliner), TRANSPARENT);
 		assert.equal(await visibility(close), 'hidden');
 		await outliner.hover();
 		const hoveredFill = await resolve(page, 'background-color', 'color-mix(in srgb, var(--panel) 80%, transparent)');
 		assert.equal(await bg(outliner), hoveredFill);
-		assert.equal(await bg(page.locator('.dockTab--hovered[data-pinned]').first()), hoveredFill, 'live hover equals the pinned hovered specimen');
+		assert.equal(await bg(page.locator('[data-pinned] .dockTab--hovered').first()), hoveredFill, 'live hover equals the pinned hovered specimen');
 		assert.equal(await fg(outliner), await resolve(page, 'color', 'var(--foreground-hover)'));
 		assert.equal(await visibility(close), 'visible');
 		assert.deepEqual(errors, []);
@@ -50,7 +50,7 @@ test('DockTab: hover shows the hovered fill, the hovered text colour and the clo
 test('DockTab: the close button shows its hovered and pressed colours', async () => {
 	await withBrowser(async (browser) => {
 		const { page, errors } = await openPreview(browser, 'DockTab');
-		const details = page.locator('ue-dock-tab').nth(0).locator('.dockTab[data-tab="details"]');
+		const details = page.locator('ue-tab-well:not([data-pinned])').nth(0).locator('.dockTab[data-tab="details"]');
 		const close = details.locator('.dockTab-close');
 		assert.equal(await fg(close), await resolve(page, 'color', 'var(--foreground)'));
 		await close.hover();
@@ -68,7 +68,7 @@ test('DockTab: the close button shows its hovered and pressed colours', async ()
 test('DockTab: clicking a tab makes it the foreground tab and swaps the panel', async () => {
 	await withBrowser(async (browser) => {
 		const { page, errors } = await openPreview(browser, 'DockTab');
-		const stack = page.locator('ue-dock-tab').nth(0);
+		const stack = page.locator('ue-tab-well:not([data-pinned])').nth(0);
 		const tab = (name: string): Locator => stack.locator('.dockTab[data-tab="' + name + '"]');
 		const panel = (name: string): Locator => stack.locator('[data-panel="' + name + '"]');
 		assert.ok(await panel('details').isVisible());
@@ -94,10 +94,10 @@ test('DockTab: clicking a tab makes it the foreground tab and swaps the panel', 
 test('DockTab: the active state moves between stacks and shows the primary line only on a minor tab', async () => {
 	await withBrowser(async (browser) => {
 		const { page, errors } = await openPreview(browser, 'DockTab');
-		const left = page.locator('ue-dock-tab').nth(0).locator('.dockTab[data-tab="details"]');
-		const right = page.locator('ue-dock-tab').nth(1).locator('.dockTab[data-tab="layers"]');
-		const major = page.locator('ue-dock-tab').nth(2).locator('.dockTab[data-tab="level2"]');
-		const pinnedActive = page.locator('.dockTab--active[data-pinned]').first();
+		const left = page.locator('ue-tab-well:not([data-pinned])').nth(0).locator('.dockTab[data-tab="details"]');
+		const right = page.locator('ue-tab-well:not([data-pinned])').nth(1).locator('.dockTab[data-tab="layers"]');
+		const major = page.locator('ue-tab-well:not([data-pinned])').nth(2).locator('.dockTab[data-tab="level2"]');
+		const pinnedActive = page.locator('[data-pinned] .dockTab--active').first();
 		assert.ok((await classes(left)).includes('dockTab--active'));
 		assert.notEqual(await lineContent(left), 'none');
 
@@ -120,8 +120,8 @@ test('DockTab: the active state moves between stacks and shows the primary line 
 test('DockTab: closing the foreground tab selects its left neighbour, and the last close leaves an empty well', async () => {
 	await withBrowser(async (browser) => {
 		const { page, errors } = await openPreview(browser, 'DockTab');
-		const stack = page.locator('ue-dock-tab').nth(0);
-		const tabs = stack.locator('.dockTab-well > .dockTab');
+		const stack = page.locator('ue-tab-well:not([data-pinned])').nth(0);
+		const tabs = stack.locator('.tabWell-well > ue-dock-tab > .dockTab');
 		const tab = (name: string): Locator => stack.locator('.dockTab[data-tab="' + name + '"]');
 
 		await tab('content').click();
@@ -139,11 +139,11 @@ test('DockTab: closing the foreground tab selects its left neighbour, and the la
 
 		await tab('outliner').locator('.dockTab-close').click();
 		assert.equal(await tabs.count(), 0);
-		const well = stack.locator('.dockTab-well');
-		assert.ok((await well.boundingBox())!.height >= 33, 'the empty well keeps its height');
+		const well = stack.locator('.tabWell-well');
+		assert.ok((await well.boundingBox())!.height >= 25, 'the empty well keeps its height');
 		assert.equal(await stack.locator('[data-panel]').count(), 0);
 
-		await stack.locator('.dockTab-reset').click();
+		await stack.locator('.tabWell-reset').click();
 		assert.deepEqual(await names(tabs), ['details', 'outliner', 'content'], 'Restore tabs brings the tabs back');
 		assert.ok((await classes(tab('details'))).includes('dockTab--foreground'));
 		assert.deepEqual(errors, []);
@@ -154,9 +154,9 @@ test('DockTab: closing the foreground tab selects its left neighbour, and the la
 test('DockTab: a middle click closes a tab', async () => {
 	await withBrowser(async (browser) => {
 		const { page, errors } = await openPreview(browser, 'DockTab');
-		const stack = page.locator('ue-dock-tab').nth(1);
+		const stack = page.locator('ue-tab-well:not([data-pinned])').nth(1);
 		await stack.locator('.dockTab[data-tab="layers"]').click({ button: 'middle' });
-		assert.deepEqual(await names(stack.locator('.dockTab-well > .dockTab')), ['place']);
+		assert.deepEqual(await names(stack.locator('.tabWell-well > ue-dock-tab > .dockTab')), ['place']);
 		assert.deepEqual(errors, []);
 		await page.close();
 	});
@@ -165,7 +165,7 @@ test('DockTab: a middle click closes a tab', async () => {
 test('DockTab: arrow keys, Home, End, Enter and Delete work on a focused tab', async () => {
 	await withBrowser(async (browser) => {
 		const { page, errors } = await openPreview(browser, 'DockTab');
-		const stack = page.locator('ue-dock-tab').nth(0);
+		const stack = page.locator('ue-tab-well:not([data-pinned])').nth(0);
 		const tab = (name: string): Locator => stack.locator('.dockTab[data-tab="' + name + '"]');
 		await tab('details').focus();
 		await page.keyboard.press('ArrowRight');
@@ -182,7 +182,7 @@ test('DockTab: arrow keys, Home, End, Enter and Delete work on a focused tab', a
 		assert.equal(await focusedTab(page), 'details');
 		assert.ok(await tab('details').evaluate((el) => getComputedStyle(el).outlineStyle !== 'none'), 'a focused tab shows a focus ring');
 		await page.keyboard.press('Delete');
-		assert.deepEqual(await names(stack.locator('.dockTab-well > .dockTab')), ['outliner', 'content']);
+		assert.deepEqual(await names(stack.locator('.tabWell-well > ue-dock-tab > .dockTab')), ['outliner', 'content']);
 		assert.ok((await classes(tab('outliner'))).includes('dockTab--foreground'));
 		assert.equal(await focusedTab(page), 'outliner', 'focus follows to the new foreground tab');
 		assert.deepEqual(errors, []);
@@ -193,7 +193,7 @@ test('DockTab: arrow keys, Home, End, Enter and Delete work on a focused tab', a
 test('DockTab: the major stack switches tabs and panels like the minor one', async () => {
 	await withBrowser(async (browser) => {
 		const { page, errors } = await openPreview(browser, 'DockTab');
-		const stack = page.locator('ue-dock-tab').nth(2);
+		const stack = page.locator('ue-tab-well:not([data-pinned])').nth(2);
 		const second = stack.locator('.dockTab[data-tab="level2"]');
 		await second.hover();
 		assert.equal(await bg(second), await resolve(page, 'background-color', 'color-mix(in srgb, var(--panel) 80%, transparent)'));
@@ -211,7 +211,7 @@ test('DockTab: the major stack switches tabs and panels like the minor one', asy
 test('DockTab: pinned specimens ignore the pointer', async () => {
 	await withBrowser(async (browser) => {
 		const { page, errors } = await openPreview(browser, 'DockTab');
-		const normal = page.locator('.dockTab[data-pinned]').first();
+		const normal = page.locator('[data-pinned] .dockTab').first();
 		const before = await classes(normal);
 		await assertInert(normal);
 		await hoverAt(page, normal);
@@ -219,9 +219,10 @@ test('DockTab: pinned specimens ignore the pointer', async () => {
 		assert.equal(await visibility(normal.locator('.dockTab-close')), 'hidden');
 		await clickAt(page, normal);
 		assert.deepEqual(await classes(normal), before);
-		assert.equal(await page.locator('ue-dock-tab').count(), 3);
+		assert.equal(await page.locator('ue-tab-well:not([data-pinned])').count(), 3);
 		assert.equal(await page.locator('use').count(), 0, 'no glyph of the preview refers to a symbol');
-		assert.equal(await page.locator('[data-pinned] ue-dock-tab, ue-dock-tab [data-pinned]').count(), 0);
+		assert.equal(await page.locator('.dockTab').evaluateAll((tabs) => tabs.filter((tab) => !tab.closest('ue-dock-tab')).length), 0, 'every tab sits in its ue-dock-tab');
+		assert.equal(await page.locator('ue-tab-well[data-pinned]').count(), 10, 'every pinned specimen is a ue-tab-well with data-pinned');
 		assert.deepEqual(errors, []);
 		await page.close();
 	});
@@ -238,26 +239,26 @@ async function watchEvents(page: Page, ...names: string[]): Promise<void> {
 
 const recordedEvents = (page: Page): Promise<Array<{ type: string; detail: unknown }>> => page.evaluate(() => (window as unknown as { __events: Array<{ type: string; detail: unknown }> }).__events.slice());
 
-for (const [tag, tabClass, closeClass, stackIndex] of [['ue-dock-tab', 'dockTab', 'dockTab-close', 0], ['ue-tab-well', 'tabWell-tab', 'tabWell-close', 0]] as const) {
-	test(tag + ': ue-tab-activate and ue-tab-close report the tab, and the API activates and closes by id', async () => {
+for (const preview of ['DockTab', 'TabWell']) {
+	test(preview + ': ue-tab-activate and ue-tab-close report the tab, and the API activates and closes by id', async () => {
 		await withBrowser(async (browser) => {
-			const { page, errors } = await openPreview(browser, tag === 'ue-dock-tab' ? 'DockTab' : 'TabWell');
-			const stack = page.locator(tag).nth(stackIndex);
-			const tab = (id: string): Locator => stack.locator('.' + tabClass + '[data-tab="' + id + '"]');
+			const { page, errors } = await openPreview(browser, preview);
+			const stack = page.locator('ue-tab-well:not([data-pinned])').nth(0);
+			const tab = (id: string): Locator => stack.locator('.dockTab[data-tab="' + id + '"]');
 			await watchEvents(page, 'ue-tab-activate', 'ue-tab-close');
 			await tab('content').click();
 			await tab('content').click();
 			assert.deepEqual(await recordedEvents(page), [{ type: 'ue-tab-activate', detail: { id: 'content', label: 'Content Browser' } }], 'a second click on the foreground tab changes nothing');
-			await tab('content').locator('.' + closeClass).click();
+			await tab('content').locator('.dockTab-close').click();
 			assert.deepEqual((await recordedEvents(page)).slice(1), [
 				{ type: 'ue-tab-close', detail: { id: 'content', label: 'Content Browser' } },
 				{ type: 'ue-tab-activate', detail: { id: 'outliner', label: 'Outliner' } },
 			], 'the close comes first, then the left neighbour takes over');
 			await stack.evaluate((el, id) => (el as HTMLElement & { activateTab(id: string): void }).activateTab(id), 'details');
-			assert.ok((await classes(tab('details'))).includes(tabClass + '--foreground'));
+			assert.ok((await classes(tab('details'))).includes('dockTab--foreground'));
 			assert.ok(await stack.locator('[data-panel="details"]').isVisible());
 			await stack.evaluate((el, id) => (el as HTMLElement & { closeTab(id: string): void }).closeTab(id), 'outliner');
-			assert.deepEqual(await names(stack.locator('.' + tabClass)), ['details']);
+			assert.deepEqual(await names(stack.locator('.dockTab')), ['details']);
 			const last = (await recordedEvents(page)).at(-1);
 			assert.deepEqual(last?.type, 'ue-tab-close');
 			assert.deepEqual(errors, []);
@@ -269,8 +270,8 @@ for (const [tag, tabClass, closeClass, stackIndex] of [['ue-dock-tab', 'dockTab'
 test('DockTab: the status line under a stack shows its own events only', async () => {
 	await withBrowser(async (browser) => {
 		const { page, errors } = await openPreview(browser, 'DockTab');
-		const first = page.locator('ue-dock-tab').nth(0);
-		const second = page.locator('ue-dock-tab').nth(1);
+		const first = page.locator('ue-tab-well:not([data-pinned])').nth(0);
+		const second = page.locator('ue-tab-well:not([data-pinned])').nth(1);
 		await first.locator('.dockTab[data-tab="content"]').click();
 		await first.locator('.dockTab[data-tab="content"] .dockTab-close').click();
 		assert.equal(await first.locator('ue-event-status').textContent(), 'Closed: Content Browser (content)');
@@ -288,18 +289,18 @@ test('TabWell: hover, click and the content swap work in the minor stack', async
 	await withBrowser(async (browser) => {
 		const { page, errors } = await openPreview(browser, 'TabWell');
 		const stack = page.locator('ue-tab-well').nth(0);
-		const tab = (name: string): Locator => stack.locator('.tabWell-tab[data-tab="' + name + '"]');
+		const tab = (name: string): Locator => stack.locator('.dockTab[data-tab="' + name + '"]');
 		const outliner = tab('outliner');
 		assert.equal(await bg(outliner), TRANSPARENT);
 		await outliner.hover();
 		assert.equal(await bg(outliner), await resolve(page, 'background-color', 'color-mix(in srgb, var(--panel) 80%, transparent)'));
-		assert.equal(await visibility(outliner.locator('.tabWell-close')), 'visible');
+		assert.equal(await visibility(outliner.locator('.dockTab-close')), 'visible');
 		assert.equal(await fg(outliner), await resolve(page, 'color', 'var(--foreground-hover)'));
 
 		await outliner.click();
-		assert.ok((await classes(outliner)).includes('tabWell-tab--foreground'));
-		assert.ok((await classes(outliner)).includes('tabWell-tab--active'));
-		assert.ok(!(await classes(tab('details'))).includes('tabWell-tab--foreground'));
+		assert.ok((await classes(outliner)).includes('dockTab--foreground'));
+		assert.ok((await classes(outliner)).includes('dockTab--active'));
+		assert.ok(!(await classes(tab('details'))).includes('dockTab--foreground'));
 		assert.equal(await bg(outliner), await resolve(page, 'background-color', 'var(--panel)'));
 		assert.ok(await stack.locator('[data-panel="outliner"]').isVisible());
 		assert.ok(await stack.locator('[data-panel="details"]').isHidden());
@@ -313,15 +314,15 @@ test('TabWell: close removes the tab, the left neighbour takes over, the last cl
 	await withBrowser(async (browser) => {
 		const { page, errors } = await openPreview(browser, 'TabWell');
 		const stack = page.locator('ue-tab-well').nth(0);
-		const tabs = stack.locator('.tabWell-well > .tabWell-tab');
-		const tab = (name: string): Locator => stack.locator('.tabWell-tab[data-tab="' + name + '"]');
+		const tabs = stack.locator('.tabWell-well > ue-dock-tab > .dockTab');
+		const tab = (name: string): Locator => stack.locator('.dockTab[data-tab="' + name + '"]');
 		await tab('content').click();
-		await tab('content').locator('.tabWell-close').click();
+		await tab('content').locator('.dockTab-close').click();
 		assert.deepEqual(await names(tabs), ['details', 'outliner']);
-		assert.ok((await classes(tab('outliner'))).includes('tabWell-tab--foreground'));
-		await tab('outliner').locator('.tabWell-close').click();
-		assert.ok((await classes(tab('details'))).includes('tabWell-tab--foreground'));
-		await tab('details').locator('.tabWell-close').click();
+		assert.ok((await classes(tab('outliner'))).includes('dockTab--foreground'));
+		await tab('outliner').locator('.dockTab-close').click();
+		assert.ok((await classes(tab('details'))).includes('dockTab--foreground'));
+		await tab('details').locator('.dockTab-close').click();
 		assert.equal(await tabs.count(), 0);
 		assert.ok((await stack.locator('.tabWell-well').boundingBox())!.height >= 25, 'the empty well keeps its height');
 		await stack.locator('.tabWell-reset').click();
@@ -336,17 +337,17 @@ test('TabWell: the major stack works on its own and never shows the active line'
 		const { page, errors } = await openPreview(browser, 'TabWell');
 		const minor = page.locator('ue-tab-well').nth(0);
 		const major = page.locator('ue-tab-well').nth(1);
-		const second = major.locator('.tabWell-tab[data-tab="level2"]');
+		const second = major.locator('.dockTab[data-tab="level2"]');
 		await second.click();
-		assert.ok((await classes(second)).includes('tabWell-tab--foreground'));
-		assert.ok((await classes(second)).includes('tabWell-tab--active'));
+		assert.ok((await classes(second)).includes('dockTab--foreground'));
+		assert.ok((await classes(second)).includes('dockTab--active'));
 		assert.equal(await lineContent(second), 'none');
-		assert.ok(!(await classes(minor.locator('.tabWell-tab[data-tab="details"]'))).includes('tabWell-tab--active'), 'the minor stack lost the active state');
+		assert.ok(!(await classes(minor.locator('.dockTab[data-tab="details"]'))).includes('dockTab--active'), 'the minor stack lost the active state');
 		assert.ok(await major.locator('[data-panel="level2"]').isVisible());
 		assert.equal(await bg(major.locator('.tabWell-content')), await resolve(page, 'background-color', 'var(--background)'));
-		await minor.locator('.tabWell-tab[data-tab="outliner"]').click();
-		assert.notEqual(await lineContent(minor.locator('.tabWell-tab[data-tab="outliner"]')), 'none');
-		assert.ok(!(await classes(second)).includes('tabWell-tab--active'));
+		await minor.locator('.dockTab[data-tab="outliner"]').click();
+		assert.notEqual(await lineContent(minor.locator('.dockTab[data-tab="outliner"]')), 'none');
+		assert.ok(!(await classes(second)).includes('dockTab--active'));
 		assert.deepEqual(errors, []);
 		await page.close();
 	});
@@ -356,7 +357,7 @@ test('TabWell: keyboard moves between tabs and Delete closes', async () => {
 	await withBrowser(async (browser) => {
 		const { page, errors } = await openPreview(browser, 'TabWell');
 		const stack = page.locator('ue-tab-well').nth(0);
-		await stack.locator('.tabWell-tab[data-tab="details"]').focus();
+		await stack.locator('.dockTab[data-tab="details"]').focus();
 		await page.keyboard.press('ArrowRight');
 		assert.equal(await focusedTab(page), 'outliner');
 		assert.ok(await stack.locator('[data-panel="outliner"]').isVisible());
@@ -366,30 +367,30 @@ test('TabWell: keyboard moves between tabs and Delete closes', async () => {
 		await page.keyboard.press('Home');
 		assert.equal(await focusedTab(page), 'details');
 		await page.keyboard.press('Delete');
-		assert.deepEqual(await names(stack.locator('.tabWell-well > .tabWell-tab')), ['outliner', 'content']);
+		assert.deepEqual(await names(stack.locator('.tabWell-well > ue-dock-tab > .dockTab')), ['outliner', 'content']);
 		assert.deepEqual(errors, []);
 		await page.close();
 	});
 });
 
-test('TabWell: one major tab alone draws the title-bar tab with no element and no symbol', async () => {
+test('TabWell: one major tab alone draws the title-bar tab inside a pinned ue-tab-well and uses no symbol', async () => {
 	await withBrowser(async (browser) => {
 		const { page, errors } = await openPreview(browser, 'TabWell');
-		const alone = page.locator('.tabWell-tab--major[data-pinned]');
+		const alone = page.locator('ue-tab-well[data-pinned] .dockTab--major');
 		assert.equal(await alone.count(), 1);
-		assert.equal(await alone.evaluate((el) => el.closest('ue-tab-well')), null);
+		assert.equal(await alone.evaluate((el) => el.closest('ue-tab-well')?.hasAttribute('data-pinned')), true);
 		assert.equal(await page.locator('use').count(), 0, 'no glyph of the preview refers to a symbol');
 		assert.equal(await bg(alone), await resolve(page, 'background-color', 'var(--panel)'));
 		assert.equal(await fg(alone), await resolve(page, 'color', 'var(--white)'));
 		assert.equal(await lineContent(alone), 'none', 'a major tab has no active line');
 		const box = (await alone.boundingBox())!;
 		assert.ok(Math.abs(box.height - 30.8) < 0.1, 'major tab height ' + box.height);
-		assert.equal(await visibility(alone.locator('.tabWell-close')), 'visible', 'the foreground tab shows its close button');
-		assert.equal(await alone.locator('.tabWell-icon svg').evaluate((el) => getComputedStyle(el).width), '16px');
-		assert.equal(await alone.locator('.tabWell-icon').evaluate((el) => getComputedStyle(el).paddingLeft), '4px');
-		const well = (await page.locator('.tabWell-well--major').filter({ has: alone }).boundingBox())!;
+		assert.equal(await visibility(alone.locator('.dockTab-close')), 'visible', 'the foreground tab shows its close button');
+		assert.equal(await alone.locator('.dockTab-icon svg').evaluate((el) => getComputedStyle(el).width), '16px');
+		assert.equal(await alone.locator('.dockTab-icon').evaluate((el) => getComputedStyle(el).paddingLeft), '4px');
+		const well = (await page.locator('ue-tab-well[data-pinned] .tabWell-well--major').boundingBox())!;
 		assert.ok(well.height >= 30.7, 'the major well is as tall as the major tab: ' + well.height);
-		assert.equal(await bg(page.locator('.tabWell-well--major').filter({ has: alone })), await resolve(page, 'background-color', 'var(--title)'));
+		assert.equal(await bg(page.locator('ue-tab-well[data-pinned] .tabWell-well--major')), await resolve(page, 'background-color', 'var(--title)'));
 		assert.deepEqual(errors, []);
 		await page.close();
 	});
@@ -408,7 +409,7 @@ test('WindowChrome: the buttons show their hover fills and the pressed state dro
 		await minimize.hover();
 		assert.equal(await bg(minimize), await resolve(page, 'background-color', 'rgba(255, 255, 255, 0.157)'));
 		assert.equal(await fg(minimize), await resolve(page, 'color', 'var(--foreground-hover)'));
-		assert.equal(await bg(page.locator('.button--hover[data-pinned]').first()), await bg(minimize), 'live hover equals the pinned hover specimen');
+		assert.equal(await bg(page.locator('[data-pinned] .button--hover').first()), await bg(minimize), 'live hover equals the pinned hover specimen');
 
 		await close.hover();
 		assert.equal(await bg(close), await resolve(page, 'background-color', 'rgba(255, 79, 79, 0.588)'));
@@ -494,7 +495,7 @@ test('WindowChrome: pinned button specimens ignore the pointer', async () => {
 		await hoverAt(page, pinned);
 		assert.equal(await bg(pinned), TRANSPARENT);
 		assert.equal(await page.locator('ue-window-chrome').count(), 1);
-		assert.equal(await page.locator('[data-pinned] ue-window-chrome, ue-window-chrome [data-pinned]').count(), 0);
+		assert.equal(await page.locator('ue-window-chrome ue-button[data-pinned]').count(), 0, 'the pinned button specimens sit outside the live window');
 		assert.deepEqual(errors, []);
 		await page.close();
 	});
@@ -532,7 +533,7 @@ test('Splitter: hover shows the secondary fill and the resize cursor', async () 
 		assert.equal(await col.evaluate((el) => getComputedStyle(el).cursor), 'row-resize');
 		await row.hover();
 		assert.equal(await bg(row), await resolve(page, 'background-color', 'var(--secondary)'));
-		assert.equal(await bg(page.locator('.splitter-handle--highlight[data-pinned]').first()), await bg(row), 'live hover equals the pinned highlight');
+		assert.equal(await bg(page.locator('[data-pinned] .splitter-handle--highlight').first()), await bg(row), 'live hover equals the pinned highlight');
 		await page.mouse.move(2, 2);
 		assert.equal(await bg(row), await resolve(page, 'background-color', 'var(--background)'));
 		assert.deepEqual(errors, []);
@@ -740,15 +741,15 @@ test('Splitter: the line handle is 2px wide with a hit area 3px wider on each si
 test('Splitter: pinned handles stay pinned', async () => {
 	await withBrowser(async (browser) => {
 		const { page, errors } = await openPreview(browser, 'Splitter');
-		const pinned = page.locator('.splitter-handle[data-pinned]').first();
-		const demo = page.locator('.splitter').filter({ has: pinned });
+		const pinned = page.locator('[data-pinned] .splitter-handle').first();
+		const demo = page.locator('ue-splitter[data-pinned] .splitter').first();
 		const start = await sizes(demo, 'width');
 		await assertInert(pinned);
 		await hoverAt(page, pinned);
 		assert.equal(await bg(pinned), await resolve(page, 'background-color', 'var(--background)'));
 		await dragHandle(page, pinned, 30, 0);
 		assert.deepEqual(await sizes(demo, 'width'), start);
-		assert.equal(await page.locator('[data-pinned] ue-splitter, ue-splitter [data-pinned]').count(), 0);
+		assert.equal(await page.locator('ue-splitter:not([data-pinned]) [data-pinned]').count(), 0, 'no pinned specimen sits inside a live splitter');
 		assert.deepEqual(errors, []);
 		await page.close();
 	});

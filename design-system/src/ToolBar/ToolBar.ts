@@ -2,6 +2,7 @@
 import { UeElement, define } from '../_shared/element.ts';
 import '../Button/Button.ts';
 import '../ComboButton/ComboButton.ts';
+import './ToolBar.css';
 
 const CONTROL = '.button, .combobutton';
 const PANEL = '.combobutton-menu';

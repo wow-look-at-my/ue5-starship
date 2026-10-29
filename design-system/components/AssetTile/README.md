@@ -27,7 +27,7 @@ One `<ue-asset-tile>` wraps exactly one tile grid: a `listbox` of tiles with sel
 
 - The element sets `role="option"`, `aria-selected`, `tabindex` (one tile takes the Tab stop: the selected one, else the first) and the class `is-selected`. An author writes only the initial `is-selected`. `data-id` is the tile id in events and the API. Without it the text of `.AssetTile__name` is the id.
 - The thumbnail of an asset is a `.AssetTile__asset` box. Put a cube `<svg>` or an `<img class="AssetTile__image">` in it. The strip colour is the CSS variable `--strip`.
-- Hover and keyboard focus need no script: `.AssetTile:hover` and `:focus-visible` carry the look. A forced specimen uses `is-hover` and `is-selected`, and takes `data-pinned` (on the tile or on a row of tiles) so the page ignores the pointer.
+- Hover and keyboard focus need no script: `.AssetTile:hover` and `:focus-visible` carry the look. A forced specimen uses `is-hover` and `is-selected`, and sits in a `<ue-asset-tile data-pinned>`, so no setup runs and the page ignores the pointer.
 - The folder glyph is inline, 64x64, `fill="currentColor"` plus overlay paths. No `<symbol>` is needed.
 
 ## Selection and keys

@@ -8,44 +8,39 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Condensed:wght@400;700&family=Roboto+Mono&display=swap">
 <style>body { font-family: var(--font-sans); }</style>
 <style>
-/* SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp. Style set "WindowMenuBar" (SC:2443-2448), buttons built by SMenuEntryBlock.cpp:247-298. The items are ComboButton menubar triggers, the menus are PopupMenu lists. */
+/* The menu strip look is in src/MenuBar/MenuBar.css. This page only lays out its notes and the live stage. */
 body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* Normal font 10pt = 13.333px (SC:36, SC:2444); 16px line height approximates Roboto metrics */
 .menuBar-note { margin: 14px 0 6px; font: 400 10.667px/12px var(--font-sans); color: var(--foreground); opacity: .7; } /* Small font 8pt (SC:40) */
 .menuBar-note:first-child { margin-top: 0; }
 
-/* Strip: WindowMenuBar.Background is FSlateNoResource (SC:2443); the bar is transparent and sits on the title area */
-.menuBar { display: flex; align-items: stretch; background: transparent; }
-
-/* Each item and its pop-up share a slot, so the pop-up anchors under the item and the item fills the strip height */
-.menuBar .menuBar-slot { display: flex; align-items: stretch; }
 .menuBar-stage { min-height: 230px; }
 </style>
 </head>
 <body>
 
 <div class="menuBar-note">Normal, with Edit hovered (pinned)</div>
-<div class="menuBar" data-pinned>
-	<span class="combobutton combobutton--menubar"><span class="combobutton__label">File</span></span>
-	<span class="combobutton combobutton--menubar combobutton--hover"><span class="combobutton__label">Edit</span></span>
-	<span class="combobutton combobutton--menubar"><span class="combobutton__label">Window</span></span>
-	<span class="combobutton combobutton--menubar"><span class="combobutton__label">Tools</span></span>
-	<span class="combobutton combobutton--menubar"><span class="combobutton__label">Build</span></span>
-	<span class="combobutton combobutton--menubar"><span class="combobutton__label">Select</span></span>
-	<span class="combobutton combobutton--menubar"><span class="combobutton__label">Actor</span></span>
-	<span class="combobutton combobutton--menubar"><span class="combobutton__label">Help</span></span>
-</div>
+<ue-menu-bar data-pinned><div class="menuBar">
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">File</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar combobutton--hover"><span class="combobutton__label">Edit</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">Window</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">Tools</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">Build</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">Select</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">Actor</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">Help</span></span></ue-combo-button>
+</div></ue-menu-bar>
 
 <div class="menuBar-note">Window menu open (pinned)</div>
-<div class="menuBar" data-pinned>
-	<span class="combobutton combobutton--menubar"><span class="combobutton__label">File</span></span>
-	<span class="combobutton combobutton--menubar"><span class="combobutton__label">Edit</span></span>
-	<span class="combobutton combobutton--menubar combobutton--open"><span class="combobutton__label">Window</span></span>
-	<span class="combobutton combobutton--menubar"><span class="combobutton__label">Tools</span></span>
-	<span class="combobutton combobutton--menubar"><span class="combobutton__label">Build</span></span>
-	<span class="combobutton combobutton--menubar"><span class="combobutton__label">Select</span></span>
-	<span class="combobutton combobutton--menubar"><span class="combobutton__label">Actor</span></span>
-	<span class="combobutton combobutton--menubar"><span class="combobutton__label">Help</span></span>
-</div>
+<ue-menu-bar data-pinned><div class="menuBar">
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">File</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">Edit</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar combobutton--open"><span class="combobutton__label">Window</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">Tools</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">Build</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">Select</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">Actor</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">Help</span></span></ue-combo-button>
+</div></ue-menu-bar>
 
 <div class="menuBar-note">Live: hover an item, click to open its menu, then hover another item to switch. Escape or a click outside closes. Keys: Left and Right between items, Down opens, Up and Down in a menu, Enter picks. The menu entries are illustrative.</div>
 <ue-menu-bar>

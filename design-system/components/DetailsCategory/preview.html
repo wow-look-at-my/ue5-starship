@@ -130,7 +130,7 @@
 		<div class="DetailsHeader-instanceBox">
 			<div class="DetailsHeader-instance">
 				<svg viewBox="0 0 16 16"><path d="M8 1.5 14 4.75v6.5L8 14.5 2 11.25v-6.5z M2 4.75 8 8l6-3.25 M8 8v6.5"/></svg>
-				<span class="name">Chair</span><span class="ctx">(Instance)</span>
+				<span class="DetailsHeader-instanceName">Chair</span><span class="DetailsHeader-instanceContext">(Instance)</span>
 			</div>
 		</div>
 	</div>
@@ -280,28 +280,28 @@
 <p class="DetailsCategory-cap"><b>Live details.</b> Type in the search box to filter the rows by name (Escape or the X clears it). The pills show one section: Physics has none. The gear menu collapses or expands all categories, or shows only modified rows (rows with a reset arrow). The Location row is a nested vector input and Mass is a spin box. The star and the lock toggle. Click the actor name to rename it.</p>
 
 <!-- Pinned: the original specimen. Collision Preset is forced to its hover fill. -->
-<div class="DetailsCategory-frame" data-pinned>
+<ue-details-category data-pinned><div class="DetailsCategory-frame">
 	<div class="DetailsCategory-cat">
 		<div class="DetailsCategory-catRow" aria-expanded="true"><svg class="DetailsCategory-arrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-title">Rendering</span></div>
 	</div>
 	<div class="DetailsCategory-row">
 		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-label">Visible</span></span></div>
 		<div class="DetailsCategory-split"></div>
-		<div class="DetailsCategory-value"><span class="checkbox" aria-checked="true"><span class="checkbox__box"><svg class="checkbox__glyph" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span></span></div>
+		<div class="DetailsCategory-value"><ue-checkbox><span class="checkbox" aria-checked="true"><span class="checkbox__box"><svg class="checkbox__glyph" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span></span></ue-checkbox></div>
 		<div class="DetailsCategory-split"></div>
 		<div class="DetailsCategory-right"></div>
 	</div>
 	<div class="DetailsCategory-row">
 		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-label">Actor Label</span></span></div>
 		<div class="DetailsCategory-split"></div>
-		<div class="DetailsCategory-value"><div class="textinput textinput--small"><span class="textinput__text">Chair</span></div></div>
+		<div class="DetailsCategory-value"><ue-text-input><div class="textinput textinput--small"><span class="textinput__text">Chair</span></div></ue-text-input></div>
 		<div class="DetailsCategory-split"></div>
-		<div class="DetailsCategory-right"><button class="resettodefault" type="button" tabindex="-1" aria-label="Reset to default"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button></div>
+		<div class="DetailsCategory-right"><ue-reset-to-default><button class="resettodefault" type="button" tabindex="-1" aria-label="Reset to default"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button></ue-reset-to-default></div>
 	</div>
 	<div class="DetailsCategory-row is-hover">
 		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-label">Collision Preset</span></span></div>
 		<div class="DetailsCategory-split"></div>
-		<div class="DetailsCategory-value"><div class="combobutton-anchor combobutton-anchor--fill"><span class="combobutton combobutton--small" tabindex="-1"><span class="combobutton__label">BlockAll</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></div></div>
+		<div class="DetailsCategory-value"><ue-combo-button><div class="combobutton-anchor combobutton-anchor--fill"><span class="combobutton combobutton--small" tabindex="-1"><span class="combobutton__label">BlockAll</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></div></ue-combo-button></div>
 		<div class="DetailsCategory-split"></div>
 		<div class="DetailsCategory-right"></div>
 	</div>
@@ -316,7 +316,7 @@
 		<div class="DetailsCategory-indent" style="width: 16px"></div>
 		<div class="DetailsCategory-name"><span class="DetailsCategory-nameInner"><svg class="DetailsCategory-rowArrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-label">Cast Shadow</span></span></div>
 		<div class="DetailsCategory-split"></div>
-		<div class="DetailsCategory-value"><span class="checkbox" aria-checked="true"><span class="checkbox__box"><svg class="checkbox__glyph" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span></span></div>
+		<div class="DetailsCategory-value"><ue-checkbox><span class="checkbox" aria-checked="true"><span class="checkbox__box"><svg class="checkbox__glyph" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span></span></ue-checkbox></div>
 		<div class="DetailsCategory-split"></div>
 		<div class="DetailsCategory-right"></div>
 	</div>
@@ -330,7 +330,7 @@
 	<div class="DetailsCategory-adv">
 		<div class="DetailsCategory-advRow" aria-expanded="false"><svg class="DetailsCategory-arrow" viewBox="0 0 16 16"><path d="M6 4.5v7L10.5 8z"/></svg><span class="DetailsCategory-title">Advanced</span></div>
 	</div>
-</div>
+</div></ue-details-category>
 <p class="DetailsCategory-cap"><b>Pinned.</b> The reference frame: Collision Preset is forced to its hover fill, Static Mesh stays collapsed.</p>
 
 </body>

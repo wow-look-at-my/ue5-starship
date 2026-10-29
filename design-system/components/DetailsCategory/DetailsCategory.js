@@ -4,8 +4,10 @@ var UeElement = class extends HTMLElement {
   #ready = false;
   #pendingSetup = null;
   // The bundle can load before the parser reaches this element's children, so setup waits for the document to finish parsing.
+  // A pinned specimen (data-pinned on the element or an ancestor) keeps its authored markup: setup never runs.
   connectedCallback() {
     this.style.display = "contents";
+    if (this.closest("[data-pinned]")) return;
     if (document.readyState !== "loading") {
       this.#start();
       return;
@@ -575,7 +577,7 @@ var UeDetailsHeader = class extends UeElement {
     this.on(label, "blur", () => {
       const text = (label.textContent ?? "").trim();
       label.textContent = text === "" ? before : text;
-      for (const name of this.all(".DetailsHeader-instance .name")) name.textContent = label.textContent;
+      for (const name of this.all(".DetailsHeader-instance .DetailsHeader-instanceName")) name.textContent = label.textContent;
     });
   }
 };

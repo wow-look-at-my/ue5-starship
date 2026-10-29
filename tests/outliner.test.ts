@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Locator, Page } from 'playwright';
 import { bgOf, centre, classes, clickBlank, colorOf, holdPointer, inPreview, keys, movePointer, parkPointer, releasePointer, rgb, rowIn, settle, shown, spin, visibleLabels, widthOf } from './preview-kit.ts';
-import { assertInert, hoverAt } from './pinned.ts';
+import { assertInert, clickAt, hoverAt } from './pinned.ts';
 
 // ---------------------------------------------------------------------------------------------------------------- TreeRow
 
@@ -159,16 +159,16 @@ test('TreeRow: rows alternate even and odd by visible position', async () => {
 
 test('TreeRow: pinned specimens stay pinned', async () => {
 	await inPreview('TreeRow', async (page) => {
-		const first = page.locator('.tr-page > .tr-row').first();
-		const specimen = page.locator('.tr-page > .tr-row.is-selected:not(.is-inactive)');
-		await first.click();
-		await first.hover();
+		const first = page.locator('.tr-page > ue-tree-row[data-pinned] > .tr-row').first();
+		const specimen = page.locator('.tr-page > ue-tree-row[data-pinned] > .tr-row.is-selected:not(.is-inactive)');
+		await clickAt(page, first);
+		await hoverAt(page, first);
 		assert.equal(await bgOf(first), rgb('recessed'));
 		assert.equal(await bgOf(specimen), rgb('select'));
 		await clickBlank(page);
 		assert.equal(await bgOf(specimen), rgb('select'), 'a pinned active row never turns inactive');
-		assert.equal(await bgOf(page.locator('.tr-page > .tr-row.is-selected.is-inactive')), rgb('select-inactive'));
-		assert.equal(await bgOf(page.locator('.tr-page > .tr-row.is-parent')), rgb('select-parent'));
+		assert.equal(await bgOf(page.locator('.tr-page > ue-tree-row[data-pinned] > .tr-row.is-selected.is-inactive')), rgb('select-inactive'));
+		assert.equal(await bgOf(page.locator('.tr-page > ue-tree-row[data-pinned] > .tr-row.is-parent')), rgb('select-parent'));
 		assert.equal(await page.locator('ue-tree-row .tr-row.is-selected').count(), 0, 'nothing in the live tree got selected');
 	});
 });
@@ -524,11 +524,11 @@ test('HeaderRow: the splitter resizes from the keyboard', async () => {
 
 test('HeaderRow: pinned specimens keep their forced state', async () => {
 	await inPreview('HeaderRow', async (page) => {
-		assert.equal(await bgOf(page.locator('.hr-page > .hr-row .hr-cell.is-hover')), rgb('dropdown'));
-		const cell = page.locator('.hr-page > .hr-row').nth(1).locator('.hr-cell.is-text').nth(1);
-		await cell.hover();
+		assert.equal(await bgOf(page.locator('.hr-page > ue-header-row[data-pinned] > .hr-row .hr-cell.is-hover')), rgb('dropdown'));
+		const cell = page.locator('.hr-page > ue-header-row[data-pinned] > .hr-row').nth(1).locator('.hr-cell.is-text').nth(1);
+		await hoverAt(page, cell);
 		assert.equal(await bgOf(cell), rgb('header'), 'a pinned cell has no sort and no hover');
-		await cell.click();
+		await clickAt(page, cell);
 		assert.equal(await cell.getAttribute('aria-sort'), null);
 	});
 });
@@ -909,9 +909,9 @@ test('SceneOutliner: the pinned specimen stays pinned', async () => {
 		const row = specimen.locator('.so-row').nth(2);
 		await parkPointer(page);
 		const before = await bgOf(row);
-		await row.hover();
+		await hoverAt(page, row);
 		assert.equal(await bgOf(row), before, 'a pinned row has no hover');
-		await row.click();
+		await clickAt(page, row);
 		assert.equal(await specimen.locator('.so-row.is-selected').count(), 1);
 		assert.equal(await specimen.locator('.so-eye').count(), 2);
 	});

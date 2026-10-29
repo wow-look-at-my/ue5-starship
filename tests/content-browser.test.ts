@@ -26,7 +26,7 @@ const valueOf = (target: Locator): Promise<string> => target.inputValue();
 
 // Appends a deep copy of the first element with this tag to the body.
 function duplicateFirst(tag: string): void {
-	const live = document.querySelector(tag);
+	const live = document.querySelector(tag + ':not([data-pinned], [data-pinned] *)');
 	if (live) document.body.append(live.cloneNode(true));
 }
 
@@ -167,7 +167,7 @@ scenario('ContentToolbar: the Settings menu toggles checks and works from the ke
 });
 
 scenario('ContentToolbar: pinned specimens stay static and a copied instance is independent', 'ContentToolbar', async (page) => {
-	const pinned = page.locator('.ContentToolbar[data-pinned]').first();
+	const pinned = page.locator('[data-pinned] .ContentToolbar').first();
 	await assertInert(pinned);
 	await clickAt(page, pinned.locator('.button', { hasText: 'Content' }).first());
 	assert.equal(await pinned.locator('.button--tight').filter({ hasText: /^(All|Content|StarterContent)$/ }).count(), 3, 'a pinned toolbar does not navigate');
@@ -298,8 +298,8 @@ scenario('SourcePanel: search toggles show hover, pressed and checked colours; t
 	assert.equal(await attr(spRow(page, 'NewCollection2'), 'aria-selected'), 'true');
 });
 
-scenario('SourcePanel: the pinned panel is plain HTML and does not react', 'SourcePanel', async (page) => {
-	const pinned = page.locator('.SourcePanel[data-pinned]');
+scenario('SourcePanel: the pinned panel runs no setup and does not react', 'SourcePanel', async (page) => {
+	const pinned = page.locator('[data-pinned] .SourcePanel');
 	await assertInert(pinned);
 	const pinnedRow = pinned.locator('.tr-row', { hasText: 'Architecture' });
 	await clickAt(page, pinnedRow);
@@ -570,7 +570,7 @@ scenario('AssetSearchBar: the filter menu is keyboard operable', 'AssetSearchBar
 });
 
 scenario('AssetSearchBar: the pinned rows stay as drawn', 'AssetSearchBar', async (page) => {
-	const pinnedBars = page.locator('.AssetSearchBar[data-pinned]');
+	const pinnedBars = page.locator('[data-pinned] .AssetSearchBar');
 	assert.equal(await pinnedBars.count(), 2);
 	await assertInert(pinnedBars.first());
 	const pinnedClear = pinnedBars.locator('.textinput__clear');

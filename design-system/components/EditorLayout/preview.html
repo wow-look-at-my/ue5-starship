@@ -9,302 +9,14 @@
 <style>body { font-family: var(--font-sans); }</style>
 <style>
 
-
-
-	.windowChrome-page { padding: 16px; font: 400 13.333px/1.2 var(--font-sans); color: var(--foreground); }
-	.windowChrome-caption { margin: 6px 0 14px; font: 400 11px/1.2 var(--font-sans); color: var(--hover-2); }
-	.windowChrome-scroll { overflow-x: auto; }
-	.windowChrome-h { margin: 0 0 6px; font: 700 11px/1.2 var(--font-sans); letter-spacing: .04em; text-transform: uppercase; color: var(--hover-2); }
-
-	/* Window frame: BorderBrush = Recessed fill, radius 2, 2px WindowBorder outline (StarshipCoreStyle.cpp:781); main area inset 3px (BorderPadding, :785) */
-	.windowChrome-frame { position: relative; box-sizing: border-box; min-width: 640px;
-		background: var(--recessed); /* BackgroundBrush Recessed, StarshipCoreStyle.cpp:780 */
-		border: 2px solid var(--window-border); border-radius: 2px; /* :781 */
-		padding: 1px; /* 3px border padding minus the 2px stroke: :785 */ }
-	/* OutlineBrush: 1px InputOutline stroke, radius 2, overlay slot Padding(2): StarshipCoreStyle.cpp:782, SWindow.cpp:597-600 */
-	.windowChrome-frame::before { content: ""; position: absolute; inset: 0; border: 1px solid var(--input-outline); border-radius: 2px; pointer-events: none; }
-
-	/* Title area is as tall as the taller of left content (icon 45 + 2x5 padding + 4 bottom = 59) and right content: SWindowTitleBar.cpp:321 (spacer height), :206 (icon Padding 0,0,0,4), StarshipCoreStyle.cpp:284-285 (AppIcon 45x45, AppIconPadding 5) */
-	.windowChrome-title { position: relative; height: 59px; background: var(--title); /* Brushes.Title under the major tab stack, SDockingTabStack.cpp:1234 */ }
-	.windowChrome-icon { position: absolute; left: 0; top: 0; box-sizing: border-box; width: 55px; height: 55px; padding: 5px; color: var(--white); /* AppIcon tint White, StarshipCoreStyle.cpp:284 */ }
-	.windowChrome-icon svg { display: block; width: 45px; height: 45px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
-
-	/* menu strip slot: SWindowTitleBar WindowMenuSlot, content is consumer-provided; top padding 25 reserves it (SDockingTabStack.cpp:891,897) */
-	.windowChrome-menu { position: absolute; left: 55px; top: 0; height: 25px; display: flex; align-items: center; }
-
-	/* tab row (the tab itself is the TabWell major tab): major tab placed 25px below the top, 45 + 12 = 57px from the left: SDockingTabStack.cpp:893,898 */
-	.windowChrome-tabRow { position: absolute; left: 57px; top: 25px; }
-
-	/* right content: badge then the three buttons, all VAlign top; SBox padding left 2: SWindowTitleBar.cpp:235 */
-	.windowChrome-right { position: absolute; right: 0; top: 0; display: flex; align-items: flex-start; padding-left: 2px; }
-	.windowChrome-right ue-button, .windowChrome-stateBox ue-button { display: flex; flex: none; }
-	.windowChrome-badge { margin-right: 10px; /* slot Padding(0,0,8,0) LevelEditor.cpp:247 + SBox Padding(0,0,2,0) LevelEditor.cpp:166 */
-		padding: 6px 32px 7px; /* SProjectBadge.BadgePadding (32,6,32,7): StarshipStyle.cpp:2917 */
-		background: #0f0f0f; /* Colors.Title tint (LevelEditor.cpp:107-108) over Badge.png; the texture is not in the tree, #0f0f0f is what the reference screenshot shows */
-		border-radius: 6px; /* 6/16 slice of the 16px Badge brush: StarshipStyle.cpp:2916 */
-		color: var(--foreground); /* BadgeTextColor, LevelEditor.cpp:123 */ }
-	/* window content below the title area; stand-in for the dock area */
-	.windowChrome-content { height: 50px; background: var(--panel); margin-top: 0; padding: 8px 12px; color: var(--foreground); }
-
-	.windowChrome-frame:focus-visible { outline: 1px solid var(--primary); outline-offset: 2px; }
-	.windowChrome-frame[data-maximized] { border-radius: 0; }
-	.windowChrome-frame[data-maximized]::before { border-radius: 0; }
-	.windowChrome-frame[data-maximized] .windowChrome-content { height: 90px; }
-	.windowChrome-live { margin: 0 0 8px; line-height: 1.45; }
-	.windowChrome-live b, .windowChrome-status { color: var(--foreground); }
-	ue-window-chrome { display: contents; }
-
-	.windowChrome-states { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: flex-start; }
-	.windowChrome-state { display: flex; flex-direction: column; gap: 4px; }
-	.windowChrome-stateBox { background: var(--title); }
-
-
-
-
-/* SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp. Style set "WindowMenuBar" (SC:2443-2448), buttons built by SMenuEntryBlock.cpp:247-298. The items are ComboButton menubar triggers, the menus are PopupMenu lists. */
- /* Normal font 10pt = 13.333px (SC:36, SC:2444); 16px line height approximates Roboto metrics */
-.menuBar-note { margin: 14px 0 6px; font: 400 10.667px/12px var(--font-sans); color: var(--foreground); opacity: .7; } /* Small font 8pt (SC:40) */
-.menuBar-note:first-child { margin-top: 0; }
-
-/* Strip: WindowMenuBar.Background is FSlateNoResource (SC:2443); the bar is transparent and sits on the title area */
-.menuBar { display: flex; align-items: stretch; background: transparent; }
-
-/* Each item and its pop-up share a slot, so the pop-up anchors under the item and the item fills the strip height */
-.menuBar .menuBar-slot { display: flex; align-items: stretch; }
-.menuBar-stage { min-height: 230px; }
-
-
-
-
-/* Every px value cites engine source. SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp, SS = Editor/EditorStyle/Private/StarshipStyle.cpp. The buttons are Button toolbar and plate variants, the combos are ComboButton variants. */
- /* Normal font 10pt = 13.333px (SC:36); 16px line height approximates Roboto metrics */
-.toolBar-note { margin: 18px 0 6px; font: 400 10.667px/12px var(--font-sans); color: var(--foreground); opacity: .7; } /* Small font 8pt (SC:40) */
-
-/* Bar: SlimToolBar background Panel, BackgroundPadding (4,6) (SC:2200-2205), applied by MultiBox.cpp:1349-1350 */
-.toolBar { display: flex; align-items: stretch; background: var(--panel); padding: 6px 4px; }
-.toolBar .toolBar-slot { display: flex; align-items: center; flex-shrink: 0; white-space: nowrap; } /* a combo never wraps its label or shrinks; a slot that holds a menu also positions it */
-.toolBar .toolBar-slot--plate { align-items: stretch; }
-.toolBar-spacer { flex: 1; }
-
-/* Button block: ButtonPadding (4,0) (SC:2208); toggle block: CheckBoxPadding (8,0) (SC:2209); combo block: ComboButtonPadding (0,0) (SC:2207) */
-.toolBar-slot--button { padding: 0 4px; }
-.toolBar-slot--toggle { padding: 0 8px; }
-.toolBar-slot--combo { padding: 0; }
-
-/* Separator: Recessed brush, thickness 2 (ToolBarStyle.cpp:25), padding (4,-5) (SC:2210-2211) */
-.toolBar-slot--sep { padding: 0 4px; }
-.toolBar-sep { width: 2px; align-self: stretch; margin: -5px 0; background: var(--recessed); }
-
-/* Editor-modes combo is a bare SComboButton, gap 6 between its icon and label (LevelEditorToolBar.cpp:1407) */
-.toolBar-slot--modes { padding: 0 10px 0 0; }
-.toolBar .toolBar-modeIcon { margin-right: 6px; }
-
-/* Play group (backplate): SS:5516-5622. All plates use Dropdown fill; hover and press only change the foreground, which the button inherits. */
-.toolBar-plate { display: flex; align-items: center; justify-content: center; background: var(--dropdown); }
-.toolBar-plate--left { margin-left: 10px; padding: 2px 6px 2px 8px; border-radius: 4px 0 0 4px; } /* ButtonPadding (10,0,0,0) (SS:5529), padding (8,2,6,2) (SS:5524), corners (SS:5520) */
-.toolBar-plate--center { padding: 2px 6px 2px 2px; border-radius: 0; } /* padding (2,2,6,2) (SS:5558), ButtonPadding 0 (SS:5561) */
-.toolBar-plate--right { width: 22px; margin: 0 8px 0 1px; border-radius: 0 4px 4px 0; } /* ComboButtonPadding (1,0,8,0) (SS:5620), corners (SS:5605); width = 7+6 padding + 20 content + 6 arrow - 17 arrow shift (SS:5609, 5613) = 22 */
-.toolBar-plate--play { color: var(--accent-green); } /* NormalForeground AccentGreen (SS:5542) */
-.toolBar-plate--play:hover { color: #a9c296; } /* HSV S*0.5 of AccentGreen in linear space (SS:5536, 5544) */
-.toolBar-plate--play:active, .toolBar[data-playing="true"] .toolBar-plate--play { color: #658e34; } /* HSV V*0.5 (SS:5537, 5543); a running game keeps the pressed look */
-.toolBar-plate--step, .toolBar-plate--right { color: var(--foreground); }
-.toolBar-plate--step:hover, .toolBar-plate--step:active, .toolBar-plate--right:hover, .toolBar-plate--right:active { color: var(--foreground-hover); } /* pressed foreground ForegroundHover (SC:2190) */
-.toolBar-plate--stop { color: var(--accent-red); } /* NormalForeground AccentRed (SS:5576) */
-.toolBar-plate--stop:hover { color: #ffc0c0; } /* hover (SS:5570, 5578) */
-.toolBar-plate--stop:active { color: #bc2c2c; } /* HSV V*0.5 of AccentRed (SS:5571, 5577) */
-.toolBar-plate:has(:disabled) { opacity: .45; pointer-events: none; } /* disabled widgets draw at alpha .45 (SlateElementPixelShader.usf:535) */
-.toolBar-dots { flex: none; width: 6px; height: 24px; margin-left: 8px; fill: currentColor; stroke: none; } /* ellipsis-vertical-narrow 6x24 (SS:5614) */
-
-/* Settings block: right aligned with 7px right padding (LevelEditorToolBar.cpp:1639); CalloutToolbar shows labels (SC:2278-2283) */
-.toolBar-slot--settings { padding: 0 7px 0 0; }
-
-.toolBar-stage { min-height: 190px; }
-
-
-
-
-/* SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp, SS = Editor/EditorStyle/Private/StarshipStyle.cpp, PM = Editor/PlacementMode/Private/SPlacementModeTools.cpp, WR = Developer/WidgetRegistration/Private */
- /* Normal font 10pt = 13.333px (SC:36); 16px line height approximates Roboto metrics */
-.placeActors-note { margin: 0 0 6px; font: 400 10.667px/12px var(--font-sans); color: var(--foreground); opacity: .7; } /* Small font 8pt (SC:40) */
-.placeActors-demo { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
-.placeActors-svgdefs { position: absolute; width: 0; height: 0; overflow: hidden; }
-.placeActors-ico { display: block; flex: none; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
-.placeActors-ico--16 { width: 16px; height: 16px; } /* Icons.Help Icon16x16 (SC:297) */
-.placeActors-ico--20 { width: 20px; height: 20px; } /* PlacementBrowser.Icons.* are Icon20x20 (SS:4717-4725) */
-
-.placeActors { width: 240px; background: var(--panel); } /* panel colour Brushes.Panel (PM:705); width is the consumer's dock size */
-
-/* Search block: SBorder ToolPanel.GroupBorder = Panel colour (SC:437), Padding 8 (PM:693). The field is a TextInput search variant. */
-.placeActors-search { padding: 8px; background: var(--panel); }
-
-/* The category rail is a SegmentedControl rail variant, 44px wide (CategoryDrivenContentBuilderBase.cpp:18). */
-
-/* Section header: FSimpleTitleContainer (SimpleTitleContainer.cpp:17) in FHeaderAndBodyContainer (HeaderAndBodyContainer.cpp:63-71) */
-.placeActors-header { padding: 4px 0 4px 6px; background: var(--dropdown); color: var(--foreground); } /* Dropdown fill (HeaderAndBodyContainer.cpp:63), Foreground (:64), header margin 4 (:71) + title padding (2,4,0,4) (SimpleTitleContainer.cpp:17) */
-.placeActors-body { background: var(--recessed); } /* Recessed body (HeaderAndBodyContainer.cpp:65) */
-.placeActors-grid { padding: 8px; background: var(--panel); } /* FColumnWrappingContainer: Panel, Padding 8 (ColumnWrappingContainer.cpp:58-59) */
-
-/* Item row: SPlacementAssetEntry (PM:156-306): ThumbnailBackground Dropdown r6 (SS:4626), cell height 32 (ColumnWrappingContainerTemplates.cpp:10), slot padding (4,2,4,2) (ColumnWrappingContainer.cpp:63) */
-.placeActors-row { display: flex; align-items: center; box-sizing: border-box; height: 32px; margin: 2px 4px; border-radius: 6px; background: var(--dropdown); box-shadow: inset 0 0 0 1px var(--dropdown); cursor: grab; } /* normal outline Dropdown 1px r6 (SS:4617) */
-.placeActors-row:hover, .placeActors-row.is-hover { box-shadow: inset 0 0 0 1px var(--hover); } /* hovered outline Hover (SS:4618) */
-.placeActors-row.is-pressed, .placeActors-row:active { box-shadow: inset 0 0 0 1px var(--primary); } /* pressed outline Primary (SS:4619) */
-.placeActors-tile { display: flex; align-items: center; justify-content: center; width: 20px; height: 24px; margin: 4px 0 4px 4px; color: var(--foreground-hover); } /* thumbnail box 20 wide (PM:226), padding (4,4,0,4) (PM:221); cell leaves 24px of height */
-.placeActors-name { flex: 1; min-width: 0; padding: 0 8px 1px 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(255, 255, 255, .9); } /* text padding (4,0,8,1) (PM:222), Regular 10pt white alpha .9 (SS:4649-4650) */
-.placeActors-info { display: flex; align-items: center; justify-content: center; box-sizing: border-box; width: 24px; height: 20px; margin-right: 4px; border-radius: 4px; color: var(--foreground); } /* SDocumentationAnchor: SSimpleButton, Icons.Help 16 (SDocumentationAnchor.cpp:63), SimpleButton padding (2,1) (SC:1405-1407) + content padding (2,1) (ToolWidgetsStyle.cpp:19, ToolWidgetsStylePrivate.h:24-25) */
-.placeActors-info:hover { background: var(--hover); color: var(--foreground-hover); } /* SimpleButton hover Dropdown (SC:1391) is invisible on a Dropdown row, so the preview uses Hover */
-.placeActors-row[hidden], .placeActors-group[hidden], .placeActors-empty[hidden] { display: none; }
-.placeActors-row:focus-visible { outline: 1px solid var(--primary-hover); outline-offset: 1px; }
-.placeActors-grid--live { min-height: 180px; } /* five rows of 32 + 2 + 2 margin at most, so switching category does not resize the panel */
-.placeActors-empty { padding: 8px 4px; color: var(--foreground); opacity: .7; }
-.placeActors-handle { flex: none; width: 6px; height: 15px; margin-right: 8px; background: radial-gradient(circle, var(--foreground) 1px, transparent 1.2px) 0 0 / 3px 5px; opacity: .6; } /* VerticalBoxDragIndicatorShort 6x15 (SC:466), padding right 8 (PM:211); dot pattern approximates the PNG */
-
-
-
-
-	/* Demo layout only. The component layout is src/DetailsHeader/DetailsHeader.css and the buttons are ue-button elements. */
-	.DetailsHeader-frame { width: 360px; }
-	.DetailsHeader-cap { width: 360px; box-sizing: border-box; margin: 0; padding: 6px 10px 12px; font: 400 10.667px/1.4 var(--font-sans); color: var(--foreground); opacity: .8; }
-	.DetailsHeader-cap b { color: var(--foreground-hover); }
-
-
-
-
-	/* Demo layout only. The component layout is src/DetailsSearchRow/DetailsSearchRow.css. */
-	.DetailsSearchRow-frame { width: 360px; background: var(--panel); } /* SBorder Brushes.Panel: SDetailsView.cpp:391-395 */
-	.DetailsSearchRow-cap { width: 360px; box-sizing: border-box; margin: 0; padding: 6px 8px 12px; font: 400 10.667px/1.4 var(--font-sans); color: var(--foreground); opacity: .8; }
-	.DetailsSearchRow-cap b { color: var(--foreground-hover); }
-
-
-
-
-	/* Every metric below is cited in README.md. */
-	.FilterPills-frame { width: 360px; background: var(--panel); padding-bottom: 8px; } /* Brushes.Panel: SDetailsView.cpp:391-395 */
-	ue-filter-pills { font: 400 10.667px/1.4 var(--font-sans); color: var(--hover-2); }
-	/* Preview captions only */
-	.FilterPills-cap { width: 360px; box-sizing: border-box; margin: 0; padding: 6px 8px 12px; font: 400 10.667px/1.4 var(--font-sans); color: var(--foreground); opacity: .8; }
-	.FilterPills-cap b { color: var(--foreground-hover); }
-
-
-
-
-	/* Demo layout only. The component layout is src/DetailsCategory/DetailsCategory.css. */
-	.DetailsCategory-frame, .DetailsCategory-panel { width: 360px; }
-	.DetailsCategory-cap { width: 360px; box-sizing: border-box; margin: 0; padding: 6px 8px 12px; font: 400 10.667px/1.4 var(--font-sans); color: var(--foreground); opacity: .8; }
-	.DetailsCategory-cap b { color: var(--foreground-hover); }
-
-
-
-
-	/* Metrics: SSceneOutliner.cpp:139-335, SOutlinerTreeView.cpp:273-321, StarshipCoreStyle.cpp:2000-2117. See README. */
-	.so-page { padding: 16px; display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
-	.so-col { display: flex; flex-direction: column; gap: 8px; width: 372px; max-width: 100%; }
-	.so-cap { font-size: 11px; line-height: 1.3; color: var(--foreground); opacity: .6; }
-	.so-panel { width: 372px; max-width: 100%; display: flex; flex-direction: column; background: var(--panel); color: var(--foreground); font-size: 13.333px; line-height: 16px; }
-
-	/* Toolbar: padding (8,8,8,4); search fills, 4 gap before the buttons -- SSceneOutliner.cpp:183,220 */
-	.so-toolbar { display: flex; align-items: center; gap: 4px; padding: 8px 8px 4px 8px; }
-
-	/* Tree area: Recessed behind the rows, 300px tall, the rows fill the width beside the 16px bar -- SSceneOutliner.cpp:260, StarshipStyle.cpp:827 */
-	.so-scroll { height: 300px; background: var(--recessed); }
-	.so-view { flex: 1 1 auto; min-width: 0; }
-
-	/* Columns. The row cells line up with the header cells: gutter and pinned are 24px, the Type cell is 2 of the 7 flexible parts, and each 1px gap of the header is a margin here. */
-	.so-gutter, .so-pinned { --tr-cell-width: 24px; margin-right: 1px; display: flex; align-items: center; justify-content: center; }
-	.so-type { --tr-cell-width: calc((100% - 52px) * 2 / 7); margin-left: 1px; padding-left: 8px; opacity: .6; } /* subdued foreground (alpha 0.6), padding-left 8 -- SceneOutlinerActorInfoColumn.cpp:117,122 */
-	.so-eye { width: 16px; height: 16px; display: block; }
-	/* Eye: transparent for a visible item unless its row is hovered or selected; a hidden item keeps its closed eye. Hovered eye on an unselected row = ForegroundHover -- SceneOutlinerGutter.cpp:238-257 */
-	ue-scene-outliner .so-row[aria-selected="false"]:not(:hover) .so-eye:not(.is-off) { visibility: hidden; }
-	ue-scene-outliner .so-row[aria-selected="false"] .so-gutter:hover .so-eye { color: var(--foreground-hover); }
-
-	/* Status line: Header fill, padding (14,9) -- SSceneOutliner.cpp:325-328 */
-	.so-status { background: var(--header); padding: 9px 14px; color: var(--foreground); }
-	/* Status colour while a text filter is active -- ActorBrowsingMode.cpp:393-401 */
-	.so-status.is-match { color: var(--accent-green); }
-	.so-status.is-none { color: var(--accent-red); }
-	.so-svg { width: 0; height: 0; position: absolute; }
-
-
-
-
-	.ContentBrowser { width: 1200px; margin: 12px 16px; }
-	.ContentBrowser__body { height: 189px; }
-
-
-
-
-/* SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp, SB = Editor/StatusBar/Private/SStatusBar.cpp, WD = Developer/ToolWidgets/Private/SWidgetDrawer.cpp, SU = Editor/StatusBar/Private/StatusBarSubsystem.cpp. */
-/* The drawer buttons are Button status variants. The combos are ComboButton simple variants. The console is a TextInput console variant. */
- /* Normal font 10pt = 13.333px (SC:36); 16px line height approximates Roboto metrics */
-.statusBar-note { margin: 0 0 6px; font: 400 10.667px/12px var(--font-sans); color: var(--foreground); opacity: .7; } /* Small font 8pt (SC:40) */
-
-/* Bar: SBox HeightOverride StatusBar.Height = 32 (SC:1883, SB:584). Segments are Panel (Brushes.Panel, SB:580) with 1px gaps (SB:597, 610, 622). */
-/* The console box alone is at least 300px (SOutputLog.cpp:220), so the bar has a minimum width. */
-/* No brush sets the gap colour in SB. The gap shows what is behind the bar, and --background is an assumption. */
-.statusBar { display: flex; min-width: 990px; height: 32px; background: var(--background); }
-.statusBar-seg { display: flex; flex: none; align-items: center; background: var(--panel); margin: 0 1px; white-space: nowrap; }
-.statusBar-seg--drawer { padding: 0 2px; } /* SBorder Padding (2,0) (WD:443) */
-.statusBar-seg--message { flex: 1; min-width: 0; padding: 0 6px; } /* SBorder Padding (6,0) (SB:602) */
-.statusBar-seg--joined { margin-right: 0; } /* the Output Log button and its console share one 1px-padded slot (WD:589) */
-.statusBar-seg--console { padding: 0 2px; margin-left: 2px; } /* slot Padding (2,0,0,0) (WD:506), SBorder Padding (2,0) (WD:509) */
-.statusBar-seg--console .statusBar-console { display: flex; align-items: center; align-self: stretch; padding: 0 6px; background: var(--panel); } /* SBorder Panel Padding (6,0) (SU:524-527) */
-.statusBar-seg--tools { padding: 0 4px; } /* StatusBarToolBar BackgroundPadding (4,4) (SC:1897); vertical 4 is absorbed by the 32px bar */
-
-/* A combo and its pop-up share an anchor. The Cmd slot has Padding (0,0,4,0) (SOutputLog.cpp:186). */
-.statusBar .statusBar-anchor { display: flex; align-items: center; }
-.statusBar-cmd { margin-right: 4px; }
-
-/* Console text box: width 300 to 600 (SOutputLog.cpp:220-221) */
-.statusBar .statusBar-input { width: 300px; flex: none; }
-
-/* Derived Data: icon, 3px gap, label, 10px after the label (SDerivedDataStatusBar.cpp:177, 224). */
-/* Source Control: icon, 5px gap, label (SourceControlMenuHelpers.cpp:449). */
-.statusBar .statusBar-dd-ico { margin-right: 3px; }
-.statusBar .statusBar-dd-txt { margin-right: 10px; }
-.statusBar .statusBar-sc-ico { margin-right: 0; }
-.statusBar .statusBar-sc-txt { margin-left: 5px; }
-
-.statusBar-stage { min-width: 990px; padding-top: 14px; }
-/* Recessed ground of log text boxes. Log.Normal is Mono 12px (OutputLogStyle.cpp:54). */
-.statusBar-history { display: flex; flex-direction: column; justify-content: flex-end; box-sizing: border-box; width: 300px; min-height: 72px; margin: 0 0 4px 0; padding: 4px 8px; background: var(--recessed); font: 400 12px/16px var(--font-mono); color: var(--foreground); }
-
-
-
-
-	.tabWell-page { display: flex; flex-wrap: wrap; gap: 22px; padding: 22px; font: 400 13.333px/1.2 var(--font-sans); color: var(--foreground); }
-	.tabWell-col { display: flex; flex-direction: column; gap: 6px; flex: 1 1 300px; min-width: 0; max-width: 420px; }
-	.tabWell-caption { font: 400 11px/1.2 var(--font-sans); color: var(--hover-2); }
-
-	/* preview mount only: a recessed window ground so a background-coloured area stays visible */
-	.tabWell-stack { box-shadow: 0 0 0 6px var(--recessed); }
-	.tabWell-content { min-height: 150px; }
-	.tabWell-reset { align-self: flex-start; padding: 2px 8px; font: 400 11px/1.2 var(--font-sans); color: var(--foreground); background: transparent; border: 1px solid var(--input-outline); border-radius: 2px; cursor: default; }
-	.tabWell-reset:hover { color: var(--foreground-hover); background: var(--recessed); }
-	.tabWell-reset:active { color: var(--foreground); background: var(--background); }
-	.tabWell-reset:focus-visible { outline: 1px solid var(--primary); outline-offset: 1px; }
-	.tabWell-live { flex: 1 0 100%; max-width: 760px; line-height: 1.45; }
-	.tabWell-live b { color: var(--foreground); }
-	ue-tab-well { display: contents; }
-
-	/* stand-in for consumer content; not part of the component */
-	.tabWell-row { display: flex; align-items: center; gap: 8px; height: 22px; padding: 0 8px; color: var(--foreground); }
-	.tabWell-row:nth-child(even) { background: var(--recessed); }
-	.tabWell-row svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; }
-
-	.el-root { width: 1280px; background: var(--background); font: 400 13.333px/1.2 var(--font-sans); color: var(--foreground); display: flex; flex-direction: column; }
-	.el-root .windowChrome-title { width: 100%; }
+	.el-root { width: 1280px; background: var(--background); font: 400 13.333px/1.2 var(--font-sans); color: var(--foreground); }
+	.el-window { display: flex; flex-direction: column; }
 	.el-toolbar { background: var(--panel); }
 	.el-main { display: grid; grid-template-columns: 280px 1fr 372px; gap: 0 2px; height: 520px; background: var(--background); }
 	.el-col { display: flex; flex-direction: column; min-width: 0; min-height: 0; gap: 2px; }
-	.el-root .tabWell-stack { display: flex; flex-direction: column; min-height: 0; flex: 1 1 0; }
-	.el-root .el-body { overflow: hidden; padding: 0; flex: 1 1 auto; min-height: 0; }
-	.el-root .el-body > [role="tabpanel"] { height: 100%; overflow: auto; }
-	.el-root .menuBar-stage, .el-root .toolBar-stage, .el-root .statusBar-stage { margin: 0; padding: 0; min-height: 0; min-width: 0; }
-	.el-root .statusBar-stage { position: relative; }
-	.el-root .statusBar-history { position: absolute; bottom: 100%; left: 0; min-height: 0; margin: 0; z-index: 5; }
-	.el-root .statusBar-history:empty { display: none; }
-	.el-root .DetailsHeader-frame, .el-root .DetailsSearchRow-frame, .el-root .FilterPills-frame, .el-root .DetailsCategory-frame, .el-root .so-panel { width: 100%; }
-	.el-root .ContentBrowser { width: 100%; margin: 0; }
-	.el-root .statusBar { min-width: 0; }
+	.el-stack { display: flex; flex-direction: column; min-height: 0; flex: 1 1 0; }
+	.el-body { overflow: hidden; padding: 0; flex: 1 1 auto; min-height: 0; }
+	.el-body > [role="tabpanel"] { height: 100%; overflow: auto; }
 	.el-viewport { display: block; width: 100%; height: 100%; object-fit: cover; }
 	.el-details { flex: 3 1 0; } .el-outliner { flex: 2 1 0; }
 	.el-bottom { height: 250px; margin-top: 2px; display: flex; }
@@ -335,10 +47,11 @@
 <symbol id="so-eye-off" viewBox="0 0 16 16"><path d="M1.5 8C3 5.2 5.3 3.8 8 3.8s5 1.4 6.5 4.2c-1.5 2.8-3.8 4.2-6.5 4.2S3 10.8 1.5 8z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M2.5 13.5l11-11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></symbol>
 
 
-
 </defs></svg>
 <div class="el-root">
-<div class="windowChrome-title">
+<ue-window-chrome>
+<div class="windowChrome-frame" tabindex="0" role="group" aria-label="Editor window" data-active="false">
+		<div class="windowChrome-title">
 			<div class="windowChrome-icon"><svg><use href="#windowChrome-i-logo"/></svg></div>
 			<div class="windowChrome-menu"><ue-menu-bar>
 	<div class="menuBar-stage">
@@ -466,7 +179,7 @@
 	</div>
 </ue-menu-bar></div>
 			<div class="windowChrome-tabRow">
-				<div class="tabWell-well tabWell-well--major"><div class="tabWell-tab tabWell-tab--major tabWell-tab--foreground"><span class="tabWell-icon"><svg viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></svg></span><span class="tabWell-label">Minimal_Default</span><span class="tabWell-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></div>
+				<ue-tab-well data-pinned><div class="tabWell-well tabWell-well--major"><ue-dock-tab><div class="dockTab dockTab--major dockTab--foreground"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></svg></span><span class="dockTab-label">Minimal_Default</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab></div></ue-tab-well>
 			</div>
 			<div class="windowChrome-right">
 				<div class="windowChrome-badge">LevelDesignProject</div>
@@ -475,6 +188,7 @@
 				<ue-button><button class="button button--caption button--caption-close" type="button" data-action="close" aria-label="Close" title="Close"><svg><use href="#windowChrome-i-close"/></svg></button></ue-button>
 			</div>
 		</div>
+		<div class="el-window">
 <div class="el-toolbar"><ue-tool-bar>
 	<div class="toolBar-stage">
 		<div class="toolBar" role="toolbar" aria-label="Level editor toolbar" data-playing="false">
@@ -566,7 +280,7 @@
 	</div>
 </ue-tool-bar></div>
 <div class="el-main">
-<div class="el-col"><ue-tab-well><div class="tabWell-stack " style="width:100%"><div class="tabWell-well" role="tablist" aria-label="Place Actors"><div class="tabWell-tab tabWell-tab--foreground tabWell-tab--active" role="tab" tabindex="0" aria-selected="true" data-tab="place"><span class="tabWell-icon"><svg viewBox="0 0 16 16"><path d="M2 4.500h4l1.500 1.500H14v6.500H2z"/></svg></span><span class="tabWell-label">Place Actors</span><span class="tabWell-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></div><div class="tabWell-content el-body"><div role="tabpanel" data-panel="place"><ue-place-actors-panel>
+<div class="el-col"><ue-tab-well><div class="tabWell-stack el-stack "><div class="tabWell-well" role="tablist" aria-label="Place Actors"><ue-dock-tab><div class="dockTab dockTab--foreground dockTab--active" role="tab" tabindex="0" aria-selected="true" data-tab="place"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M2 4.500h4l1.500 1.500H14v6.500H2z"/></svg></span><span class="dockTab-label">Place Actors</span><span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab></div><div class="tabWell-content el-body"><div role="tabpanel" data-panel="place"><ue-place-actors-panel>
 		<div class="placeActors">
 			<div class="placeActors-search"><ue-text-input><div class="textinput textinput--search"><svg class="textinput__glyph textinput__glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><svg class="textinput__glyph textinput__clear" role="button" aria-label="Clear search" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg><input class="textinput__text textinput__field" type="text" placeholder="Search Classes" aria-label="Search Classes" autocomplete="off" spellcheck="false"><span class="textinput__tail"></span></div></ue-text-input></div>
 			<ue-segmented-control>
@@ -627,8 +341,8 @@
 			</div></div>
 		</div>
 	</ue-place-actors-panel></div></div></div></ue-tab-well></div>
-<div class="el-col"><ue-tab-well><div class="tabWell-stack " style="width:100%"><div class="tabWell-well" role="tablist" aria-label="Viewport 1"><div class="tabWell-tab tabWell-tab--foreground tabWell-tab--active" role="tab" tabindex="0" aria-selected="true" data-tab="viewport"><span class="tabWell-icon"><svg viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></svg></span><span class="tabWell-label">Viewport 1</span><span class="tabWell-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></div><div class="tabWell-content el-body"><div role="tabpanel" data-panel="viewport"><img class="el-viewport" src="/_blob/a5eee8bb3006435518a23e42e3623041" alt="3D viewport placeholder"></div></div></div></ue-tab-well></div>
-<div class="el-col"><ue-tab-well><div class="tabWell-stack el-details" style="width:100%"><div class="tabWell-well" role="tablist" aria-label="Details"><div class="tabWell-tab tabWell-tab--foreground tabWell-tab--active" role="tab" tabindex="0" aria-selected="true" data-tab="details"><span class="tabWell-icon"><svg viewBox="0 0 16 16"><path d="M2.500 4h11 M2.500 8h11 M2.500 12h7"/></svg></span><span class="tabWell-label">Details</span><span class="tabWell-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></div><div class="tabWell-content el-body"><div role="tabpanel" data-panel="details"><ue-details-category>
+<div class="el-col"><ue-tab-well><div class="tabWell-stack el-stack "><div class="tabWell-well" role="tablist" aria-label="Viewport 1"><ue-dock-tab><div class="dockTab dockTab--foreground dockTab--active" role="tab" tabindex="0" aria-selected="true" data-tab="viewport"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></svg></span><span class="dockTab-label">Viewport 1</span><span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab></div><div class="tabWell-content el-body"><div role="tabpanel" data-panel="viewport"><img class="el-viewport" src="/_blob/a5eee8bb3006435518a23e42e3623041" alt="3D viewport placeholder"></div></div></div></ue-tab-well></div>
+<div class="el-col"><ue-tab-well><div class="tabWell-stack el-stack el-details"><div class="tabWell-well" role="tablist" aria-label="Details"><ue-dock-tab><div class="dockTab dockTab--foreground dockTab--active" role="tab" tabindex="0" aria-selected="true" data-tab="details"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M2.500 4h11 M2.500 8h11 M2.500 12h7"/></svg></span><span class="dockTab-label">Details</span><span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab></div><div class="tabWell-content el-body"><div role="tabpanel" data-panel="details"><ue-details-category>
 <div class="DetailsCategory-panel">
 	<ue-details-header>
 	<div class="DetailsHeader-frame">
@@ -647,7 +361,7 @@
 		<div class="DetailsHeader-instanceBox">
 			<div class="DetailsHeader-instance">
 				<svg viewBox="0 0 16 16"><path d="M8 1.5 14 4.75v6.5L8 14.5 2 11.25v-6.5z M2 4.75 8 8l6-3.25 M8 8v6.5"/></svg>
-				<span class="name">Chair</span><span class="ctx">(Instance)</span>
+				<span class="DetailsHeader-instanceName">Chair</span><span class="DetailsHeader-instanceContext">(Instance)</span>
 			</div>
 		</div>
 	</div>
@@ -793,7 +507,7 @@
 		<div class="DetailsCategory-empty">No properties match.</div>
 	</div>
 </div>
-</ue-details-category></div></div></div></ue-tab-well><ue-tab-well><div class="tabWell-stack el-outliner" style="width:100%"><div class="tabWell-well" role="tablist" aria-label="Outliner"><div class="tabWell-tab tabWell-tab--foreground tabWell-tab--active" role="tab" tabindex="0" aria-selected="true" data-tab="outliner"><span class="tabWell-icon"><svg viewBox="0 0 16 16"><path d="M5.500 3.500h8 M5.500 8h8 M5.500 12.500h8 M2.500 3.500h.5 M2.500 8h.5 M2.500 12.500h.5"/></svg></span><span class="tabWell-label">Outliner</span><span class="tabWell-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></div><div class="tabWell-content el-body"><div role="tabpanel" data-panel="outliner"><ue-scene-outliner>
+</ue-details-category></div></div></div></ue-tab-well><ue-tab-well><div class="tabWell-stack el-stack el-outliner"><div class="tabWell-well" role="tablist" aria-label="Outliner"><ue-dock-tab><div class="dockTab dockTab--foreground dockTab--active" role="tab" tabindex="0" aria-selected="true" data-tab="outliner"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M5.500 3.500h8 M5.500 8h8 M5.500 12.500h8 M2.500 3.500h.5 M2.500 8h.5 M2.500 12.500h.5"/></svg></span><span class="dockTab-label">Outliner</span><span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab></div><div class="tabWell-content el-body"><div role="tabpanel" data-panel="outliner"><ue-scene-outliner>
 	<div class="so-panel">
 		<div class="so-toolbar">
 			<ue-text-input><div class="textinput textinput--search"><svg class="textinput__glyph textinput__glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><svg class="textinput__glyph textinput__clear" role="button" aria-label="Clear search" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg><input class="textinput__text textinput__field" type="text" placeholder="Search..." aria-label="Search actors" autocomplete="off" spellcheck="false"><span class="textinput__tail"></span></div></ue-text-input>
@@ -841,7 +555,7 @@
 	</div>
 </ue-scene-outliner></div></div></div></ue-tab-well></div>
 </div>
-<div class="el-bottom"><ue-tab-well><div class="tabWell-stack " style="width:100%"><div class="tabWell-well" role="tablist" aria-label="Content Browser"><div class="tabWell-tab tabWell-tab--foreground tabWell-tab--active" role="tab" tabindex="0" aria-selected="true" data-tab="content"><span class="tabWell-icon"><svg viewBox="0 0 16 16"><path d="M2 4.500h4l1.500 1.500H14v6.500H2z"/></svg></span><span class="tabWell-label">Content Browser</span><span class="tabWell-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></div><div class="tabWell-content el-body"><div role="tabpanel" data-panel="content"><ue-content-browser>
+<div class="el-bottom"><ue-tab-well><div class="tabWell-stack el-stack "><div class="tabWell-well" role="tablist" aria-label="Content Browser"><ue-dock-tab><div class="dockTab dockTab--foreground dockTab--active" role="tab" tabindex="0" aria-selected="true" data-tab="content"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M2 4.500h4l1.500 1.500H14v6.500H2z"/></svg></span><span class="dockTab-label">Content Browser</span><span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab></div><div class="tabWell-content el-body"><div role="tabpanel" data-panel="content"><ue-content-browser>
 <div class="ContentBrowser">
 <ue-content-toolbar>
 <div class="ContentToolbar" role="toolbar" aria-label="Content browser toolbar">
@@ -877,7 +591,7 @@
 </ue-splitter>
 </div>
 </ue-content-browser></div></div></div></ue-tab-well></div>
-<ue-status-bar>
+<ue-status-bar docked>
 	<div class="statusBar-stage">
 		<div class="statusBar-history" role="log" aria-label="Command history"></div>
 		<div class="statusBar">
@@ -934,6 +648,9 @@
 		</div>
 	</div>
 </ue-status-bar>
+</div>
+	</div>
+</ue-window-chrome>
 </div>
 </body>
 </html>

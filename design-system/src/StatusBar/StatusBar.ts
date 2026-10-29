@@ -3,6 +3,7 @@ import { UeElement, define } from '../_shared/element.ts';
 import '../Button/Button.ts';
 import '../ComboButton/ComboButton.ts';
 import '../TextInput/TextInput.ts';
+import './StatusBar.css';
 
 const DRAWER = '.statusBar-seg--drawer .button';
 const MAX_LINES = 4;

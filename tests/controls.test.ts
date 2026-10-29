@@ -251,10 +251,10 @@ scenario('Button: Tab shows the Primary focus ring', 'Button', async (page) => {
 	await outlineIs(page, first, 'primary');
 });
 
-scenario('Button: pinned specimens ignore the pointer and sit outside the element', 'Button', async (page) => {
-	const pinned = page.locator('.button--hover[data-pinned]').first();
+scenario('Button: pinned specimens ignore the pointer and sit in a pinned ue-button', 'Button', async (page) => {
+	const pinned = page.locator('[data-pinned] .button--hover').first();
 	assert.equal(await prop(pinned, 'pointer-events'), 'none');
-	assert.equal(await pinned.evaluate((el) => el.closest('ue-button')), null);
+	assert.equal(await pinned.evaluate((el) => el.closest('ue-button')?.hasAttribute('data-pinned')), true);
 	await paints(page, pinned, 'hover');
 });
 
@@ -520,7 +520,7 @@ scenario('ComboButton: a combo button inside another primitive acts on its own c
 	if (process.env.UE_MODE === 'modules') await page.addScriptTag({ type: 'module', url: '/components/ComboButton/ComboButton.js' });
 	await page.waitForFunction(() => customElements.get('ue-combo-button') !== undefined);
 	await page.evaluate(() => {
-		const body = document.querySelectorAll('ue-expandable-area .expandablearea__body')[1];
+		const body = document.querySelectorAll('ue-expandable-area:not([data-pinned], [data-pinned] *) .expandablearea__body')[1];
 		const row = document.createElement('div');
 		row.innerHTML = '<ue-combo-button><div class="combobutton-anchor"><span class="combobutton combobutton--small" role="combobox" tabindex="0" aria-expanded="false"><span class="combobutton__label">One</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span><div class="combobutton-menu" hidden><ue-popup-menu><div class="popupmenu popupmenu--combo" role="menu" tabindex="0"><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">One</span></span></div><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Two</span></span></div></div></ue-popup-menu></div></div></ue-combo-button>';
 		body.append(row);
@@ -1160,11 +1160,11 @@ scenario('Tooltip: a tooltip around another tooltip does not show for the inner 
 	await seen(page.locator('#outer > .tooltip-popup'), false);
 });
 
-scenario('Tooltip: pinned specimens stay visible plain HTML and the live tooltip starts hidden', 'Tooltip', async (page) => {
-	const pinned = page.locator('.tooltip[data-pinned]');
+scenario('Tooltip: pinned specimens stay visible in a pinned ue-tooltip and the live tooltip starts hidden', 'Tooltip', async (page) => {
+	const pinned = page.locator('[data-pinned] .tooltip');
 	assert.equal(await pinned.count(), 2);
 	await seen(pinned.first(), true);
-	assert.equal(await pinned.first().evaluate((el) => el.closest('ue-tooltip')), null);
+	assert.equal(await pinned.first().evaluate((el) => el.closest('ue-tooltip')?.hasAttribute('data-pinned')), true);
 	assert.equal(await popup(page, 0).evaluate((el) => el.hasAttribute('hidden')), true);
 });
 
@@ -1306,10 +1306,10 @@ scenario('PopupMenu: the small variant sets 10.667px rows and each list keeps it
 	assert.equal(await menuStatus(page, 0), 'Activated: nothing yet');
 });
 
-scenario('PopupMenu: pinned menus stay plain HTML and ignore the pointer', 'PopupMenu', async (page) => {
-	const pinned = page.locator('.popupmenu[data-pinned]');
+scenario('PopupMenu: pinned menus sit in a pinned ue-popup-menu and ignore the pointer', 'PopupMenu', async (page) => {
+	const pinned = page.locator('[data-pinned] .popupmenu');
 	assert.equal(await pinned.count(), 2);
-	assert.equal(await pinned.first().evaluate((el) => el.closest('ue-popup-menu')), null);
+	assert.equal(await pinned.first().evaluate((el) => el.closest('ue-popup-menu')?.hasAttribute('data-pinned')), true);
 	assert.equal(await prop(pinned.first(), 'pointer-events'), 'none');
 });
 
@@ -1319,7 +1319,7 @@ const NT = 'ue-notification ';
 const toastCount = (page: Page): Promise<number> => page.locator(NT + '.notification').count();
 const stackHeight = async (page: Page): Promise<number> => (await page.locator(NT + '.notification-stack').boundingBox())?.height ?? 0;
 const toastTitles = (page: Page): Promise<string[]> => page.locator(NT + '.notification__title').allTextContents();
-const toastGone = (page: Page, remaining: number): Promise<unknown> => page.waitForFunction((n) => document.querySelectorAll('ue-notification .notification').length === n, remaining);
+const toastGone = (page: Page, remaining: number): Promise<unknown> => page.waitForFunction((n) => document.querySelectorAll('ue-notification:not([data-pinned], [data-pinned] *) .notification').length === n, remaining);
 
 scenario('Notification: Dismiss removes the toast and the stack closes up', 'Notification', async (page) => {
 	assert.equal(await toastCount(page), 1);
@@ -1370,7 +1370,7 @@ scenario('Notification: a dismissed toast can be brought back with Show notifica
 	await wait(page, 300);
 	assert.equal(await toastCount(page), 1);
 	await paints(page, page.locator(NT + '.notification'), 'notifications');
-	assert.equal(await page.locator('.notification[data-pinned]').count(), 3);
+	assert.equal(await page.locator('[data-pinned] .notification').count(), 3);
 });
 
 // ---------- ExpandableArea ----------
@@ -1447,7 +1447,7 @@ scenario('ExpandableArea: the panel keeps its Panel fill and the header has no h
 	await pointAt(page, header);
 	assert.equal(await fill(header), CLEAR);
 	await paints(page, panel, 'panel');
-	assert.equal(await page.locator('.expandablearea[data-pinned]').count(), 2);
+	assert.equal(await page.locator('[data-pinned] .expandablearea').count(), 2);
 });
 
 // ---------- ResetToDefault ----------

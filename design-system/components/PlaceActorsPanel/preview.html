@@ -8,40 +8,12 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Condensed:wght@400;700&family=Roboto+Mono&display=swap">
 <style>body { font-family: var(--font-sans); }</style>
 <style>
-/* SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp, SS = Editor/EditorStyle/Private/StarshipStyle.cpp, PM = Editor/PlacementMode/Private/SPlacementModeTools.cpp, WR = Developer/WidgetRegistration/Private */
+/* The panel look is in src/PlaceActorsPanel/PlaceActorsPanel.css. This page only lays out its notes and the demo strip. */
 body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* Normal font 10pt = 13.333px (SC:36); 16px line height approximates Roboto metrics */
 .placeActors-note { margin: 0 0 6px; font: 400 10.667px/12px var(--font-sans); color: var(--foreground); opacity: .7; } /* Small font 8pt (SC:40) */
 .placeActors-demo { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
 .placeActors-svgdefs { position: absolute; width: 0; height: 0; overflow: hidden; }
-.placeActors-ico { display: block; flex: none; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
-.placeActors-ico--16 { width: 16px; height: 16px; } /* Icons.Help Icon16x16 (SC:297) */
-.placeActors-ico--20 { width: 20px; height: 20px; } /* PlacementBrowser.Icons.* are Icon20x20 (SS:4717-4725) */
 
-.placeActors { width: 240px; background: var(--panel); } /* panel colour Brushes.Panel (PM:705); width is the consumer's dock size */
-
-/* Search block: SBorder ToolPanel.GroupBorder = Panel colour (SC:437), Padding 8 (PM:693). The field is a TextInput search variant. */
-.placeActors-search { padding: 8px; background: var(--panel); }
-
-/* The category rail is a SegmentedControl rail variant, 44px wide (CategoryDrivenContentBuilderBase.cpp:18). */
-
-/* Section header: FSimpleTitleContainer (SimpleTitleContainer.cpp:17) in FHeaderAndBodyContainer (HeaderAndBodyContainer.cpp:63-71) */
-.placeActors-header { padding: 4px 0 4px 6px; background: var(--dropdown); color: var(--foreground); } /* Dropdown fill (HeaderAndBodyContainer.cpp:63), Foreground (:64), header margin 4 (:71) + title padding (2,4,0,4) (SimpleTitleContainer.cpp:17) */
-.placeActors-body { background: var(--recessed); } /* Recessed body (HeaderAndBodyContainer.cpp:65) */
-.placeActors-grid { padding: 8px; background: var(--panel); } /* FColumnWrappingContainer: Panel, Padding 8 (ColumnWrappingContainer.cpp:58-59) */
-
-/* Item row: SPlacementAssetEntry (PM:156-306): ThumbnailBackground Dropdown r6 (SS:4626), cell height 32 (ColumnWrappingContainerTemplates.cpp:10), slot padding (4,2,4,2) (ColumnWrappingContainer.cpp:63) */
-.placeActors-row { display: flex; align-items: center; box-sizing: border-box; height: 32px; margin: 2px 4px; border-radius: 6px; background: var(--dropdown); box-shadow: inset 0 0 0 1px var(--dropdown); cursor: grab; } /* normal outline Dropdown 1px r6 (SS:4617) */
-.placeActors-row:hover, .placeActors-row.is-hover { box-shadow: inset 0 0 0 1px var(--hover); } /* hovered outline Hover (SS:4618) */
-.placeActors-row.is-pressed, .placeActors-row:active { box-shadow: inset 0 0 0 1px var(--primary); } /* pressed outline Primary (SS:4619) */
-.placeActors-tile { display: flex; align-items: center; justify-content: center; width: 20px; height: 24px; margin: 4px 0 4px 4px; color: var(--foreground-hover); } /* thumbnail box 20 wide (PM:226), padding (4,4,0,4) (PM:221); cell leaves 24px of height */
-.placeActors-name { flex: 1; min-width: 0; padding: 0 8px 1px 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(255, 255, 255, .9); } /* text padding (4,0,8,1) (PM:222), Regular 10pt white alpha .9 (SS:4649-4650) */
-.placeActors-info { display: flex; align-items: center; justify-content: center; box-sizing: border-box; width: 24px; height: 20px; margin-right: 4px; border-radius: 4px; color: var(--foreground); } /* SDocumentationAnchor: SSimpleButton, Icons.Help 16 (SDocumentationAnchor.cpp:63), SimpleButton padding (2,1) (SC:1405-1407) + content padding (2,1) (ToolWidgetsStyle.cpp:19, ToolWidgetsStylePrivate.h:24-25) */
-.placeActors-info:hover { background: var(--hover); color: var(--foreground-hover); } /* SimpleButton hover Dropdown (SC:1391) is invisible on a Dropdown row, so the preview uses Hover */
-.placeActors-row[hidden], .placeActors-group[hidden], .placeActors-empty[hidden] { display: none; }
-.placeActors-row:focus-visible { outline: 1px solid var(--primary-hover); outline-offset: 1px; }
-.placeActors-grid--live { min-height: 180px; } /* five rows of 32 + 2 + 2 margin at most, so switching category does not resize the panel */
-.placeActors-empty { padding: 8px 4px; color: var(--foreground); opacity: .7; }
-.placeActors-handle { flex: none; width: 6px; height: 15px; margin-right: 8px; background: radial-gradient(circle, var(--foreground) 1px, transparent 1.2px) 0 0 / 3px 5px; opacity: .6; } /* VerticalBoxDragIndicatorShort 6x15 (SC:466), padding right 8 (PM:211); dot pattern approximates the PNG */
 </style>
 </head>
 <body>
@@ -61,11 +33,11 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 
 <div class="placeActors-demo">
 
-<div data-pinned>
+<div>
 	<div class="placeActors-note">Arrangement of the reference screenshot: horizontal strip, info button (pinned: Actor hovered, Player Start pressed)</div>
-	<div class="placeActors">
-		<div class="placeActors-search"><div class="textinput textinput--search"><svg class="textinput__glyph textinput__glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><span class="textinput__text"><span class="textinput__hint">Search Classes</span></span><span class="textinput__tail"></span></div></div>
-		<div class="SegmentedControl SegmentedControl--rail SegmentedControl--row">
+	<ue-place-actors-panel data-pinned><div class="placeActors">
+		<div class="placeActors-search"><ue-text-input><div class="textinput textinput--search"><svg class="textinput__glyph textinput__glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><span class="textinput__text"><span class="textinput__hint">Search Classes</span></span><span class="textinput__tail"></span></div></ue-text-input></div>
+		<ue-segmented-control><div class="SegmentedControl SegmentedControl--rail SegmentedControl--row">
 			<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l2.5 1.5"/></svg></button>
 			<button class="SegmentedControl-seg is-checked"><svg viewBox="0 0 16 16"><path d="M5 2.5L8.5 6h-7z"/><circle cx="11.5" cy="5" r="2.5"/><rect x="3" y="9.5" width="5" height="4.5" rx=".5"/></svg></button>
 			<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><path d="M5.5 10.5c-1.5-1-2.2-2.3-2.2-3.8a4.7 4.7 0 0 1 9.4 0c0 1.5-.7 2.8-2.2 3.8z"/><path d="M6 12.5h4M6.8 14.2h2.4"/></svg></button>
@@ -74,7 +46,7 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 			<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><path d="M6 2.5l1.2 3.3 3.3 1.2-3.3 1.2L6 11.5 4.8 8.2 1.5 7l3.3-1.2zM12 9l.8 2.2L15 12l-2.2.8L12 15l-.8-2.2L9 12l2.2-.8z"/></svg></button>
 			<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><path d="M8 2l5.5 2.7v5.6L8 13 2.5 10.3V4.7z" stroke-dasharray="2 1.5"/></svg></button>
 			<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><rect x="2" y="5" width="9" height="9" rx="1"/><path d="M5 2.5h8.5V11"/></svg></button>
-		</div>
+		</div></ue-segmented-control>
 		<div class="placeActors-header">Basic</div>
 		<div class="placeActors-body"><div class="placeActors-grid">
 			<div class="placeActors-row is-hover"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-sphere"/></svg></div><div class="placeActors-name">Actor</div><div class="placeActors-info"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
@@ -83,21 +55,21 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 			<div class="placeActors-row"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-bulb"/></svg></div><div class="placeActors-name">Point Light</div><div class="placeActors-info"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
 			<div class="placeActors-row is-pressed"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-flag"/></svg></div><div class="placeActors-name">Player Start</div><div class="placeActors-info"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
 		</div></div>
-	</div>
+	</div></ue-place-actors-panel>
 </div>
 
-<div data-pinned>
+<div>
 	<div class="placeActors-note">Arrangement of the 5.5.3 source: vertical rail, drag handle (pinned)</div>
-	<div class="placeActors" style="width:260px">
-		<div class="placeActors-search"><div class="textinput textinput--search"><svg class="textinput__glyph textinput__glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><span class="textinput__text"><span class="textinput__hint">Search Classes</span></span><span class="textinput__tail"></span></div></div>
+	<ue-place-actors-panel data-pinned><div class="placeActors" style="width:260px">
+		<div class="placeActors-search"><ue-text-input><div class="textinput textinput--search"><svg class="textinput__glyph textinput__glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><span class="textinput__text"><span class="textinput__hint">Search Classes</span></span><span class="textinput__tail"></span></div></ue-text-input></div>
 		<div style="display:flex">
-			<div class="SegmentedControl SegmentedControl--rail">
+			<ue-segmented-control><div class="SegmentedControl SegmentedControl--rail">
 				<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l2.5 1.5"/></svg></button>
 				<button class="SegmentedControl-seg is-checked"><svg viewBox="0 0 16 16"><path d="M5 2.5L8.5 6h-7z"/><circle cx="11.5" cy="5" r="2.5"/><rect x="3" y="9.5" width="5" height="4.5" rx=".5"/></svg></button>
 				<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><path d="M5.5 10.5c-1.5-1-2.2-2.3-2.2-3.8a4.7 4.7 0 0 1 9.4 0c0 1.5-.7 2.8-2.2 3.8z"/><path d="M6 12.5h4M6.8 14.2h2.4"/></svg></button>
 				<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><path d="M8 2l5.5 2.7v5.6L8 13 2.5 10.3V4.7z"/><path d="M2.5 4.7L8 7.4l5.5-2.7M8 7.4V13"/></svg></button>
 				<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><rect x="2" y="5" width="9" height="9" rx="1"/><path d="M5 2.5h8.5V11"/></svg></button>
-			</div>
+			</div></ue-segmented-control>
 			<div style="flex:1;min-width:0">
 				<div class="placeActors-header">Basic</div>
 				<div class="placeActors-body"><div class="placeActors-grid">
@@ -107,7 +79,7 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 				</div></div>
 			</div>
 		</div>
-	</div>
+	</div></ue-place-actors-panel>
 </div>
 
 <div>

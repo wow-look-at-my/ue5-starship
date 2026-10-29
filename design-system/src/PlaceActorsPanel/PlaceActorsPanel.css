@@ -1,0 +1,31 @@
+/* SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp, SS = Editor/EditorStyle/Private/StarshipStyle.cpp, PM = Editor/PlacementMode/Private/SPlacementModeTools.cpp, WR = Developer/WidgetRegistration/Private */
+
+.placeActors-ico { display: block; flex: none; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+.placeActors-ico--16 { width: 16px; height: 16px; } /* Icons.Help Icon16x16 (SC:297) */
+.placeActors-ico--20 { width: 20px; height: 20px; } /* PlacementBrowser.Icons.* are Icon20x20 (SS:4717-4725) */
+
+.placeActors { width: 240px; background: var(--panel); } /* panel colour Brushes.Panel (PM:705); width is the consumer's dock size */
+
+/* Search block: SBorder ToolPanel.GroupBorder = Panel colour (SC:437), Padding 8 (PM:693). The field is a TextInput search variant. */
+.placeActors-search { padding: 8px; background: var(--panel); }
+
+/* The category rail is a SegmentedControl rail variant, 44px wide (CategoryDrivenContentBuilderBase.cpp:18). */
+
+/* Section header: FSimpleTitleContainer (SimpleTitleContainer.cpp:17) in FHeaderAndBodyContainer (HeaderAndBodyContainer.cpp:63-71) */
+.placeActors-header { padding: 4px 0 4px 6px; background: var(--dropdown); color: var(--foreground); } /* Dropdown fill (HeaderAndBodyContainer.cpp:63), Foreground (:64), header margin 4 (:71) + title padding (2,4,0,4) (SimpleTitleContainer.cpp:17) */
+.placeActors-body { background: var(--recessed); } /* Recessed body (HeaderAndBodyContainer.cpp:65) */
+.placeActors-grid { padding: 8px; background: var(--panel); } /* FColumnWrappingContainer: Panel, Padding 8 (ColumnWrappingContainer.cpp:58-59) */
+
+/* Item row: SPlacementAssetEntry (PM:156-306): ThumbnailBackground Dropdown r6 (SS:4626), cell height 32 (ColumnWrappingContainerTemplates.cpp:10), slot padding (4,2,4,2) (ColumnWrappingContainer.cpp:63) */
+.placeActors-row { display: flex; align-items: center; box-sizing: border-box; height: 32px; margin: 2px 4px; border-radius: 6px; background: var(--dropdown); box-shadow: inset 0 0 0 1px var(--dropdown); cursor: grab; } /* normal outline Dropdown 1px r6 (SS:4617) */
+.placeActors-row:hover, .placeActors-row.is-hover { box-shadow: inset 0 0 0 1px var(--hover); } /* hovered outline Hover (SS:4618) */
+.placeActors-row.is-pressed, .placeActors-row:active { box-shadow: inset 0 0 0 1px var(--primary); } /* pressed outline Primary (SS:4619) */
+.placeActors-tile { display: flex; align-items: center; justify-content: center; width: 20px; height: 24px; margin: 4px 0 4px 4px; color: var(--foreground-hover); } /* thumbnail box 20 wide (PM:226), padding (4,4,0,4) (PM:221); cell leaves 24px of height */
+.placeActors-name { flex: 1; min-width: 0; padding: 0 8px 1px 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(255, 255, 255, .9); } /* text padding (4,0,8,1) (PM:222), Regular 10pt white alpha .9 (SS:4649-4650) */
+.placeActors-info { display: flex; align-items: center; justify-content: center; box-sizing: border-box; width: 24px; height: 20px; margin-right: 4px; border-radius: 4px; color: var(--foreground); } /* SDocumentationAnchor: SSimpleButton, Icons.Help 16 (SDocumentationAnchor.cpp:63), SimpleButton padding (2,1) (SC:1405-1407) + content padding (2,1) (ToolWidgetsStyle.cpp:19, ToolWidgetsStylePrivate.h:24-25) */
+.placeActors-info:hover { background: var(--hover); color: var(--foreground-hover); } /* SimpleButton hover Dropdown (SC:1391) is invisible on a Dropdown row, so the preview uses Hover */
+.placeActors-row[hidden], .placeActors-group[hidden], .placeActors-empty[hidden] { display: none; }
+.placeActors-row:focus-visible { outline: 1px solid var(--primary-hover); outline-offset: 1px; }
+.placeActors-grid--live { min-height: 180px; } /* five rows of 32 + 2 + 2 margin at most, so switching category does not resize the panel */
+.placeActors-empty { padding: 8px 4px; color: var(--foreground); opacity: .7; }
+.placeActors-handle { flex: none; width: 6px; height: 15px; margin-right: 8px; background: radial-gradient(circle, var(--foreground) 1px, transparent 1.2px) 0 0 / 3px 5px; opacity: .6; } /* VerticalBoxDragIndicatorShort 6x15 (SC:466), padding right 8 (PM:211); dot pattern approximates the PNG */

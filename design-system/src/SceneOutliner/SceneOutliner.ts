@@ -4,6 +4,7 @@ import type { SortDetail } from '../HeaderRow/HeaderRow.ts';
 import type { ScrollbarVisibilityDetail } from '../Scrollbar/Scrollbar.ts';
 import type { TreeRow, TreeRowInfo } from '../TreeRow/TreeRow.ts';
 import '../Button/Button.ts';
+import './SceneOutliner.css';
 import '../HeaderRow/HeaderRow.ts';
 import '../Scrollbar/Scrollbar.ts';
 import '../TextInput/TextInput.ts';

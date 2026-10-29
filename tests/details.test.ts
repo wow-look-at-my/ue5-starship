@@ -77,7 +77,7 @@ test('DetailsHeader: the buttons are ue-button primitives with their hover and p
 		assert.ok(await open.isVisible(), 'the padlock opens again');
 
 		const label = header.locator('.DetailsHeader-label');
-		const instance = header.locator('.DetailsHeader-instance .name');
+		const instance = header.locator('.DetailsHeader-instance .DetailsHeader-instanceName');
 		assert.equal(await bgOf(label), CLEAR);
 		await label.hover();
 		assert.equal(await bgOf(label), rgb('input'));
@@ -244,8 +244,8 @@ test('SegmentedControl: click selects, arrows move, hover fills, the pinned row 
 		assert.deepEqual(await checked(), ['Static']);
 
 		const pinnedRow = page.locator('.SegmentedControl-row').nth(1);
-		assert.equal(await pinnedRow.locator('xpath=ancestor::ue-segmented-control').count(), 0);
-		await pinnedRow.locator('.SegmentedControl-seg').nth(0).click();
+		assert.equal(await pinnedRow.locator('ue-segmented-control[data-pinned]').count(), 1);
+		await clickAt(page, pinnedRow.locator('.SegmentedControl-seg').nth(0));
 		assert.deepEqual(await pinnedRow.locator('.SegmentedControl-seg.is-checked').allTextContents(), ['Stationary']);
 
 		const second = page.locator('ue-segmented-control').nth(1);
@@ -677,8 +677,8 @@ test('DetailsCategory: headers fold their rows, row arrows fold children, checkb
 		await frame.locator('.DetailsCategory-catRow').nth(1).click();
 		assert.ok(await frame.locator('.DetailsCategory-row', { hasText: 'SM_Chair' }).isVisible());
 
-		const pinned = page.locator('.DetailsCategory-frame[data-pinned]');
-		assert.equal(await pinned.locator('xpath=ancestor::ue-details-category').count(), 0);
+		const pinned = page.locator('[data-pinned] .DetailsCategory-frame');
+		assert.equal(await pinned.locator('xpath=ancestor::ue-details-category[@data-pinned]').count(), 1);
 		await assertInert(pinned);
 		assert.ok(await pinned.locator('.DetailsCategory-row.is-hover').isVisible());
 		assert.equal(await bgOf(pinned.locator('.DetailsCategory-row.is-hover .DetailsCategory-name')), rgb('header'), 'the forced hover fills the row');
@@ -761,7 +761,7 @@ test('DetailsCategory: the live details panel filters rows by search and section
 		await replaceText(page, 'Bench');
 		await key(page, 'Enter');
 		assert.equal(await trimmed(name), 'Bench');
-		assert.equal(await trimmed(panel.locator('.DetailsHeader-instance .name')), 'Bench');
+		assert.equal(await trimmed(panel.locator('.DetailsHeader-instance .DetailsHeader-instanceName')), 'Bench');
 	});
 });
 
@@ -772,7 +772,7 @@ const stripComments = (css: string): string => css.replace(/\/\*[\s\S]*?\*\//g, 
 
 // The classes each composite owns. Every other class in its CSS, its markup and its preview comes from a primitive.
 const OWN: Record<string, string[]> = {
-	DetailsHeader: ['', 'frame', 'icon', 'label', 'name', 'actions', 'positive', 'shackle', 'shackle--open', 'shackle--shut', 'instanceBox', 'instance', 'cap'],
+	DetailsHeader: ['', 'frame', 'icon', 'label', 'name', 'actions', 'positive', 'shackle', 'shackle--open', 'shackle--shut', 'instanceBox', 'instance', 'instanceName', 'instanceContext', 'cap'],
 	DetailsSearchRow: ['', 'frame', 'searchSlot', 'cap'],
 	AssetPicker: ['frame', 'row', 'name', 'value', 'right', 'split', 'thumbSlot', 'thumbFrame', 'thumb', 'strip', 'thumbBorder', 'col', 'buttons', 'cap'],
 	VectorInput: ['frame', 'row', 'name', 'value', 'right', 'split', 'lockSlot', 'fields', 'shackle', 'shackle--open', 'shackle--shut', 'cap'],

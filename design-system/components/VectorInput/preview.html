@@ -106,41 +106,41 @@
 </ue-vector-input>
 <p class="VectorInput-cap"><b>Live.</b> Drag a field sideways to change it (Escape cancels the drag, release snaps to the step). Click without dragging to type: Enter commits, Escape cancels. Tab to a field and press Up or Down to step, Enter to type. The reset arrow shows only when a value differs from its default and resets all three. The Scale lock moves the three axes together. The row label opens a Relative / World menu.</p>
 
-<div class="VectorInput-frame" data-pinned>
+<ue-vector-input data-pinned><div class="VectorInput-frame">
 	<div class="VectorInput-row">
-		<div class="VectorInput-name"><span class="combobutton combobutton--small" tabindex="-1"><span class="combobutton__label">Location</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></div>
+		<div class="VectorInput-name"><ue-combo-button><span class="combobutton combobutton--small" tabindex="-1"><span class="combobutton__label">Location</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></ue-combo-button></div>
 		<div class="VectorInput-split"></div>
 		<div class="VectorInput-value"><div class="VectorInput-fields">
-			<div class="spinbox spinbox--small spinbox--unbounded"><span class="spinbox__axis spinbox__axis--x"></span><span class="spinbox__text">-215.0</span></div>
-			<div class="spinbox spinbox--small spinbox--unbounded"><span class="spinbox__axis spinbox__axis--y"></span><span class="spinbox__text">-126.5</span></div>
-			<div class="spinbox spinbox--small spinbox--unbounded spinbox--active"><span class="spinbox__axis spinbox__axis--z"></span><span class="spinbox__text">32.0</span></div>
+			<ue-spin-box><div class="spinbox spinbox--small spinbox--unbounded"><span class="spinbox__axis spinbox__axis--x"></span><span class="spinbox__text">-215.0</span></div></ue-spin-box>
+			<ue-spin-box><div class="spinbox spinbox--small spinbox--unbounded"><span class="spinbox__axis spinbox__axis--y"></span><span class="spinbox__text">-126.5</span></div></ue-spin-box>
+			<ue-spin-box><div class="spinbox spinbox--small spinbox--unbounded spinbox--active"><span class="spinbox__axis spinbox__axis--z"></span><span class="spinbox__text">32.0</span></div></ue-spin-box>
 		</div></div>
 		<div class="VectorInput-split"></div>
-		<div class="VectorInput-right"><button class="resettodefault" type="button" tabindex="-1" aria-label="Reset to default"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button></div>
+		<div class="VectorInput-right"><ue-reset-to-default><button class="resettodefault" type="button" tabindex="-1" aria-label="Reset to default"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button></ue-reset-to-default></div>
 	</div>
 	<div class="VectorInput-row">
-		<div class="VectorInput-name"><span class="combobutton combobutton--small" tabindex="-1"><span class="combobutton__label">Rotation</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></div>
+		<div class="VectorInput-name"><ue-combo-button><span class="combobutton combobutton--small" tabindex="-1"><span class="combobutton__label">Rotation</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></ue-combo-button></div>
 		<div class="VectorInput-split"></div>
 		<div class="VectorInput-value"><div class="VectorInput-fields">
-			<div class="spinbox spinbox--small spinbox--unbounded"><span class="spinbox__axis spinbox__axis--x"></span><span class="spinbox__text">0.0</span><span class="spinbox__unit">&deg;</span></div>
-			<div class="spinbox spinbox--small spinbox--unbounded"><span class="spinbox__axis spinbox__axis--y"></span><span class="spinbox__text">0.0</span><span class="spinbox__unit">&deg;</span></div>
-			<div class="spinbox spinbox--small spinbox--unbounded"><span class="spinbox__axis spinbox__axis--z"></span><span class="spinbox__text">63.7</span><span class="spinbox__unit">&deg;</span></div>
+			<ue-spin-box><div class="spinbox spinbox--small spinbox--unbounded"><span class="spinbox__axis spinbox__axis--x"></span><span class="spinbox__text">0.0</span><span class="spinbox__unit">&deg;</span></div></ue-spin-box>
+			<ue-spin-box><div class="spinbox spinbox--small spinbox--unbounded"><span class="spinbox__axis spinbox__axis--y"></span><span class="spinbox__text">0.0</span><span class="spinbox__unit">&deg;</span></div></ue-spin-box>
+			<ue-spin-box><div class="spinbox spinbox--small spinbox--unbounded"><span class="spinbox__axis spinbox__axis--z"></span><span class="spinbox__text">63.7</span><span class="spinbox__unit">&deg;</span></div></ue-spin-box>
 		</div></div>
 		<div class="VectorInput-split"></div>
-		<div class="VectorInput-right"><button class="resettodefault" type="button" tabindex="-1" aria-label="Reset to default"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button></div>
+		<div class="VectorInput-right"><ue-reset-to-default><button class="resettodefault" type="button" tabindex="-1" aria-label="Reset to default"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button></ue-reset-to-default></div>
 	</div>
 	<div class="VectorInput-row">
-		<div class="VectorInput-name"><span class="combobutton combobutton--small" tabindex="-1"><span class="combobutton__label">Scale</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span><span class="VectorInput-lockSlot"><button class="button button--toggle button--icon" aria-pressed="false" tabindex="-1" aria-label="Scale uniformly"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><rect x="3" y="7.5" width="10" height="6.5" rx="1.25"/><path class="VectorInput-shackle VectorInput-shackle--open" d="M5.5 7.5V5a2.5 2.5 0 0 1 4.9-.7"/></svg></button></span></div>
+		<div class="VectorInput-name"><ue-combo-button><span class="combobutton combobutton--small" tabindex="-1"><span class="combobutton__label">Scale</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></ue-combo-button><span class="VectorInput-lockSlot"><ue-button><button class="button button--toggle button--icon" aria-pressed="false" tabindex="-1" aria-label="Scale uniformly"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><rect x="3" y="7.5" width="10" height="6.5" rx="1.25"/><path class="VectorInput-shackle VectorInput-shackle--open" d="M5.5 7.5V5a2.5 2.5 0 0 1 4.9-.7"/></svg></button></ue-button></span></div>
 		<div class="VectorInput-split"></div>
 		<div class="VectorInput-value"><div class="VectorInput-fields">
-			<div class="spinbox spinbox--small spinbox--unbounded"><span class="spinbox__axis spinbox__axis--x"></span><span class="spinbox__text">1.0</span></div>
-			<div class="spinbox spinbox--small spinbox--unbounded"><span class="spinbox__axis spinbox__axis--y"></span><span class="spinbox__text">1.0</span></div>
-			<div class="spinbox spinbox--small spinbox--unbounded"><span class="spinbox__axis spinbox__axis--z"></span><span class="spinbox__text">1.0</span></div>
+			<ue-spin-box><div class="spinbox spinbox--small spinbox--unbounded"><span class="spinbox__axis spinbox__axis--x"></span><span class="spinbox__text">1.0</span></div></ue-spin-box>
+			<ue-spin-box><div class="spinbox spinbox--small spinbox--unbounded"><span class="spinbox__axis spinbox__axis--y"></span><span class="spinbox__text">1.0</span></div></ue-spin-box>
+			<ue-spin-box><div class="spinbox spinbox--small spinbox--unbounded"><span class="spinbox__axis spinbox__axis--z"></span><span class="spinbox__text">1.0</span></div></ue-spin-box>
 		</div></div>
 		<div class="VectorInput-split"></div>
-		<div class="VectorInput-right"><button class="resettodefault resettodefault--idle" type="button" tabindex="-1" aria-label="Reset to default" disabled><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button></div>
+		<div class="VectorInput-right"><ue-reset-to-default><button class="resettodefault resettodefault--idle" type="button" tabindex="-1" aria-label="Reset to default" disabled><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button></ue-reset-to-default></div>
 	</div>
-</div>
+</div></ue-vector-input>
 <p class="VectorInput-cap"><b>Pinned.</b> Forced state: the Location Z field in its active (dragging or typing) outline.</p>
 
 </body>

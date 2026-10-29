@@ -1,9 +1,9 @@
 // <ue-window-chrome> wraps one live .windowChrome-frame, its restore button and its status line.
 import { UeElement, define } from '../_shared/element.ts';
 import '../Button/Button.ts';
-import '../DockTab/DockTab.css';
 import '../MenuBar/MenuBar.ts';
-import '../TabWell/TabWell.css';
+import '../TabWell/TabWell.ts';
+import './WindowChrome.css';
 
 const MAXIMIZE_GLYPH = '#windowChrome-i-max';
 const RESTORE_GLYPH = '#windowChrome-i-restore';

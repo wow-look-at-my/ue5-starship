@@ -437,3 +437,14 @@
 .combobutton-menu[hidden] {
   display: none;
 }
+
+/* design-system/src/MenuBar/MenuBar.css */
+.menuBar {
+  display: flex;
+  align-items: stretch;
+  background: transparent;
+}
+.menuBar .menuBar-slot {
+  display: flex;
+  align-items: stretch;
+}

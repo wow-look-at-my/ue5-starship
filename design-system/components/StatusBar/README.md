@@ -61,7 +61,7 @@ Citations: `SC` is `Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp`, `S
 - The Cmd combo opens its panel upward, because the bar is at the bottom of the window. Choosing a row renames the combo, which is the value mode of the combo. The engine fills this menu with the command executors (`SOutputLog.cpp:192`, `:733`). Cmd and Python are illustrative.
 - Derived Data and Source Control open an upward panel as well. Their entries are illustrative, because the source builds those menus at run time.
 - The console box is the real input of the `ue-text-input`. Focus draws the Primary outline and white text (`SC:1285`, `SC:1292`). Enter appends `> command` to the history (a few lines at most) and empties the box. Up and Down recall earlier commands. A blank line does nothing. The bar reads those keys on the input.
-- Events: `ue-drawer-change`, `ue-executor-change`, `ue-command`. A bar with `data-pinned` stays plain HTML.
+- Events: `ue-drawer-change`, `ue-executor-change`, `ue-command`. A bar in `<ue-status-bar data-pinned>` runs no setup and ignores the pointer. The host attribute `docked` on `ue-status-bar` floats the log history above the bar, for a bar at the foot of a window.
 
 ## Not found in source
 

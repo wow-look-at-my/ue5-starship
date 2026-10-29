@@ -28,7 +28,7 @@ class UeDetailsHeader extends UeElement {
 		this.on(label, 'blur', () => {
 			const text = (label.textContent ?? '').trim();
 			label.textContent = text === '' ? before : text;
-			for (const name of this.all('.DetailsHeader-instance .name')) name.textContent = label.textContent;
+			for (const name of this.all('.DetailsHeader-instance .DetailsHeader-instanceName')) name.textContent = label.textContent;
 		});
 	}
 }

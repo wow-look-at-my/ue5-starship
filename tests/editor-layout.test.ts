@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { openPreview, root, tokensCss, withBrowser } from './lib.ts';
 
 const SHOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '.build', 'editor-layout.png');
-const TAGS = ['ue-menu-bar', 'ue-tool-bar', 'ue-tab-well', 'ue-place-actors-panel', 'ue-details-category', 'ue-scene-outliner', 'ue-content-browser', 'ue-status-bar'];
+const TAGS = ['ue-window-chrome', 'ue-menu-bar', 'ue-tool-bar', 'ue-tab-well', 'ue-dock-tab', 'ue-place-actors-panel', 'ue-details-category', 'ue-scene-outliner', 'ue-content-browser', 'ue-status-bar'];
 
 // The layout points at the uploaded asset; serve the file from disk in its place.
 async function openLayout(browser: Parameters<Parameters<typeof withBrowser>[0]>[0]) {
@@ -66,9 +66,9 @@ test('typing in the content browser search changes the item count', async () => 
 test('closing the Place Actors tab empties its well', async () => {
 	await withBrowser(async (browser) => {
 		const { page } = await openLayout(browser);
-		const stack = page.locator('ue-tab-well').first();
-		await stack.locator('.tabWell-tab').hover();
-		await stack.locator('.tabWell-close').click();
-		assert.equal(await stack.locator('.tabWell-tab').count(), 0);
+		const stack = page.locator('ue-tab-well:not([data-pinned])').first();
+		await stack.locator('.dockTab').hover();
+		await stack.locator('.dockTab-close').click();
+		assert.equal(await stack.locator('.dockTab').count(), 0);
 	});
 });

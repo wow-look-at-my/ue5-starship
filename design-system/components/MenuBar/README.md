@@ -52,7 +52,7 @@ The fill sits on a border outside the button and the button uses the NoBorder st
 - Left and Right move between the items. In an open menu they close it and open the next menu on its first row. A row with a submenu keeps the arrow keys.
 - A picked row fires `ue-menu-select` with `{ label }`. The event repeats `ue-combo-pick` of the nested combo.
 - The menu entries in the preview are illustrative. They are not the full 5.5.3 menus.
-- A strip with `data-pinned` (the forced hover and open specimens) is outside the element and stays plain HTML.
+- A strip in `<ue-menu-bar data-pinned>` (the forced hover and open specimens) runs no setup and ignores the pointer.
 
 ## Not found in source
 

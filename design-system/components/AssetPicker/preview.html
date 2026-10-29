@@ -66,7 +66,7 @@
 </ue-asset-picker>
 <p class="AssetPicker-cap"><b>Live.</b> Click the combo (or press Down) to open the asset list, choose with the pointer or Up, Down, Enter, Escape. The label and the thumbnail tooltip follow the choice. The use-selected button picks SM_Table, the stand-in for a Content Browser selection. The reset arrow shows when the value is not None and puts it back.</p>
 
-<div class="AssetPicker-frame is-menuRoom" data-pinned>
+<ue-asset-picker data-pinned><div class="AssetPicker-frame is-menuRoom">
 	<div class="AssetPicker-row">
 		<div class="AssetPicker-name">Static Mesh</div>
 		<div class="AssetPicker-split"></div>
@@ -78,27 +78,27 @@
 				</div>
 			</div>
 			<div class="AssetPicker-col">
-				<div class="combobutton-anchor combobutton-anchor--fill">
+				<ue-combo-button><div class="combobutton-anchor combobutton-anchor--fill">
 					<span class="combobutton combobutton--small combobutton--open" tabindex="-1"><span class="combobutton__label">SM_Table</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
 					<div class="combobutton-menu">
-						<div class="popupmenu popupmenu--small popupmenu--combo">
+						<ue-popup-menu><div class="popupmenu popupmenu--small popupmenu--combo">
 							<div class="popupmenu__row"><span class="popupmenu__body"><span class="popupmenu__label">None</span></span></div>
 							<div class="popupmenu__row"><span class="popupmenu__body"><span class="popupmenu__label">SM_Chair</span></span></div>
 							<div class="popupmenu__row popupmenu__row--hover"><span class="popupmenu__body"><span class="popupmenu__label">SM_Table</span></span></div>
 							<div class="popupmenu__row"><span class="popupmenu__body"><span class="popupmenu__label">SM_Couch</span></span></div>
-						</div>
+						</div></ue-popup-menu>
 					</div>
-				</div>
+				</div></ue-combo-button>
 				<div class="AssetPicker-buttons">
-					<button class="button button--simple button--icon button--pressed" tabindex="-1" aria-label="Use Selected Asset"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M11 8H5.5m2.5-2.75L5.25 8 8 10.75"/></svg></button>
-					<button class="button button--simple button--icon button--hover" tabindex="-1" aria-label="Browse to Asset"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M1.75 4.25a1 1 0 0 1 1-1h3.2l1.3 1.5h5a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H2.75a1 1 0 0 1-1-1z"/></svg></button>
+					<ue-button><button class="button button--simple button--icon button--pressed" tabindex="-1" aria-label="Use Selected Asset"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M11 8H5.5m2.5-2.75L5.25 8 8 10.75"/></svg></button></ue-button>
+					<ue-button><button class="button button--simple button--icon button--hover" tabindex="-1" aria-label="Browse to Asset"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M1.75 4.25a1 1 0 0 1 1-1h3.2l1.3 1.5h5a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H2.75a1 1 0 0 1-1-1z"/></svg></button></ue-button>
 				</div>
 			</div>
 		</div>
 		<div class="AssetPicker-split"></div>
-		<div class="AssetPicker-right"><button class="resettodefault resettodefault--hover" type="button" tabindex="-1" aria-label="Reset to default"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button></div>
+		<div class="AssetPicker-right"><ue-reset-to-default><button class="resettodefault resettodefault--hover" type="button" tabindex="-1" aria-label="Reset to default"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button></ue-reset-to-default></div>
 	</div>
-</div>
+</div></ue-asset-picker>
 <p class="AssetPicker-cap"><b>Pinned.</b> Forced states: combo open with SM_Table hovered, use pressed, browse and reset hovered. The list covers the buttons below it.</p>
 
 </body>

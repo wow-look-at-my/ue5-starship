@@ -13,40 +13,7 @@
 	.windowChrome-scroll { overflow-x: auto; }
 	.windowChrome-h { margin: 0 0 6px; font: 700 11px/1.2 var(--font-sans); letter-spacing: .04em; text-transform: uppercase; color: var(--hover-2); }
 
-	/* Window frame: BorderBrush = Recessed fill, radius 2, 2px WindowBorder outline (StarshipCoreStyle.cpp:781); main area inset 3px (BorderPadding, :785) */
-	.windowChrome-frame { position: relative; box-sizing: border-box; min-width: 640px;
-		background: var(--recessed); /* BackgroundBrush Recessed, StarshipCoreStyle.cpp:780 */
-		border: 2px solid var(--window-border); border-radius: 2px; /* :781 */
-		padding: 1px; /* 3px border padding minus the 2px stroke: :785 */ }
-	/* OutlineBrush: 1px InputOutline stroke, radius 2, overlay slot Padding(2): StarshipCoreStyle.cpp:782, SWindow.cpp:597-600 */
-	.windowChrome-frame::before { content: ""; position: absolute; inset: 0; border: 1px solid var(--input-outline); border-radius: 2px; pointer-events: none; }
-
-	/* Title area is as tall as the taller of left content (icon 45 + 2x5 padding + 4 bottom = 59) and right content: SWindowTitleBar.cpp:321 (spacer height), :206 (icon Padding 0,0,0,4), StarshipCoreStyle.cpp:284-285 (AppIcon 45x45, AppIconPadding 5) */
-	.windowChrome-title { position: relative; height: 59px; background: var(--title); /* Brushes.Title under the major tab stack, SDockingTabStack.cpp:1234 */ }
-	.windowChrome-icon { position: absolute; left: 0; top: 0; box-sizing: border-box; width: 55px; height: 55px; padding: 5px; color: var(--white); /* AppIcon tint White, StarshipCoreStyle.cpp:284 */ }
-	.windowChrome-icon svg { display: block; width: 45px; height: 45px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
-
-	/* menu strip slot: SWindowTitleBar WindowMenuSlot, content is consumer-provided; top padding 25 reserves it (SDockingTabStack.cpp:891,897) */
-	.windowChrome-menu { position: absolute; left: 55px; top: 0; height: 25px; display: flex; align-items: center; }
-
-	/* tab row (the tab itself is the TabWell major tab): major tab placed 25px below the top, 45 + 12 = 57px from the left: SDockingTabStack.cpp:893,898 */
-	.windowChrome-tabRow { position: absolute; left: 57px; top: 25px; }
-
-	/* right content: badge then the three buttons, all VAlign top; SBox padding left 2: SWindowTitleBar.cpp:235 */
-	.windowChrome-right { position: absolute; right: 0; top: 0; display: flex; align-items: flex-start; padding-left: 2px; }
-	.windowChrome-right ue-button, .windowChrome-stateBox ue-button { display: flex; flex: none; }
-	.windowChrome-badge { margin-right: 10px; /* slot Padding(0,0,8,0) LevelEditor.cpp:247 + SBox Padding(0,0,2,0) LevelEditor.cpp:166 */
-		padding: 6px 32px 7px; /* SProjectBadge.BadgePadding (32,6,32,7): StarshipStyle.cpp:2917 */
-		background: #0f0f0f; /* Colors.Title tint (LevelEditor.cpp:107-108) over Badge.png; the texture is not in the tree, #0f0f0f is what the reference screenshot shows */
-		border-radius: 6px; /* 6/16 slice of the 16px Badge brush: StarshipStyle.cpp:2916 */
-		color: var(--foreground); /* BadgeTextColor, LevelEditor.cpp:123 */ }
-	/* window content below the title area; stand-in for the dock area */
-	.windowChrome-content { height: 50px; background: var(--panel); margin-top: 0; padding: 8px 12px; color: var(--foreground); }
-
-	.windowChrome-frame:focus-visible { outline: 1px solid var(--primary); outline-offset: 2px; }
-	.windowChrome-frame[data-maximized] { border-radius: 0; }
-	.windowChrome-frame[data-maximized]::before { border-radius: 0; }
-	.windowChrome-frame[data-maximized] .windowChrome-content { height: 90px; }
+	/* The window frame, title area and badge look is in src/WindowChrome/WindowChrome.css. */
 	.windowChrome-live { margin: 0 0 8px; line-height: 1.45; }
 	.windowChrome-live b, .windowChrome-status { color: var(--foreground); }
 	ue-window-chrome { display: contents; }
@@ -54,6 +21,7 @@
 	.windowChrome-states { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: flex-start; }
 	.windowChrome-state { display: flex; flex-direction: column; gap: 4px; }
 	.windowChrome-stateBox { background: var(--title); }
+	.windowChrome-stateBox ue-button { display: flex; flex: none; }
 </style>
 </head>
 <body>
@@ -80,7 +48,7 @@
 				<ue-menu-bar><div class="menuBar" role="menubar" aria-label="Main menu"><div class="menuBar-item" role="menuitem" tabindex="0">File</div><div class="menuBar-item" role="menuitem" tabindex="-1">Edit</div><div class="menuBar-item" role="menuitem" tabindex="-1">Window</div><div class="menuBar-item" role="menuitem" tabindex="-1">Tools</div><div class="menuBar-item" role="menuitem" tabindex="-1">Build</div><div class="menuBar-item" role="menuitem" tabindex="-1">Select</div><div class="menuBar-item" role="menuitem" tabindex="-1">Actor</div><div class="menuBar-item" role="menuitem" tabindex="-1">Help</div></div></ue-menu-bar>
 			</div>
 			<div class="windowChrome-tabRow">
-				<div class="tabWell-well tabWell-well--major"><div class="tabWell-tab tabWell-tab--major tabWell-tab--foreground"><span class="tabWell-icon"><svg viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></svg></span><span class="tabWell-label">Minimal_Default</span><span class="tabWell-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></div>
+				<ue-tab-well data-pinned><div class="tabWell-well tabWell-well--major"><ue-dock-tab><div class="dockTab dockTab--major dockTab--foreground"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></svg></span><span class="dockTab-label">Minimal_Default</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab></div></ue-tab-well>
 			</div>
 			<div class="windowChrome-right">
 				<div class="windowChrome-badge">LevelDesignProject</div>
@@ -99,14 +67,14 @@
 	<h3 class="windowChrome-h">Button states (42 x 23)</h3>
 	<div class="windowChrome-caption" style="margin:0 0 8px">pinned: forced states, they do not react to the pointer</div>
 	<div class="windowChrome-states">
-		<div class="windowChrome-state"><div class="windowChrome-stateBox"><ue-button><button class="button button--caption" type="button" data-pinned tabindex="-1" aria-label="Minimize, pinned normal"><svg><use href="#windowChrome-i-min"/></svg></button></ue-button></div><span class="windowChrome-caption" style="margin:0">minimize</span></div>
-		<div class="windowChrome-state"><div class="windowChrome-stateBox"><ue-button><button class="button button--caption button--hover" type="button" data-pinned tabindex="-1" aria-label="Minimize, pinned hover"><svg><use href="#windowChrome-i-min"/></svg></button></ue-button></div><span class="windowChrome-caption" style="margin:0">min / max hover</span></div>
-		<div class="windowChrome-state"><div class="windowChrome-stateBox"><ue-button><button class="button button--caption button--hover" type="button" data-pinned tabindex="-1" aria-label="Maximize, pinned hover"><svg><use href="#windowChrome-i-max"/></svg></button></ue-button></div><span class="windowChrome-caption" style="margin:0">maximize hover</span></div>
-		<div class="windowChrome-state"><div class="windowChrome-stateBox"><ue-button><button class="button button--caption button--pressed" type="button" data-pinned tabindex="-1" aria-label="Maximize, pinned pressed"><svg><use href="#windowChrome-i-max"/></svg></button></ue-button></div><span class="windowChrome-caption" style="margin:0">min / max pressed (no fill)</span></div>
-		<div class="windowChrome-state"><div class="windowChrome-stateBox"><ue-button><button class="button button--caption" type="button" data-pinned tabindex="-1" aria-label="Restore, pinned normal"><svg><use href="#windowChrome-i-restore"/></svg></button></ue-button></div><span class="windowChrome-caption" style="margin:0">restore glyph</span></div>
-		<div class="windowChrome-state"><div class="windowChrome-stateBox"><ue-button><button class="button button--caption button--caption-close" type="button" data-pinned tabindex="-1" aria-label="Close, pinned normal"><svg><use href="#windowChrome-i-close"/></svg></button></ue-button></div><span class="windowChrome-caption" style="margin:0">close</span></div>
-		<div class="windowChrome-state"><div class="windowChrome-stateBox"><ue-button><button class="button button--caption button--caption-close button--hover" type="button" data-pinned tabindex="-1" aria-label="Close, pinned hover"><svg><use href="#windowChrome-i-close"/></svg></button></ue-button></div><span class="windowChrome-caption" style="margin:0">close hover</span></div>
-		<div class="windowChrome-state"><div class="windowChrome-stateBox"><ue-button><button class="button button--caption button--caption-close button--pressed" type="button" data-pinned tabindex="-1" aria-label="Close, pinned pressed"><svg><use href="#windowChrome-i-close"/></svg></button></ue-button></div><span class="windowChrome-caption" style="margin:0">close pressed (no fill)</span></div>
+		<div class="windowChrome-state"><div class="windowChrome-stateBox"><ue-button data-pinned><button class="button button--caption" type="button" tabindex="-1" aria-label="Minimize, pinned normal"><svg><use href="#windowChrome-i-min"/></svg></button></ue-button></div><span class="windowChrome-caption" style="margin:0">minimize</span></div>
+		<div class="windowChrome-state"><div class="windowChrome-stateBox"><ue-button data-pinned><button class="button button--caption button--hover" type="button" tabindex="-1" aria-label="Minimize, pinned hover"><svg><use href="#windowChrome-i-min"/></svg></button></ue-button></div><span class="windowChrome-caption" style="margin:0">min / max hover</span></div>
+		<div class="windowChrome-state"><div class="windowChrome-stateBox"><ue-button data-pinned><button class="button button--caption button--hover" type="button" tabindex="-1" aria-label="Maximize, pinned hover"><svg><use href="#windowChrome-i-max"/></svg></button></ue-button></div><span class="windowChrome-caption" style="margin:0">maximize hover</span></div>
+		<div class="windowChrome-state"><div class="windowChrome-stateBox"><ue-button data-pinned><button class="button button--caption button--pressed" type="button" tabindex="-1" aria-label="Maximize, pinned pressed"><svg><use href="#windowChrome-i-max"/></svg></button></ue-button></div><span class="windowChrome-caption" style="margin:0">min / max pressed (no fill)</span></div>
+		<div class="windowChrome-state"><div class="windowChrome-stateBox"><ue-button data-pinned><button class="button button--caption" type="button" tabindex="-1" aria-label="Restore, pinned normal"><svg><use href="#windowChrome-i-restore"/></svg></button></ue-button></div><span class="windowChrome-caption" style="margin:0">restore glyph</span></div>
+		<div class="windowChrome-state"><div class="windowChrome-stateBox"><ue-button data-pinned><button class="button button--caption button--caption-close" type="button" tabindex="-1" aria-label="Close, pinned normal"><svg><use href="#windowChrome-i-close"/></svg></button></ue-button></div><span class="windowChrome-caption" style="margin:0">close</span></div>
+		<div class="windowChrome-state"><div class="windowChrome-stateBox"><ue-button data-pinned><button class="button button--caption button--caption-close button--hover" type="button" tabindex="-1" aria-label="Close, pinned hover"><svg><use href="#windowChrome-i-close"/></svg></button></ue-button></div><span class="windowChrome-caption" style="margin:0">close hover</span></div>
+		<div class="windowChrome-state"><div class="windowChrome-stateBox"><ue-button data-pinned><button class="button button--caption button--caption-close button--pressed" type="button" tabindex="-1" aria-label="Close, pinned pressed"><svg><use href="#windowChrome-i-close"/></svg></button></ue-button></div><span class="windowChrome-caption" style="margin:0">close pressed (no fill)</span></div>
 	</div>
 </div>
 </body>

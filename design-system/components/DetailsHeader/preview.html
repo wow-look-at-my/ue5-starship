@@ -32,27 +32,27 @@
 	<div class="DetailsHeader-instanceBox">
 		<div class="DetailsHeader-instance">
 			<svg viewBox="0 0 16 16"><path d="M8 1.5 14 4.75v6.5L8 14.5 2 11.25v-6.5z M2 4.75 8 8l6-3.25 M8 8v6.5"/></svg>
-			<span class="name">Chair</span><span class="ctx">(Instance)</span>
+			<span class="DetailsHeader-instanceName">Chair</span><span class="DetailsHeader-instanceContext">(Instance)</span>
 		</div>
 	</div>
 </div>
 </ue-details-header>
 <p class="DetailsHeader-cap"><b>Live.</b> Hover and press Add, Blueprint, help and the lock. Click the lock to close the padlock. Hover and click the actor name to edit it: Enter commits and updates the instance row, Escape cancels.</p>
 
-<div class="DetailsHeader-frame" data-pinned>
+<ue-details-header data-pinned><div class="DetailsHeader-frame">
 	<div class="DetailsHeader">
 		<div class="DetailsHeader-name">
 			<svg class="DetailsHeader-icon" viewBox="0 0 16 16"><path d="M8 1.5 14 4.75v6.5L8 14.5 2 11.25v-6.5z M2 4.75 8 8l6-3.25 M8 8v6.5"/></svg>
 			<div class="DetailsHeader-label is-focused">Chair</div>
 			<div class="DetailsHeader-actions">
-				<button class="button button--small button--pressed" tabindex="-1"><svg class="button__icon DetailsHeader-positive" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>Add</button>
-				<button class="button button--icon button--hover" tabindex="-1" aria-label="Blueprint"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M2.5 3.5h4v3h-4z M9.5 9.5h4v3h-4z M6.5 5h2.5a1.5 1.5 0 0 1 1.5 1.5V9.5 M2.5 11h4"/></svg></button>
-				<button class="button button--simple button--icon button--hover" tabindex="-1" aria-label="Help"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M6.2 6.3a1.9 1.9 0 1 1 2.7 1.7c-.6.3-.9.7-.9 1.3M8 11.4v.1"/></svg></button>
-				<button class="button button--toggle button--icon button--pressed" data-role="lock" aria-pressed="true" tabindex="-1" aria-label="Lock"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><rect x="3" y="7.5" width="10" height="6.5" rx="1.25"/><path class="DetailsHeader-shackle DetailsHeader-shackle--open" d="M5.5 7.5V5a2.5 2.5 0 0 1 4.9-.7"/><path class="DetailsHeader-shackle DetailsHeader-shackle--shut" d="M5.5 7.5V5a2.5 2.5 0 0 1 5 0v2.5"/></svg></button>
+				<ue-button><button class="button button--small button--pressed" tabindex="-1"><svg class="button__icon DetailsHeader-positive" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>Add</button></ue-button>
+				<ue-button><button class="button button--icon button--hover" tabindex="-1" aria-label="Blueprint"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M2.5 3.5h4v3h-4z M9.5 9.5h4v3h-4z M6.5 5h2.5a1.5 1.5 0 0 1 1.5 1.5V9.5 M2.5 11h4"/></svg></button></ue-button>
+				<ue-button><button class="button button--simple button--icon button--hover" tabindex="-1" aria-label="Help"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M6.2 6.3a1.9 1.9 0 1 1 2.7 1.7c-.6.3-.9.7-.9 1.3M8 11.4v.1"/></svg></button></ue-button>
+				<ue-button><button class="button button--toggle button--icon button--pressed" data-role="lock" aria-pressed="true" tabindex="-1" aria-label="Lock"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><rect x="3" y="7.5" width="10" height="6.5" rx="1.25"/><path class="DetailsHeader-shackle DetailsHeader-shackle--open" d="M5.5 7.5V5a2.5 2.5 0 0 1 4.9-.7"/><path class="DetailsHeader-shackle DetailsHeader-shackle--shut" d="M5.5 7.5V5a2.5 2.5 0 0 1 5 0v2.5"/></svg></button></ue-button>
 			</div>
 		</div>
 	</div>
-</div>
+</div></ue-details-header>
 <p class="DetailsHeader-cap"><b>Pinned.</b> Forced states: name box focused, Add pressed, Blueprint and help hovered, lock pressed and locked.</p>
 
 </body>

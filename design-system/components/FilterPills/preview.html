@@ -46,13 +46,13 @@
 </ue-filter-pills>
 <p class="FilterPills-cap"><b>Live chips</b> (<code>FilterPills-strip--chips</code>). The X on a chip removes it and fires <code>ue-pill-remove</code>. <code>addChip({ id, label, color })</code> adds one and fires <code>ue-pill-add</code>.</p>
 
-<div class="FilterPills-frame" data-pinned>
-	<div class="FilterPills-strip">
+<div class="FilterPills-frame">
+	<ue-filter-pills data-pinned><div class="FilterPills-strip">
 		<span class="FilterPills-pill is-hover">Hover</span>
 		<span class="FilterPills-pill is-pressed">Pressed</span>
 		<span class="FilterPills-pill is-checked">Checked</span>
 		<span class="FilterPills-pill is-checked is-hover">Checked hover</span>
-	</div>
+	</div></ue-filter-pills>
 </div>
 <p class="FilterPills-cap"><b>Pinned.</b> Forced states: hovered, pressed, checked, checked and hovered.</p>
 

@@ -140,12 +140,12 @@ scenario('MenuBar: arrow keys move between items and into the dropdown', 'MenuBa
 });
 
 scenario('MenuBar: pinned specimens ignore clicks and keep their forced states', 'MenuBar', async (page) => {
-	const pinned = page.locator('.menuBar[data-pinned]');
+	const pinned = page.locator('[data-pinned] .menuBar');
 	assert.equal(await pinned.count(), 2);
 	await assertInert(pinned.nth(0));
 	assert.equal(await fill(pinned.nth(1).locator('.combobutton--open')), await token(page, 'primary'));
 	await clickAt(page, pinned.nth(0).locator('.combobutton').nth(0));
-	assert.equal(await page.locator('.menuBar[data-pinned] .combobutton--open').count(), 1);
+	assert.equal(await page.locator('[data-pinned] .menuBar .combobutton--open').count(), 1);
 	assert.equal(await fill(pinned.nth(0).locator('.combobutton--hover')), await token(page, 'hover'));
 	await hoverAt(page, pinned.nth(0).locator('.combobutton').nth(0));
 	assert.equal(await fill(pinned.nth(0).locator('.combobutton').nth(0)), CLEAR, 'a pinned item does not react to the pointer');
@@ -305,7 +305,7 @@ scenario('ToolBar: the Play options dots open a menu and Left and Right move bet
 });
 
 scenario('ToolBar: pinned specimens ignore clicks', 'ToolBar', async (page) => {
-	const pinned = page.locator('.toolBar[data-pinned]');
+	const pinned = page.locator('[data-pinned] .toolBar');
 	assert.equal(await pinned.count(), 2);
 	await assertInert(pinned.nth(0));
 	await assertInert(pinned.nth(1));
@@ -414,7 +414,7 @@ scenario('PlaceActorsPanel: the search is a ue-text-input search and the rail a 
 });
 
 scenario('PlaceActorsPanel: pinned specimens ignore clicks and keep their forced rows', 'PlaceActorsPanel', async (page) => {
-	const pinned = page.locator('div[data-pinned]').first();
+	const pinned = page.locator('ue-place-actors-panel[data-pinned]').first();
 	await assertInert(pinned);
 	await clickAt(page, pinned.locator('.SegmentedControl-seg').nth(2));
 	assert.equal(await pinned.locator('.SegmentedControl-seg.is-checked').count(), 1);
@@ -556,11 +556,11 @@ scenario('StatusBar: Derived Data and Source Control fill Dropdown on hover', 'S
 });
 
 scenario('StatusBar: pinned specimens ignore clicks and keep their hover state', 'StatusBar', async (page) => {
-	const pinned = page.locator('.statusBar[data-pinned]');
+	const pinned = page.locator('[data-pinned] .statusBar');
 	assert.equal(await pinned.count(), 2);
 	await assertInert(pinned.nth(0));
 	await clickAt(page, pinned.nth(0).locator('.button').first());
-	assert.equal(await page.locator('.statusBar[data-pinned] .button[aria-pressed="true"]').count(), 0);
+	assert.equal(await page.locator('[data-pinned] .statusBar .button[aria-pressed="true"]').count(), 0);
 	assert.equal(await ink(pinned.nth(1).locator('.button--hover')), await token(page, 'foreground-hover'));
 	assert.equal(await fill(pinned.nth(1).locator('.combobutton--hover')), await token(page, 'dropdown'));
 	await hoverAt(page, pinned.nth(0).locator('.combobutton').first());

@@ -80,7 +80,7 @@ Hover and pressed on a plate change only the foreground, because the plate brush
 - A combo opens its own panel. One menu is open at a time. Escape or a press outside closes. Down and Up open and enter the menu. Left and Right move the focus between the controls, which is the only key handling of the composite.
 - Play sets `aria-pressed` and enables Stop. Stop disables itself again. The state sits on `data-playing` of the `.toolBar`, and the plate colour follows it. A second Play press keeps the game running. An idle Stop button is `disabled`. Its plate draws at alpha .45 (`SlateElementPixelShader.usf:535`).
 - `ue-play-change` fires with `{ playing }`. `ue-menu-select` fires with `{ label }` and repeats `ue-combo-pick`.
-- The menu entries are illustrative. A strip with `data-pinned` stays plain HTML.
+- The menu entries are illustrative. A strip in `<ue-tool-bar data-pinned>` runs no setup and ignores the pointer.
 
 ## Not found in source
 

@@ -67,7 +67,7 @@ Citations: `SC` is `Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp`, `S
 - Double click or Enter on a row fires `ue-place` with `{ name }`.
 - The live panel lists the built-in categories of `PlacementModeModule.cpp:130-290`. The Basic, Lights, Shapes and Visual Effects items are factories registered there (`PlacementModeModule.cpp:150-260`). The Recent, Volumes and All items are illustrative, because the engine fills them at run time. The clapperboard category of the reference screenshot is not in this module and is left out of the live panel.
 - Search filters only the shown category. The engine search spans every category. This is a simplification.
-- A panel with `data-pinned` (the forced-state specimens) stays plain HTML.
+- A panel in `<ue-place-actors-panel data-pinned>` (the forced-state specimens) runs no setup and ignores the pointer.
 
 ## Not found in source
 
