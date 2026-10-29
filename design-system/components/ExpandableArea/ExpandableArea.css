@@ -50,6 +50,23 @@
 .expandablearea__header[aria-expanded=true] .expandablearea__caret {
   transform: rotate(90deg);
 }
+.expandablearea--source {
+  border-radius: 0;
+  background: var(--header);
+  color: var(--foreground);
+  padding-top: 2px;
+}
+.expandablearea--source .expandablearea__header {
+  padding: 0 4px;
+  min-height: 24px;
+}
+.expandablearea--source .expandablearea__title {
+  font: 700 13.333px/16px var(--font-sans);
+}
+.expandablearea--source .expandablearea__body {
+  padding: 0;
+  background: var(--recessed);
+}
 @media (prefers-reduced-motion: reduce) {
   .expandablearea__header[role=button] .expandablearea__caret {
     transition: none;

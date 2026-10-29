@@ -27,7 +27,7 @@ export interface PillRemoveDetail {
 	label: string;
 }
 
-class UeFilterPills extends UeElement {
+export class UeFilterPills extends UeElement {
 	#strip: HTMLElement | null = null;
 
 	protected setup(): void {

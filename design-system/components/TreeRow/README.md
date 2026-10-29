@@ -36,7 +36,7 @@ Without it the label text is the id.
 | Variant | Markup | Effect |
 |---|---|---|
 | Default | `.tr-tree` | 20px rows, indent 6 + 12 per level, subdued arrow, folder tint at 75% |
-| Source tree | `.tr-tree.is-compact` | 16px rows, 19px root rows (3px top padding), indent 0 + 10 per level, full-strength arrow and folder. Values from `components/SourcePanel/preview.html:31-45` |
+| Source tree | `.tr-tree.is-compact` | 16px rows, 19px root rows (3px top padding), indent 0 + 10 per level, full-strength arrow and folder. Values from the Content Browser source tree (`SourcesViewWidgets.cpp:138-150`, `SExpanderArrow.cpp:73,182`) |
 | Custom indent | `style="--tree-indent-base:0px; --tree-indent-step:10px"` on `.tr-tree` or on an ancestor | The indent of a row is `base + depth x step`. Defaults 6px and 12px. `is-compact` defaults to 0px and 10px |
 | Single select | `<ue-tree-row select="single">` | Every click and key selects one row. Shift and Ctrl add nothing. `aria-multiselectable` is `false` |
 | Multi select | default | Click replaces, Ctrl or Cmd toggles, Shift selects the range from the anchor |
@@ -71,7 +71,10 @@ el.getSelectedIds(): string[];
 el.select(ids: string[]);                 // fires ue-tree-select
 el.setExpanded(id: string, expanded: boolean);
 el.setFilter(filter: string | ((row: { id: string; label: string; depth: number }) => boolean) | null);
+el.appendRow(row: TreeRowData);           // adds one row after the last row; the selection stays
 ```
+
+`<ue-tree-row collapse-selects>`: closing a row that hides the selected row selects the closing row, as a file tree does. `ue-tree-toggle` fires first, then `ue-tree-select`. Without the attribute the hidden row stays selected.
 
 `setFilter` keeps the rows that match and their ancestors, hides the rest, and shows each ancestor open while the filter is set. The stored `aria-expanded` of an ancestor does not change, so `setFilter(null)` restores the earlier tree. A string filter is a case-insensitive substring of the label.
 

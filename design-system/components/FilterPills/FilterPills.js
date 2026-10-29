@@ -193,3 +193,6 @@ var UeFilterPills = class extends UeElement {
   }
 };
 define("ue-filter-pills", UeFilterPills);
+export {
+  UeFilterPills
+};

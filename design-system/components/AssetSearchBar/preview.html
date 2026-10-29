@@ -11,104 +11,22 @@
 	/* SContentBrowser.cpp:1445-1447 asset-area border: Brushes.Panel, Padding(2,2,2,0) */
 	.AssetSearchBarDemo { background: var(--panel); padding: 2px 2px 0; font: 400 13.333px/16px var(--font-sans); color: var(--foreground); margin: 12px 16px; width: 640px; }
 	.AssetSearchBarDemo small { display: block; color: var(--hover-2); font: 400 10.667px/1 var(--font-sans); padding: 6px 6px 0; }
-	.AssetSearchBar svg { width: 16px; height: 16px; flex: none; display: block; }
-
-	/* vertical filter layout slot: Padding(6,4,0,0) (SContentBrowser.cpp:1362), height from the text box */
-	.AssetSearchBar { display: flex; align-items: flex-start; padding: 4px 0 4px 6px; }
-
-	/* SSearchBox, style FilterBar.SearchBox (StarshipCoreStyle.cpp:893-900, 1301-1318): pill brush, Input fill, 1px Secondary outline, hover Hover, focus Primary.
-	   Text padding (8,3,30,4) (:896); glass left, ImagePadding(4,0,0,0), image 14px (:1316-1317). Width 500 (SContentBrowser.cpp:1249). */
-	.AssetSearchBar__field { position: relative; display: flex; align-items: center; width: 500px; box-sizing: border-box; border-radius: 999px;
-		background: var(--input); box-shadow: inset 0 0 0 1px var(--secondary); }
-	.AssetSearchBar__field:hover { box-shadow: inset 0 0 0 1px var(--hover); }
-	.AssetSearchBar__field:focus-within, .AssetSearchBar__field.is-focused { box-shadow: inset 0 0 0 1px var(--primary); }
-	.AssetSearchBar__glass { margin-left: 4px; width: 14px !important; height: 14px !important; color: var(--foreground); }
-	.AssetSearchBar__input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; color: var(--foreground); font: inherit; padding: 3px 30px 4px 8px; }
-	.AssetSearchBar__input::placeholder { color: var(--foreground); opacity: .35; }     /* hint = text colour at alpha 0.35 (SlateEditableTextLayout.cpp:3563) */
-	.AssetSearchBar__input:focus, .is-focused .AssetSearchBar__input { color: var(--white); }  /* FocusedForegroundColor White (StarshipCoreStyle.cpp:1285) */
-	.AssetSearchBar__inputText { flex: 1; padding: 3px 30px 4px 8px; color: var(--foreground); }
-	/* clear X: ThinHoverOnlyButton, ContentPadding = ImagePadding (SSearchBox.cpp:153-166); shown only with text */
-	.AssetSearchBar__clear { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); display: flex; padding: 0 0 0 4px; color: var(--foreground); }
-	/* in-field plus-circle (5.5.3): HoverOnlyButton, ContentPadding(0) + (2,0); only when text is non-empty (SFilterSearchBox.cpp:171-189) */
-	.AssetSearchBar__plus { position: absolute; right: 30px; top: 50%; transform: translateY(-50%); display: flex; padding: 0 2px; color: var(--foreground); border-radius: 4px; }
-
-	/* external icon buttons: SimpleButton icon-only padding (2,1) (StarshipCoreStyle.cpp:1405-1407) */
-	.AssetSearchBar__btn { display: flex; align-items: center; margin-left: 2px; padding: 1px 2px; border-radius: 4px; color: var(--foreground); height: 18px; align-self: center; }
-	.AssetSearchBar__btn:hover { background: var(--dropdown); color: var(--foreground-hover); }   /* SimpleButton hovered Dropdown r4 (:1391) */
-	/* filter: SComboButton SimpleComboButtonWithIcon (StarshipCoreStyle.cpp:1522-1524), ContentPadding(1,0) (SBasicFilterBar.h:265) => padding (3,1); icon 16 + wide chevron 16 */
-	.AssetSearchBar__filter { padding: 1px 3px; margin-left: 2px; }
-	.AssetSearchBar__filter svg + svg { margin-left: 2px; }   /* FComboButtonStyle DownArrowPadding default 2 (SlateTypes.cpp:165) */
-	.AssetSearchBar__filter--lead { margin: 0 2px 0 0; }   /* SContentBrowser.cpp:1369 Padding(0,0,2,0) */
-
-	/* ---- live rows (inside <ue-asset-search-bar>); the pinned row is plain HTML and skips these ---- */
-	.AssetSearchBar { position: relative; }
-	.AssetSearchBar button { border: 0; background: none; font: inherit; cursor: default; }
-	.AssetSearchBar button.AssetSearchBar__btn:hover, ue-asset-search-bar .AssetSearchBar__btn:focus-visible { background: var(--dropdown); color: var(--foreground-hover); outline: 0; }
-	/* SimpleButton pressed = Dropdown r4, content padding shifts 1px down (StarshipCoreStyle.cpp:1389-1407) */
-	ue-asset-search-bar .AssetSearchBar__btn:active { background: var(--dropdown); color: var(--foreground-hover); padding: 2px 2px 0; }
-	.AssetSearchBar button.AssetSearchBar__filter:active { padding: 2px 3px 0; }
-	.AssetSearchBar__clear[hidden], .AssetSearchBar__plus[hidden] { display: none; }
-	/* clear X and plus: HoverOnlyButton = SimpleButtonIconOnly, hover/press Dropdown r4 (StarshipCoreStyle.cpp:1456,1389-1394) */
-	ue-asset-search-bar .AssetSearchBar__clear, ue-asset-search-bar .AssetSearchBar__plus { border-radius: 4px; }
-	ue-asset-search-bar .AssetSearchBar__clear:hover, ue-asset-search-bar .AssetSearchBar__plus:hover, ue-asset-search-bar .AssetSearchBar__clear:active, ue-asset-search-bar .AssetSearchBar__plus:active,
-	ue-asset-search-bar .AssetSearchBar__clear:focus-visible, ue-asset-search-bar .AssetSearchBar__plus:focus-visible { background: var(--dropdown); color: var(--foreground-hover); outline: 0; }
-
-	/* filter pill: FilterBar.FilterBackground Secondary r3 with the 8 x 22 colour segment (StarshipCoreStyle.cpp:916-917) */
-	.AssetSearchBar__pills { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 0 4px 6px; }
-	.AssetSearchBar__pills:empty { display: none; }
-	.AssetSearchBar__pill { display: flex; align-items: center; height: 22px; border-radius: 3px; background: var(--secondary); overflow: hidden; color: var(--foreground); }
-	.AssetSearchBar__pillColor { width: 8px; align-self: stretch; flex: none; }
-	.AssetSearchBar__pillName { padding: 0 6px 0 6px; }
-	.AssetSearchBar .AssetSearchBar__pillRemove, .AssetSearchBar__pills .AssetSearchBar__pillRemove { display: flex; align-items: center; margin: 0 3px 0 0; padding: 1px; border: 0; border-radius: 4px; background: none; color: var(--foreground); cursor: default; }
-	.AssetSearchBar__pills .AssetSearchBar__pillRemove:hover, .AssetSearchBar__pills .AssetSearchBar__pillRemove:focus-visible { background: var(--dropdown); color: var(--foreground-hover); outline: 0; }
-	.AssetSearchBar__pills svg { width: 16px; height: 16px; flex: none; display: block; }
-	.AssetSearchBar__pill:hover { color: var(--foreground-hover); }
-
-	/* filter menu: same declarations as PopupMenu/preview.html */
-	.AssetSearchBar__menu { position: absolute; z-index: 20; box-sizing: border-box; min-width: 180px; padding: 8px 0; background: var(--dropdown); box-shadow: inset 0 0 0 1px var(--dropdown-outline); color: var(--foreground-hover); }
-	.AssetSearchBar .AssetSearchBar__menuitem { display: flex; align-items: center; width: 100%; padding: 3px 5px 3px 12px; gap: 8px; color: var(--foreground-hover); text-align: left; white-space: nowrap; border-radius: 0; height: auto; margin: 0; }
-	.AssetSearchBar .AssetSearchBar__menuitem:hover, .AssetSearchBar .AssetSearchBar__menuitem:focus { background: var(--primary); outline: 0; }
-	.AssetSearchBar__menucheck { display: flex; width: 16px; height: 16px; margin-left: 2px; flex: none; }
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-	<defs>
-		<symbol id="asb-glass" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6.75" cy="6.75" r="4.5"/><path d="M10.2 10.2L14 14"/></g></symbol>
-		<symbol id="asb-save" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"><path d="M2.5 2.5h9l2 2v9h-11z"/><path d="M5 2.5v3.5h5V2.5M5 13.5v-4h6v4"/></g></symbol>
-		<symbol id="asb-filter" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4h12M4 8h8M6.5 12h3"/></g></symbol>
-		<symbol id="asb-chev" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-		<symbol id="asb-x" viewBox="0 0 16 16"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
-		<symbol id="asb-plus" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.75v6.5M4.75 8h6.5"/></g></symbol>
-	</defs>
-</svg>
 <div class="AssetSearchBarDemo">
-	<small>Live, reference layout: field, save, filter dropdown (empty). Type for the clear X, Escape clears, the filter menu adds pills.</small>
-	<ue-asset-search-bar>
-	<div class="AssetSearchBar">
-		<label class="AssetSearchBar__field"><svg class="AssetSearchBar__glass"><use href="#asb-glass"/></svg><input class="AssetSearchBar__input" placeholder="Search StarterContent" aria-label="Search"><button type="button" class="AssetSearchBar__clear" aria-label="Clear search" hidden><svg><use href="#asb-x"/></svg></button></label>
-		<button type="button" class="AssetSearchBar__btn" aria-label="Save search"><svg><use href="#asb-save"/></svg></button>
-		<button type="button" class="AssetSearchBar__btn AssetSearchBar__filter" aria-label="Filters" aria-expanded="false"><svg><use href="#asb-filter"/></svg><svg><use href="#asb-chev"/></svg></button>
-	</div>
-	</ue-asset-search-bar>
-	<small>Focused with text (clear X shown), pinned</small>
-	<div class="AssetSearchBar">
-		<div class="AssetSearchBar__field is-focused"><svg class="AssetSearchBar__glass"><use href="#asb-glass"/></svg><span class="AssetSearchBar__inputText" style="color:var(--white)">chair</span><span class="AssetSearchBar__clear"><svg><use href="#asb-x"/></svg></span></div>
-		<span class="AssetSearchBar__btn"><svg><use href="#asb-save"/></svg></span>
-		<span class="AssetSearchBar__btn AssetSearchBar__filter"><svg><use href="#asb-filter"/></svg><svg><use href="#asb-chev"/></svg></span>
-	</div>
-	<small>Live, 5.5.3 source layout: filter button first, then the field with the plus-circle save-search button. The plus and X show only while text is typed.</small>
-	<ue-asset-search-bar>
-	<div class="AssetSearchBar">
-		<button type="button" class="AssetSearchBar__btn AssetSearchBar__filter AssetSearchBar__filter--lead" aria-label="Filters" aria-expanded="false"><svg><use href="#asb-filter"/></svg><svg><use href="#asb-chev"/></svg></button>
-		<div class="AssetSearchBar__field"><svg class="AssetSearchBar__glass"><use href="#asb-glass"/></svg><input class="AssetSearchBar__input" value="chair" aria-label="Search"><button type="button" class="AssetSearchBar__plus" aria-label="Save search"><svg><use href="#asb-plus"/></svg></button><button type="button" class="AssetSearchBar__clear" aria-label="Clear search"><svg><use href="#asb-x"/></svg></button></div>
-	</div>
-	</ue-asset-search-bar>
-	<small>Source layout with a static field, pinned</small>
-	<div class="AssetSearchBar">
-		<span class="AssetSearchBar__btn AssetSearchBar__filter AssetSearchBar__filter--lead"><svg><use href="#asb-filter"/></svg><svg><use href="#asb-chev"/></svg></span>
-		<div class="AssetSearchBar__field"><svg class="AssetSearchBar__glass"><use href="#asb-glass"/></svg><span class="AssetSearchBar__inputText">chair</span><span class="AssetSearchBar__plus"><svg><use href="#asb-plus"/></svg></span><span class="AssetSearchBar__clear"><svg><use href="#asb-x"/></svg></span></div>
-	</div>
+<small>Live, reference layout: field, save, filter dropdown (empty). Type for the clear X, Escape clears, the filter menu adds chips.</small>
+<ue-asset-search-bar>
+<div class="AssetSearchBar"><div class="AssetSearchBar__field"><ue-text-input><div class="textinput textinput--search"><svg class="textinput__glyph textinput__glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><svg class="textinput__glyph textinput__clear" viewBox="0 0 16 16" role="button" aria-label="Clear search"><path d="M4 4l8 8M12 4l-8 8"/></svg><input class="textinput__text textinput__field" type="text" placeholder="Search StarterContent" aria-label="Search"><span class="textinput__tail"></span></div></ue-text-input></div><ue-button data-action="save"><button type="button" class="button button--simple button--icon" aria-label="Save search"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M2.5 2.5h9l2 2v9h-11z"/><path d="M5 2.5v3.5h5V2.5M5 13.5v-4h6v4"/></svg></button></ue-button><ue-combo-button mode="action" data-action="filter"><div class="combobutton-anchor"><span class="combobutton combobutton--icon" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="Filters"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M2 4h12M4 8h8M6.5 12h3"/></svg><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span><div class="combobutton-menu" hidden><ue-popup-menu><div class="popupmenu" role="menu" tabindex="0" aria-label="Filters"><div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false" data-value="Static Mesh"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Static Mesh</span></span></div><div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false" data-value="Material"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Material</span></span></div><div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false" data-value="Texture"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Texture</span></span></div><div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false" data-value="Blueprint"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Blueprint</span></span></div><div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false" data-value="Level"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Level</span></span></div></div></ue-popup-menu></div></div></ue-combo-button></div><ue-filter-pills><div class="FilterPills-strip FilterPills-strip--chips" role="list"></div></ue-filter-pills>
+</ue-asset-search-bar>
+<small>Focused with text (clear X shown), pinned</small>
+<div class="AssetSearchBar" data-pinned><div class="AssetSearchBar__field"><div class="textinput textinput--search textinput--focus textinput--filled"><svg class="textinput__glyph textinput__glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><svg class="textinput__glyph textinput__clear" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg><span class="textinput__text" style="color:var(--white)">chair</span><span class="textinput__tail"></span></div></div><button type="button" class="button button--simple button--icon" aria-label="Save search"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M2.5 2.5h9l2 2v9h-11z"/><path d="M5 2.5v3.5h5V2.5M5 13.5v-4h6v4"/></svg></button><span class="combobutton combobutton--icon" aria-label="Filters"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M2 4h12M4 8h8M6.5 12h3"/></svg><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></div>
+<small>Live, 5.5.3 source layout: filter button first, then the field with the plus-circle save-search button. The plus and X show only while text is typed.</small>
+<ue-asset-search-bar>
+<div class="AssetSearchBar"><ue-combo-button mode="action" data-action="filter"><div class="combobutton-anchor"><span class="combobutton combobutton--icon" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="Filters"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M2 4h12M4 8h8M6.5 12h3"/></svg><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span><div class="combobutton-menu" hidden><ue-popup-menu><div class="popupmenu" role="menu" tabindex="0" aria-label="Filters"><div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false" data-value="Static Mesh"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Static Mesh</span></span></div><div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false" data-value="Material"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Material</span></span></div><div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false" data-value="Texture"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Texture</span></span></div><div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false" data-value="Blueprint"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Blueprint</span></span></div><div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false" data-value="Level"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Level</span></span></div></div></ue-popup-menu></div></div></ue-combo-button><div class="AssetSearchBar__field"><ue-text-input><div class="textinput textinput--search textinput--filled"><svg class="textinput__glyph textinput__glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><svg class="textinput__glyph textinput__clear" viewBox="0 0 16 16" role="button" aria-label="Clear search"><path d="M4 4l8 8M12 4l-8 8"/></svg><input class="textinput__text textinput__field" type="text" placeholder="Search StarterContent" aria-label="Search" value="chair"><span class="textinput__trail"><span class="AssetSearchBar__plus"><ue-button data-action="save"><button type="button" class="button button--simple button--icon" aria-label="Save search"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.75v6.5M4.75 8h6.5"/></svg></button></ue-button></span></span><span class="textinput__tail"></span></div></ue-text-input></div></div><ue-filter-pills><div class="FilterPills-strip FilterPills-strip--chips" role="list"></div></ue-filter-pills>
+</ue-asset-search-bar>
+<small>Source layout with a static field, pinned</small>
+<div class="AssetSearchBar" data-pinned><span class="combobutton combobutton--icon" aria-label="Filters"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M2 4h12M4 8h8M6.5 12h3"/></svg><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span><div class="AssetSearchBar__field"><div class="textinput textinput--search textinput--focus textinput--filled"><svg class="textinput__glyph textinput__glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><svg class="textinput__glyph textinput__clear" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg><span class="textinput__text" style="color:var(--white)">chair</span><span class="textinput__trail"><span class="AssetSearchBar__plus"><button type="button" class="button button--simple button--icon" aria-label="Save search"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.75v6.5M4.75 8h6.5"/></svg></button></span></span><span class="textinput__tail"></span></div></div></div>
 </div>
 </body>
 </html>

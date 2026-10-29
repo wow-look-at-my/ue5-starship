@@ -2,38 +2,61 @@
 
 The top row of the Content Browser. Add / Import / Save All actions, history arrows, a breadcrumb path trail and a right-aligned Settings button, all on a Panel-coloured strip 32px high.
 
+## Composed from
+
+| Part | Built from |
+|---|---|
+| Add | `ue-combo-button` (`combobutton--button`, action mode) with a `ue-popup-menu` |
+| Import, Save All | `ue-button` (`button--simple button--tight`) |
+| Back, Forward | `ue-button` (`button--simple button--icon`) |
+| Crumbs | `ue-button` (`button--simple button--tight`), one per path element |
+| Crumb chevrons | `ue-combo-button` (`combobutton--icon`, action mode) with a `ue-popup-menu` of the sub-folders |
+| Settings | `ue-combo-button` (`combobutton--simple`, action mode, `combobutton-menu--end`) with check rows |
+
+The composite owns only the layout of the row (`src/ContentToolbar/ContentToolbar.css`), the path, the history and the crumb trail. The breadcrumb has no primitive of its own. The leading folder glyph is in the reference image only.
+
 ## What the consumer provides
 
-- The three action labels and their handlers (Add opens a menu. Import and Save All are plain buttons).
-- The breadcrumb crumbs (text per path element) and whether back / forward history is available (forward and back render at reduced opacity when disabled).
-- The Settings menu content.
+- The initial crumbs: one `ue-button[data-crumb]` per path element in the markup. The element redraws the trail from its path.
+- The menu rows, as `ue-popup-menu` markup (see the PopupMenu README).
+- `childrenOf(path)`: the names of the folders inside the folder at `path`. The chevron after a crumb lists them. The default knows the folders of the demo.
 
 The row is: `[tool buttons] [back] [forward] [breadcrumb, fills the remaining width] [Settings]`. Lock and "Dock in Layout" buttons exist in source (`SContentBrowser.cpp:822-844`) but are hidden in the standard browser and are not drawn here.
 
-## Metrics (px = Slate units at 100% DPI; 10pt text = 13.333px)
+## API
+
+```ts
+el.path: readonly string[];                  // the current crumbs
+el.childrenOf: (path: string[]) => string[]; // sub-folders of a path
+el.setHistory(entries: string[][], index: number): void; // replace the history, no event
+el.navigate(path: string[]): void;           // go to a path and record it, no event
+```
+
+| Event | `detail` | When |
+|---|---|---|
+| `contenttoolbar:navigate` | `{ path }` | The user clicked a crumb, picked a sub-folder or walked Back or Forward |
+
+`ue-button-click` and `ue-combo-pick` of the parts bubble as they are. `data-action` on the `ue-button` or `ue-combo-button` host names the part: `add`, `import`, `save-all`, `back`, `forward`, `settings`.
+
+## Metrics owned by the row
 
 | Part | Value | Source |
 |---|---|---|
 | Row background / padding | `--panel` / 3px all sides | `SContentBrowser.cpp:764-766` |
 | Tool strip left offset | 5px slot padding + 4px toolbar background padding left, 2px top/bottom | `SContentBrowser.cpp:772`, `StarshipStyle.cpp:6624` |
 | Separator between tool buttons | 2px wide, no brush, 4px margin each side | `StarshipStyle.cpp:6622-6623`, `ToolBarStyle.cpp:25` |
-| Add button | combo button, `--secondary` fill, 1px `--input` outline, radius 4, hover `--hover` | `StarshipCoreStyle.cpp:1372-1376`, `SContentBrowser.cpp:1799-1806` |
-| Add content padding | 2px + 12px = 14px horizontal, 1.5px + 1.5px = 3px vertical; icon 16, gap 3, height 22 | `ToolWidgetsStylePrivate.h:22-28`, `ToolWidgetsStyle.cpp:57-62`, `CoreStyle.h:110`, `SButton.cpp:159-163` |
-| Add icon colour | `--accent-green` plus icon | `ToolWidgetsStyle.cpp:76` |
-| Import / Save All | `SimpleButton`: ContentPadding(2) + (2,1) = padding 3px 4px, icon 16, gap 3, hover `--dropdown` radius 4 | `StarshipCoreStyle.cpp:1389-1407`, `SContentBrowser.cpp:1839,1857`, `ContentBrowserAssetDataSource.cpp:3607` |
-| Text | Normal 10pt Regular, `--foreground` | `StarshipCoreStyle.cpp:36,1170-1172` |
-| Back / forward | `SimpleButton`, ContentPadding(1,0) + (2,1) = padding 1px 3px, icon 16 (22 x 18 hit box); back margin-left 10, forward margin-left 2 | `SContentBrowser.cpp:778-797` |
+| Back / forward | back margin-left 10, forward margin-left 2 | `SContentBrowser.cpp:778-797` |
 | Breadcrumb slot | fills; margin-left 2 | `SContentBrowser.cpp:816-820` |
-| Crumb button | `SimpleButton` + ContentPadding(2,2) = padding 3px 4px, hover `--dropdown` | `SNavigationBar.h:43-45` |
-| Crumb delimiter | `Icons.ChevronRight` 16px, button ContentPadding(3,0) + (2,1) = padding 1px 5px | `SNavigationBar.h:46`, `SBreadcrumbTrail.h:198-203` |
-| Settings button | `SimpleComboButton`, no down arrow; button padding (4,1); icon slot and text slot Padding(4,0); slot margin-left 5 | `SContentBrowser.cpp:494-518,848`, `StarshipCoreStyle.cpp:1398-1400,1514-1521` |
+| Settings slot | margin-left 5 | `SContentBrowser.cpp:848` |
 | Row height | 22 (button) + 2 + 2 (toolbar padding) + 3 + 3 (row padding) = 32 | derived from the rows above |
+
+The look of each button, the menus and the check rows follows the Button, ComboButton and PopupMenu READMEs.
 
 ## Do
 
 - Keep every button on a 22px line box so the row stays 32px high.
-- Draw disabled history arrows at reduced opacity (the preview uses 0.45, an approximation of Slate's DisabledEffect, `SlateElementPixelShader.usf:514`).
 - Let the breadcrumb take all free width so Settings stays right-aligned.
+- Use `mode="action"` on every menu here. A pick fires `ue-combo-pick` and never changes the label.
 
 ## Don't
 
@@ -42,4 +65,4 @@ The row is: `[tool buttons] [back] [forward] [breadcrumb, fills the remaining wi
 
 ## Icons
 
-The Starship SVG files are not available. Icons in `preview.html` (plus, import, save-all, circle arrows, chevron, gear, folder) are simple stroke/fill approximations drawn to the 16px grid. Replace them with the real `Starship/Common/*.svg` assets. The leading folder glyph before the breadcrumb is present in the reference screenshot and was not found in the 5.5.3 `SNavigationBar` source.
+The Starship SVG files are not available. Icons in `preview.html` (plus, import, save-all, circle arrows, chevron, gear, folder) are simple stroke/fill approximations drawn to the 16px grid. Replace them with the real `Starship/Common/*.svg` assets.

@@ -74,6 +74,7 @@ The element can be a `button` or any element with `role="button"` and `tabindex=
 | `button--simple` | Transparent, `--dropdown` on hover |
 | `button--icon` | Icon-only: padding 4 x 3, radius 4. Combine with `button--simple` or `button--toggle`. The icon is `button__icon button__icon--solo` |
 | `button--toggle` | A toggle with `aria-pressed="true\|false"`. Off looks like simple. On fills `--primary` (hover `--primary-hover`, pressed `--dropdown`). A click flips `aria-pressed` |
+| `button--tight` | Combine with `button--simple`. Side padding 4 instead of 8, at rest and pressed. For a consumer that sets `ContentPadding(2)` in place of the `SButton` default (4,2), as the Content Browser toolbar does (`SContentBrowser.cpp:1839,1857`) |
 | `button--small` | Fixed 22px height, padding 14 on both sides. For the Add button |
 | `button--toolbar` | The slim toolbar button: padding 8 x 4 (pressed 8, 5, 8, 3), 20px icon. Combine with `button--simple` or `button--toggle`. A toggle has no pressed shift (`StarshipCoreStyle.cpp:2193-2194`, `:2217-2218`, `:2240`) |
 | `button--plate` | A button on a backplate, as in the Play group. No fill, no padding, the foreground is inherited and a disabled one is not dimmed. The plate owns the fill, the foreground and the alpha. The icon is 20px (`StarshipStyle.cpp:5520-5578`) |

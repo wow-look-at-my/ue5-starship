@@ -49,6 +49,13 @@ One `<ue-expandable-area>` wraps exactly one `.expandablearea`. The CSS lives in
 
 The header may hold other controls, such as a `ue-button` or a `ue-checkbox` on the right. A click on a control inside the header. That click is on any `ue-*` element or on anything with its own `tabindex`, `role` or native control behavior does not fold the area. Enter and Space fold the area only while the header itself has the focus. A `ue-expandable-area` inside the body is independent.
 
+## Variants
+
+| Class on `.expandablearea` | Look |
+|---|---|
+| none | `--panel` surface, radius 4, small bold title, header padding 4 x 2 |
+| `expandablearea--source` | The Content Browser sources column: `--header` block with 2px top padding and radius 0, 24px header row with padding 4 x 0, a 13.33px bold title in `--foreground`, a `--recessed` body with no padding (`SContentBrowser.cpp:908-909,1473-1487,1554`) |
+
 ## Events
 
 | Event | Detail | When |

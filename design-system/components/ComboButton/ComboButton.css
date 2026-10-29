@@ -311,6 +311,7 @@
 }
 .combobutton--button .combobutton__icon {
   margin-right: 0;
+  color: var(--accent-green);
 }
 .combobutton--simple.combobutton--wide {
   padding: 1px 10px;

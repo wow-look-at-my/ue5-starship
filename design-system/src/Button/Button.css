@@ -44,6 +44,9 @@
 .button--toggle[aria-disabled="true"]:active { background: transparent; color: var(--foreground); }
 .button--toggle[aria-pressed="true"][aria-disabled="true"]:active { background: var(--primary); color: var(--foreground-hover); }
 
+/* Tight: a toolbar button whose consumer sets ContentPadding(2) in place of the SButton default (4,2), as the Content Browser does (SContentBrowser.cpp:1839,1857). */
+.button--tight, .button--tight:active, .button--tight.button--pressed { padding-left: 4px; padding-right: 4px; }
+
 .button--small { box-sizing: border-box; height: 22px; padding: 0 14px; } /* Add button: ComboButton content padding (2,1.5) + Button padding (12,1.5) ToolWidgetsStyle.cpp:16-21, fixed 22px */
 .button--small:active, .button--small.button--pressed { padding: 1px 14px 0; }
 

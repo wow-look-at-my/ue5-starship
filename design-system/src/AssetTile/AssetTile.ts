@@ -29,7 +29,7 @@ export interface TileOpenDetail {
 	id: string;
 }
 
-class AssetTileElement extends UeElement {
+export class AssetTileElement extends UeElement {
 	#anchor: HTMLElement | null = null;
 	#grid: HTMLElement | null = null;
 	#lastIds = '';

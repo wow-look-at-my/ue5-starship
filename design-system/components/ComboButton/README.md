@@ -114,7 +114,7 @@ A check row never changes the label.
 | `combobutton--simple` | Transparent, `--dropdown` on hover, padding 4 x 1 |
 | `combobutton--icon` | Transparent icon plus chevron, no label, padding 4 x 3 |
 | `combobutton--small` | Property row size: `400 10.667px/1.172` font, fixed 22px height, no minimum width |
-| `combobutton--button` | The Button look: `--secondary` fill, fixed 22px height, padding 14, 3px gap |
+| `combobutton--button` | The Button look: `--secondary` fill, fixed 22px height, padding 14, 3px gap. The plus icon is `--accent-green` (`ToolWidgetsStyle.cpp:76`) |
 | `combobutton--wide` (with `--simple`) | Content padding 6 on top of the simple padding: 10 x 1 (`SDerivedDataStatusBar.cpp:166`) |
 | `combobutton--menubar` | A menu bar item: no fill, padding 12 x 4, Hover fill on hover, Primary while open, no chevron. The panel is at least 220px wide (`StarshipCoreStyle.cpp:2433-2448`) |
 | `combobutton--toolbar` | The slim toolbar combo: padding 8 x 4 (pressed 8, 5, 8, 3), 20px icon, Dropdown fill on hover. Add `combobutton--overflow` for the 16px glyph with padding 12 x 4 (`StarshipCoreStyle.cpp:2193-2206`) |

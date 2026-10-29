@@ -298,6 +298,47 @@ test('TreeRow: setRows draws rows from data, with indent, icons, expand state, s
 	});
 });
 
+test('TreeRow: appendRow adds a row after the last one and keeps the selection', async () => {
+	await inPreview('TreeRow', async (page) => {
+		await page.evaluate(() => {
+			const tree = document.createElement('ue-tree-row') as TreeApi & { appendRow(row: object): void };
+			tree.id = 'tr-append';
+			document.body.append(tree);
+			tree.setRows([{ id: 'one', label: 'One', depth: 0, icon: 'folder', selected: true }]);
+			tree.appendRow({ id: 'two', label: 'Two', depth: 0, icon: 'folder' });
+		});
+		const labels = (): Promise<string[]> => visibleLabels(page, '#tr-append', '.tr-row', '.tr-text');
+		assert.deepEqual(await labels(), ['One', 'Two']);
+		assert.deepEqual(await page.evaluate(() => (document.querySelector('#tr-append') as TreeApi).getSelectedIds()), ['one'], 'appending leaves the selection alone');
+		await rowIn(page, '#tr-append', '.tr-row', '.tr-text', 'Two').click();
+		assert.deepEqual(await page.evaluate(() => (document.querySelector('#tr-append') as TreeApi).getSelectedIds()), ['two'], 'the new row selects like any other');
+	});
+});
+
+test('TreeRow: collapse-selects moves the selection to a folder that hides it, and a plain tree keeps it', async () => {
+	await inPreview('TreeRow', async (page) => {
+		await page.evaluate(() => {
+			for (const [id, attribute] of [['tr-keep', false], ['tr-fold', true]] as const) {
+				const tree = document.createElement('ue-tree-row') as TreeApi;
+				tree.id = id;
+				if (attribute) tree.setAttribute('collapse-selects', '');
+				document.body.append(tree);
+				tree.setRows([
+					{ id: 'dir', label: 'Dir', depth: 0, icon: 'folder', expanded: true },
+					{ id: 'leaf', label: 'Leaf', depth: 1, icon: 'object', selected: true },
+				]);
+			}
+		});
+		await watch(page, 'ue-tree-select');
+		const selected = (id: string): Promise<string[]> => page.evaluate((tree) => (document.querySelector('#' + tree) as TreeApi).getSelectedIds(), id);
+		await rowIn(page, '#tr-keep', '.tr-row', '.tr-text', 'Dir').locator('.tr-arrow').click();
+		assert.deepEqual(await selected('tr-keep'), ['leaf'], 'a plain tree keeps the hidden selection');
+		await rowIn(page, '#tr-fold', '.tr-row', '.tr-text', 'Dir').locator('.tr-arrow').click();
+		assert.deepEqual(await selected('tr-fold'), ['dir'], 'the folder takes the selection');
+		assert.deepEqual(await seen(page, 'ue-tree-select'), [{ ids: ['dir'] }]);
+	});
+});
+
 test('TreeRow: setFilter keeps the matches and their ancestors, opens them, and restores on clear', async () => {
 	await inPreview('TreeRow', async (page) => {
 		const filter = (text: string | null): Promise<void> => page.evaluate((value) => (document.querySelector('#tr-main') as TreeApi).setFilter(value), text);

@@ -1,0 +1,15 @@
+.ContentBrowser { background: var(--background); font: 400 13.333px/16px var(--font-sans); color: var(--foreground); }
+
+/* SSeparator Thickness(2), Separator brush = Recessed: SContentBrowser.cpp:861; StarshipCoreStyle.cpp:707 */
+.ContentBrowser__rule { height: 2px; background: var(--recessed); }
+
+/* Body: the splitter handle shows the Background brush: StarshipCoreStyle.cpp:633-635. The sources slot starts at 340px. */
+.ContentBrowser .ContentBrowser__body { background: var(--background); }
+.ContentBrowser .ContentBrowser__sources { flex: 0 0 340px; }
+
+/* Asset area: Brushes.Panel, Padding(2,2,2,0): SContentBrowser.cpp:1445-1447 */
+.ContentBrowser__assets { display: flex; flex-direction: column; background: var(--panel); padding: 2px 2px 0; }
+.ContentBrowser__tiles { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--hover) transparent; }
+
+/* Bottom bar: text Padding(8,5): SAssetView.cpp:1383-1387 */
+.ContentBrowser__status { padding: 5px 8px; }

@@ -276,3 +276,6 @@ var AssetTileElement = class extends UeElement {
   }
 };
 define("ue-asset-tile", AssetTileElement);
+export {
+  AssetTileElement
+};
