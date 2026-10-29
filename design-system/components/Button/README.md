@@ -74,6 +74,7 @@ The element can be a `button` or any element with `role="button"` and `tabindex=
 | `button--simple` | Transparent, `--dropdown` on hover |
 | `button--icon` | Icon-only: padding 4 x 3, radius 4. Combine with `button--simple` or `button--toggle`. The icon is `button__icon button__icon--solo` |
 | `button--toggle` | A toggle with `aria-pressed="true\|false"`. Off looks like simple. On fills `--primary` (hover `--primary-hover`, pressed `--dropdown`). A click flips `aria-pressed` |
+| `button--caption` | Window caption button: 42 x 23, no outline, transparent, glyph `svg` 42 x 23 in `currentColor`. Hover fills white at 15.7% alpha, pressed has no fill. Add `button--caption-close` for the close button: hover fills red at 58.8% alpha (`StarshipCoreStyle.cpp:749-766`, `:789-792`) |
 | `button--small` | Fixed 22px height, padding 14 on both sides. For the Add button |
 | disabled | the `disabled` attribute on a `button`, or `aria-disabled="true"` on any element |
 

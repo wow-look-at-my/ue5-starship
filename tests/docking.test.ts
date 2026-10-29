@@ -408,7 +408,7 @@ test('WindowChrome: the buttons show their hover fills and the pressed state dro
 		await minimize.hover();
 		assert.equal(await bg(minimize), await resolve(page, 'background-color', 'rgba(255, 255, 255, 0.157)'));
 		assert.equal(await fg(minimize), await resolve(page, 'color', 'var(--foreground-hover)'));
-		assert.equal(await bg(page.locator('.windowChrome-btn--hover[data-pinned]').first()), await bg(minimize), 'live hover equals the pinned hover specimen');
+		assert.equal(await bg(page.locator('.button--hover[data-pinned]').first()), await bg(minimize), 'live hover equals the pinned hover specimen');
 
 		await close.hover();
 		assert.equal(await bg(close), await resolve(page, 'background-color', 'rgba(255, 79, 79, 0.588)'));
@@ -490,7 +490,7 @@ test('WindowChrome: the window state follows focus', async () => {
 test('WindowChrome: pinned button specimens ignore the pointer', async () => {
 	await withBrowser(async (browser) => {
 		const { page, errors } = await openPreview(browser, 'WindowChrome');
-		const pinned = page.locator('.windowChrome-states .windowChrome-btn--close').first();
+		const pinned = page.locator('.windowChrome-states .button--caption-close').first();
 		await hoverAt(page, pinned);
 		assert.equal(await bg(pinned), TRANSPARENT);
 		assert.equal(await page.locator('ue-window-chrome').count(), 1);

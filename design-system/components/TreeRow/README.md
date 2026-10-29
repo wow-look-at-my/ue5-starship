@@ -75,6 +75,9 @@ el.setFilter(filter: string | ((row: { id: string; label: string; depth: number 
 
 `setFilter` keeps the rows that match and their ancestors, hides the rest, and shows each ancestor open while the filter is set. The stored `aria-expanded` of an ancestor does not change, so `setFilter(null)` restores the earlier tree. A string filter is a case-insensitive substring of the label.
 
+- `el.sortChildren(compare)` sorts the children of every parent with `compare(a, b)` on `TreeRowInfo` (`id`, `label`, `depth`, `element`). A row keeps its subtree, the selection and the open state stay, and the stripes follow.
+- A click or double-click inside an element marked `data-tr-inert` (a control in a `.tr-cell`) selects nothing and opens nothing.
+
 `expandable: true` keeps the arrow on a row with no children yet. Opening it fires `ue-tree-toggle`. The consumer answers with a new `setRows`.
 
 ## What the consumer provides
