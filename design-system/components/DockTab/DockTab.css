@@ -2,3 +2,157 @@
 [data-pinned] {
   pointer-events: none;
 }
+
+/* design-system/src/TabWell/TabWell.css */
+:is(.dockTab-well, .tabWell-well) {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  background: var(--background);
+  padding: 0;
+  min-height: 25px;
+}
+:is(.dockTab-well--major, .tabWell-well--major) {
+  background: var(--title);
+  min-height: 30.8px;
+}
+:is(.dockTab-stack, .tabWell-stack) {
+  display: flex;
+  flex-direction: column;
+}
+:is(.dockTab-body, .tabWell-content) {
+  background: var(--panel);
+  padding: 0;
+}
+:is(.dockTab-well--major + .dockTab-body, .tabWell-content--major) {
+  background: var(--background);
+}
+[data-panel][hidden] {
+  display: none;
+}
+
+/* design-system/src/DockTab/DockTab.css */
+:is(.dockTab, .tabWell-tab) {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  flex: 0 1 auto;
+  min-width: 0;
+  height: 25px;
+  max-width: 160px;
+  padding: 2.55px 10px 3.4px 4px;
+  border-radius: 4px 4px 0 0;
+  color: var(--foreground);
+  font: 400 13.333px/1.2 var(--font-sans);
+  white-space: nowrap;
+}
+:is(.dockTab-icon, .tabWell-icon) {
+  display: flex;
+  flex: none;
+  padding: 1px;
+  margin-right: 5px;
+}
+:is(.dockTab-icon, .tabWell-icon, .dockTab-close, .tabWell-close) svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+:is(.dockTab-label, .tabWell-label) {
+  padding: 2px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+:is(.dockTab-close, .tabWell-close) {
+  display: flex;
+  flex: none;
+  padding: 1.5px 0 0;
+  color: var(--foreground);
+  visibility: hidden;
+}
+.dockTab-close--hot {
+  color: var(--foreground-hover);
+}
+.dockTab--hovered {
+  background: color-mix(in srgb, var(--panel) 80%, transparent);
+  color: var(--foreground-hover);
+}
+.dockTab--hovered .dockTab-close,
+:is(.dockTab--foreground, .tabWell-tab--foreground) :is(.dockTab-close, .tabWell-close) {
+  visibility: visible;
+}
+:is(.dockTab--foreground, .tabWell-tab--foreground) {
+  background: var(--panel);
+  color: var(--foreground);
+}
+:is(.dockTab--active, .tabWell-tab--active) {
+  color: var(--foreground-hover);
+}
+:is(.dockTab--active, .tabWell-tab--active)::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      var(--primary),
+      transparent);
+}
+.dockTab--flash::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #18a0fb;
+  opacity: .5;
+}
+:is(.dockTab--major, .tabWell-tab--major) {
+  height: auto;
+  max-width: 210px;
+  padding: 3.4px 10px 3.4px 4px;
+}
+:is(.dockTab--major.dockTab--hovered, .dockTab--major.dockTab--foreground, .dockTab--major.dockTab--active, .tabWell-tab--major.tabWell-tab--foreground, .tabWell-tab--major.tabWell-tab--active) {
+  color: var(--white);
+}
+:is(.dockTab--major, .tabWell-tab--major) :is(.dockTab-icon, .tabWell-icon) {
+  padding: 4px;
+  border-radius: 4px;
+}
+.dockTab-icon--tinted {
+  background: var(--accent-orange);
+}
+:is(.dockTab--major.dockTab--active, .tabWell-tab--major.tabWell-tab--active)::before {
+  content: none;
+}
+:is(.dockTab, .tabWell-tab):not(.dockTab--foreground, .tabWell-tab--foreground):hover {
+  background: color-mix(in srgb, var(--panel) 80%, transparent);
+}
+:is(.dockTab, .tabWell-tab):hover {
+  color: var(--foreground-hover);
+}
+:is(.dockTab--major, .tabWell-tab--major):hover {
+  color: var(--white);
+}
+:is(.dockTab, .tabWell-tab):hover :is(.dockTab-close, .tabWell-close),
+:is(.dockTab, .tabWell-tab):focus-visible :is(.dockTab-close, .tabWell-close) {
+  visibility: visible;
+}
+:is(.dockTab-close, .tabWell-close):hover {
+  color: var(--foreground-hover);
+}
+:is(.dockTab-close, .tabWell-close):active {
+  color: var(--foreground);
+}
+:is(.dockTab, .tabWell-tab):focus-visible {
+  outline: 1px solid var(--primary);
+  outline-offset: -2px;
+}

@@ -2,3 +2,73 @@
 [data-pinned] {
   pointer-events: none;
 }
+
+/* design-system/src/Scrollbar/Scrollbar.css */
+.sb {
+  position: relative;
+  flex: none;
+}
+.sb-v {
+  width: 16px;
+  height: 150px;
+}
+.sb-h {
+  width: 170px;
+  height: 16px;
+}
+.sb-box-v {
+  width: 12px;
+  height: 150px;
+}
+.sb-thumb {
+  position: absolute;
+  border-radius: 4px;
+  background: var(--hover);
+}
+.sb-v .sb-thumb {
+  left: 4px;
+  width: 8px;
+}
+.sb-box-v .sb-thumb {
+  left: 2px;
+  width: 8px;
+}
+.sb-h .sb-thumb {
+  top: 4px;
+  height: 8px;
+}
+.sb.is-hover .sb-thumb,
+.sb.is-drag .sb-thumb,
+.sb:hover .sb-thumb {
+  background: var(--hover-2);
+}
+.sb-scroll {
+  display: flex;
+}
+.sb-scroll.is-h {
+  flex-direction: column;
+}
+.sb[hidden] {
+  display: none;
+}
+.sb-scroll .sb-v,
+.sb-scroll .sb-box-v {
+  height: auto;
+  align-self: stretch;
+}
+.sb-scroll .sb-h {
+  width: auto;
+  align-self: stretch;
+}
+.sb-view {
+  overflow: auto;
+  scrollbar-width: none;
+  overscroll-behavior: contain;
+}
+.sb-view::-webkit-scrollbar {
+  display: none;
+}
+.sb-view:focus-visible {
+  outline: 1px solid var(--primary);
+  outline-offset: -1px;
+}

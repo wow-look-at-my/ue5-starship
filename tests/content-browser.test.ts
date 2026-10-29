@@ -4,6 +4,7 @@ import { strict as assert } from 'node:assert';
 import type { Page, Locator } from 'playwright';
 import { scenario } from './scenario.ts';
 import { token, prop, fill, texts, hasClass } from './probe.ts';
+import { assertInert, clickAt } from './pinned.ts';
 
 const exactly = (text: string): RegExp => new RegExp('^' + text + '$');
 const hasFocus = (target: Locator): Promise<boolean> => target.evaluate((el) => el === document.activeElement);
@@ -247,6 +248,7 @@ scenario('SourcePanel: the pinned panel is plain HTML and does not react', 'Sour
 const tile = (page: Page, name: string): Locator => page.locator('ue-asset-tile .AssetTile', { has: page.locator('.AssetTile__name', { hasText: exactly(name) }) });
 const tileSelection = (page: Page): Promise<string[]> => texts(page, 'ue-asset-tile .AssetTile.is-selected .AssetTile__name');
 const cardOf = (target: Locator): Locator => target.locator('.AssetTile__card');
+const liveStatus = (page: Page, index: number): Locator => page.locator('ue-asset-tile').first().locator('ue-event-status').nth(index);
 
 scenario('AssetTile: hover looks of folder and asset tiles', 'AssetTile', async (page) => {
 	const folder = tile(page, 'Audio');
@@ -273,7 +275,7 @@ scenario('AssetTile: click selects one tile, Ctrl/Cmd toggles and Shift selects 
 
 	await tile(page, 'Materials').click({ modifiers: ['Control'] });
 	assert.deepEqual(await tileSelection(page), ['Audio', 'Materials']);
-	assert.equal(await page.locator('ue-asset-tile .AssetTilePreview__status').textContent(), '2 selected: Audio, Materials');
+	assert.equal(await liveStatus(page, 0).textContent(), 'Selected: Audio,Materials. ');
 	await tile(page, 'Audio').click({ modifiers: ['Control'] });
 	assert.deepEqual(await tileSelection(page), ['Materials'], 'Ctrl+click on a selected tile removes it');
 
@@ -295,13 +297,77 @@ scenario('AssetTile: selected and selected + hovered colours', 'AssetTile', asyn
 });
 
 scenario('AssetTile: double-click and Enter open a tile', 'AssetTile', async (page) => {
-	await recordEvents(page, 'assettile:open');
+	await recordEvents(page, 'ue-tile-open');
 	await tile(page, 'Audio').dblclick();
-	assert.deepEqual(await recorded(page, 'assettile:open'), [{ name: 'Audio', folder: true }]);
-	assert.match((await page.locator('ue-asset-tile .AssetTilePreview__status').textContent()) ?? '', /Opened: Audio/);
+	assert.deepEqual(await recorded(page, 'ue-tile-open'), [{ id: 'Audio' }]);
+	assert.equal(await liveStatus(page, 1).textContent(), 'Opened: Audio');
 	await tile(page, 'SM_Chair').focus();
 	await tap(page, 'Enter');
-	assert.deepEqual((await recorded(page, 'assettile:open')).pop(), { name: 'SM_Chair', folder: false });
+	assert.deepEqual((await recorded(page, 'ue-tile-open')).pop(), { id: 'SM_Chair' });
+});
+
+scenario('AssetTile: ue-tile-select reports the ids and fires only when the selection changes', 'AssetTile', async (page) => {
+	await recordEvents(page, 'ue-tile-select');
+	await tile(page, 'Audio').click();
+	await tile(page, 'Audio').click();
+	await tile(page, 'SM_Table').click({ modifiers: ['Control'] });
+	await tap(page, 'Control+a');
+	assert.deepEqual(await recorded(page, 'ue-tile-select'), [
+		{ ids: ['Audio'] },
+		{ ids: ['Audio', 'SM_Table'] },
+		{ ids: ['Architecture', 'Audio', 'Blueprints', 'Materials', 'SM_Chair', 'SM_Table', 'M_Wood_Floor_Walnut_Polished', 'T_Brick_Clay_D'] },
+	], 'a click on the selected tile changes nothing, so it fires nothing');
+});
+
+scenario('AssetTile: a single-select grid picks one tile whatever the modifiers', 'AssetTile', async (page) => {
+	const single = page.locator('ue-asset-tile[select="single"]');
+	const item = (name: string): Locator => single.locator('.AssetTile', { has: page.locator('.AssetTile__name', { hasText: exactly(name) }) });
+	await recordEvents(page, 'ue-tile-select');
+	await item('Textures').click();
+	await item('M_Metal').click({ modifiers: ['Control'] });
+	await item('SM_Lamp').click({ modifiers: ['Shift'] });
+	assert.deepEqual(await texts(page, 'ue-asset-tile[select="single"] .AssetTile.is-selected .AssetTile__name'), ['SM_Lamp']);
+	assert.deepEqual(await recorded(page, 'ue-tile-select'), [{ ids: ['textures'] }, { ids: ['m_metal'] }, { ids: ['sm_lamp'] }], 'data-id is the id');
+	await tap(page, 'ArrowRight');
+	await tap(page, 'Control+a');
+	assert.deepEqual(await texts(page, 'ue-asset-tile[select="single"] .AssetTile.is-selected .AssetTile__name'), ['M_Metal'], 'Ctrl+A selects nothing extra');
+	assert.equal(await single.locator('.AssetTile-grid').getAttribute('aria-multiselectable'), 'false');
+	assert.deepEqual(await tileSelection(page), ['M_Metal'], 'the other grid kept nothing selected');
+});
+
+scenario('AssetTile: setTiles draws folder and asset tiles from data, and select() and the ids follow', 'AssetTile', async (page) => {
+	await page.evaluate(() => {
+		const grid = document.createElement('ue-asset-tile') as HTMLElement & { setTiles(tiles: object[]): void };
+		grid.id = 'at-data';
+		document.body.append(grid);
+		grid.setTiles([
+			{ id: 'f1', label: 'Maps', kind: 'folder' },
+			{ id: 'a1', label: 'SM_Rock_With_A_Rather_Long_Name', kind: 'asset', typeLabel: 'Static Mesh', strip: '#ff0000' },
+			{ id: 'a2', label: 'T_Noise', kind: 'asset', typeLabel: 'Texture', thumb: 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==', selected: true },
+		]);
+	});
+	const data = page.locator('#at-data');
+	assert.equal(await data.locator('.AssetTile-grid').getAttribute('role'), 'listbox');
+	assert.equal(await data.locator('.AssetTile').count(), 3);
+	assert.equal(await data.locator('.AssetTile--folder .AssetTile__folderIcon').count(), 1);
+	assert.equal(await data.locator('.AssetTile--asset').nth(0).locator('.AssetTile__class').textContent(), 'Static Mesh');
+	assert.equal(await data.locator('.AssetTile--asset').nth(0).locator('.AssetTile__strip').evaluate((el) => getComputedStyle(el).backgroundColor), 'rgb(255, 0, 0)');
+	assert.equal(await data.locator('.AssetTile__image').count(), 1, 'a thumb URL draws an image');
+	assert.equal(await data.locator('.AssetTile--asset').nth(0).locator('svg').count(), 1, 'an asset without a thumb draws the cube');
+	assert.equal(await data.locator('.AssetTile.is-selected').getAttribute('data-id'), 'a2');
+	assert.equal(await data.locator('.AssetTile').nth(0).getAttribute('role'), 'option');
+	assert.equal(await data.locator('.AssetTile[tabindex="0"]').getAttribute('data-id'), 'a2', 'the selected tile takes the Tab stop');
+	await recordEvents(page, 'ue-tile-select');
+	await data.locator('.AssetTile--folder').click();
+	await data.locator('.AssetTile[data-id="a1"]').click({ modifiers: ['Control'] });
+	assert.deepEqual(await recorded(page, 'ue-tile-select'), [{ ids: ['f1'] }, { ids: ['f1', 'a1'] }]);
+	assert.deepEqual(await page.evaluate(() => (document.querySelector('#at-data') as HTMLElement & { getSelectedIds(): string[] }).getSelectedIds()), ['f1', 'a1']);
+	await page.evaluate(() => (document.querySelector('#at-data') as HTMLElement & { select(ids: string[]): void }).select(['a2']));
+	assert.deepEqual(await recorded(page, 'ue-tile-select').then((all) => all.at(-1)), { ids: ['a2'] });
+	await data.locator('.AssetTile[data-id="a2"]').focus();
+	await recordEvents(page, 'ue-tile-open');
+	await tap(page, 'Enter');
+	assert.deepEqual(await recorded(page, 'ue-tile-open'), [{ id: 'a2' }]);
 });
 
 scenario('AssetTile: arrow keys, Home and End move the selection through the wrapped grid', 'AssetTile', async (page) => {
@@ -325,7 +391,8 @@ scenario('AssetTile: arrow keys, Home and End move the selection through the wra
 
 scenario('AssetTile: pinned tiles ignore clicks and hover', 'AssetTile', async (page) => {
 	const pinned = page.locator('.AssetTile:not(ue-asset-tile .AssetTile)').first();
-	await pinned.click();
+	await assertInert(pinned);
+	await clickAt(page, pinned);
 	assert.equal(await attr(pinned, 'class'), 'AssetTile AssetTile--folder');
 	assert.equal(await fill(cardOf(pinned)), 'rgba(0, 0, 0, 0)', 'a hovered pinned folder tile keeps its look');
 });

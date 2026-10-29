@@ -2,6 +2,57 @@
 
 A tab stack: a tab well of dock tabs on the `--background` ground, over a content area on the `--panel` ground, as built by `SDockingTabStack`.
 
+One `<ue-tab-well>` wraps exactly one stack: one well of tabs over one content area. A composite puts one `ue-tab-well` per docked panel. `<ue-dock-tab>` is the same behaviour on the `dockTab-*` class names (see `DockTab`). Both draw the same pixels.
+
+## Markup contract
+
+```html
+<ue-tab-well>
+	<div class="tabWell-stack">
+		<div class="tabWell-well" role="tablist" aria-label="Minor tabs">      <!-- add tabWell-well--major for a major stack -->
+			<div class="tabWell-tab tabWell-tab--foreground tabWell-tab--active" role="tab" tabindex="0" aria-selected="true" data-tab="details">
+				<span class="tabWell-icon"><svg viewBox="0 0 16 16"><path d="..."/></svg></span>
+				<span class="tabWell-label">Details</span>
+				<span class="tabWell-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.5 4.5l7 7 M11.5 4.5l-7 7"/></svg></span>
+			</div>
+			<div class="tabWell-tab" role="tab" tabindex="-1" aria-selected="false" data-tab="outliner">...</div>
+		</div>
+		<div class="tabWell-content">                                              <!-- tabWell-content--major for a major stack -->
+			<div role="tabpanel" data-panel="details">...</div>
+			<div role="tabpanel" data-panel="outliner" hidden>...</div>
+		</div>
+	</div>
+	<button class="tabWell-reset" type="button">Restore tabs</button>              <!-- optional -->
+</ue-tab-well>
+```
+
+- A tab pairs with the panel whose `data-panel` equals its `data-tab`. `data-tab` is also the id in events.
+- The element sets `tabWell-tab--foreground` (the selected tab of the stack), `tabWell-tab--active` (the one foreground tab of the focused stack on the page), `aria-selected`, `tabindex` (roving: the foreground tab is 0) and the `hidden` attribute of each panel. An author writes only the initial state.
+- A glyph is inline `<svg viewBox="0 0 16 16">` with paths. The CSS strokes it with `currentColor`, width 1.25, no fill, round caps. No `<symbol>` is needed.
+- A panel of a stack nested inside another stack never matches the outer stack. A panel pairs only with a tab of the stack that holds it.
+- `.tabWell-reset` puts the markup back as it was when the element connected. It is optional.
+- Keyboard on a focused tab: Left and Right move and select (wrapping), Home and End jump, Enter and Space select, Delete closes. A middle click closes. A click on a tab selects it. A right-click selects it too.
+- Closing the foreground tab selects its left neighbour, or the new first tab (`SDockingTabWell.cpp:617-633`). An emptied well keeps its height.
+
+## Variants
+
+| Variant | Markup |
+|---|---|
+| Minor stack | `tabWell-well` (`--background`) over `tabWell-content` (`--panel`) |
+| Major stack | `tabWell-well tabWell-well--major` (`--title`) over `tabWell-content tabWell-content--major` (`--background`), tabs carry `tabWell-tab--major`. A major tab never shows the active line |
+| One major tab alone | `<div class="tabWell-well tabWell-well--major"><div class="tabWell-tab tabWell-tab--major tabWell-tab--foreground">icon, label, close</div></div>` with no element. This is the title-bar tab of the window chrome. The tab is 30.8px tall, white text, `--panel` fill, close button visible |
+
+## Events
+
+Both events bubble and are composed. A handler ignores an event from a nested stack.
+
+| Event | `detail` | When |
+|---|---|---|
+| `ue-tab-activate` | `{ id, label }` | A tab became the foreground tab of its stack, by click, key, close, or `activateTab(id)`. Clicking the tab that is already foreground fires nothing |
+| `ue-tab-close` | `{ id, label }` | A tab was removed, by its button, a middle click, Delete or `closeTab(id)`. It fires before the `ue-tab-activate` of the tab that takes over |
+
+`id` is the `data-tab` of the tab. `label` is the text of `.tabWell-label`. The element has `activateTab(id)`, `closeTab(id)` and `tabs()`.
+
 ## What the consumer provides
 
 - The tabs (see `DockTab`) and the content widget of the foreground tab.

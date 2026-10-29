@@ -1,11 +1,20 @@
-// <ue-splitter> wraps one .splitter-demo and makes every .splitter-handle in it draggable.
+// <ue-splitter> wraps one .splitter box: a pane, a .splitter-handle and a second pane. The handle resizes the pane before it.
 import { UeElement, define } from '../_shared/element.ts';
 import { drag } from '../_shared/drag.ts';
+import './Splitter.css';
 
-const MIN_PANE = 20;
-const KEY_STEP = 5;
-const KEY_STEP_LARGE = 20;
+const DEFAULT_MIN = 20;
+const DEFAULT_STEP = 5;
+const DEFAULT_STEP_LARGE = 20;
 const HIGHLIGHT = 'splitter-handle--highlight';
+
+export interface SplitterResizeDetail {
+	// Length of the pane before the handle, in pixels.
+	size: number;
+	// Length of both panes together.
+	total: number;
+	orientation: 'horizontal' | 'vertical';
+}
 
 interface Panes {
 	before: HTMLElement;
@@ -24,24 +33,32 @@ const extent = (pane: HTMLElement, vertical: boolean): number => pane.getBoundin
 
 class SplitterElement extends UeElement {
 	protected setup(): void {
-		for (const handle of this.all('.splitter-handle')) {
-			if (handle.hasAttribute('data-pinned')) continue;
-			this.#wire(handle);
-		}
+		const handle = this.all('.splitter-handle').find((candidate) => this.owns(candidate));
+		if (!handle) throw new Error('ue-splitter needs a .splitter-handle between two panes');
+		this.#wire(handle);
+	}
+
+	// A number attribute of this element, or the fallback when it is missing or not a number.
+	#number(name: string, fallback: number): number {
+		const value = Number(this.getAttribute(name));
+		return this.hasAttribute(name) && Number.isFinite(value) ? value : fallback;
 	}
 
 	#wire(handle: HTMLElement): void {
 		let startSize = 0;
 		let total = 0;
+		const minStart = (): number => this.#number('data-min-start', DEFAULT_MIN);
+		const minEnd = (): number => this.#number('data-min-end', DEFAULT_MIN);
 
 		// Sets the size of the pane before the handle. The pane after it takes the rest.
 		const resize = (size: number): void => {
 			const panes = panesOf(handle);
 			if (!panes) return;
-			const clamped = Math.min(Math.max(size, MIN_PANE), total - MIN_PANE);
+			const clamped = Math.min(Math.max(size, minStart()), total - minEnd());
 			panes.before.style.flex = '0 0 ' + clamped + 'px';
 			panes.after.style.flex = '1 1 0';
 			this.#publish(handle, panes);
+			this.emit<SplitterResizeDetail>('ue-splitter-resize', { size: clamped, total, orientation: panes.vertical ? 'vertical' : 'horizontal' });
 		};
 		const measure = (): Panes | null => {
 			const panes = panesOf(handle);
@@ -74,11 +91,11 @@ class SplitterElement extends UeElement {
 			if (!current) return;
 			const grow = current.vertical ? 'ArrowDown' : 'ArrowRight';
 			const shrink = current.vertical ? 'ArrowUp' : 'ArrowLeft';
-			const step = event.shiftKey ? KEY_STEP_LARGE : KEY_STEP;
+			const step = event.shiftKey ? this.#number('data-step-shift', DEFAULT_STEP_LARGE) : this.#number('data-step', DEFAULT_STEP);
 			if (event.key === grow) resize(startSize + step);
 			else if (event.key === shrink) resize(startSize - step);
-			else if (event.key === 'Home') resize(MIN_PANE);
-			else if (event.key === 'End') resize(total - MIN_PANE);
+			else if (event.key === 'Home') resize(minStart());
+			else if (event.key === 'End') resize(total - minEnd());
 			else return;
 			event.preventDefault();
 		});
@@ -88,8 +105,8 @@ class SplitterElement extends UeElement {
 	#publish(handle: HTMLElement, panes: Panes): void {
 		const size = extent(panes.before, panes.vertical);
 		const total = size + extent(panes.after, panes.vertical);
-		handle.setAttribute('aria-valuemin', String(MIN_PANE));
-		handle.setAttribute('aria-valuemax', String(Math.round(total - MIN_PANE)));
+		handle.setAttribute('aria-valuemin', String(this.#number('data-min-start', DEFAULT_MIN)));
+		handle.setAttribute('aria-valuemax', String(Math.round(total - this.#number('data-min-end', DEFAULT_MIN))));
 		handle.setAttribute('aria-valuenow', String(Math.round(size)));
 	}
 }

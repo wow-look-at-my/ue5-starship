@@ -1,0 +1,32 @@
+/* Metrics: StarshipCoreStyle.cpp:2078-2117 (TableView.Header), SHeaderRow.cpp:51-221 and 714-970. See README. */
+
+/* Header: Recessed background, Foreground text -- StarshipCoreStyle.cpp:2113-2114 */
+.hr-row { background: var(--recessed); color: var(--foreground); font-family: var(--font-sans); font-size: 13.333px; }
+/* Cells: 1px splitter handle drawn as the Recessed gap between slots -- StarshipCoreStyle.cpp:2112. A cell grows by --hr-grow; a fixed cell keeps its width. */
+.hr-cells { display: flex; gap: 1px; }
+/* Cell fill = Header, hovered = Dropdown, only for a column that can sort -- StarshipCoreStyle.cpp:2083-2084, SHeaderRow.cpp:302-309 */
+.hr-cell { position: relative; box-sizing: border-box; flex: var(--hr-grow, 1) 1 0px; display: flex; align-items: center; min-width: 0; height: 24px; background: var(--header); overflow: hidden; white-space: nowrap; }
+.hr-cell.is-fixed, .hr-cell.is-gutter, .hr-cell.is-pinned { flex: none; width: var(--hr-fixed, 24px); }
+.hr-cell.is-hover, .hr-cell[aria-sort]:hover { background: var(--dropdown); }
+.hr-cell[aria-sort] { cursor: default; user-select: none; -webkit-user-select: none; }
+.hr-cell[aria-sort]:focus-visible { outline: 1px solid var(--primary); outline-offset: -1px; }
+/* Splitter hit area: 5px = the 1px handle plus 4 -- SHeaderRow.cpp:716. The grip covers the last 4px of the cell and the handle gap. */
+.hr-grip { position: absolute; top: 0; right: 0; width: 4px; height: 100%; cursor: col-resize; touch-action: none; }
+.hr-grip[hidden] { display: none; }
+.hr-grip:focus-visible { background: var(--primary); outline: none; }
+/* Default cell padding (5 + 2) / 2 = 3.5 each side -- SHeaderRow.cpp:716,745,769; label box height 24 -- SHeaderRow.cpp:88 */
+.hr-cell.is-text { padding: 0 3.5px; }
+/* Gutter header: HeaderContentPadding(4,0,0,0), icon left -- SceneOutlinerGutter.cpp:322-334 */
+.hr-cell.is-gutter { padding-left: 4px; }
+/* Pinned header: icon centered -- SceneOutlinerPinnedColumn.cpp:187 */
+.hr-cell.is-pinned { justify-content: center; }
+/* Scrollbar spacer, 16 wide -- SHeaderRow.cpp:734-741, STableViewBase.cpp:172. A consumer hides it while the scrollbar below is hidden. */
+.hr-spacer { flex: none; width: 16px; background: var(--recessed); }
+.hr-spacer[hidden] { display: none; }
+.hr-icon { flex: none; width: 16px; height: 16px; display: block; }
+/* Sort arrow: 12x12, 4px left padding, Foreground -- SHeaderRow.cpp:127-133, StarshipCoreStyle.cpp:2079-2082 */
+.hr-sort { flex: none; width: 12px; height: 12px; margin-left: 4px; display: block; }
+.hr-sort path { fill: currentColor; }
+.hr-sort[hidden] { display: none; }
+/* Separator under the row: 2px Recessed -- StarshipCoreStyle.cpp:2115-2116, SHeaderRow.cpp:949-964 */
+.hr-rule { height: 2px; background: var(--recessed); }

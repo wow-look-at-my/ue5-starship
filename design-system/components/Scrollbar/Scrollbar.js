@@ -36,6 +36,10 @@ var UeElement = class extends HTMLElement {
   emit(name, detail) {
     return this.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
   }
+  // True when the nearest element of this tag above the target is this element, so a nested instance keeps its own events.
+  owns(target) {
+    return target instanceof Element && target.closest(this.localName) === this;
+  }
   all(selector) {
     return Array.from(this.querySelectorAll(selector));
   }
@@ -167,6 +171,11 @@ function bindBar(view, bar, thumb, vertical, onFits) {
   observer.observe(view);
   observer.observe(bar);
   for (const child of Array.from(view.children)) observer.observe(child);
+  const mutations = new MutationObserver((records) => {
+    for (const record of records) for (const added of Array.from(record.addedNodes)) if (added instanceof Element) observer.observe(added);
+    update();
+  });
+  mutations.observe(view, { childList: true });
   update();
   return {
     update,
@@ -175,21 +184,42 @@ function bindBar(view, bar, thumb, vertical, onFits) {
       view.removeEventListener("scroll", onScroll);
       bar.removeEventListener("wheel", onWheel);
       observer.disconnect();
+      mutations.disconnect();
     }
   };
 }
 
 // design-system/src/Scrollbar/Scrollbar.ts
 var Scrollbar = class extends UeElement {
+  #visible = null;
+  // True while the content overflows and the bar shows.
+  get visible() {
+    return this.#visible === true;
+  }
   setup() {
-    for (const box of this.all(".sb-scroll")) {
-      const view = box.querySelector(".sb-view");
-      const bar = box.querySelector(".sb");
-      const thumb = bar?.querySelector(".sb-thumb");
-      if (!view || !bar || !thumb) continue;
-      const vertical = !bar.classList.contains("sb-h");
-      this.onDispose(bindBar(view, bar, thumb, vertical).dispose);
-    }
+    const box = this.all(".sb-scroll").find((candidate) => this.owns(candidate));
+    const view = box?.querySelector(":scope > .sb-view");
+    const bar = box?.querySelector(":scope > .sb");
+    const thumb = bar?.querySelector(".sb-thumb");
+    if (!view || !bar || !thumb) throw new Error("ue-scrollbar needs a .sb-scroll with a .sb-view and a .sb bar that holds a .sb-thumb");
+    const vertical = !bar.classList.contains("sb-h");
+    this.#visible = null;
+    let started = false;
+    const binding = bindBar(view, bar, thumb, vertical, (fits) => {
+      if (started) this.#report(!fits);
+    });
+    this.onDispose(binding.dispose);
+    const first = setTimeout(() => {
+      started = true;
+      this.#report(!bar.hidden);
+    }, 0);
+    this.onDispose(() => clearTimeout(first));
+  }
+  // Announces the first state and every change.
+  #report(visible) {
+    if (this.#visible === visible) return;
+    this.#visible = visible;
+    this.emit("ue-scrollbar-visibility", { visible });
   }
 };
 define("ue-scrollbar", Scrollbar);

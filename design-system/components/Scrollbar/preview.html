@@ -16,29 +16,10 @@
 	.sb-col { display: flex; flex-direction: column; gap: 6px; align-items: center; }
 	.sb-cap { font-size: 11px; line-height: 1.2; color: var(--foreground); opacity: .6; text-align: center; }
 	.sb-well { background: var(--recessed); }
+	.sb-col--status { font-size: 11px; line-height: 1.2; color: var(--foreground); }
 
-	/* Slot: 16 wide inside a table view (STableViewBase.cpp:100), SScrollBar uniform padding 2 (SScrollBar.h:32) */
-	.sb { position: relative; flex: none; }
-	.sb-v { width: 16px; height: 150px; }
-	.sb-h { width: 170px; height: 16px; }
-	.sb-box-v { width: 12px; height: 150px; }
-	/* Thumb: 8 thick centered in the slot, radius 4, no track fill -- StarshipCoreStyle.cpp:189,192 */
-	.sb-thumb { position: absolute; border-radius: 4px; background: var(--hover); }
-	.sb-v .sb-thumb { left: 4px; width: 8px; }
-	.sb-box-v .sb-thumb { left: 2px; width: 8px; }
-	.sb-h .sb-thumb { top: 4px; height: 8px; }
-	/* Hovered or dragged thumb = Hover2 -- StarshipCoreStyle.cpp:190-191. The whole bar is the hover target -- SScrollBar.cpp:307-321 */
-	.sb.is-hover .sb-thumb, .sb.is-drag .sb-thumb, :where(.sb-scroll) .sb:hover .sb-thumb { background: var(--hover-2); }
-
-	/* Live box: a natively scrolling view with its own scrollbar hidden, and a bar that follows it */
-	.sb-scroll { display: flex; }
-	.sb-scroll.is-h { flex-direction: column; }
-	.sb[hidden] { display: none; }
-	.sb-scroll .sb-v, .sb-scroll .sb-box-v { height: auto; align-self: stretch; }
-	.sb-scroll .sb-h { width: auto; align-self: stretch; }
-	.sb-view { overflow: auto; scrollbar-width: none; background: var(--recessed); color: var(--foreground); font-size: 13.333px; line-height: 16px; overscroll-behavior: contain; }
-	.sb-view::-webkit-scrollbar { display: none; }
-	.sb-view:focus-visible { outline: 1px solid var(--primary); outline-offset: -1px; }
+	/* Demo content of a scroll view. The view's own look is the page's choice. */
+	.sb-view { background: var(--recessed); color: var(--foreground); font-size: 13.333px; line-height: 16px; }
 	.sb-scroll.is-v .sb-view { width: 150px; height: 150px; }
 	.sb-scroll.is-h .sb-view { width: 170px; height: 44px; }
 	.sb-line { height: 20px; padding: 2px 6px; box-sizing: border-box; white-space: nowrap; }
@@ -90,10 +71,20 @@
 			</div></ue-scrollbar>
 			<div class="sb-cap">horizontal, slot 16</div>
 		</div>
+		<div class="sb-col sb-col--status">
+			<ue-scrollbar><div class="sb-scroll is-v">
+				<div class="sb-view" tabindex="0" role="region" aria-label="Short content, no scrollbar">
+					<div class="sb-line">Row 01</div><div class="sb-line">Row 02</div><div class="sb-line">Row 03</div>
+				</div>
+				<div class="sb sb-well sb-v" aria-hidden="true"><div class="sb-thumb"></div></div>
+			</div></ue-scrollbar>
+			<div class="sb-cap">content fits: the bar hides</div>
+			<ue-event-status event="ue-scrollbar-visibility" template="bar visible: {visible}"></ue-event-status>
+		</div>
 		<div class="sb-cap" style="text-align:left;max-width:520px">Live. Hover the bar or the thumb. Drag the thumb. Click the track to centre the thumb there. Use the mouse wheel over the view or the bar, shift-wheel for the horizontal one, or focus a view and press arrow keys, Page Up, Page Down, Home or End. The very long content leaves a thumb near the 35px minimum. A view whose content fits hides its bar.</div>
 	</div>
 
-	<div class="sb-group">
+	<div class="sb-group" data-pinned>
 		<div class="sb-group-title">Vertical, table view slot (16), pinned</div>
 		<div class="sb-row">
 			<div class="sb-col"><div class="sb sb-well sb-v"><div class="sb-thumb" style="top:2px;height:70px"></div></div><div class="sb-cap">normal<br>Hover</div></div>
@@ -103,14 +94,14 @@
 		</div>
 	</div>
 
-	<div class="sb-group">
+	<div class="sb-group" data-pinned>
 		<div class="sb-group-title">Horizontal, pinned</div>
 		<div class="sb-col"><div class="sb sb-well sb-h"><div class="sb-thumb" style="left:2px;width:80px"></div></div><div class="sb-cap">normal</div></div>
 		<div class="sb-col"><div class="sb sb-well sb-h is-hover"><div class="sb-thumb" style="left:2px;width:80px"></div></div><div class="sb-cap">hovered</div></div>
 		<div class="sb-col"><div class="sb sb-well sb-h is-drag"><div class="sb-thumb" style="left:50px;width:80px"></div></div><div class="sb-cap">dragged</div></div>
 	</div>
 
-	<div class="sb-group">
+	<div class="sb-group" data-pinned>
 		<div class="sb-group-title">ScrollBox (12), pinned</div>
 		<div class="sb-row">
 			<div class="sb-col"><div class="sb sb-well sb-box-v"><div class="sb-thumb" style="top:2px;height:70px"></div></div><div class="sb-cap">normal</div></div>

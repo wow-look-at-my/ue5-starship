@@ -2,11 +2,53 @@
 
 A 24px column-header strip with `--header` cells, 1px `--recessed` splitters, a sort arrow beside the title and a 2px `--recessed` rule underneath (UE 5.5.3 `TableView.Header`).
 
+One `<ue-header-row>` wraps exactly one `.hr-row`. It sorts, resizes and reports. It never reorders data.
+
+## Markup contract
+
+```html
+<ue-header-row grips="on">   <!-- grips="off" hides and disables every .hr-grip -->
+	<div class="hr-row">
+		<div class="hr-cells">
+			<div class="hr-cell is-gutter"><svg class="hr-icon" viewBox="0 0 16 16">...</svg></div>   <!-- fixed 24px -->
+			<div class="hr-cell is-text" role="columnheader" tabindex="0" aria-sort="ascending" data-column="label" style="--hr-grow:5">
+				Item Label
+				<span class="hr-grip" role="separator" aria-orientation="vertical" aria-label="Resize Item Label" tabindex="0"></span>
+			</div>
+			<div class="hr-cell is-text" role="columnheader" tabindex="0" aria-sort="none" data-column="type" style="--hr-grow:2">Type</div>
+			<div class="hr-spacer"></div>   <!-- 16px, only while the scrollbar below shows -->
+		</div>
+		<div class="hr-rule"></div>
+	</div>
+</ue-header-row>
+```
+
+- `.hr-cells` is a flex row with a 1px gap. A flexible cell grows by `--hr-grow` (default 1) from a zero basis, so `--hr-grow:5` and `--hr-grow:2` give 5 : 2. A cell with `is-fixed`, `is-gutter` or `is-pinned` keeps `--hr-fixed` (24px).
+- A cell with `aria-sort` (`none`, `ascending` or `descending`) sorts. A cell without it is fixed content. `data-column` is the column id in events.
+- The element draws the sort arrow itself: a 12x12 `<svg class="hr-sort">` it adds to every sortable cell, hidden while the cell is unsorted. Markup may carry its own `.hr-sort` with one `<path>`. The element only sets the path. A static specimen writes the arrow by hand: `M2 8l4-5 4 5z` up, `M2 4l4 5 4-5z` down, `M2 6.2l4-4 4 4zM2 10.5l4-4 4 4z` secondary up, `M2 1.5l4 4 4-4zM2 5.8l4 4 4-4z` secondary down.
+- A `.hr-grip` inside a cell resizes that cell against the next cell. The scene-outliner header has no grips, so a header without any `.hr-grip` or with `grips="off"` is a plain sortable header.
+- `.hr-spacer` is the 16px block above a table scrollbar. Set its `hidden` attribute from the `ue-scrollbar-visibility` event of the scroll box below (`detail.visible === false` hides it).
+
+## Behaviour
+
+- Click, Enter or Space on a sortable cell: an unsorted column becomes ascending, a sorted one flips (`SHeaderRow.cpp:392-430`). The new primary key clears the old primary key.
+- Shift adds or flips a secondary key, drawn with the double arrow. A plain click on a secondary column makes it primary.
+- A grip drags or answers Left and Right (8px a step). Both columns keep at least 20px and the two together keep their width. Every other flexible cell keeps its width. A click on a grip never sorts.
+
+## Events
+
+Both events bubble and are composed. A handler ignores an event from a nested `ue-header-row`.
+
+| Event | `detail` | When |
+|---|---|---|
+| `ue-sort` | `{ column, mode, direction, priority }` | A cell was activated. `mode` and `direction` are `'ascending'`, `'descending'` or `'none'`. `priority` is `'primary'` or `'secondary'` |
+| `ue-column-resize` | `{ column, width, nextColumn, nextWidth }` | A grip moved. Widths are pixels |
+
 ## What the consumer provides
 
-- The column list: fixed-width icon columns or fill-width text columns, with their ratios.
+- The column list: fixed-width icon columns or fill-width text columns, with their ratios (`--hr-grow`).
 - The sort state per column: none, primary or secondary, ascending or descending.
-- Whether a vertical scrollbar shows in the table below. If it is, the header adds a 16px spacer on the right.
+- Whether a vertical scrollbar shows in the table below. If it is, the header shows a 16px spacer on the right.
 
 ## Metrics
 

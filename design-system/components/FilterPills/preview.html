@@ -10,24 +10,7 @@
 <style>
 	/* Every metric below is cited in README.md. */
 	.FilterPills-frame { width: 360px; background: var(--panel); padding-bottom: 8px; } /* Brushes.Panel: SDetailsView.cpp:391-395 */
-	.FilterPills-strip {
-		display: flex; flex-wrap: wrap; gap: 4px; /* SWrapBox InnerSlotPadding(4,4): SDetailsView.cpp:379 */
-		padding: 2px 8px 7px; /* Padding(8,2,8,7): SDetailsView.cpp:374 */
-	}
-	.FilterPills-pill {
-		display: inline-flex; align-items: center; justify-content: center;
-		margin: 0; border: 0; cursor: pointer;
-		padding: 4px 16px; /* FMargin(16,4): StarshipStyle.cpp:3252 via StarshipCoreStyle.cpp:929 */
-		border-radius: 4px;
-		background: var(--header); box-shadow: inset 0 0 0 1px var(--input); /* unchecked: StarshipCoreStyle.cpp:923 */
-		color: var(--foreground); /* ToggleButtonCheckbox foreground: StarshipCoreStyle.cpp:1633 */
-		font: 400 10.667px/1.172 var(--font-sans); /* "SmallText" = Small 8pt: SDetailsView.cpp:1371, StarshipCoreStyle.cpp:1215 */
-	}
-	.FilterPills-pill:hover, .FilterPills-pill:active, .FilterPills-pill.is-hover, .FilterPills-pill.is-pressed { background: var(--hover); color: var(--foreground-hover); } /* StarshipCoreStyle.cpp:924-925, 1634-1635 */
-	.FilterPills-pill.is-checked { background: var(--primary); color: var(--foreground-hover); } /* StarshipCoreStyle.cpp:926, 1636 */
-	.FilterPills-pill.is-checked:hover, .FilterPills-pill.is-checked:active, .FilterPills-pill.is-checked.is-hover, .FilterPills-pill.is-checked.is-pressed { background: var(--primary-hover); } /* StarshipCoreStyle.cpp:927-928 */
-	.FilterPills-pill:focus-visible { outline: 1px solid var(--primary-hover); outline-offset: 1px; } /* browser keyboard ring: Slate draws none */
-	.FilterPills-pill:disabled { opacity: .45; cursor: default; } /* alpha x .45: SlateElementPixelShader.usf:535 */
+	ue-filter-pills { font: 400 10.667px/1.4 var(--font-sans); color: var(--hover-2); }
 	/* Preview captions only */
 	.FilterPills-cap { width: 360px; box-sizing: border-box; margin: 0; padding: 6px 8px 12px; font: 400 10.667px/1.4 var(--font-sans); color: var(--foreground); opacity: .8; }
 	.FilterPills-cap b { color: var(--foreground-hover); }
@@ -47,10 +30,23 @@
 		<button class="FilterPills-pill is-checked" role="tab" aria-selected="true" tabindex="0">All</button>
 	</div>
 </div>
+<ue-event-status event="ue-filter-change" template="Section: {label}"></ue-event-status>
 </ue-filter-pills>
 <p class="FilterPills-cap"><b>Live.</b> Hover and press a pill, click one to make it the only active pill, or Tab in and use Left, Right, Home and End.</p>
 
+<ue-filter-pills>
 <div class="FilterPills-frame">
+	<div class="FilterPills-strip FilterPills-strip--chips" role="list">
+		<span class="FilterPills-chip" role="listitem" data-id="staticmesh" aria-label="Filter: Static Mesh"><span class="FilterPills-chipColor" style="background: var(--accent-blue)"></span><span class="FilterPills-chipName">Static Mesh</span><button class="FilterPills-chipRemove" type="button" aria-label="Remove Static Mesh filter"><svg viewBox="0 0 16 16"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></span>
+		<span class="FilterPills-chip" role="listitem" data-id="material" aria-label="Filter: Material"><span class="FilterPills-chipColor" style="background: var(--accent-green)"></span><span class="FilterPills-chipName">Material</span><button class="FilterPills-chipRemove" type="button" aria-label="Remove Material filter"><svg viewBox="0 0 16 16"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></span>
+		<span class="FilterPills-chip" role="listitem" data-id="texture" aria-label="Filter: Texture"><span class="FilterPills-chipColor" style="background: var(--accent-orange)"></span><span class="FilterPills-chipName">Texture</span><button class="FilterPills-chipRemove" type="button" aria-label="Remove Texture filter"><svg viewBox="0 0 16 16"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></span>
+	</div>
+</div>
+<ue-event-status event="ue-pill-remove" template="Removed: {label}"></ue-event-status>
+</ue-filter-pills>
+<p class="FilterPills-cap"><b>Live chips</b> (<code>FilterPills-strip--chips</code>). The X on a chip removes it and fires <code>ue-pill-remove</code>. <code>addChip({ id, label, color })</code> adds one and fires <code>ue-pill-add</code>.</p>
+
+<div class="FilterPills-frame" data-pinned>
 	<div class="FilterPills-strip">
 		<span class="FilterPills-pill is-hover">Hover</span>
 		<span class="FilterPills-pill is-pressed">Pressed</span>

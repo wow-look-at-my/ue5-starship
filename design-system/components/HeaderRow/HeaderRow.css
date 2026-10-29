@@ -2,3 +2,102 @@
 [data-pinned] {
   pointer-events: none;
 }
+
+/* design-system/src/HeaderRow/HeaderRow.css */
+.hr-row {
+  background: var(--recessed);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 13.333px;
+}
+.hr-cells {
+  display: flex;
+  gap: 1px;
+}
+.hr-cell {
+  position: relative;
+  box-sizing: border-box;
+  flex: var(--hr-grow, 1) 1 0px;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: 24px;
+  background: var(--header);
+  overflow: hidden;
+  white-space: nowrap;
+}
+.hr-cell.is-fixed,
+.hr-cell.is-gutter,
+.hr-cell.is-pinned {
+  flex: none;
+  width: var(--hr-fixed, 24px);
+}
+.hr-cell.is-hover,
+.hr-cell[aria-sort]:hover {
+  background: var(--dropdown);
+}
+.hr-cell[aria-sort] {
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.hr-cell[aria-sort]:focus-visible {
+  outline: 1px solid var(--primary);
+  outline-offset: -1px;
+}
+.hr-grip {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 4px;
+  height: 100%;
+  cursor: col-resize;
+  touch-action: none;
+}
+.hr-grip[hidden] {
+  display: none;
+}
+.hr-grip:focus-visible {
+  background: var(--primary);
+  outline: none;
+}
+.hr-cell.is-text {
+  padding: 0 3.5px;
+}
+.hr-cell.is-gutter {
+  padding-left: 4px;
+}
+.hr-cell.is-pinned {
+  justify-content: center;
+}
+.hr-spacer {
+  flex: none;
+  width: 16px;
+  background: var(--recessed);
+}
+.hr-spacer[hidden] {
+  display: none;
+}
+.hr-icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+.hr-sort {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  margin-left: 4px;
+  display: block;
+}
+.hr-sort path {
+  fill: currentColor;
+}
+.hr-sort[hidden] {
+  display: none;
+}
+.hr-rule {
+  height: 2px;
+  background: var(--recessed);
+}

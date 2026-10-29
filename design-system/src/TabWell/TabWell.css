@@ -1,0 +1,17 @@
+/* The well, the stack and the content area around dock tabs. Two class families draw them: tabWell-* (ue-tab-well) and dockTab-* (ue-dock-tab). Each rule lists both. The tab itself is in ../DockTab/DockTab.css. */
+
+/* tab well: Brushes.Background for a minor stack, Brushes.Title under the window chrome; SDockingTabStack.cpp:1234-1236 */
+:is(.dockTab-well, .tabWell-well) {
+	display: flex; align-items: flex-end; gap: 2px; /* OverlapWidth -2 gives a 2px gap: StarshipCoreStyle.cpp:1799, SDockingTabWell.cpp:105 */
+	background: var(--background); padding: 0; /* tab well border Padding(0): SDockingTabStack.cpp:151 */
+	min-height: 25px; /* an emptied well keeps its height: MaxMinorTabSize.Y, SDockingTabWell.cpp:9 */
+}
+:is(.dockTab-well--major, .tabWell-well--major) { background: var(--title); min-height: 30.8px; /* major tab height, derived: README */ }
+
+/* stack: a tab well over a content area */
+:is(.dockTab-stack, .tabWell-stack) { display: flex; flex-direction: column; }
+
+/* content area: ForegroundTab ContentAreaBrush, SDockingTabStack.cpp:179; Panel for minor (StarshipCoreStyle.cpp:1794), Background for major (:1820) */
+:is(.dockTab-body, .tabWell-content) { background: var(--panel); padding: 0; /* SDockTab::ContentPadding default 0, SDockTab.h:77 */ }
+:is(.dockTab-well--major + .dockTab-body, .tabWell-content--major) { background: var(--background); }
+[data-panel][hidden] { display: none; }

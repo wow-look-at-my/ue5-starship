@@ -1,0 +1,31 @@
+/* Tablist variant: the Details section strip. components/DetailsCategory/preview.html:95-99 draws the same pills (padding 4px 16px, 10.667px, --header fill). */
+.FilterPills-strip {
+	display: flex; flex-wrap: wrap; gap: 4px; /* SWrapBox InnerSlotPadding(4,4): SDetailsView.cpp:379 */
+	padding: 2px 8px 7px; /* Padding(8,2,8,7): SDetailsView.cpp:374 */
+}
+.FilterPills-pill {
+	display: inline-flex; align-items: center; justify-content: center;
+	margin: 0; border: 0; cursor: pointer;
+	padding: 4px 16px; /* FMargin(16,4): StarshipStyle.cpp:3252 via StarshipCoreStyle.cpp:929 */
+	border-radius: 4px;
+	background: var(--header); box-shadow: inset 0 0 0 1px var(--input); /* unchecked: StarshipCoreStyle.cpp:923 */
+	color: var(--foreground); /* ToggleButtonCheckbox foreground: StarshipCoreStyle.cpp:1633 */
+	font: 400 10.667px/1.172 var(--font-sans); /* "SmallText" = Small 8pt: SDetailsView.cpp:1371, StarshipCoreStyle.cpp:1215 */
+}
+.FilterPills-pill:hover, .FilterPills-pill:active, .FilterPills-pill.is-hover, .FilterPills-pill.is-pressed { background: var(--hover); color: var(--foreground-hover); } /* StarshipCoreStyle.cpp:924-925, 1634-1635 */
+.FilterPills-pill.is-checked { background: var(--primary); color: var(--foreground-hover); } /* StarshipCoreStyle.cpp:926, 1636 */
+.FilterPills-pill.is-checked:hover, .FilterPills-pill.is-checked:active, .FilterPills-pill.is-checked.is-hover, .FilterPills-pill.is-checked.is-pressed { background: var(--primary-hover); } /* StarshipCoreStyle.cpp:927-928 */
+.FilterPills-pill:focus-visible { outline: 1px solid var(--primary-hover); outline-offset: 1px; } /* browser keyboard ring: Slate draws none */
+.FilterPills-pill:disabled { opacity: .45; cursor: default; } /* alpha x .45: SlateElementPixelShader.usf:535 */
+
+/* Chip variant: a removable filter chip with a colour segment. components/AssetSearchBar/preview.html:56-65 draws the same chips
+   (FilterBar.FilterBackground Secondary r3 with the 8 x 22 colour segment, StarshipCoreStyle.cpp:916-917). */
+.FilterPills-strip--chips { padding: 0 0 4px 6px; }
+.FilterPills-strip--chips:empty, .FilterPills-strip[hidden] { display: none; }
+.FilterPills-chip { display: flex; align-items: center; height: 22px; border-radius: 3px; background: var(--secondary); overflow: hidden; color: var(--foreground); font: 400 13.333px/16px var(--font-sans); }
+.FilterPills-chip:hover { color: var(--foreground-hover); }
+.FilterPills-chipColor { width: 8px; align-self: stretch; flex: none; background: var(--accent-gray); }
+.FilterPills-chipName { padding: 0 6px; }
+.FilterPills-chipRemove { display: flex; align-items: center; margin: 0 3px 0 0; padding: 1px; border: 0; border-radius: 4px; background: none; color: var(--foreground); cursor: default; }
+.FilterPills-chipRemove:hover, .FilterPills-chipRemove:focus-visible { background: var(--dropdown); color: var(--foreground-hover); outline: 0; }
+.FilterPills-chipRemove svg { width: 16px; height: 16px; flex: none; display: block; }

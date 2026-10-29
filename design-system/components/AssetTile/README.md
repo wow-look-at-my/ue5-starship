@@ -2,6 +2,66 @@
 
 The tile-view item of the area of the Content Browser asset. A folder tile (tinted folder icon over a centred name) and a generic asset tile (square thumbnail with a 2px type-colour strip over a name and type label), each with normal, hovered, selected and selected + hovered states.
 
+One `<ue-asset-tile>` wraps exactly one tile grid: a `listbox` of tiles with selection, grid keys and open.
+
+## Markup contract
+
+```html
+<ue-asset-tile select="multi">       <!-- select="single" picks one tile whatever the modifiers -->
+	<div class="AssetTile-grid">     <!-- a wrapping flex row; the element sets role="listbox" -->
+		<div class="AssetTile AssetTile--folder" data-id="audio">
+			<div class="AssetTile__card">
+				<div class="AssetTile__thumb"><svg class="AssetTile__folderIcon" viewBox="0 0 64 64">...</svg></div>
+				<div class="AssetTile__nameArea"><div class="AssetTile__name">Audio</div></div>
+			</div>
+		</div>
+		<div class="AssetTile AssetTile--asset" data-id="sm_chair">
+			<div class="AssetTile__card">
+				<div class="AssetTile__thumb"><div class="AssetTile__asset"><svg viewBox="0 0 32 32">...</svg><span class="AssetTile__strip" style="--strip:var(--accent-blue)"></span></div></div>
+				<div class="AssetTile__nameArea"><div class="AssetTile__name">SM_Chair</div><div class="AssetTile__class">Static Mesh</div></div>
+			</div>
+		</div>
+	</div>
+</ue-asset-tile>
+```
+
+- The element sets `role="option"`, `aria-selected`, `tabindex` (one tile takes the Tab stop: the selected one, else the first) and the class `is-selected`. An author writes only the initial `is-selected`. `data-id` is the tile id in events and the API. Without it the text of `.AssetTile__name` is the id.
+- The thumbnail of an asset is a `.AssetTile__asset` box. Put a cube `<svg>` or an `<img class="AssetTile__image">` in it. The strip colour is the CSS variable `--strip`.
+- Hover and keyboard focus need no script: `.AssetTile:hover` and `:focus-visible` carry the look. A forced specimen uses `is-hover` and `is-selected`, and takes `data-pinned` (on the tile or on a row of tiles) so the page ignores the pointer.
+- The folder glyph is inline, 64x64, `fill="currentColor"` plus overlay paths. No `<symbol>` is needed.
+
+## Selection and keys
+
+- Click replaces the selection. Ctrl or Cmd toggles a tile. Shift selects the range from the anchor. A double-click opens the tile.
+- Right and Left move by one tile. Up and Down go to the nearest tile in the next row. Home and End jump. Shift extends the selection from the anchor, Ctrl moves the focus without selecting. Space selects like a click. Enter opens. Ctrl+A selects all.
+- `select="single"` ignores Shift, Ctrl and Ctrl+A. Every pick replaces the selection and `aria-multiselectable` is `false`.
+
+## Events
+
+Both events bubble and are composed. A handler ignores an event from a nested `ue-asset-tile`.
+
+| Event | `detail` | When |
+|---|---|---|
+| `ue-tile-select` | `{ ids: string[] }` | The selected set changed, in grid order. A click on the only selected tile fires nothing |
+| `ue-tile-open` | `{ id: string }` | A double-click or Enter on a tile |
+
+## Data API
+
+```ts
+interface TileData {
+	id: string;
+	label: string;
+	kind: 'folder' | 'asset';
+	thumb?: string;      // image URL for an asset; without it the tile draws a cube
+	typeLabel?: string;  // "Static Mesh", under the name of an asset
+	strip?: string;      // CSS colour of the 2px strip of an asset
+	selected?: boolean;
+}
+el.setTiles(tiles: TileData[]);     // replaces every tile; an element with no .AssetTile-grid creates one
+el.getSelectedIds(): string[];
+el.select(ids: string[]);           // fires ue-tile-select
+```
+
 ## What the consumer provides
 
 - Kind (folder or asset), name text, and for assets the class label, the thumbnail content and the asset-type colour for the strip.

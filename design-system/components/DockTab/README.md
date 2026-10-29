@@ -2,6 +2,37 @@
 
 A docking tab: the small panel tab (`Docking.Tab`) and the major app tab (`Docking.MajorTab`) with icon, label and close button, drawn by `SDockTab`.
 
+`<ue-dock-tab>` wraps exactly one stack of dock tabs and is the `dockTab-*` spelling of `<ue-tab-well>`: same behaviour, same events, same pixels. Read `TabWell` for the full markup contract. A tab alone (no element) is plain markup.
+
+## Markup contract
+
+```html
+<!-- One major tab alone, the title-bar tab. No element, no symbol. -->
+<div class="dockTab-well dockTab-well--major">
+	<div class="dockTab dockTab--major dockTab--foreground">
+		<span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="..."/></svg></span>
+		<span class="dockTab-label">Minimal_Default</span>
+		<span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.5 4.5l7 7 M11.5 4.5l-7 7"/></svg></span>
+	</div>
+</div>
+
+<!-- A live stack -->
+<ue-dock-tab>
+	<div class="dockTab-stack">
+		<div class="dockTab-well" role="tablist">
+			<div class="dockTab dockTab--foreground dockTab--active" role="tab" tabindex="0" aria-selected="true" data-tab="details">...</div>
+		</div>
+		<div class="dockTab-body"><div role="tabpanel" data-panel="details">...</div></div>
+	</div>
+</ue-dock-tab>
+```
+
+- Tab classes: `dockTab` (small), `dockTab--major`, plus the states `dockTab--foreground` (selected, `--panel` fill), `dockTab--active` (text `--foreground-hover` and a 1px primary line on a small tab), `dockTab--hovered` and `dockTab--flash` (forced states for a specimen). Parts: `dockTab-icon` (add `dockTab-icon--tinted` for the colour-coded cell of a major tab), `dockTab-label`, `dockTab-close` (add `dockTab-close--hot` to force its hover).
+- The major tab text is `--foreground` at rest and `--white` when hovered, foreground or active.
+- A glyph is an inline `<svg viewBox="0 0 16 16">`. The close X is `M4.5 4.5l7 7 M11.5 4.5l-7 7`.
+- The well of a stack has `min-height: 25px` (30.8px for the major well). It adds no padding, so a specimen that wants room around the tab adds its own.
+- Events: `ue-tab-activate` and `ue-tab-close`, both `{ id, label }`. The methods `activateTab(id)`, `closeTab(id)` and `tabs()` exist.
+
 ## What the consumer provides
 
 - A label, an optional 16px icon and a role (small or major). The role picks the style set.
