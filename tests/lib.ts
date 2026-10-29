@@ -105,6 +105,8 @@ export async function openPreview(browser: Browser, name: string, viewport = { w
 	});
 	await page.goto((await serve()) + '/components/' + name + '/preview.html');
 	await page.addStyleTag({ content: tokensCss() });
+	// Text widths change when the web font arrives, so measure only after it loads.
+	await page.evaluate(() => document.fonts.ready.then(() => undefined));
 	await page.waitForTimeout(100);
 	return { page, errors };
 }
