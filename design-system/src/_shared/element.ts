@@ -1,4 +1,5 @@
 // Base class for the light-DOM custom elements that make the component previews live.
+import './base.css';
 
 export type Listener<E extends Event> = (event: E) => void;
 

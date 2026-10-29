@@ -1,0 +1,2 @@
+/* A pinned specimen shows one forced state and ignores the pointer. */
+[data-pinned] { pointer-events: none; }

@@ -2042,6 +2042,21 @@
   };
   define("ue-dock-tab", DockTabElement);
 
+  // design-system/src/EventStatus/EventStatus.ts
+  var UeEventStatusElement = class extends UeElement {
+    setup() {
+      const host = this.parentElement;
+      const type = this.getAttribute("event");
+      if (!host || !type) throw new Error("ue-event-status needs a parent element and an event attribute");
+      const template = this.getAttribute("template") ?? "{value}";
+      this.on(host, type, (event) => {
+        const detail = event.detail ?? {};
+        this.textContent = template.replace(/\{(\w+)\}/g, (_match, key) => String(detail[key] ?? ""));
+      });
+    }
+  };
+  define("ue-event-status", UeEventStatusElement);
+
   // design-system/src/ExpandableArea/ExpandableArea.ts
   function headerOf(target) {
     return target instanceof Element ? target.closest('.expandablearea__header[role="button"]') : null;

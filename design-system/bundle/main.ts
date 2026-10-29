@@ -13,6 +13,7 @@ import '../src/DetailsCategory/DetailsCategory.ts';
 import '../src/DetailsHeader/DetailsHeader.ts';
 import '../src/DetailsSearchRow/DetailsSearchRow.ts';
 import '../src/DockTab/DockTab.ts';
+import '../src/EventStatus/EventStatus.ts';
 import '../src/ExpandableArea/ExpandableArea.ts';
 import '../src/FilterPills/FilterPills.ts';
 import '../src/HeaderRow/HeaderRow.ts';
