@@ -98,7 +98,7 @@ function selectorClasses(css: string): Set<string> {
 	const out = new Set<string>();
 	for (const m of css.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/([^{}]+)\{/g)) {
 		if (m[1].trim().startsWith('@')) continue;
-		for (const c of m[1].matchAll(/\.(-?[_a-zA-Z][\w-]*)/g)) out.add(c[1]);
+		for (const c of m[1].matchAll(/\.(-?[_a-zA-Z][\w-]*)/g)) if (!/^(is|has)-/.test(c[1])) out.add(c[1]);
 	}
 	return out;
 }
@@ -128,7 +128,6 @@ for (const name of names) {
 			const loose = await page.evaluate((map) => {
 				const found = new Set<string>();
 				for (const el of Array.from(document.body.querySelectorAll('[class]'))) {
-					if (el.closest('[data-pinned]')) continue;
 					for (const cls of Array.from(el.classList)) {
 						const tags = map[cls];
 						if (tags && !tags.some((tag) => el.closest(tag))) found.add(cls + ' outside ' + tags.join('/'));
