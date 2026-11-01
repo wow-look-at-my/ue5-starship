@@ -1,18 +1,34 @@
+<<<<<<< HEAD
 // <ue-place-actors-panel> wraps a .placeActors panel: category strip, search field and one item group per category.
 import { UeElement, define } from '../_shared/element.ts';
 
 const CAT = '.placeActors-cat';
+=======
+// <ue-place-actors-panel> wraps a .placeActors panel: a ue-text-input search, a ue-segmented-control category rail and one item group per category.
+import { UeElement, define } from '../_shared/element.ts';
+import '../SegmentedControl/SegmentedControl.ts';
+import '../TextInput/TextInput.ts';
+import './PlaceActorsPanel.css';
+
+>>>>>>> claude/adoring-faraday-94vc0i
 const GROUP = '.placeActors-group';
 const ROW = '.placeActors-row';
 
 export class PlaceActorsPanel extends UeElement {
 	protected setup(): void {
+<<<<<<< HEAD
 		const field = this.one<HTMLInputElement>('.placeActors-field');
 		const header = this.one('.placeActors-header');
 		const empty = this.one('.placeActors-empty');
 
 		const cats = (): HTMLElement[] => this.all(CAT);
 
+=======
+		const field = this.one<HTMLInputElement>('.textinput__field');
+		const header = this.one('.placeActors-header');
+		const empty = this.one('.placeActors-empty');
+
+>>>>>>> claude/adoring-faraday-94vc0i
 		// Shows only the rows of the visible group whose name contains the query.
 		const applyFilter = (): void => {
 			const query = (field?.value ?? '').trim().toLowerCase();
@@ -28,6 +44,7 @@ export class PlaceActorsPanel extends UeElement {
 			if (empty instanceof HTMLElement) empty.hidden = !(query !== '' && visible === 0);
 		};
 
+<<<<<<< HEAD
 		const select = (cat: HTMLElement, focus: boolean): void => {
 			const name = cat.dataset.category ?? '';
 			for (const other of cats()) {
@@ -62,6 +79,17 @@ export class PlaceActorsPanel extends UeElement {
 		});
 
 		this.on(this, 'input', () => applyFilter());
+=======
+		const show = (name: string): void => {
+			if (header) header.textContent = name;
+			for (const group of this.all(GROUP)) group.hidden = group.dataset.category !== name;
+			applyFilter();
+			this.emit('ue-category-change', { category: name });
+		};
+
+		this.on(this, 'ue-segment-change', (event) => show((event as CustomEvent<{ value: string }>).detail.value));
+		this.on(this, 'ue-text-input', () => applyFilter());
+>>>>>>> claude/adoring-faraday-94vc0i
 
 		this.on(this, 'dblclick', (event) => {
 			const target = event.target;
@@ -72,6 +100,7 @@ export class PlaceActorsPanel extends UeElement {
 
 		this.on(this, 'keydown', (event) => {
 			const target = event.target;
+<<<<<<< HEAD
 			if (!(target instanceof HTMLElement)) return;
 			const key = event.key;
 			if (target === field) {
@@ -111,6 +140,16 @@ export class PlaceActorsPanel extends UeElement {
 
 		const active = cats().find((cat) => cat.classList.contains('is-active'));
 		if (active) select(active, false);
+=======
+			if (target instanceof HTMLElement && target.matches(ROW) && event.key === 'Enter') {
+				event.preventDefault();
+				this.emit('ue-place', { name: target.querySelector('.placeActors-name')?.textContent ?? '' });
+			}
+		});
+
+		const active = this.one('.SegmentedControl-seg.is-checked');
+		if (active) show(active.dataset.value ?? '');
+>>>>>>> claude/adoring-faraday-94vc0i
 	}
 }
 

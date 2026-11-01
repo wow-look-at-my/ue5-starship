@@ -1,6 +1,7 @@
 // design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
+<<<<<<< HEAD
   connectedCallback() {
     this.style.display = "contents";
     this.setup();
@@ -8,6 +9,34 @@ var UeElement = class extends HTMLElement {
   disconnectedCallback() {
     for (const dispose of this.#disposers.splice(0)) dispose();
   }
+=======
+  #ready = false;
+  #pendingSetup = null;
+  // The bundle can load before the parser reaches this element's children, so setup waits for the document to finish parsing.
+  // A pinned specimen (data-pinned on the element or an ancestor) keeps its authored markup: setup never runs.
+  connectedCallback() {
+    this.style.display = "contents";
+    if (this.closest("[data-pinned]")) return;
+    if (document.readyState !== "loading") {
+      this.#start();
+      return;
+    }
+    this.#pendingSetup = () => this.#start();
+    document.addEventListener("DOMContentLoaded", this.#pendingSetup, { once: true });
+  }
+  disconnectedCallback() {
+    if (this.#pendingSetup) document.removeEventListener("DOMContentLoaded", this.#pendingSetup);
+    this.#pendingSetup = null;
+    this.#ready = false;
+    for (const dispose of this.#disposers.splice(0)) dispose();
+  }
+  #start() {
+    this.#pendingSetup = null;
+    if (this.#ready || !this.isConnected) return;
+    this.#ready = true;
+    this.setup();
+  }
+>>>>>>> claude/adoring-faraday-94vc0i
   on(target, type, listener, options) {
     target.addEventListener(type, listener, options);
     this.#disposers.push(() => target.removeEventListener(type, listener, options));
@@ -19,6 +48,13 @@ var UeElement = class extends HTMLElement {
   emit(name, detail) {
     return this.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
   }
+<<<<<<< HEAD
+=======
+  // True when the nearest element of this tag above the target is this element, so a nested instance keeps its own events.
+  owns(target) {
+    return target instanceof Element && target.closest(this.localName) === this;
+  }
+>>>>>>> claude/adoring-faraday-94vc0i
   all(selector) {
     return Array.from(this.querySelectorAll(selector));
   }
@@ -149,6 +185,15 @@ function bindBar(view, bar, thumb, vertical, onFits) {
   const observer = new ResizeObserver(update);
   observer.observe(view);
   observer.observe(bar);
+<<<<<<< HEAD
+=======
+  for (const child of Array.from(view.children)) observer.observe(child);
+  const mutations = new MutationObserver((records) => {
+    for (const record of records) for (const added of Array.from(record.addedNodes)) if (added instanceof Element) observer.observe(added);
+    update();
+  });
+  mutations.observe(view, { childList: true });
+>>>>>>> claude/adoring-faraday-94vc0i
   update();
   return {
     update,
@@ -157,12 +202,17 @@ function bindBar(view, bar, thumb, vertical, onFits) {
       view.removeEventListener("scroll", onScroll);
       bar.removeEventListener("wheel", onWheel);
       observer.disconnect();
+<<<<<<< HEAD
+=======
+      mutations.disconnect();
+>>>>>>> claude/adoring-faraday-94vc0i
     }
   };
 }
 
 // design-system/src/Scrollbar/Scrollbar.ts
 var Scrollbar = class extends UeElement {
+<<<<<<< HEAD
   setup() {
     for (const box of this.all(".sb-scroll")) {
       const view = box.querySelector(".sb-view");
@@ -172,6 +222,37 @@ var Scrollbar = class extends UeElement {
       const vertical = !bar.classList.contains("sb-h");
       this.onDispose(bindBar(view, bar, thumb, vertical).dispose);
     }
+=======
+  #visible = null;
+  // True while the content overflows and the bar shows.
+  get visible() {
+    return this.#visible === true;
+  }
+  setup() {
+    const box = this.all(".sb-scroll").find((candidate) => this.owns(candidate));
+    const view = box?.querySelector(":scope > .sb-view");
+    const bar = box?.querySelector(":scope > .sb");
+    const thumb = bar?.querySelector(".sb-thumb");
+    if (!view || !bar || !thumb) throw new Error("ue-scrollbar needs a .sb-scroll with a .sb-view and a .sb bar that holds a .sb-thumb");
+    const vertical = !bar.classList.contains("sb-h");
+    this.#visible = null;
+    let started = false;
+    const binding = bindBar(view, bar, thumb, vertical, (fits) => {
+      if (started) this.#report(!fits);
+    });
+    this.onDispose(binding.dispose);
+    const first = setTimeout(() => {
+      started = true;
+      this.#report(!bar.hidden);
+    }, 0);
+    this.onDispose(() => clearTimeout(first));
+  }
+  // Announces the first state and every change.
+  #report(visible) {
+    if (this.#visible === visible) return;
+    this.#visible = visible;
+    this.emit("ue-scrollbar-visibility", { visible });
+>>>>>>> claude/adoring-faraday-94vc0i
   }
 };
 define("ue-scrollbar", Scrollbar);

@@ -1,16 +1,19 @@
-<!-- @dsCard group="Controls" height=140 subtitle="ExpandableArea: collapsed and expanded, caret, bold small title, rounded panel body" -->
+<!-- @dsCard group="Controls" height=210 subtitle="ExpandableArea: collapsed and expanded, caret, bold small title, rounded panel body" -->
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ExpandableArea</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Condensed:wght@400;700&family=Roboto+Mono&display=swap">
+<style>body { font-family: var(--font-sans); }</style>
 <style>
 	/* Slate unit = 1px. */
 	.expandablearea-page { padding: 16px; display: flex; flex-wrap: wrap; gap: 20px 32px; align-items: flex-start; }
 	.expandablearea-col { display: flex; flex-direction: column; gap: 6px; width: 260px; }
 	.expandablearea-cap { font: 400 10.667px/1.2 var(--font-sans); color: var(--foreground); opacity: .7; }
 
+<<<<<<< HEAD
 	.expandablearea {
 		border-radius: 4px; /* ExpandableArea.Border radius 4 StarshipCoreStyle.cpp:568 */
 		background: var(--panel); /* fill Panel :568 */
@@ -36,14 +39,16 @@
 	.expandablearea__header[aria-expanded="true"] .expandablearea__caret { transform: rotate(90deg); }
 	@media (prefers-reduced-motion: reduce) { .expandablearea__header[role="button"] .expandablearea__caret { transition: none; } }
 	.expandablearea__row { padding: 4px 8px; font: 400 13.333px/16px var(--font-sans); color: var(--foreground); } /* consumer content; sample only */
+=======
+	.expandablearea-live { display: flex; flex-wrap: wrap; gap: 20px 32px; flex: 1 1 100%; }
+	.expandablearea-header-tools { margin-left: auto; display: flex; align-items: center; gap: 6px; } /* demo only: controls that sit in a header */
+	.expandablearea-row { padding: 4px 8px; font: 400 13.333px/16px var(--font-sans); color: var(--foreground); } /* consumer content; sample only */
+>>>>>>> claude/adoring-faraday-94vc0i
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-	<symbol id="expandablearea-right" viewBox="0 0 16 16"><path d="M6 4l4 4-4 4z"/></symbol>
-	<symbol id="expandablearea-down" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4z"/></symbol>
-</svg>
 <div class="expandablearea-page">
+<<<<<<< HEAD
 	<ue-expandable-area>
 		<div class="expandablearea-live">
 			<div class="expandablearea-col">
@@ -79,11 +84,62 @@
 		<span class="expandablearea-cap">Expanded</span>
 		<div class="expandablearea" data-pinned>
 			<div class="expandablearea__header"><svg class="expandablearea__caret" style="fill:var(--foreground)"><use href="#expandablearea-down"/></svg><span class="expandablearea__title">Transform</span></div>
-			<div class="expandablearea__body">
-				<div class="expandablearea__row">Location</div>
-				<div class="expandablearea__row">Rotation</div>
-			</div>
+=======
+	<div class="expandablearea-live">
+		<div class="expandablearea-col">
+			<span class="expandablearea-cap">Live: click the header, or Tab to it and press Enter or Space. The header has no hover fill in the engine.</span>
+			<ue-expandable-area>
+				<div class="expandablearea">
+					<div class="expandablearea__header" role="button" tabindex="0" aria-expanded="false"><svg class="expandablearea__caret" viewBox="0 0 16 16"><path d="M6 4l4 4-4 4z"/></svg><span class="expandablearea__title">Advanced</span></div>
+					<div class="expandablearea__body" hidden>
+						<div class="expandablearea-row">Enable Gravity</div>
+						<div class="expandablearea-row">Mass Scale</div>
+					</div>
+				</div>
+				<ue-event-status class="expandablearea-cap" event="ue-expand-toggle" template="Expanded: {expanded}">Expanded: false</ue-event-status>
+			</ue-expandable-area>
 		</div>
+		<div class="expandablearea-col">
+			<span class="expandablearea-cap">Live, starts expanded</span>
+			<ue-expandable-area>
+				<div class="expandablearea">
+					<div class="expandablearea__header" role="button" tabindex="0" aria-expanded="true"><svg class="expandablearea__caret" viewBox="0 0 16 16"><path d="M6 4l4 4-4 4z"/></svg><span class="expandablearea__title">Transform</span></div>
+					<div class="expandablearea__body">
+						<div class="expandablearea-row">Location</div>
+						<div class="expandablearea-row">Rotation</div>
+					</div>
+				</div>
+			</ue-expandable-area>
+		</div>
+		<div class="expandablearea-col">
+			<span class="expandablearea-cap">Live, controls in the header do not fold the area</span>
+			<ue-expandable-area>
+				<div class="expandablearea">
+					<div class="expandablearea__header" role="button" tabindex="0" aria-expanded="true"><svg class="expandablearea__caret" viewBox="0 0 16 16"><path d="M6 4l4 4-4 4z"/></svg><span class="expandablearea__title">Lighting</span><span class="expandablearea-header-tools"><ue-button><button class="button button--simple button--small" aria-label="Add light">Add</button></ue-button></span></div>
+					<div class="expandablearea__body">
+						<div class="expandablearea-row">Intensity</div>
+					</div>
+				</div>
+			</ue-expandable-area>
+		</div>
+	</div>
+	<span class="expandablearea-cap" style="flex:1 1 100%;max-width:none">Pinned: collapsed and expanded for reference, not interactive</span>
+	<div class="expandablearea-col">
+		<span class="expandablearea-cap">Collapsed</span>
+		<ue-expandable-area data-pinned><div class="expandablearea">
+			<div class="expandablearea__header"><svg class="expandablearea__caret" viewBox="0 0 16 16"><path d="M6 4l4 4-4 4z"/></svg><span class="expandablearea__title">Advanced</span></div>
+		</div></ue-expandable-area>
+	</div>
+	<div class="expandablearea-col">
+		<span class="expandablearea-cap">Expanded</span>
+		<ue-expandable-area data-pinned><div class="expandablearea">
+			<div class="expandablearea__header"><svg class="expandablearea__caret" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4z"/></svg><span class="expandablearea__title">Transform</span></div>
+>>>>>>> claude/adoring-faraday-94vc0i
+			<div class="expandablearea__body">
+				<div class="expandablearea-row">Location</div>
+				<div class="expandablearea-row">Rotation</div>
+			</div>
+		</div></ue-expandable-area>
 	</div>
 </div>
 <script type="module" src="./ExpandableArea.js"></script>

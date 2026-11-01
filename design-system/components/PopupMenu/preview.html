@@ -5,12 +5,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PopupMenu</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Condensed:wght@400;700&family=Roboto+Mono&display=swap">
+<style>body { font-family: var(--font-sans); }</style>
 <style>
 	/* Slate unit = 1px. Outline is drawn inside the box (inset shadow). */
 	.popupmenu-page { padding: 16px; display: flex; flex-wrap: wrap; gap: 20px 32px; align-items: flex-start; }
 	.popupmenu-col { display: flex; flex-direction: column; gap: 8px; }
 	.popupmenu-cap { font: 400 10.667px/1.2 var(--font-sans); color: var(--foreground); opacity: .7; max-width: 300px; }
 
+<<<<<<< HEAD
 	.popupmenu {
 		box-sizing: border-box; width: 290px;
 		padding: 8px 0; /* menu box padding (0,8,0,8) MultiBox.cpp:1344 */
@@ -61,18 +64,17 @@
 		color: var(--white-25); /* :2333 */
 	}
 	.popupmenu__heading::after { content: ""; flex: 1 1 auto; height: 1px; margin-left: 14px; background: var(--white-25); } /* SHeadingBlock.cpp:67-74 */
+=======
+	.popupmenu-demo { width: 290px; }
+	.popupmenu-demo--narrow { width: 230px; }
+	.popupmenu-status { color: var(--foreground-hover); opacity: 1; }
+	.popupmenu-live { position: relative; }
+>>>>>>> claude/adoring-faraday-94vc0i
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-	<symbol id="popupmenu-tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></symbol>
-	<symbol id="popupmenu-chev" viewBox="0 0 16 16"><path d="M6 3.5l4.5 4.5L6 12.5"/></symbol>
-	<symbol id="popupmenu-copy" viewBox="0 0 16 16"><rect x="5" y="5" width="8" height="8" rx="1"/><path d="M3 10V3h7"/></symbol>
-	<symbol id="popupmenu-paste" viewBox="0 0 16 16"><rect x="3" y="4" width="10" height="9" rx="1"/><path d="M6 4V2.5h4V4"/></symbol>
-	<symbol id="popupmenu-trash" viewBox="0 0 16 16"><path d="M3.5 4.5h9M6 4.5V3h4v1.5M5 4.5l.5 8h5l.5-8"/></symbol>
-	<symbol id="popupmenu-save" viewBox="0 0 16 16"><path d="M3 3h8l2 2v8H3zM5 3v3h5V3M5 13V9h6v4"/></symbol>
-</svg>
 <div class="popupmenu-page">
+<<<<<<< HEAD
 	<ue-popup-menu class="popupmenu-live-host">
 		<div class="popupmenu-col popupmenu-live">
 			<span class="popupmenu-cap">Live: hover or use Up, Down, Home and End. Enter, Space or a click activates. Check and radio rows toggle.</span>
@@ -80,11 +82,21 @@
 				<div class="popupmenu__heading">View</div>
 				<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false"><span class="popupmenu__check"><svg class="popupmenu__tick"><use href="#popupmenu-tick"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Grid</span></span></div>
 				<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="true"><span class="popupmenu__check"><svg class="popupmenu__tick"><use href="#popupmenu-tick"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Bounds</span><span class="popupmenu__keys">Alt+B</span></span></div>
+=======
+	<div class="popupmenu-col popupmenu-live">
+		<span class="popupmenu-cap">Live: hover or use Up, Down, Home and End. Enter, Space or a click activates. Check and radio rows toggle.</span>
+		<ue-popup-menu>
+			<div class="popupmenu popupmenu-demo" role="menu" tabindex="0" aria-label="View">
+				<div class="popupmenu__heading">View</div>
+				<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Grid</span></span></div>
+				<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="true"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Bounds</span><span class="popupmenu__keys">Alt+B</span></span></div>
+>>>>>>> claude/adoring-faraday-94vc0i
 				<div class="popupmenu__row" role="menuitemradio" aria-checked="true"><span class="popupmenu__check"><span class="popupmenu__radio"></span></span><span class="popupmenu__body"><span class="popupmenu__label">Perspective</span></span></div>
 				<div class="popupmenu__row" role="menuitemradio" aria-checked="false"><span class="popupmenu__check"><span class="popupmenu__radio"></span></span><span class="popupmenu__body"><span class="popupmenu__label">Top</span></span></div>
 				<div class="popupmenu__sep"></div>
 				<div class="popupmenu__row" role="menuitem" aria-disabled="true"><span class="popupmenu__check"></span><span class="popupmenu__body"><span class="popupmenu__label">Reset Layout</span></span></div>
 			</div>
+<<<<<<< HEAD
 			<span class="popupmenu-cap popupmenu-status">Activated: nothing yet</span>
 		</div>
 		<div class="popupmenu-col popupmenu-live">
@@ -93,6 +105,18 @@
 				<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__icon"><svg><use href="#popupmenu-copy"/></svg></span><span class="popupmenu__label">Copy</span><span class="popupmenu__keys">Ctrl+C</span></span></div>
 				<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__icon"><svg><use href="#popupmenu-paste"/></svg></span><span class="popupmenu__label">Paste</span><span class="popupmenu__keys">Ctrl+V</span></span></div>
 				<div class="popupmenu__row" role="menuitem" aria-haspopup="menu" aria-expanded="false"><span class="popupmenu__body"><span class="popupmenu__icon"><svg><use href="#popupmenu-save"/></svg></span><span class="popupmenu__label">Save As</span></span><svg class="popupmenu__arrow"><use href="#popupmenu-chev"/></svg>
+=======
+			<ue-event-status class="popupmenu-cap popupmenu-status" event="ue-menu-activate" template="Activated: {text}">Activated: nothing yet</ue-event-status>
+		</ue-popup-menu>
+	</div>
+	<div class="popupmenu-col popupmenu-live">
+		<span class="popupmenu-cap">Live: Right or hover opens the submenu, Left or Escape closes it. Disabled rows and separators are skipped.</span>
+		<ue-popup-menu>
+			<div class="popupmenu popupmenu-demo popupmenu-demo--narrow" role="menu" tabindex="0" aria-label="Edit">
+				<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__icon"><svg viewBox="0 0 16 16"><rect x="5" y="5" width="8" height="8" rx="1"/><path d="M3 10V3h7"/></svg></span><span class="popupmenu__label">Copy</span><span class="popupmenu__keys">Ctrl+C</span></span></div>
+				<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__icon"><svg viewBox="0 0 16 16"><rect x="3" y="4" width="10" height="9" rx="1"/><path d="M6 4V2.5h4V4"/></svg></span><span class="popupmenu__label">Paste</span><span class="popupmenu__keys">Ctrl+V</span></span></div>
+				<div class="popupmenu__row" role="menuitem" aria-haspopup="menu" aria-expanded="false"><span class="popupmenu__body"><span class="popupmenu__icon"><svg viewBox="0 0 16 16"><path d="M3 3h8l2 2v8H3zM5 3v3h5V3M5 13V9h6v4"/></svg></span><span class="popupmenu__label">Save As</span></span><svg class="popupmenu__arrow" viewBox="0 0 16 16"><path d="M6 3.5l4.5 4.5L6 12.5"/></svg>
+>>>>>>> claude/adoring-faraday-94vc0i
 					<div class="popupmenu popupmenu__sub" role="menu" aria-label="Save As" hidden>
 						<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Asset...</span></span></div>
 						<div class="popupmenu__row" role="menuitem" aria-disabled="true"><span class="popupmenu__body"><span class="popupmenu__label">Level...</span></span></div>
@@ -101,6 +125,7 @@
 					</div>
 				</div>
 				<div class="popupmenu__sep"></div>
+<<<<<<< HEAD
 				<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__icon"><svg><use href="#popupmenu-trash"/></svg></span><span class="popupmenu__label">Delete</span><span class="popupmenu__keys">Del</span></span></div>
 			</div>
 			<span class="popupmenu-cap popupmenu-status">Activated: nothing yet</span>
@@ -110,24 +135,53 @@
 	<div class="popupmenu-col">
 		<span class="popupmenu-cap">With a check column (all rows share the column width)</span>
 		<div class="popupmenu" data-pinned>
+=======
+				<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__icon"><svg viewBox="0 0 16 16"><path d="M3.5 4.5h9M6 4.5V3h4v1.5M5 4.5l.5 8h5l.5-8"/></svg></span><span class="popupmenu__label">Delete</span><span class="popupmenu__keys">Del</span></span></div>
+			</div>
+			<ue-event-status class="popupmenu-cap popupmenu-status" event="ue-menu-activate" template="Activated: {text}">Activated: nothing yet</ue-event-status>
+		</ue-popup-menu>
+	</div>
+	<div class="popupmenu-col popupmenu-live">
+		<span class="popupmenu-cap">Live, small rows (popupmenu--small, as the asset picker list uses)</span>
+		<ue-popup-menu>
+			<div class="popupmenu popupmenu--small popupmenu-demo popupmenu-demo--narrow" role="menu" tabindex="0" aria-label="Assets">
+				<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">SM_Chair</span></span></div>
+				<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">SM_Table</span></span></div>
+				<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">SM_Lamp</span></span></div>
+			</div>
+			<ue-event-status class="popupmenu-cap popupmenu-status" event="ue-menu-activate" template="Activated: {text}">Activated: nothing yet</ue-event-status>
+		</ue-popup-menu>
+	</div>
+	<span class="popupmenu-cap" style="flex:1 1 100%;max-width:none">Pinned: forced rows for reference, not interactive</span>
+	<div class="popupmenu-col">
+		<span class="popupmenu-cap">With a check column (all rows share the column width)</span>
+		<ue-popup-menu data-pinned><div class="popupmenu popupmenu-demo">
+>>>>>>> claude/adoring-faraday-94vc0i
 			<div class="popupmenu__heading">View</div>
 			<div class="popupmenu__row"><span class="popupmenu__check"></span><span class="popupmenu__body"><span class="popupmenu__label">Show Grid</span></span></div>
-			<div class="popupmenu__row popupmenu__row--hover"><span class="popupmenu__check"><svg class="popupmenu__tick"><use href="#popupmenu-tick"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Bounds</span><span class="popupmenu__keys">Alt+B</span></span></div>
+			<div class="popupmenu__row popupmenu__row--hover"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Bounds</span><span class="popupmenu__keys">Alt+B</span></span></div>
 			<div class="popupmenu__row"><span class="popupmenu__check"><span class="popupmenu__radio popupmenu__radio--on"></span></span><span class="popupmenu__body"><span class="popupmenu__label">Perspective</span></span></div>
 			<div class="popupmenu__row"><span class="popupmenu__check"><span class="popupmenu__radio"></span></span><span class="popupmenu__body"><span class="popupmenu__label">Top</span></span></div>
 			<div class="popupmenu__sep"></div>
 			<div class="popupmenu__row popupmenu__row--disabled"><span class="popupmenu__check"></span><span class="popupmenu__body"><span class="popupmenu__label">Reset Layout</span></span></div>
-		</div>
+		</div></ue-popup-menu>
 	</div>
 	<div class="popupmenu-col">
 		<span class="popupmenu-cap">Icons, key bindings and a submenu arrow</span>
+<<<<<<< HEAD
 		<div class="popupmenu popupmenu--narrow" data-pinned>
 			<div class="popupmenu__row"><span class="popupmenu__body"><span class="popupmenu__icon"><svg><use href="#popupmenu-copy"/></svg></span><span class="popupmenu__label">Copy</span><span class="popupmenu__keys">Ctrl+C</span></span></div>
 			<div class="popupmenu__row"><span class="popupmenu__body"><span class="popupmenu__icon"><svg><use href="#popupmenu-paste"/></svg></span><span class="popupmenu__label">Paste</span><span class="popupmenu__keys">Ctrl+V</span></span></div>
 			<div class="popupmenu__row popupmenu__row--hover"><span class="popupmenu__body"><span class="popupmenu__icon"><svg><use href="#popupmenu-save"/></svg></span><span class="popupmenu__label">Save As</span></span><svg class="popupmenu__arrow"><use href="#popupmenu-chev"/></svg></div>
+=======
+		<ue-popup-menu data-pinned><div class="popupmenu popupmenu-demo popupmenu-demo--narrow">
+			<div class="popupmenu__row"><span class="popupmenu__body"><span class="popupmenu__icon"><svg viewBox="0 0 16 16"><rect x="5" y="5" width="8" height="8" rx="1"/><path d="M3 10V3h7"/></svg></span><span class="popupmenu__label">Copy</span><span class="popupmenu__keys">Ctrl+C</span></span></div>
+			<div class="popupmenu__row"><span class="popupmenu__body"><span class="popupmenu__icon"><svg viewBox="0 0 16 16"><rect x="3" y="4" width="10" height="9" rx="1"/><path d="M6 4V2.5h4V4"/></svg></span><span class="popupmenu__label">Paste</span><span class="popupmenu__keys">Ctrl+V</span></span></div>
+			<div class="popupmenu__row popupmenu__row--hover"><span class="popupmenu__body"><span class="popupmenu__icon"><svg viewBox="0 0 16 16"><path d="M3 3h8l2 2v8H3zM5 3v3h5V3M5 13V9h6v4"/></svg></span><span class="popupmenu__label">Save As</span></span><svg class="popupmenu__arrow" viewBox="0 0 16 16"><path d="M6 3.5l4.5 4.5L6 12.5"/></svg></div>
+>>>>>>> claude/adoring-faraday-94vc0i
 			<div class="popupmenu__sep"></div>
-			<div class="popupmenu__row"><span class="popupmenu__body"><span class="popupmenu__icon"><svg><use href="#popupmenu-trash"/></svg></span><span class="popupmenu__label">Delete</span><span class="popupmenu__keys">Del</span></span></div>
-		</div>
+			<div class="popupmenu__row"><span class="popupmenu__body"><span class="popupmenu__icon"><svg viewBox="0 0 16 16"><path d="M3.5 4.5h9M6 4.5V3h4v1.5M5 4.5l.5 8h5l.5-8"/></svg></span><span class="popupmenu__label">Delete</span><span class="popupmenu__keys">Del</span></span></div>
+		</div></ue-popup-menu>
 	</div>
 </div>
 <script type="module" src="./PopupMenu.js"></script>

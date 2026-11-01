@@ -5,7 +5,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AssetPicker</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Condensed:wght@400;700&family=Roboto+Mono&display=swap">
+<style>body { font-family: var(--font-sans); }</style>
 <style>
+<<<<<<< HEAD
 	/* Every metric below is cited in README.md. Icons are 16x16 stroke approximations of the Starship SVGs. */
 	.AssetPicker-frame { width: 360px; background: var(--recessed); }
 	/* Property row (see DetailsCategory): SDetailSingleItemRow.cpp:732-760 */
@@ -61,12 +64,17 @@
 	.AssetPicker-menuMark { position: relative; flex: none; width: 16px; height: 16px; margin: 0 6px 0 2px; }
 	.AssetPicker-menuItem[aria-selected="true"] .AssetPicker-menuMark::after { content: ""; position: absolute; left: 5px; top: 1px; width: 4px; height: 9px; border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); }
 	/* Preview captions only */
+=======
+	/* Demo layout only. The component layout is src/AssetPicker/AssetPicker.css. */
+	.AssetPicker-frame { width: 360px; }
+>>>>>>> claude/adoring-faraday-94vc0i
 	.AssetPicker-cap { width: 360px; box-sizing: border-box; margin: 0; padding: 6px 8px 12px; font: 400 10.667px/1.4 var(--font-sans); color: var(--foreground); opacity: .8; }
 	.AssetPicker-cap b { color: var(--foreground-hover); }
 	.AssetPicker-frame.is-menuRoom { margin-bottom: 150px; }
 </style>
 </head>
 <body>
+<<<<<<< HEAD
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
 	<symbol id="AssetPicker-chev" viewBox="0 0 16 16"><path d="m4.5 6.5 3.5 3.5 3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 	<symbol id="AssetPicker-use" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.25"/><path d="M11 8H5.5m2.5-2.75L5.25 8 8 10.75" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></symbol>
@@ -112,15 +120,22 @@
 <div class="AssetPicker-frame is-menuRoom">
 	<div class="AssetPicker-row">
 		<div class="AssetPicker-name" style="align-self: stretch">Static Mesh</div>
+=======
+<ue-asset-picker>
+<div class="AssetPicker-frame">
+	<div class="AssetPicker-row" data-default="None" data-selection="SM_Table">
+		<div class="AssetPicker-name">Static Mesh</div>
+>>>>>>> claude/adoring-faraday-94vc0i
 		<div class="AssetPicker-split"></div>
 		<div class="AssetPicker-value">
 			<div class="AssetPicker-thumbSlot">
-				<div class="AssetPicker-thumbFrame">
-					<div class="AssetPicker-thumb"><svg><use href="#AssetPicker-cube"/></svg><i class="AssetPicker-strip"></i></div>
+				<div class="AssetPicker-thumbFrame" title="/Game/Props/SM_Chair.SM_Chair" aria-label="SM_Chair">
+					<div class="AssetPicker-thumb"><svg viewBox="0 0 16 16"><path d="M8 1.5 14 4.75v6.5L8 14.5 2 11.25v-6.5z M2 4.75 8 8l6-3.25 M8 8v6.5"/></svg><i class="AssetPicker-strip"></i></div>
 					<i class="AssetPicker-thumbBorder"></i>
 				</div>
 			</div>
 			<div class="AssetPicker-col">
+<<<<<<< HEAD
 				<button class="AssetPicker-combo is-hover" tabindex="-1"><span class="label">SM_Table</span><svg><use href="#AssetPicker-chev"/></svg></button>
 				<div class="AssetPicker-buttons">
 					<span class="AssetPicker-btnBox"><button class="AssetPicker-btn is-pressed" tabindex="-1"><svg><use href="#AssetPicker-use"/></svg></button></span>
@@ -131,15 +146,88 @@
 					<div class="AssetPicker-menuItem" aria-selected="false"><span class="AssetPicker-menuMark"></span>SM_Chair</div>
 					<div class="AssetPicker-menuItem is-hover" aria-selected="true"><span class="AssetPicker-menuMark"></span>SM_Table</div>
 					<div class="AssetPicker-menuItem" aria-selected="false"><span class="AssetPicker-menuMark"></span>SM_Couch</div>
+=======
+				<ue-combo-button>
+					<div class="combobutton-anchor combobutton-anchor--fill">
+						<span class="combobutton combobutton--small" role="combobox" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="Static Mesh">
+							<span class="combobutton__label">SM_Chair</span>
+							<svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg>
+						</span>
+						<div class="combobutton-menu" hidden>
+							<ue-popup-menu>
+								<div class="popupmenu popupmenu--small popupmenu--combo" role="menu" tabindex="0" aria-label="Assets">
+									<div class="popupmenu__row" role="menuitem" data-value="None"><span class="popupmenu__body"><span class="popupmenu__label">None</span></span></div>
+									<div class="popupmenu__row" role="menuitem" data-value="SM_Chair"><span class="popupmenu__body"><span class="popupmenu__label">SM_Chair</span></span></div>
+									<div class="popupmenu__row" role="menuitem" data-value="SM_Table"><span class="popupmenu__body"><span class="popupmenu__label">SM_Table</span></span></div>
+									<div class="popupmenu__row" role="menuitem" data-value="SM_Couch"><span class="popupmenu__body"><span class="popupmenu__label">SM_Couch</span></span></div>
+									<div class="popupmenu__row" role="menuitem" data-value="SM_Lamp"><span class="popupmenu__body"><span class="popupmenu__label">SM_Lamp</span></span></div>
+									<div class="popupmenu__row" role="menuitem" data-value="SM_Bookshelf"><span class="popupmenu__body"><span class="popupmenu__label">SM_Bookshelf</span></span></div>
+								</div>
+							</ue-popup-menu>
+						</div>
+					</div>
+				</ue-combo-button>
+				<div class="AssetPicker-buttons">
+					<ue-button><button class="button button--simple button--icon" data-role="use" aria-label="Use Selected Asset from Content Browser" title="Use Selected Asset from Content Browser"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M11 8H5.5m2.5-2.75L5.25 8 8 10.75"/></svg></button></ue-button>
+					<ue-button><button class="button button--simple button--icon" data-role="browse" aria-label="Browse to Asset in Content Browser" title="Browse to Asset in Content Browser"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M1.75 4.25a1 1 0 0 1 1-1h3.2l1.3 1.5h5a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H2.75a1 1 0 0 1-1-1z"/></svg></button></ue-button>
+>>>>>>> claude/adoring-faraday-94vc0i
 				</div>
 			</div>
 		</div>
 		<div class="AssetPicker-split"></div>
+<<<<<<< HEAD
 		<div class="AssetPicker-right"><button class="AssetPicker-reset is-hover" tabindex="-1"><svg><use href="#AssetPicker-reset"/></svg></button></div>
 	</div>
 </div>
 <p class="AssetPicker-cap"><b>Pinned.</b> Forced states: combo hovered with the list open and SM_Table hovered, reset hovered. The list covers the buttons below it.</p>
 
 <script type="module" src="./AssetPicker.js"></script>
+=======
+		<div class="AssetPicker-right">
+			<ue-reset-to-default>
+				<button class="resettodefault" type="button" title="Reset this property to its default value." aria-label="Reset to default"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button>
+			</ue-reset-to-default>
+		</div>
+	</div>
+</div>
+</ue-asset-picker>
+<p class="AssetPicker-cap"><b>Live.</b> Click the combo (or press Down) to open the asset list, choose with the pointer or Up, Down, Enter, Escape. The label and the thumbnail tooltip follow the choice. The use-selected button picks SM_Table, the stand-in for a Content Browser selection. The reset arrow shows when the value is not None and puts it back.</p>
+
+<ue-asset-picker data-pinned><div class="AssetPicker-frame is-menuRoom">
+	<div class="AssetPicker-row">
+		<div class="AssetPicker-name">Static Mesh</div>
+		<div class="AssetPicker-split"></div>
+		<div class="AssetPicker-value">
+			<div class="AssetPicker-thumbSlot">
+				<div class="AssetPicker-thumbFrame">
+					<div class="AssetPicker-thumb"><svg viewBox="0 0 16 16"><path d="M8 1.5 14 4.75v6.5L8 14.5 2 11.25v-6.5z M2 4.75 8 8l6-3.25 M8 8v6.5"/></svg><i class="AssetPicker-strip"></i></div>
+					<i class="AssetPicker-thumbBorder"></i>
+				</div>
+			</div>
+			<div class="AssetPicker-col">
+				<ue-combo-button><div class="combobutton-anchor combobutton-anchor--fill">
+					<span class="combobutton combobutton--small combobutton--open" tabindex="-1"><span class="combobutton__label">SM_Table</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
+					<div class="combobutton-menu">
+						<ue-popup-menu><div class="popupmenu popupmenu--small popupmenu--combo">
+							<div class="popupmenu__row"><span class="popupmenu__body"><span class="popupmenu__label">None</span></span></div>
+							<div class="popupmenu__row"><span class="popupmenu__body"><span class="popupmenu__label">SM_Chair</span></span></div>
+							<div class="popupmenu__row popupmenu__row--hover"><span class="popupmenu__body"><span class="popupmenu__label">SM_Table</span></span></div>
+							<div class="popupmenu__row"><span class="popupmenu__body"><span class="popupmenu__label">SM_Couch</span></span></div>
+						</div></ue-popup-menu>
+					</div>
+				</div></ue-combo-button>
+				<div class="AssetPicker-buttons">
+					<ue-button><button class="button button--simple button--icon button--pressed" tabindex="-1" aria-label="Use Selected Asset"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M11 8H5.5m2.5-2.75L5.25 8 8 10.75"/></svg></button></ue-button>
+					<ue-button><button class="button button--simple button--icon button--hover" tabindex="-1" aria-label="Browse to Asset"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M1.75 4.25a1 1 0 0 1 1-1h3.2l1.3 1.5h5a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H2.75a1 1 0 0 1-1-1z"/></svg></button></ue-button>
+				</div>
+			</div>
+		</div>
+		<div class="AssetPicker-split"></div>
+		<div class="AssetPicker-right"><ue-reset-to-default><button class="resettodefault resettodefault--hover" type="button" tabindex="-1" aria-label="Reset to default"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button></ue-reset-to-default></div>
+	</div>
+</div></ue-asset-picker>
+<p class="AssetPicker-cap"><b>Pinned.</b> Forced states: combo open with SM_Table hovered, use pressed, browse and reset hovered. The list covers the buttons below it.</p>
+
+>>>>>>> claude/adoring-faraday-94vc0i
 </body>
 </html>

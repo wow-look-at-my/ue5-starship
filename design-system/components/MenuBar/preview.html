@@ -5,12 +5,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MenuBar</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Condensed:wght@400;700&family=Roboto+Mono&display=swap">
+<style>body { font-family: var(--font-sans); }</style>
 <style>
-/* SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp. Style set "WindowMenuBar" (SC:2443-2448), buttons built by SMenuEntryBlock.cpp:247-298. */
+/* The menu strip look is in src/MenuBar/MenuBar.css. This page only lays out its notes and the live stage. */
 body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* Normal font 10pt = 13.333px (SC:36, SC:2444); 16px line height approximates Roboto metrics */
 .menuBar-note { margin: 14px 0 6px; font: 400 10.667px/12px var(--font-sans); color: var(--foreground); opacity: .7; } /* Small font 8pt (SC:40) */
 .menuBar-note:first-child { margin-top: 0; }
 
+<<<<<<< HEAD
 /* Strip: WindowMenuBar.Background is FSlateNoResource (SC:2443); the bar is transparent and sits on the title area */
 .menuBar { display: flex; align-items: stretch; background: transparent; }
 
@@ -32,11 +35,15 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 .menuBar-label { margin: 0 6px 0 2px; } /* label padding (2,0,6,0) (SMenuEntryBlock.cpp:602) */
 .menuBar-keys { margin-left: 25px; padding: 0 4px 0 16px; font-size: 10.667px; opacity: .6; } /* key binding padding 25 and box (16,0,4,0) (SMenuEntryBlock.cpp:612, 618), Small 8pt (SC:2324), subdued (SMenuEntryBlock.cpp:622) */
 .menuBar-sep { height: 1px; margin: 6px 12px; background: var(--white-25); } /* Menu.Separator White25, padding (12,6,12,6) (SC:2318-2319); thickness 1 (SMenuSeparatorBlock.cpp:56) */
+=======
+.menuBar-stage { min-height: 230px; }
+>>>>>>> claude/adoring-faraday-94vc0i
 </style>
 </head>
 <body>
 
 <div class="menuBar-note">Normal, with Edit hovered (pinned)</div>
+<<<<<<< HEAD
 <div class="menuBar" data-pinned>
 	<div class="menuBar-item">File</div>
 	<div class="menuBar-item is-hover">Edit</div>
@@ -59,6 +66,157 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 	<div class="menuBar-item">Actor</div>
 	<div class="menuBar-item">Help</div>
 </div>
+=======
+<ue-menu-bar data-pinned><div class="menuBar">
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">File</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar combobutton--hover"><span class="combobutton__label">Edit</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">Window</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">Tools</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">Build</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">Select</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">Actor</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">Help</span></span></ue-combo-button>
+</div></ue-menu-bar>
+
+<div class="menuBar-note">Window menu open (pinned)</div>
+<ue-menu-bar data-pinned><div class="menuBar">
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">File</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">Edit</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar combobutton--open"><span class="combobutton__label">Window</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">Tools</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">Build</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">Select</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">Actor</span></span></ue-combo-button>
+	<ue-combo-button><span class="combobutton combobutton--menubar"><span class="combobutton__label">Help</span></span></ue-combo-button>
+</div></ue-menu-bar>
+
+<div class="menuBar-note">Live: hover an item, click to open its menu, then hover another item to switch. Escape or a click outside closes. Keys: Left and Right between items, Down opens, Up and Down in a menu, Enter picks. The menu entries are illustrative.</div>
+<ue-menu-bar>
+	<div class="menuBar-stage">
+		<div class="menuBar" role="menubar" aria-label="Main menu">
+			<ue-combo-button mode="action">
+				<div class="combobutton-anchor menuBar-slot">
+					<span class="combobutton combobutton--menubar" role="menuitem" tabindex="0" aria-haspopup="menu" aria-expanded="false"><span class="combobutton__label">File</span></span>
+					<div class="combobutton-menu" hidden>
+						<ue-popup-menu>
+							<div class="popupmenu" role="menu" tabindex="0" aria-label="File">
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">New Level</span><span class="popupmenu__keys">Ctrl+N</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Open Level</span><span class="popupmenu__keys">Ctrl+O</span></span></div>
+								<div class="popupmenu__sep"></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Save Current Level</span><span class="popupmenu__keys">Ctrl+S</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Save All</span><span class="popupmenu__keys">Ctrl+Shift+S</span></span></div>
+								<div class="popupmenu__sep"></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Exit</span></span></div>
+							</div>
+						</ue-popup-menu>
+					</div>
+				</div>
+			</ue-combo-button>
+			<ue-combo-button mode="action">
+				<div class="combobutton-anchor menuBar-slot">
+					<span class="combobutton combobutton--menubar" role="menuitem" tabindex="-1" aria-haspopup="menu" aria-expanded="false"><span class="combobutton__label">Edit</span></span>
+					<div class="combobutton-menu" hidden>
+						<ue-popup-menu>
+							<div class="popupmenu" role="menu" tabindex="0" aria-label="Edit">
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Undo</span><span class="popupmenu__keys">Ctrl+Z</span></span></div>
+								<div class="popupmenu__row" role="menuitem" aria-disabled="true"><span class="popupmenu__body"><span class="popupmenu__label">Redo</span><span class="popupmenu__keys">Ctrl+Y</span></span></div>
+								<div class="popupmenu__sep"></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Cut</span><span class="popupmenu__keys">Ctrl+X</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Copy</span><span class="popupmenu__keys">Ctrl+C</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Paste</span><span class="popupmenu__keys">Ctrl+V</span></span></div>
+								<div class="popupmenu__sep"></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Editor Preferences</span></span></div>
+							</div>
+						</ue-popup-menu>
+					</div>
+				</div>
+			</ue-combo-button>
+			<ue-combo-button mode="action">
+				<div class="combobutton-anchor menuBar-slot">
+					<span class="combobutton combobutton--menubar" role="menuitem" tabindex="-1" aria-haspopup="menu" aria-expanded="false"><span class="combobutton__label">Window</span></span>
+					<div class="combobutton-menu" hidden>
+						<ue-popup-menu>
+							<div class="popupmenu" role="menu" tabindex="0" aria-label="Window">
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Content Browser</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Details</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Outliner</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Output Log</span></span></div>
+							</div>
+						</ue-popup-menu>
+					</div>
+				</div>
+			</ue-combo-button>
+			<ue-combo-button mode="action">
+				<div class="combobutton-anchor menuBar-slot">
+					<span class="combobutton combobutton--menubar" role="menuitem" tabindex="-1" aria-haspopup="menu" aria-expanded="false"><span class="combobutton__label">Tools</span></span>
+					<div class="combobutton-menu" hidden>
+						<ue-popup-menu>
+							<div class="popupmenu" role="menu" tabindex="0" aria-label="Tools">
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">New C++ Class</span></span></div>
+								<div class="popupmenu__row" role="menuitem" aria-disabled="true"><span class="popupmenu__body"><span class="popupmenu__label">Source Control</span></span></div>
+							</div>
+						</ue-popup-menu>
+					</div>
+				</div>
+			</ue-combo-button>
+			<ue-combo-button mode="action">
+				<div class="combobutton-anchor menuBar-slot">
+					<span class="combobutton combobutton--menubar" role="menuitem" tabindex="-1" aria-haspopup="menu" aria-expanded="false"><span class="combobutton__label">Build</span></span>
+					<div class="combobutton-menu" hidden>
+						<ue-popup-menu>
+							<div class="popupmenu" role="menu" tabindex="0" aria-label="Build">
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Build All Levels</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Build Geometry</span></span></div>
+							</div>
+						</ue-popup-menu>
+					</div>
+				</div>
+			</ue-combo-button>
+			<ue-combo-button mode="action">
+				<div class="combobutton-anchor menuBar-slot">
+					<span class="combobutton combobutton--menubar" role="menuitem" tabindex="-1" aria-haspopup="menu" aria-expanded="false"><span class="combobutton__label">Select</span></span>
+					<div class="combobutton-menu" hidden>
+						<ue-popup-menu>
+							<div class="popupmenu" role="menu" tabindex="0" aria-label="Select">
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Select All</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Select None</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Invert Selection</span></span></div>
+							</div>
+						</ue-popup-menu>
+					</div>
+				</div>
+			</ue-combo-button>
+			<ue-combo-button mode="action">
+				<div class="combobutton-anchor menuBar-slot">
+					<span class="combobutton combobutton--menubar" role="menuitem" tabindex="-1" aria-haspopup="menu" aria-expanded="false"><span class="combobutton__label">Actor</span></span>
+					<div class="combobutton-menu" hidden>
+						<ue-popup-menu>
+							<div class="popupmenu" role="menu" tabindex="0" aria-label="Actor">
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Go to Actor</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Pilot Actor</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Detach</span></span></div>
+							</div>
+						</ue-popup-menu>
+					</div>
+				</div>
+			</ue-combo-button>
+			<ue-combo-button mode="action">
+				<div class="combobutton-anchor menuBar-slot">
+					<span class="combobutton combobutton--menubar" role="menuitem" tabindex="-1" aria-haspopup="menu" aria-expanded="false"><span class="combobutton__label">Help</span></span>
+					<div class="combobutton-menu" hidden>
+						<ue-popup-menu>
+							<div class="popupmenu" role="menu" tabindex="0" aria-label="Help">
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Documentation</span></span></div>
+								<div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">About Unreal Editor</span></span></div>
+							</div>
+						</ue-popup-menu>
+					</div>
+				</div>
+			</ue-combo-button>
+		</div>
+	</div>
+</ue-menu-bar>
+>>>>>>> claude/adoring-faraday-94vc0i
 
 <div class="menuBar-note">Live: hover an item, click to open its menu, then hover another item to switch. Escape or a click outside closes. Keys: Left and Right between items, Down opens, Up and Down in a menu, Enter picks. The menu entries are illustrative.</div>
 <ue-menu-bar>

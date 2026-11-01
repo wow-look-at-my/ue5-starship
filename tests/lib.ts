@@ -54,6 +54,17 @@ let baseUrl: Promise<string> | undefined;
 export function serve(): Promise<string> {
 	baseUrl ??= new Promise((resolve, reject) => {
 		const server = http.createServer((req, res) => {
+<<<<<<< HEAD
+=======
+			if (process.env.UE_PUBLISHED) {
+				// UE_PUBLISHED is the published artifact's project URL, so the suite runs against the bytes the viewer serves.
+				void fetch(process.env.UE_PUBLISHED + (req.url ?? '/')).then(async (upstream) => {
+					res.writeHead(upstream.status, { 'content-type': upstream.headers.get('content-type') ?? 'application/octet-stream' });
+					res.end(Buffer.from(await upstream.arrayBuffer()));
+				}, () => res.writeHead(502).end());
+				return;
+			}
+>>>>>>> claude/adoring-faraday-94vc0i
 			const file = path.join(root, decodeURIComponent(new URL(req.url ?? '/', 'http://x').pathname));
 			if (!file.startsWith(root) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
 				res.writeHead(404).end();
@@ -72,16 +83,59 @@ export function serve(): Promise<string> {
 	return baseUrl;
 }
 
+<<<<<<< HEAD
 // Opens a component preview with the tokens injected. Console and page errors collect in `errors`.
 export async function openPreview(browser: Browser, name: string, viewport = { width: 1000, height: 800 }): Promise<Preview> {
 	const page = await browser.newPage({ viewport });
+=======
+// The design system page preloads components/bundle.js as a classic script ahead of the preview markup.
+const pascal = (tag: string): string => tag.split('-').slice(1).map((part) => part[0].toUpperCase() + part.slice(1)).join('');
+
+function loaderTags(html: string): string {
+	if (process.env.UE_MODE !== 'modules') return '<script src="/components/bundle.js"></script>';
+	const tags = new Set(Array.from(html.matchAll(/<(ue-[a-z0-9-]+)/g), (m) => m[1]));
+	return Array.from(tags, (tag) => '<script type="module" src="/components/' + pascal(tag) + '/' + pascal(tag) + '.js"></script>').join('');
+}
+
+// The page also preloads components/bundle.css ahead of the preview's own styles.
+export const withBundle = (html: string): string => html.replace('<head>', '<head><link rel="stylesheet" href="/components/bundle.css">').replace('</head>', loaderTags(html) + '</head>');
+
+// A pinned specimen is a ue-* element with data-pinned, so a ue-* tag in a page selector must mean the live element.
+// A selector that names data-pinned is left alone: it picks pinned specimens on purpose.
+const NOT_PINNED = ':not([data-pinned], [data-pinned] *)';
+export function live(selector: string): string {
+	if (selector.includes('data-pinned')) return selector;
+	return selector.replace(/(^|[\s>+~,(])(ue-[a-z0-9-]+)(?![\w-])/g, '$1$2' + NOT_PINNED);
+}
+
+// Opens a component preview with the tokens injected. Console and page errors collect in `errors`.
+export async function openPreview(browser: Browser, name: string, viewport = { width: 1000, height: 800 }): Promise<Preview> {
+	const page = await browser.newPage({ viewport });
+	const pageLocator = page.locator.bind(page);
+	page.locator = ((selector: string, options?: Parameters<Page['locator']>[1]) => pageLocator(live(selector), options)) as Page['locator'];
+	for (const method of ['$eval', '$$eval'] as const) {
+		const original = page[method].bind(page) as (selector: string, ...rest: unknown[]) => Promise<unknown>;
+		(page as unknown as Record<string, unknown>)[method] = (selector: string, ...rest: unknown[]) => original(live(selector), ...rest);
+	}
+>>>>>>> claude/adoring-faraday-94vc0i
 	const errors: string[] = [];
 	page.on('pageerror', (e) => errors.push(String(e)));
 	page.on('console', (m) => {
 		if (m.type() === 'error' && !/fonts\.g|ERR_|Failed to load resource/.test(m.text())) errors.push(m.text());
 	});
+<<<<<<< HEAD
 	await page.goto((await serve()) + '/components/' + name + '/preview.html');
 	await page.addStyleTag({ content: tokensCss() });
+=======
+	await page.route('**/components/*/preview.html', async (route) => {
+		const response = await route.fetch();
+		await route.fulfill({ response, body: withBundle(await response.text()) });
+	});
+	await page.goto((await serve()) + '/components/' + name + '/preview.html');
+	await page.addStyleTag({ content: tokensCss() });
+	// Text widths change when the web font arrives, so measure only after it loads.
+	await page.evaluate(() => document.fonts.ready.then(() => undefined));
+>>>>>>> claude/adoring-faraday-94vc0i
 	await page.waitForTimeout(100);
 	return { page, errors };
 }

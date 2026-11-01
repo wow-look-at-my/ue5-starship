@@ -5,17 +5,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PlaceActorsPanel</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Condensed:wght@400;700&family=Roboto+Mono&display=swap">
+<style>body { font-family: var(--font-sans); }</style>
 <style>
-/* SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp, SS = Editor/EditorStyle/Private/StarshipStyle.cpp, PM = Editor/PlacementMode/Private/SPlacementModeTools.cpp, WR = Developer/WidgetRegistration/Private */
+/* The panel look is in src/PlaceActorsPanel/PlaceActorsPanel.css. This page only lays out its notes and the demo strip. */
 body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* Normal font 10pt = 13.333px (SC:36); 16px line height approximates Roboto metrics */
 .placeActors-note { margin: 0 0 6px; font: 400 10.667px/12px var(--font-sans); color: var(--foreground); opacity: .7; } /* Small font 8pt (SC:40) */
 .placeActors-demo { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
 .placeActors-svgdefs { position: absolute; width: 0; height: 0; overflow: hidden; }
-.placeActors-ico { display: block; flex: none; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
-.placeActors-ico--14 { width: 14px; height: 14px; } /* search glass ImageSizeOverride 14 (SC:1316) */
-.placeActors-ico--16 { width: 16px; height: 16px; } /* Icons.Help Icon16x16 (SC:297) */
-.placeActors-ico--20 { width: 20px; height: 20px; } /* PlacementBrowser.Icons.* are Icon20x20 (SS:4717-4725) */
 
+<<<<<<< HEAD
 .placeActors { width: 240px; background: var(--panel); } /* panel colour Brushes.Panel (PM:705); width is the consumer's dock size */
 
 /* Search: SBorder ToolPanel.GroupBorder = Panel colour (SC:437), Padding 8 (PM:693); SSearchBox with style "SearchBox" (SC:1301-1319) */
@@ -60,21 +59,18 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 .placeActors-grid--live { min-height: 180px; } /* five rows of 32 + 2 + 2 margin at most, so switching category does not resize the panel */
 .placeActors-empty { padding: 8px 4px; color: var(--foreground); opacity: .7; }
 .placeActors-handle { flex: none; width: 6px; height: 15px; margin-right: 8px; background: radial-gradient(circle, var(--foreground) 1px, transparent 1.2px) 0 0 / 3px 5px; opacity: .6; } /* VerticalBoxDragIndicatorShort 6x15 (SC:466), padding right 8 (PM:211); dot pattern approximates the PNG */
+=======
+>>>>>>> claude/adoring-faraday-94vc0i
 </style>
 </head>
 <body>
 
 <svg class="placeActors-svgdefs" aria-hidden="true">
 	<defs>
-		<symbol id="placeActors-i-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></symbol>
-		<symbol id="placeActors-i-recent" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l2.5 1.5"/></symbol>
-		<symbol id="placeActors-i-basic" viewBox="0 0 16 16"><path d="M5 2.5L8.5 6h-7z"/><circle cx="11.5" cy="5" r="2.5"/><rect x="3" y="9.5" width="5" height="4.5" rx=".5"/></symbol>
 		<symbol id="placeActors-i-bulb" viewBox="0 0 16 16"><path d="M5.5 10.5c-1.5-1-2.2-2.3-2.2-3.8a4.7 4.7 0 0 1 9.4 0c0 1.5-.7 2.8-2.2 3.8z"/><path d="M6 12.5h4M6.8 14.2h2.4"/></symbol>
 		<symbol id="placeActors-i-shapes" viewBox="0 0 16 16"><path d="M8 2l5.5 2.7v5.6L8 13 2.5 10.3V4.7z"/><path d="M2.5 4.7L8 7.4l5.5-2.7M8 7.4V13"/></symbol>
-		<symbol id="placeActors-i-clap" viewBox="0 0 16 16"><rect x="2" y="6.5" width="12" height="7" rx="1"/><path d="M2 6.5l1-3 3 .7-1 2.3M7 3.8l3 .7-1 2M11 4.6l3 .7-.7 1.2"/></symbol>
 		<symbol id="placeActors-i-vfx" viewBox="0 0 16 16"><path d="M6 2.5l1.2 3.3 3.3 1.2-3.3 1.2L6 11.5 4.8 8.2 1.5 7l3.3-1.2zM12 9l.8 2.2L15 12l-2.2.8L12 15l-.8-2.2L9 12l2.2-.8z"/></symbol>
 		<symbol id="placeActors-i-volumes" viewBox="0 0 16 16"><path d="M8 2l5.5 2.7v5.6L8 13 2.5 10.3V4.7z" stroke-dasharray="2 1.5"/></symbol>
-		<symbol id="placeActors-i-all" viewBox="0 0 16 16"><rect x="2" y="5" width="9" height="9" rx="1"/><path d="M5 2.5h8.5V11"/></symbol>
 		<symbol id="placeActors-i-sphere" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M3 6.5c3 1.5 7 1.5 10 0M3 9.5c3-1.5 7-1.5 10 0" opacity=".6"/></symbol>
 		<symbol id="placeActors-i-person" viewBox="0 0 16 16"><circle cx="8" cy="4.5" r="2.5"/><path d="M3 14c0-3.2 2.2-5 5-5s5 1.8 5 5z"/></symbol>
 		<symbol id="placeActors-i-flag" viewBox="0 0 16 16"><path d="M4 14V2.5M4 3h8l-1.8 2.7L12 8.5H4"/></symbol>
@@ -85,6 +81,7 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 
 <div class="placeActors-demo">
 
+<<<<<<< HEAD
 <div data-pinned>
 	<div class="placeActors-note">Arrangement of the reference screenshot: horizontal strip, info button (pinned: Actor hovered, Player Start pressed)</div>
 	<div class="placeActors">
@@ -99,6 +96,22 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 			<div class="placeActors-cat"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-volumes"/></svg></div>
 			<div class="placeActors-cat"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-all"/></svg></div>
 		</div>
+=======
+<div>
+	<div class="placeActors-note">Arrangement of the reference screenshot: horizontal strip, info button (pinned: Actor hovered, Player Start pressed)</div>
+	<ue-place-actors-panel data-pinned><div class="placeActors">
+		<div class="placeActors-search"><ue-text-input><div class="textinput textinput--search"><svg class="textinput__glyph textinput__glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><span class="textinput__text"><span class="textinput__hint">Search Classes</span></span><span class="textinput__tail"></span></div></ue-text-input></div>
+		<ue-segmented-control><div class="SegmentedControl SegmentedControl--rail SegmentedControl--row">
+			<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l2.5 1.5"/></svg></button>
+			<button class="SegmentedControl-seg is-checked"><svg viewBox="0 0 16 16"><path d="M5 2.5L8.5 6h-7z"/><circle cx="11.5" cy="5" r="2.5"/><rect x="3" y="9.5" width="5" height="4.5" rx=".5"/></svg></button>
+			<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><path d="M5.5 10.5c-1.5-1-2.2-2.3-2.2-3.8a4.7 4.7 0 0 1 9.4 0c0 1.5-.7 2.8-2.2 3.8z"/><path d="M6 12.5h4M6.8 14.2h2.4"/></svg></button>
+			<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><path d="M8 2l5.5 2.7v5.6L8 13 2.5 10.3V4.7z"/><path d="M2.5 4.7L8 7.4l5.5-2.7M8 7.4V13"/></svg></button>
+			<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><rect x="2" y="6.5" width="12" height="7" rx="1"/><path d="M2 6.5l1-3 3 .7-1 2.3M7 3.8l3 .7-1 2M11 4.6l3 .7-.7 1.2"/></svg></button>
+			<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><path d="M6 2.5l1.2 3.3 3.3 1.2-3.3 1.2L6 11.5 4.8 8.2 1.5 7l3.3-1.2zM12 9l.8 2.2L15 12l-2.2.8L12 15l-.8-2.2L9 12l2.2-.8z"/></svg></button>
+			<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><path d="M8 2l5.5 2.7v5.6L8 13 2.5 10.3V4.7z" stroke-dasharray="2 1.5"/></svg></button>
+			<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><rect x="2" y="5" width="9" height="9" rx="1"/><path d="M5 2.5h8.5V11"/></svg></button>
+		</div></ue-segmented-control>
+>>>>>>> claude/adoring-faraday-94vc0i
 		<div class="placeActors-header">Basic</div>
 		<div class="placeActors-body"><div class="placeActors-grid">
 			<div class="placeActors-row is-hover"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-sphere"/></svg></div><div class="placeActors-name">Actor</div><div class="placeActors-info"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
@@ -107,21 +120,28 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 			<div class="placeActors-row"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-bulb"/></svg></div><div class="placeActors-name">Point Light</div><div class="placeActors-info"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
 			<div class="placeActors-row is-pressed"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-flag"/></svg></div><div class="placeActors-name">Player Start</div><div class="placeActors-info"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
 		</div></div>
-	</div>
+	</div></ue-place-actors-panel>
 </div>
 
+<<<<<<< HEAD
 <div data-pinned>
 	<div class="placeActors-note">Arrangement of the 5.5.3 source: vertical rail, drag handle (pinned)</div>
 	<div class="placeActors" style="width:260px">
 		<div class="placeActors-search"><div class="placeActors-searchbox"><svg class="placeActors-ico placeActors-ico--14"><use href="#placeActors-i-search"/></svg><span class="placeActors-hint">Search Classes</span></div></div>
+=======
+<div>
+	<div class="placeActors-note">Arrangement of the 5.5.3 source: vertical rail, drag handle (pinned)</div>
+	<ue-place-actors-panel data-pinned><div class="placeActors" style="width:260px">
+		<div class="placeActors-search"><ue-text-input><div class="textinput textinput--search"><svg class="textinput__glyph textinput__glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><span class="textinput__text"><span class="textinput__hint">Search Classes</span></span><span class="textinput__tail"></span></div></ue-text-input></div>
+>>>>>>> claude/adoring-faraday-94vc0i
 		<div style="display:flex">
-			<div class="placeActors-rail placeActors-rail--col">
-				<div class="placeActors-cat"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-recent"/></svg></div>
-				<div class="placeActors-cat is-active"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-basic"/></svg></div>
-				<div class="placeActors-cat"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-bulb"/></svg></div>
-				<div class="placeActors-cat"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-shapes"/></svg></div>
-				<div class="placeActors-cat"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-all"/></svg></div>
-			</div>
+			<ue-segmented-control><div class="SegmentedControl SegmentedControl--rail">
+				<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l2.5 1.5"/></svg></button>
+				<button class="SegmentedControl-seg is-checked"><svg viewBox="0 0 16 16"><path d="M5 2.5L8.5 6h-7z"/><circle cx="11.5" cy="5" r="2.5"/><rect x="3" y="9.5" width="5" height="4.5" rx=".5"/></svg></button>
+				<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><path d="M5.5 10.5c-1.5-1-2.2-2.3-2.2-3.8a4.7 4.7 0 0 1 9.4 0c0 1.5-.7 2.8-2.2 3.8z"/><path d="M6 12.5h4M6.8 14.2h2.4"/></svg></button>
+				<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><path d="M8 2l5.5 2.7v5.6L8 13 2.5 10.3V4.7z"/><path d="M2.5 4.7L8 7.4l5.5-2.7M8 7.4V13"/></svg></button>
+				<button class="SegmentedControl-seg"><svg viewBox="0 0 16 16"><rect x="2" y="5" width="9" height="9" rx="1"/><path d="M5 2.5h8.5V11"/></svg></button>
+			</div></ue-segmented-control>
 			<div style="flex:1;min-width:0">
 				<div class="placeActors-header">Basic</div>
 				<div class="placeActors-body"><div class="placeActors-grid">
@@ -131,7 +151,72 @@ body { margin: 0; padding: 16px; font: 400 13.333px/16px var(--font-sans); } /* 
 				</div></div>
 			</div>
 		</div>
-	</div>
+	</div></ue-place-actors-panel>
+</div>
+
+<div>
+	<div class="placeActors-note">Live: click a category to swap the list, type in the search field to filter it (the X clears it, so does Escape), hover and press the rows and the "?" button. Keys: Left and Right in the strip. The categories are the built-in ones of PlacementModeModule.cpp:130-290. Items outside Basic are illustrative.</div>
+	<ue-place-actors-panel>
+		<div class="placeActors">
+			<div class="placeActors-search"><ue-text-input><div class="textinput textinput--search"><svg class="textinput__glyph textinput__glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><svg class="textinput__glyph textinput__clear" role="button" aria-label="Clear search" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg><input class="textinput__text textinput__field" type="text" placeholder="Search Classes" aria-label="Search Classes" autocomplete="off" spellcheck="false"><span class="textinput__tail"></span></div></ue-text-input></div>
+			<ue-segmented-control>
+				<div class="SegmentedControl SegmentedControl--rail SegmentedControl--row" role="radiogroup" aria-label="Categories">
+				<button class="SegmentedControl-seg" role="radio" aria-checked="false" tabindex="-1" aria-label="Recent" data-value="Recent"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l2.5 1.5"/></svg></button>
+				<button class="SegmentedControl-seg is-checked" role="radio" aria-checked="true" tabindex="0" aria-label="Basic" data-value="Basic"><svg viewBox="0 0 16 16"><path d="M5 2.5L8.5 6h-7z"/><circle cx="11.5" cy="5" r="2.5"/><rect x="3" y="9.5" width="5" height="4.5" rx=".5"/></svg></button>
+				<button class="SegmentedControl-seg" role="radio" aria-checked="false" tabindex="-1" aria-label="Lights" data-value="Lights"><svg viewBox="0 0 16 16"><path d="M5.5 10.5c-1.5-1-2.2-2.3-2.2-3.8a4.7 4.7 0 0 1 9.4 0c0 1.5-.7 2.8-2.2 3.8z"/><path d="M6 12.5h4M6.8 14.2h2.4"/></svg></button>
+				<button class="SegmentedControl-seg" role="radio" aria-checked="false" tabindex="-1" aria-label="Shapes" data-value="Shapes"><svg viewBox="0 0 16 16"><path d="M8 2l5.5 2.7v5.6L8 13 2.5 10.3V4.7z"/><path d="M2.5 4.7L8 7.4l5.5-2.7M8 7.4V13"/></svg></button>
+				<button class="SegmentedControl-seg" role="radio" aria-checked="false" tabindex="-1" aria-label="Visual Effects" data-value="Visual Effects"><svg viewBox="0 0 16 16"><path d="M6 2.5l1.2 3.3 3.3 1.2-3.3 1.2L6 11.5 4.8 8.2 1.5 7l3.3-1.2zM12 9l.8 2.2L15 12l-2.2.8L12 15l-.8-2.2L9 12l2.2-.8z"/></svg></button>
+				<button class="SegmentedControl-seg" role="radio" aria-checked="false" tabindex="-1" aria-label="Volumes" data-value="Volumes"><svg viewBox="0 0 16 16"><path d="M8 2l5.5 2.7v5.6L8 13 2.5 10.3V4.7z" stroke-dasharray="2 1.5"/></svg></button>
+				<button class="SegmentedControl-seg" role="radio" aria-checked="false" tabindex="-1" aria-label="All" data-value="All"><svg viewBox="0 0 16 16"><rect x="2" y="5" width="9" height="9" rx="1"/><path d="M5 2.5h8.5V11"/></svg></button>
+				</div>
+			</ue-segmented-control>
+			<div class="placeActors-header">Basic</div>
+			<div class="placeActors-body"><div class="placeActors-grid placeActors-grid--live" role="list">
+				<div class="placeActors-group" data-category="Recent" hidden>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-shapes"/></svg></div><div class="placeActors-name">Cube</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-bulb"/></svg></div><div class="placeActors-name">Point Light</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-sphere"/></svg></div><div class="placeActors-name">Actor</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+				</div>
+				<div class="placeActors-group" data-category="Basic">
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-sphere"/></svg></div><div class="placeActors-name">Actor</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-person"/></svg></div><div class="placeActors-name">Character</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-person"/></svg></div><div class="placeActors-name">Pawn</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-bulb"/></svg></div><div class="placeActors-name">Point Light</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-flag"/></svg></div><div class="placeActors-name">Player Start</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+				</div>
+				<div class="placeActors-group" data-category="Lights" hidden>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-bulb"/></svg></div><div class="placeActors-name">Directional Light</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-bulb"/></svg></div><div class="placeActors-name">Point Light</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-bulb"/></svg></div><div class="placeActors-name">Spot Light</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-bulb"/></svg></div><div class="placeActors-name">Rect Light</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-bulb"/></svg></div><div class="placeActors-name">Sky Light</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+				</div>
+				<div class="placeActors-group" data-category="Shapes" hidden>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-shapes"/></svg></div><div class="placeActors-name">Cube</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-sphere"/></svg></div><div class="placeActors-name">Sphere</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-shapes"/></svg></div><div class="placeActors-name">Cylinder</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-shapes"/></svg></div><div class="placeActors-name">Cone</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-shapes"/></svg></div><div class="placeActors-name">Plane</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+				</div>
+				<div class="placeActors-group" data-category="Visual Effects" hidden>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-vfx"/></svg></div><div class="placeActors-name">Post Process Volume</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-vfx"/></svg></div><div class="placeActors-name">Sky Atmosphere</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-vfx"/></svg></div><div class="placeActors-name">Volumetric Cloud</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-vfx"/></svg></div><div class="placeActors-name">Exponential Height Fog</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+				</div>
+				<div class="placeActors-group" data-category="Volumes" hidden>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-volumes"/></svg></div><div class="placeActors-name">Trigger Volume</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-volumes"/></svg></div><div class="placeActors-name">Blocking Volume</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+				</div>
+				<div class="placeActors-group" data-category="All" hidden>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-sphere"/></svg></div><div class="placeActors-name">Actor</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-person"/></svg></div><div class="placeActors-name">Character</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+					<div class="placeActors-row" role="listitem" tabindex="0"><div class="placeActors-tile"><svg class="placeActors-ico placeActors-ico--20"><use href="#placeActors-i-person"/></svg></div><div class="placeActors-name">Pawn</div><div class="placeActors-info" role="button" aria-label="Documentation"><svg class="placeActors-ico placeActors-ico--16"><use href="#placeActors-i-help"/></svg></div></div>
+				</div>
+				<div class="placeActors-empty" hidden>No matching items</div>
+			</div></div>
+		</div>
+	</ue-place-actors-panel>
 </div>
 
 <div>

@@ -1,6 +1,15 @@
+<<<<<<< HEAD
 // <ue-popup-menu> wraps live .popupmenu blocks. One row at a time is current, the hovered or keyboard row.
 import { UeElement, define } from '../_shared/element.ts';
 import { enabledRows, rowLabel } from '../_shared/popup.ts';
+=======
+// <ue-popup-menu> wraps one .popupmenu list. One row at a time is current,
+// the hovered or keyboard row.
+import { UeElement, define } from '../_shared/element.ts';
+import { ownedBy } from '../_shared/own.ts';
+import { enabledRows, rowLabel } from '../_shared/popup.ts';
+import './PopupMenu.css';
+>>>>>>> claude/adoring-faraday-94vc0i
 
 const ROW = '.popupmenu__row';
 const CURRENT = 'popupmenu__row--hover';
@@ -12,10 +21,13 @@ function rowOf(target: EventTarget | null): HTMLElement | null {
 	return target instanceof Element ? target.closest<HTMLElement>(ROW) : null;
 }
 
+<<<<<<< HEAD
 function rootOf(node: Element | null): HTMLElement | null {
 	return node?.closest<HTMLElement>('.popupmenu[tabindex]') ?? null;
 }
 
+=======
+>>>>>>> claude/adoring-faraday-94vc0i
 function isDisabled(row: HTMLElement): boolean {
 	return row.getAttribute('aria-disabled') === 'true';
 }
@@ -29,12 +41,62 @@ function menuOf(row: HTMLElement): HTMLElement | null {
 	return row.parentElement;
 }
 
+<<<<<<< HEAD
 export class UePopupMenuElement extends UeElement {
 	protected setup(): void {
 		this.on(this, 'mousemove', (event) => {
 			const row = rowOf(event.target);
 			const root = rootOf(row);
 			if (!row || !root) return;
+=======
+export interface MenuActivateDetail {
+	label: string;
+	role: string | null;
+	// Null for a plain row.
+	checked: boolean | null;
+	// The label, plus the new state for a check or radio row.
+	text: string;
+	// The data-value attribute of the row, or its label.
+	value: string;
+	row: HTMLElement;
+}
+
+export class UePopupMenuElement extends UeElement {
+	// The focusable .popupmenu list.
+	get root(): HTMLElement {
+		const root = this.one('.popupmenu[tabindex]');
+		if (!root) throw new Error('ue-popup-menu needs a .popupmenu[tabindex] element');
+		return root;
+	}
+
+	// Focuses the list and marks `row` current. `keys` hides the hover highlight, as after an arrow key.
+	focusMenu(row: HTMLElement | null, keys: boolean): void {
+		const root = this.root;
+		root.focus({ preventScroll: true });
+		root.classList.toggle(KEYS, keys);
+		this.#show(root, row, null);
+	}
+
+	// Clears the current row and closes every submenu.
+	reset(): void {
+		const root = this.root;
+		root.classList.remove(KEYS);
+		this.#show(root, null, null);
+	}
+
+	// The enabled rows of the top level, in order.
+	topRows(): HTMLElement[] {
+		return enabledRows(this.root, ':scope > ' + ROW);
+	}
+
+	protected setup(): void {
+		void this.root;
+
+		this.on(this, 'mousemove', (event) => {
+			const row = rowOf(event.target);
+			if (!row || !ownedBy(this, event.target)) return;
+			const root = this.root;
+>>>>>>> claude/adoring-faraday-94vc0i
 			root.classList.remove(KEYS);
 			if (isDisabled(row)) return;
 			const sub = submenuOf(row);
@@ -45,7 +107,11 @@ export class UePopupMenuElement extends UeElement {
 
 		this.on(this, 'pointerdown', (event) => {
 			const row = rowOf(event.target);
+<<<<<<< HEAD
 			if (row && event.button === 0 && !isDisabled(row)) row.classList.add(PRESSED);
+=======
+			if (row && ownedBy(this, event.target) && event.button === 0 && !isDisabled(row)) row.classList.add(PRESSED);
+>>>>>>> claude/adoring-faraday-94vc0i
 		});
 		const release = (): void => {
 			for (const row of this.all(ROW + '.' + PRESSED)) row.classList.remove(PRESSED);
@@ -59,6 +125,7 @@ export class UePopupMenuElement extends UeElement {
 
 		this.on(this, 'click', (event) => {
 			const row = rowOf(event.target);
+<<<<<<< HEAD
 			const root = rootOf(row);
 			if (!row || !root || isDisabled(row)) return;
 			const sub = submenuOf(row);
@@ -67,16 +134,31 @@ export class UePopupMenuElement extends UeElement {
 				return;
 			}
 			this.#show(root, row, null);
+=======
+			if (!row || !ownedBy(this, event.target) || isDisabled(row)) return;
+			const sub = submenuOf(row);
+			if (sub) {
+				this.#show(this.root, row, sub.hidden ? row : null);
+				return;
+			}
+			this.#show(this.root, row, null);
+>>>>>>> claude/adoring-faraday-94vc0i
 			this.#activate(row);
 		});
 
 		this.on(this, 'mouseout', (event) => {
+<<<<<<< HEAD
 			const root = rootOf(event.target instanceof Element ? event.target : null);
 			if (!root || (event.relatedTarget instanceof Node && root.contains(event.relatedTarget))) return;
+=======
+			const root = this.root;
+			if (!ownedBy(this, event.target) || (event.relatedTarget instanceof Node && root.contains(event.relatedTarget))) return;
+>>>>>>> claude/adoring-faraday-94vc0i
 			if (!root.classList.contains(KEYS)) this.#show(root, null, null);
 		});
 
 		this.on(this, 'keydown', (event) => {
+<<<<<<< HEAD
 			const root = event.target instanceof HTMLElement && event.target.matches('.popupmenu[tabindex]') ? event.target : null;
 			if (root) this.#key(event, root);
 		});
@@ -84,6 +166,15 @@ export class UePopupMenuElement extends UeElement {
 		this.on(this, 'focusout', (event) => {
 			const root = rootOf(event.target instanceof Element ? event.target : null);
 			if (root && !(event.relatedTarget instanceof Node && root.contains(event.relatedTarget))) this.#show(root, null, null);
+=======
+			if (event.target === this.root) this.#key(event, this.root);
+		});
+
+		this.on(this, 'focusout', (event) => {
+			const root = this.root;
+			if (!root.contains(event.target as Node)) return;
+			if (!(event.relatedTarget instanceof Node && root.contains(event.relatedTarget))) this.#show(root, null, null);
+>>>>>>> claude/adoring-faraday-94vc0i
 		});
 	}
 
@@ -109,20 +200,37 @@ export class UePopupMenuElement extends UeElement {
 	#activate(row: HTMLElement): void {
 		const role = row.getAttribute('role');
 		const label = rowLabel(row, '.popupmenu__label');
+<<<<<<< HEAD
 		let text = 'Activated: ' + label;
 		if (role === 'menuitemcheckbox') {
 			const on = row.getAttribute('aria-checked') !== 'true';
 			row.setAttribute('aria-checked', String(on));
 			text += on ? ' (checked)' : ' (unchecked)';
+=======
+		let checked: boolean | null = null;
+		let text = label;
+		if (role === 'menuitemcheckbox') {
+			checked = row.getAttribute('aria-checked') !== 'true';
+			row.setAttribute('aria-checked', String(checked));
+			text += checked ? ' (checked)' : ' (unchecked)';
+>>>>>>> claude/adoring-faraday-94vc0i
 		} else if (role === 'menuitemradio') {
 			for (const other of Array.from(menuOf(row)?.querySelectorAll<HTMLElement>(':scope > [role="menuitemradio"]') ?? [])) {
 				other.setAttribute('aria-checked', String(other === row));
 			}
+<<<<<<< HEAD
 			text += ' (selected)';
 		}
 		const status = row.closest('.popupmenu-live')?.querySelector('.popupmenu-status');
 		if (status) status.textContent = text;
 		this.emit('ue-menu-activate', { label });
+=======
+			checked = true;
+			text += ' (selected)';
+		}
+		const detail: MenuActivateDetail = { label, role, checked, text, value: row.dataset.value ?? label, row };
+		this.emit('ue-menu-activate', detail);
+>>>>>>> claude/adoring-faraday-94vc0i
 	}
 
 	#key(event: KeyboardEvent, root: HTMLElement): void {
@@ -144,13 +252,26 @@ export class UePopupMenuElement extends UeElement {
 			case 'ArrowLeft': this.#leave(root, current); break;
 			case 'Escape':
 				root.classList.add(KEYS);
+<<<<<<< HEAD
 				if (current && menu !== root) this.#leave(root, current);
 				else this.#show(root, null, null);
+=======
+				if (current && menu !== root) {
+					this.#leave(root, current);
+					event.stopPropagation();
+				} else {
+					this.#show(root, null, null);
+				}
+>>>>>>> claude/adoring-faraday-94vc0i
 				break;
 			case 'Enter':
 			case ' ':
 				root.classList.add(KEYS);
+<<<<<<< HEAD
 				if (!current) break;
+=======
+				if (event.repeat || !current) break;
+>>>>>>> claude/adoring-faraday-94vc0i
 				if (submenuOf(current)) this.#enter(root, current);
 				else this.#activate(current);
 				break;
