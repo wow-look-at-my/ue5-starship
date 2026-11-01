@@ -20,18 +20,10 @@
 
 	/* Preview only: rows 1-2 shrink the name column so the full labels fit; row 3 keeps the default 40:60 split (DetailsViewArgs.h:134) where labels clip. */
 	.SegmentedControl-row.is-wide .SegmentedControl-name { flex-basis: 16%; }
-<<<<<<< HEAD
 	/* A live example: the row and the line that shows its latest event. */
 	.SegmentedControl-live { font: 400 10.667px/1.4 var(--font-sans); color: var(--hover-2); }
 	.SegmentedControl-railDemo { display: flex; align-items: flex-start; gap: 16px; padding: 8px; background: var(--recessed); font: 400 10.667px/1.4 var(--font-sans); color: var(--hover-2); }
 	.SegmentedControl-railDemo .SegmentedControl--row { width: 168px; }
-=======
-	/* Forced states: the same declarations as the :hover, :active and checked rules above. */
-	.SegmentedControl-seg.is-hover { background: var(--hover); color: var(--foreground-hover); }
-	.SegmentedControl-seg.is-pressed { background: var(--header); color: var(--foreground-hover); }
-	.SegmentedControl-seg:focus-visible { outline: 1px solid var(--primary-hover); outline-offset: -1px; } /* browser keyboard ring: Slate draws none */
-	.SegmentedControl-seg:disabled { opacity: .45; cursor: default; } /* alpha x .45: SlateElementPixelShader.usf:535 */
->>>>>>> origin/master
 	/* Preview captions only */
 	.SegmentedControl-cap { width: 360px; box-sizing: border-box; margin: 0; padding: 6px 8px 12px; font: 400 10.667px/1.4 var(--font-sans); color: var(--foreground); opacity: .8; }
 	.SegmentedControl-cap b { color: var(--foreground-hover); }
@@ -39,11 +31,7 @@
 </head>
 <body>
 <div class="SegmentedControl-frame">
-<<<<<<< HEAD
 	<div class="SegmentedControl-live">
-=======
-	<ue-segmented-control>
->>>>>>> origin/master
 	<div class="SegmentedControl-row is-wide">
 		<div class="SegmentedControl-name">Mobility</div>
 		<div class="SegmentedControl-split"></div>
@@ -59,12 +47,8 @@
 		<div class="SegmentedControl-split"></div>
 		<div class="SegmentedControl-right"></div>
 	</div>
-<<<<<<< HEAD
 	<ue-event-status event="ue-segment-change" template="Mobility: {value}"></ue-event-status>
 	</div>
-=======
-	</ue-segmented-control>
->>>>>>> origin/master
 	<div class="SegmentedControl-row is-wide">
 		<div class="SegmentedControl-name">Mobility</div>
 		<div class="SegmentedControl-split"></div>
@@ -78,11 +62,7 @@
 		<div class="SegmentedControl-split"></div>
 		<div class="SegmentedControl-right"></div>
 	</div>
-<<<<<<< HEAD
 	<div class="SegmentedControl-live">
-=======
-	<ue-segmented-control>
->>>>>>> origin/master
 	<div class="SegmentedControl-row">
 		<div class="SegmentedControl-name">Mobility</div>
 		<div class="SegmentedControl-split"></div>
@@ -98,7 +78,6 @@
 		<div class="SegmentedControl-split"></div>
 		<div class="SegmentedControl-right"></div>
 	</div>
-<<<<<<< HEAD
 	<ue-event-status event="ue-segment-change" template="Mobility: {value}"></ue-event-status>
 	</div>
 </div>
@@ -131,12 +110,5 @@
 <p class="SegmentedControl-cap"><b>Rail</b> (<code>SegmentedControl--rail</code>): the Place Actors category strip. The checked button is Primary with a 0.5px outline. Up and Down move in the vertical rail, Left and Right in the wrapped one.</p>
 <p class="SegmentedControl-cap"><b>Live</b> (rows 1 and 3). Hover and press a segment, click to select Static, Stationary or Movable, or Tab in and use the arrow keys, Home and End. <b>Pinned</b> (row 2): Stationary checked, Movable forced hover.</p>
 
-=======
-	</ue-segmented-control>
-</div>
-<p class="SegmentedControl-cap"><b>Live</b> (rows 1 and 3). Hover and press a segment, click to select Static, Stationary or Movable, or Tab in and use the arrow keys, Home and End. <b>Pinned</b> (row 2): Stationary checked, Movable forced hover.</p>
-
-<script type="module" src="./SegmentedControl.js"></script>
->>>>>>> origin/master
 </body>
 </html>

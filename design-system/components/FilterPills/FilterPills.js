@@ -1,7 +1,6 @@
 // design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
-<<<<<<< HEAD
   #ready = false;
   #pendingSetup = null;
   // The bundle can load before the parser reaches this element's children, so setup waits for the document to finish parsing.
@@ -28,15 +27,6 @@ var UeElement = class extends HTMLElement {
     this.#ready = true;
     this.setup();
   }
-=======
-  connectedCallback() {
-    this.style.display = "contents";
-    this.setup();
-  }
-  disconnectedCallback() {
-    for (const dispose of this.#disposers.splice(0)) dispose();
-  }
->>>>>>> origin/master
   on(target, type, listener, options) {
     target.addEventListener(type, listener, options);
     this.#disposers.push(() => target.removeEventListener(type, listener, options));
@@ -48,13 +38,10 @@ var UeElement = class extends HTMLElement {
   emit(name, detail) {
     return this.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
   }
-<<<<<<< HEAD
   // True when the nearest element of this tag above the target is this element, so a nested instance keeps its own events.
   owns(target) {
     return target instanceof Element && target.closest(this.localName) === this;
   }
-=======
->>>>>>> origin/master
   all(selector) {
     return Array.from(this.querySelectorAll(selector));
   }
@@ -67,7 +54,6 @@ function define(tag, ctor) {
 }
 
 // design-system/src/FilterPills/FilterPills.ts
-<<<<<<< HEAD
 var CROSS = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
 var UeFilterPills = class extends UeElement {
   #strip = null;
@@ -134,39 +120,12 @@ var UeFilterPills = class extends UeElement {
   #select(pill, focus) {
     const changed = !pill.classList.contains("is-checked");
     for (const other of this.#pills()) {
-=======
-var UeFilterPills = class extends UeElement {
-  setup() {
-    for (const strip of this.all(".FilterPills-strip")) {
-      this.on(strip, "click", (event) => {
-        const pill = event.target.closest(".FilterPills-pill");
-        if (pill && strip.contains(pill)) this.select(strip, pill, false);
-      });
-      this.on(strip, "keydown", (event) => {
-        const pills = Array.from(strip.querySelectorAll(".FilterPills-pill"));
-        const at = pills.indexOf(document.activeElement);
-        if (at < 0) return;
-        let next = -1;
-        if (event.key === "ArrowRight" || event.key === "ArrowDown") next = (at + 1) % pills.length;
-        else if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = (at - 1 + pills.length) % pills.length;
-        else if (event.key === "Home") next = 0;
-        else if (event.key === "End") next = pills.length - 1;
-        if (next < 0) return;
-        event.preventDefault();
-        this.select(strip, pills[next], true);
-      });
-    }
-  }
-  select(strip, pill, focus) {
-    for (const other of strip.querySelectorAll(".FilterPills-pill")) {
->>>>>>> origin/master
       const on = other === pill;
       other.classList.toggle("is-checked", on);
       other.setAttribute("aria-selected", String(on));
       other.tabIndex = on ? 0 : -1;
     }
     if (focus) pill.focus();
-<<<<<<< HEAD
     if (changed) this.emit("ue-filter-change", { value: this.#valueOf(pill), label: (pill.textContent ?? "").trim() });
   }
   // Replaces every pill. The first pill with checked set is checked; with none, no pill is checked.
@@ -239,9 +198,3 @@ define("ue-filter-pills", UeFilterPills);
 export {
   UeFilterPills
 };
-=======
-    this.emit("ue-filter-change", { label: pill.textContent ?? "" });
-  }
-};
-define("ue-filter-pills", UeFilterPills);
->>>>>>> origin/master

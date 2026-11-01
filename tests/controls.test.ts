@@ -1,5 +1,4 @@
 /// <reference lib="dom" />
-<<<<<<< HEAD
 // Interaction tests for the controls group: Button, ComboButton, Checkbox, TextInput, SpinBox, Slider, Tooltip, PopupMenu, Notification, ExpandableArea, ResetToDefault.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -7,11 +6,6 @@ import path from 'node:path';
 import { test } from 'node:test';
 import type { Locator, Page } from 'playwright';
 import { root } from './lib.ts';
-=======
-// Interaction tests for the controls group: Button, ComboButton, Checkbox, TextInput, SpinBox, Slider, Tooltip, PopupMenu, Notification, ExpandableArea.
-import assert from 'node:assert/strict';
-import type { Locator, Page } from 'playwright';
->>>>>>> origin/master
 import { CLEAR, token, prop, fill, hasClass, hold, release, away } from './probe.ts';
 import { scenario } from './scenario.ts';
 
@@ -74,7 +68,6 @@ async function pointAt(page: Page, target: Locator): Promise<{ x: number; y: num
 	return c;
 }
 
-<<<<<<< HEAD
 // Records the detail of every event of one type that reaches the document. Object values (such as a row element) are left out.
 async function record(page: Page, type: string): Promise<void> {
 	await page.evaluate((t) => {
@@ -126,8 +119,6 @@ for (const [name] of SINGLE) {
 	});
 }
 
-=======
->>>>>>> origin/master
 // ---------- Button ----------
 
 const BTN = 'ue-button .button';
@@ -164,7 +155,6 @@ scenario('Button: the mouse press uses the pressed fill and drops the label 1px'
 	await release(page);
 });
 
-<<<<<<< HEAD
 scenario('Button: clicks emit ue-button-click per instance, a disabled button does not', 'Button', async (page) => {
 	const status = page.locator('.button-count');
 	assert.equal(await status.textContent(), 'Last click: none yet');
@@ -184,35 +174,17 @@ scenario('Button: clicks emit ue-button-click per instance, a disabled button do
 	assert.equal(await disabled.isDisabled(), true);
 	await disabled.click({ force: true });
 	assert.equal((await events(page, 'ue-button-click')).length, 4);
-=======
-scenario('Button: clicks register in the counter, a disabled button does not count', 'Button', async (page) => {
-	const counter = page.locator('ue-button .button-count');
-	assert.equal(await counter.textContent(), 'Clicks: 0');
-	await page.locator(BTN).nth(0).click();
-	await page.locator(BTN).nth(1).click();
-	await page.locator(BTN).nth(4).click();
-	assert.match((await counter.textContent()) ?? '', /^Clicks: 3 \(last: Settings\)/);
-	const disabled = page.locator(BTN).nth(5);
-	assert.equal(await disabled.isDisabled(), true);
-	await disabled.click({ force: true });
-	assert.match((await counter.textContent()) ?? '', /^Clicks: 3/);
->>>>>>> origin/master
 	assert.equal(await prop(disabled, 'opacity'), '0.45');
 });
 
 scenario('Button: Space and Enter press the focused button, with the pressed look while held', 'Button', async (page) => {
-<<<<<<< HEAD
 	await record(page, 'ue-button-click');
-=======
-	const counter = page.locator('ue-button .button-count');
->>>>>>> origin/master
 	const plain = page.locator(BTN).nth(0);
 	await plain.focus();
 	await page.keyboard.down(' ');
 	await cls(plain, 'button--pressed', true);
 	await paints(page, plain, 'header');
 	assert.equal(await prop(plain, 'padding-top'), '4.5px');
-<<<<<<< HEAD
 	await cls(page.locator(BTN).nth(1), 'button--pressed', false);
 	await page.keyboard.up(' ');
 	await cls(plain, 'button--pressed', false);
@@ -270,13 +242,6 @@ scenario('Button: icon-only pads 3px 4px, the small variant is 22px high with 14
 	assert.equal(await prop(small, 'padding-top'), '1px');
 	assert.equal((await small.boundingBox())?.height, 22);
 	await release(page);
-=======
-	await page.keyboard.up(' ');
-	await cls(plain, 'button--pressed', false);
-	assert.match((await counter.textContent()) ?? '', /^Clicks: 1/);
-	await tap(page, 'Enter');
-	assert.match((await counter.textContent()) ?? '', /^Clicks: 2/);
->>>>>>> origin/master
 });
 
 scenario('Button: Tab shows the Primary focus ring', 'Button', async (page) => {
@@ -286,34 +251,21 @@ scenario('Button: Tab shows the Primary focus ring', 'Button', async (page) => {
 	await outlineIs(page, first, 'primary');
 });
 
-<<<<<<< HEAD
 scenario('Button: pinned specimens ignore the pointer and sit in a pinned ue-button', 'Button', async (page) => {
 	const pinned = page.locator('[data-pinned] .button--hover').first();
 	assert.equal(await prop(pinned, 'pointer-events'), 'none');
 	assert.equal(await pinned.evaluate((el) => el.closest('ue-button')?.hasAttribute('data-pinned')), true);
-=======
-scenario('Button: pinned specimens ignore the pointer and sit outside the element', 'Button', async (page) => {
-	const pinned = page.locator('.button--hover[data-pinned]').first();
-	assert.equal(await prop(pinned, 'pointer-events'), 'none');
-	assert.equal(await pinned.evaluate((el) => el.closest('ue-button')), null);
->>>>>>> origin/master
 	await paints(page, pinned, 'hover');
 });
 
 // ---------- ComboButton ----------
 
 const CB = 'ue-combo-button ';
-<<<<<<< HEAD
 const cbTrigger = (page: Page, index: number): Locator => page.locator('ue-combo-button').nth(index).locator('.combobutton');
 const cbMenu = (page: Page, index: number): Locator => page.locator('ue-combo-button').nth(index).locator('.combobutton-menu');
 const cbRows = (page: Page, index: number): Locator => cbMenu(page, index).locator('.popupmenu__row');
 const cbLabel = (trigger: Locator): Promise<string | null> => trigger.locator('.combobutton__label').textContent();
 const cbStatus = (page: Page): Promise<string | null> => page.locator('.combobutton-status').textContent();
-=======
-const cbTrigger = (page: Page, index: number): Locator => page.locator(CB + '.combobutton-anchor').nth(index).locator('.combobutton');
-const cbMenu = (page: Page, index: number): Locator => page.locator(CB + '.combobutton-anchor').nth(index).locator('.combobutton-menu');
-const cbLabel = (trigger: Locator): Promise<string | null> => trigger.locator('.combobutton__label').textContent();
->>>>>>> origin/master
 
 scenario('ComboButton: a click opens the popup with the open look, choosing sets the label and closes', 'ComboButton', async (page) => {
 	const trigger = cbTrigger(page, 0);
@@ -325,7 +277,6 @@ scenario('ComboButton: a click opens the popup with the open look, choosing sets
 	await cls(trigger, 'combobutton--open', true);
 	assert.equal(await prop(trigger, 'padding-top'), '2px');
 	await outlineIs(page, trigger, 'hover');
-<<<<<<< HEAD
 	await cbRows(page, 0).nth(2).click();
 	await seen(menu, false);
 	assert.equal(await cbLabel(trigger), 'Scale');
@@ -344,14 +295,6 @@ scenario('ComboButton: the panel is a ue-popup-menu and the picked row is marked
 	await attr(rows.nth(0), 'aria-selected', 'false');
 	await attr(rows.nth(1), 'aria-selected', 'true');
 	assert.equal(await cbLabel(cbTrigger(page, 0)), 'Rotation');
-=======
-	await menu.locator('.combobutton-row-item').nth(2).click();
-	await seen(menu, false);
-	assert.equal(await cbLabel(trigger), 'Scale');
-	assert.equal(await page.locator(CB + '.combobutton-status').textContent(), 'Picked: Scale');
-	await attr(trigger, 'aria-expanded', 'false');
-	assert.equal(await prop(trigger, 'padding-top'), '1px');
->>>>>>> origin/master
 });
 
 scenario('ComboButton: hovering a row fills it with Primary, hovering the button lights its outline', 'ComboButton', async (page) => {
@@ -360,25 +303,16 @@ scenario('ComboButton: hovering a row fills it with Primary, hovering the button
 	await pointAt(page, trigger);
 	await outlineIs(page, trigger, 'hover');
 	await trigger.click();
-<<<<<<< HEAD
 	const rows = cbRows(page, 0);
 	assert.equal(await fill(rows.nth(1)), CLEAR);
 	await pointAt(page, rows.nth(1));
 	await paints(page, rows.nth(1), 'primary');
 	await cls(rows.nth(1), 'popupmenu__row--hover', true);
-=======
-	const rows = cbMenu(page, 0).locator('.combobutton-row-item');
-	assert.equal(await fill(rows.nth(1)), CLEAR);
-	await pointAt(page, rows.nth(1));
-	await paints(page, rows.nth(1), 'primary');
-	await cls(rows.nth(1), 'combobutton-row-item--hover', true);
->>>>>>> origin/master
 });
 
 scenario('ComboButton: the keyboard opens with Down, arrows move, Enter picks, Escape cancels', 'ComboButton', async (page) => {
 	const trigger = cbTrigger(page, 0);
 	const menu = cbMenu(page, 0);
-<<<<<<< HEAD
 	const rows = cbRows(page, 0);
 	await trigger.focus();
 	await tap(page, 'ArrowDown');
@@ -389,18 +323,6 @@ scenario('ComboButton: the keyboard opens with Down, arrows move, Enter picks, E
 	await paints(page, rows.nth(2), 'primary');
 	await tap(page, 'ArrowDown');
 	await cls(rows.nth(0), 'popupmenu__row--hover', true);
-=======
-	const rows = menu.locator('.combobutton-row-item');
-	await trigger.focus();
-	await tap(page, 'ArrowDown');
-	await seen(menu, true);
-	await cls(rows.nth(0), 'combobutton-row-item--hover', true);
-	await tap(page, 'ArrowDown', 'ArrowDown');
-	await cls(rows.nth(2), 'combobutton-row-item--hover', true);
-	await cls(rows.nth(2), 'combobutton-row-item--focus', true);
-	await tap(page, 'ArrowDown');
-	await cls(rows.nth(0), 'combobutton-row-item--hover', true);
->>>>>>> origin/master
 	await tap(page, 'ArrowUp', 'Enter');
 	await seen(menu, false);
 	assert.equal(await cbLabel(trigger), 'Scale');
@@ -412,16 +334,12 @@ scenario('ComboButton: the keyboard opens with Down, arrows move, Enter picks, E
 	assert.equal(await isFocused(trigger), true);
 	await tap(page, 'Space');
 	await seen(menu, true);
-<<<<<<< HEAD
 	await cls(rows.nth(2), 'popupmenu__row--hover', true);
 	await tap(page, 'Escape', 'ArrowUp');
 	await seen(menu, true);
 	await tap(page, 'Escape');
 	await tap(page, 'ArrowUp');
 	await cls(rows.nth(2), 'popupmenu__row--hover', true);
-=======
-	await cls(rows.nth(2), 'combobutton-row-item--hover', true);
->>>>>>> origin/master
 });
 
 scenario('ComboButton: an outside click closes the popup and opening one closes the other', 'ComboButton', async (page) => {
@@ -437,7 +355,6 @@ scenario('ComboButton: an outside click closes the popup and opening one closes 
 scenario('ComboButton: the simple variant keeps its label, a disabled one does not open', 'ComboButton', async (page) => {
 	const simple = cbTrigger(page, 1);
 	await simple.click();
-<<<<<<< HEAD
 	await cbRows(page, 1).nth(1).click();
 	assert.equal(await cbLabel(simple), 'Settings');
 	assert.equal(await cbStatus(page), 'Picked: Project Settings');
@@ -446,18 +363,10 @@ scenario('ComboButton: the simple variant keeps its label, a disabled one does n
 	await outlineIs(page, disabled, 'input-outline');
 	await pointAt(page, disabled);
 	await outlineIs(page, disabled, 'input-outline');
-=======
-	await cbMenu(page, 1).locator('.combobutton-row-item').nth(1).click();
-	assert.equal(await cbLabel(simple), 'Settings');
-	assert.equal(await page.locator(CB + '.combobutton-status').textContent(), 'Picked: Project Settings');
-	const disabled = page.locator(CB + '.combobutton[aria-disabled="true"]');
-	assert.equal(await prop(disabled, 'opacity'), '0.45');
->>>>>>> origin/master
 	await disabled.click({ force: true });
 	assert.equal(await page.locator(CB + '.combobutton-menu:not([hidden])').count(), 0);
 });
 
-<<<<<<< HEAD
 scenario('ComboButton: ue-combo-pick reports the value, label and check state of the row', 'ComboButton', async (page) => {
 	await record(page, 'ue-combo-pick');
 	await cbTrigger(page, 0).click();
@@ -627,8 +536,6 @@ scenario('ComboButton: a combo button inside another primitive acts on its own c
 	assert.deepEqual(await events(page, 'ue-expand-toggle'), []);
 });
 
-=======
->>>>>>> origin/master
 // ---------- Checkbox ----------
 
 const CK = 'ue-checkbox ';
@@ -643,7 +550,6 @@ scenario('Checkbox: a click toggles and the glyph follows the state', 'Checkbox'
 	await attr(box, 'aria-checked', 'true');
 	await seen(glyph, true);
 	await seen(box.locator('.checkbox__glyph--mixed'), false);
-<<<<<<< HEAD
 	assert.equal(await page.locator('.checkbox-status').textContent(), 'Last change: Simulate Physics is checked');
 	await box.click();
 	await attr(box, 'aria-checked', 'false');
@@ -675,11 +581,6 @@ scenario('Checkbox: the box-only variant has no label, names itself by aria-labe
 	await seen(box.locator('.checkbox__glyph--check'), false);
 	await tap(page, 'Enter');
 	await attr(box, 'aria-checked', 'true');
-=======
-	assert.equal(await page.locator(CK + '.checkbox-status').textContent(), 'Last change: Simulate Physics is checked');
-	await box.click();
-	await attr(box, 'aria-checked', 'false');
->>>>>>> origin/master
 });
 
 scenario('Checkbox: Space and Enter toggle the focused box, with the pressed class while held', 'Checkbox', async (page) => {
@@ -826,7 +727,6 @@ scenario('TextInput: Escape clears the search box', 'TextInput', async (page) =>
 	await cls(box, 'textinput--filled', false);
 });
 
-<<<<<<< HEAD
 scenario('TextInput: ue-text-input reports every edit and ue-text-clear the search clear', 'TextInput', async (page) => {
 	await record(page, 'ue-text-input');
 	await record(page, 'ue-text-clear');
@@ -878,8 +778,6 @@ scenario('TextInput: Escape in a plain box leaves the text', 'TextInput', async 
 	assert.equal(await field.inputValue(), 'StaticMeshActor');
 });
 
-=======
->>>>>>> origin/master
 // ---------- SpinBox ----------
 
 const SB = 'ue-spin-box ';
@@ -998,7 +896,6 @@ scenario('SpinBox: hover outlines Hover and fills Hover, the idle fill is Dropdo
 	await paints(page, fillBar, 'dropdown');
 });
 
-<<<<<<< HEAD
 scenario('SpinBox: ue-spin-change reports each change and the status line follows', 'SpinBox', async (page) => {
 	await record(page, 'ue-spin-change');
 	const box = sbBox(page, 1);
@@ -1072,8 +969,6 @@ scenario('SpinBox: dragging one box leaves the other boxes alone', 'SpinBox', as
 	assert.equal(await sbValue(sbBox(page, 4)), -210);
 });
 
-=======
->>>>>>> origin/master
 // ---------- Slider ----------
 
 const SL = 'ue-slider ';
@@ -1102,7 +997,6 @@ scenario('Slider: clicking the bar jumps the thumb there and dragging follows th
 	assert.ok(Math.abs(thumbBox.x + 4 - (box.x + box.width - 8)) < 0.6, 'the thumb centre sits 8px from the right end');
 });
 
-<<<<<<< HEAD
 scenario('Slider: ue-slider-change reports value and text, and one slider leaves the others alone', 'Slider', async (page) => {
 	await record(page, 'ue-slider-change');
 	const el = slider(page, 0);
@@ -1116,8 +1010,6 @@ scenario('Slider: ue-slider-change reports value and text, and one slider leaves
 	assert.equal(await page.locator(SL + '.slider-value').nth(1).textContent(), '25');
 });
 
-=======
->>>>>>> origin/master
 scenario('Slider: the stepped slider snaps to its step', 'Slider', async (page) => {
 	const el = slider(page, 1);
 	const box = await el.boundingBox();
@@ -1232,7 +1124,6 @@ scenario('Tooltip: keyboard focus shows it and blur hides it, the text-only form
 	await seen(tip, false);
 });
 
-<<<<<<< HEAD
 scenario('Tooltip: any element inside a ue-tooltip is a target and the popup follows the pointer', 'Tooltip', async (page) => {
 	if (process.env.UE_MODE === 'modules') await page.waitForFunction(() => customElements.get('ue-tooltip') !== undefined);
 	await page.evaluate(() => {
@@ -1274,13 +1165,6 @@ scenario('Tooltip: pinned specimens stay visible in a pinned ue-tooltip and the 
 	assert.equal(await pinned.count(), 2);
 	await seen(pinned.first(), true);
 	assert.equal(await pinned.first().evaluate((el) => el.closest('ue-tooltip')?.hasAttribute('data-pinned')), true);
-=======
-scenario('Tooltip: pinned specimens stay visible plain HTML and the live tooltip starts hidden', 'Tooltip', async (page) => {
-	const pinned = page.locator('.tooltip[data-pinned]');
-	assert.equal(await pinned.count(), 2);
-	await seen(pinned.first(), true);
-	assert.equal(await pinned.first().evaluate((el) => el.closest('ue-tooltip')), null);
->>>>>>> origin/master
 	assert.equal(await popup(page, 0).evaluate((el) => el.hasAttribute('hidden')), true);
 });
 
@@ -1393,7 +1277,6 @@ scenario('PopupMenu: hovering a submenu row opens its submenu and it stays open 
 	await seen(sub, false);
 });
 
-<<<<<<< HEAD
 scenario('PopupMenu: ue-menu-activate reports label, role, state and value, and a submenu row only opens', 'PopupMenu', async (page) => {
 	await record(page, 'ue-menu-activate');
 	await row(page, 'Show Grid').click();
@@ -1427,12 +1310,6 @@ scenario('PopupMenu: pinned menus sit in a pinned ue-popup-menu and ignore the p
 	const pinned = page.locator('[data-pinned] .popupmenu');
 	assert.equal(await pinned.count(), 2);
 	assert.equal(await pinned.first().evaluate((el) => el.closest('ue-popup-menu')?.hasAttribute('data-pinned')), true);
-=======
-scenario('PopupMenu: pinned menus stay plain HTML and ignore the pointer', 'PopupMenu', async (page) => {
-	const pinned = page.locator('.popupmenu[data-pinned]');
-	assert.equal(await pinned.count(), 2);
-	assert.equal(await pinned.first().evaluate((el) => el.closest('ue-popup-menu')), null);
->>>>>>> origin/master
 	assert.equal(await prop(pinned.first(), 'pointer-events'), 'none');
 });
 
@@ -1442,20 +1319,12 @@ const NT = 'ue-notification ';
 const toastCount = (page: Page): Promise<number> => page.locator(NT + '.notification').count();
 const stackHeight = async (page: Page): Promise<number> => (await page.locator(NT + '.notification-stack').boundingBox())?.height ?? 0;
 const toastTitles = (page: Page): Promise<string[]> => page.locator(NT + '.notification__title').allTextContents();
-<<<<<<< HEAD
 const toastGone = (page: Page, remaining: number): Promise<unknown> => page.waitForFunction((n) => document.querySelectorAll('ue-notification:not([data-pinned], [data-pinned] *) .notification').length === n, remaining);
-=======
-const toastGone = (page: Page, remaining: number): Promise<unknown> => page.waitForFunction((n) => document.querySelectorAll('ue-notification .notification').length === n, remaining);
->>>>>>> origin/master
 
 scenario('Notification: Dismiss removes the toast and the stack closes up', 'Notification', async (page) => {
 	assert.equal(await toastCount(page), 1);
 	assert.ok((await stackHeight(page)) > 60);
-<<<<<<< HEAD
 	await page.locator(NT + '.button[data-action="dismiss"]').click();
-=======
-	await page.locator(NT + '.notification__btn[data-action="dismiss"]').click();
->>>>>>> origin/master
 	await toastGone(page, 0);
 	assert.equal(await stackHeight(page), 0);
 });
@@ -1501,11 +1370,7 @@ scenario('Notification: a dismissed toast can be brought back with Show notifica
 	await wait(page, 300);
 	assert.equal(await toastCount(page), 1);
 	await paints(page, page.locator(NT + '.notification'), 'notifications');
-<<<<<<< HEAD
 	assert.equal(await page.locator('[data-pinned] .notification').count(), 3);
-=======
-	assert.equal(await page.locator('.notification[data-pinned]').count(), 3);
->>>>>>> origin/master
 });
 
 // ---------- ExpandableArea ----------
@@ -1546,7 +1411,6 @@ scenario('ExpandableArea: Enter and Space toggle the focused header and it shows
 	await seen(body, true);
 });
 
-<<<<<<< HEAD
 scenario('ExpandableArea: ue-expand-toggle reports the new state and each area folds on its own', 'ExpandableArea', async (page) => {
 	await record(page, 'ue-expand-toggle');
 	await area(page, 0).locator('.expandablearea__header').click();
@@ -1576,8 +1440,6 @@ scenario('ExpandableArea: a control inside the header does not fold the area, th
 	assert.deepEqual(await events(page, 'ue-expand-toggle'), [{ expanded: false }]);
 });
 
-=======
->>>>>>> origin/master
 scenario('ExpandableArea: the panel keeps its Panel fill and the header has no hover fill', 'ExpandableArea', async (page) => {
 	const panel = area(page, 0);
 	const header = panel.locator('.expandablearea__header');
@@ -1585,7 +1447,6 @@ scenario('ExpandableArea: the panel keeps its Panel fill and the header has no h
 	await pointAt(page, header);
 	assert.equal(await fill(header), CLEAR);
 	await paints(page, panel, 'panel');
-<<<<<<< HEAD
 	assert.equal(await page.locator('[data-pinned] .expandablearea').count(), 2);
 });
 
@@ -1753,8 +1614,5 @@ scenario('ComboButton: value reads the picked row, the setter picks a row by val
 	});
 	assert.match(failure, /no row with the value Nothing/);
 	assert.equal(await cbLabel(cbTrigger(page, 0)), 'Scale', 'a failed set changes nothing');
-=======
-	assert.equal(await page.locator('.expandablearea[data-pinned]').count(), 2);
->>>>>>> origin/master
 });
 

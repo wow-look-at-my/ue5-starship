@@ -28,10 +28,7 @@ var TreeController = class {
     return row.getAttribute("aria-expanded") === "true";
   }
   hasChildren(row) {
-<<<<<<< HEAD
     if (this.hooks.lazy?.(row)) return true;
-=======
->>>>>>> origin/master
     const next = row.nextElementSibling;
     return next instanceof HTMLElement && next.matches(this.parts.row) && this.level(next) > this.level(row);
   }
@@ -58,7 +55,6 @@ var TreeController = class {
         return;
       }
       hideBelow = Infinity;
-<<<<<<< HEAD
       const kids = index + 1 < rows.length && this.level(rows[index + 1]) > level || (this.hooks.lazy?.(row) ?? false);
       const stored = kids && this.isOpen(row);
       const open = stored || kids && (this.hooks.forceOpen?.(row) ?? false);
@@ -66,23 +62,12 @@ var TreeController = class {
       arrow?.classList.toggle("is-leaf", !kids);
       if (kids) {
         row.setAttribute("aria-expanded", stored ? "true" : "false");
-=======
-      const kids = index + 1 < rows.length && this.level(rows[index + 1]) > level;
-      const open = kids && this.isOpen(row);
-      const arrow = row.querySelector(this.parts.arrow);
-      arrow?.classList.toggle("is-leaf", !kids);
-      if (kids) {
-        row.setAttribute("aria-expanded", open ? "true" : "false");
->>>>>>> origin/master
         this.#swap(arrow, open ? this.parts.caretOpen : this.parts.caretClosed);
         if (!open) hideBelow = level;
       } else {
         row.removeAttribute("aria-expanded");
       }
-<<<<<<< HEAD
       if (this.parts.openClass) row.classList.toggle(this.parts.openClass, open);
-=======
->>>>>>> origin/master
       this.#swap(row.querySelector(this.parts.folder), open ? this.parts.folderOpen : this.parts.folderClosed);
       row.setAttribute("aria-selected", this.isSelected(row) ? "true" : "false");
       if (this.hooks.excluded?.(row)) {
@@ -103,7 +88,6 @@ var TreeController = class {
     for (const row of this.rows()) row.classList.toggle("is-selected", set.has(row));
     if (anchor) this.#anchor = anchor;
     this.refresh();
-<<<<<<< HEAD
     this.hooks.selected?.(this.selected());
   }
   setOpen(row, open) {
@@ -111,12 +95,6 @@ var TreeController = class {
     row.setAttribute("aria-expanded", open ? "true" : "false");
     this.refresh();
     if (was !== open) this.hooks.toggled?.(row, open);
-=======
-  }
-  setOpen(row, open) {
-    row.setAttribute("aria-expanded", open ? "true" : "false");
-    this.refresh();
->>>>>>> origin/master
   }
   focusRow(row, reveal) {
     for (const other of this.rows()) other.tabIndex = other === row ? 0 : -1;
@@ -124,12 +102,8 @@ var TreeController = class {
     if (reveal) row.scrollIntoView({ block: "nearest" });
   }
   // Plain: replace the selection. Shift: range from the anchor. Ctrl or cmd: toggle the row.
-<<<<<<< HEAD
   pick(row, given, reveal) {
     const mods = this.hooks.multi === false ? { shiftKey: false, ctrlKey: false, metaKey: false } : given;
-=======
-  pick(row, mods, reveal) {
->>>>>>> origin/master
     const chosen = this.selected();
     const toggle = mods.ctrlKey || mods.metaKey;
     if (mods.shiftKey) {

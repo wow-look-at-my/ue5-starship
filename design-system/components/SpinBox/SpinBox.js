@@ -1,7 +1,6 @@
 // design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
-<<<<<<< HEAD
   #ready = false;
   #pendingSetup = null;
   // The bundle can load before the parser reaches this element's children, so setup waits for the document to finish parsing.
@@ -28,15 +27,6 @@ var UeElement = class extends HTMLElement {
     this.#ready = true;
     this.setup();
   }
-=======
-  connectedCallback() {
-    this.style.display = "contents";
-    this.setup();
-  }
-  disconnectedCallback() {
-    for (const dispose of this.#disposers.splice(0)) dispose();
-  }
->>>>>>> origin/master
   on(target, type, listener, options) {
     target.addEventListener(type, listener, options);
     this.#disposers.push(() => target.removeEventListener(type, listener, options));
@@ -48,13 +38,10 @@ var UeElement = class extends HTMLElement {
   emit(name, detail) {
     return this.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
   }
-<<<<<<< HEAD
   // True when the nearest element of this tag above the target is this element, so a nested instance keeps its own events.
   owns(target) {
     return target instanceof Element && target.closest(this.localName) === this;
   }
-=======
->>>>>>> origin/master
   all(selector) {
     return Array.from(this.querySelectorAll(selector));
   }
@@ -78,11 +65,7 @@ function numberAttr(el, name) {
 function rangeOf(box) {
   const min = numberAttr(box, "min");
   const max = numberAttr(box, "max");
-<<<<<<< HEAD
   return { min: min ?? -Infinity, max: max ?? Infinity, bounded: min !== null && max !== null, delta: numberAttr(box, "delta") ?? numberAttr(box, "step") ?? 0 };
-=======
-  return { min: min ?? -Infinity, max: max ?? Infinity, bounded: min !== null && max !== null, delta: numberAttr(box, "delta") ?? 0 };
->>>>>>> origin/master
 }
 function valueOf(box) {
   return numberAttr(box, "value") ?? 0;
@@ -94,7 +77,6 @@ function format(value) {
 function clamp(value, range) {
   return Math.min(range.max, Math.max(range.min, value));
 }
-<<<<<<< HEAD
 var UeSpinBoxElement = class extends UeElement {
   #drags = /* @__PURE__ */ new WeakMap();
   // The current value. The setter redraws the box and fires no ue-spin-change, because the owner that sets it already knows.
@@ -114,34 +96,15 @@ var UeSpinBoxElement = class extends UeElement {
     this.#render(box);
     this.on(box, "pointerdown", (event) => {
       if (event.button !== 0 || box.getAttribute("aria-disabled") === "true") return;
-=======
-function boxOf(target) {
-  return target instanceof Element ? target.closest(".spinbox") : null;
-}
-var UeSpinBoxElement = class extends UeElement {
-  #drags = /* @__PURE__ */ new WeakMap();
-  setup() {
-    for (const box of this.all(".spinbox")) this.#render(box);
-    this.on(this, "pointerdown", (event) => {
-      const box = boxOf(event.target);
-      if (!box || event.button !== 0 || box.getAttribute("aria-disabled") === "true") return;
->>>>>>> origin/master
       if (box.classList.contains("spinbox--text")) return;
       box.setPointerCapture(event.pointerId);
       this.#drags.set(box, { pointerId: event.pointerId, lastX: event.clientX, distance: 0, dragging: false, before: valueOf(box), internal: valueOf(box) });
       box.focus();
       event.preventDefault();
     });
-<<<<<<< HEAD
     this.on(box, "pointermove", (event) => {
       const state = this.#drags.get(box);
       if (!state || state.pointerId !== event.pointerId) return;
-=======
-    this.on(this, "pointermove", (event) => {
-      const box = boxOf(event.target);
-      const state = box ? this.#drags.get(box) : void 0;
-      if (!box || !state || state.pointerId !== event.pointerId) return;
->>>>>>> origin/master
       const dx = event.clientX - state.lastX;
       state.lastX = event.clientX;
       if (!state.dragging) {
@@ -155,14 +118,8 @@ var UeSpinBoxElement = class extends UeElement {
       this.#drag(box, state, dx);
     });
     const finish = (event) => {
-<<<<<<< HEAD
       const state = this.#drags.get(box);
       if (!state || state.pointerId !== event.pointerId) return;
-=======
-      const box = boxOf(event.target);
-      const state = box ? this.#drags.get(box) : void 0;
-      if (!box || !state || state.pointerId !== event.pointerId) return;
->>>>>>> origin/master
       this.#drags.delete(box);
       if (box.hasPointerCapture(event.pointerId)) box.releasePointerCapture(event.pointerId);
       box.classList.remove("spinbox--active");
@@ -174,18 +131,10 @@ var UeSpinBoxElement = class extends UeElement {
         this.#enterText(box);
       }
     };
-<<<<<<< HEAD
     this.on(box, "pointerup", finish);
     this.on(box, "pointercancel", finish);
     this.on(box, "keydown", (event) => {
       if (box.getAttribute("aria-disabled") === "true") return;
-=======
-    this.on(this, "pointerup", finish);
-    this.on(this, "pointercancel", finish);
-    this.on(this, "keydown", (event) => {
-      const box = boxOf(event.target);
-      if (!box || box.getAttribute("aria-disabled") === "true") return;
->>>>>>> origin/master
       const state = this.#drags.get(box);
       if (event.key === "Escape" && state?.dragging) {
         this.#drags.delete(box);
@@ -203,16 +152,8 @@ var UeSpinBoxElement = class extends UeElement {
       else return;
       event.preventDefault();
     });
-<<<<<<< HEAD
     this.on(box, "focusout", (event) => {
       if (event.target instanceof HTMLInputElement && event.target.classList.contains("spinbox__field")) this.#exitText(box, true, false);
-=======
-    this.on(this, "focusout", (event) => {
-      if (event.target instanceof HTMLInputElement && event.target.classList.contains("spinbox__field")) {
-        const box = boxOf(event.target);
-        if (box) this.#exitText(box, true, false);
-      }
->>>>>>> origin/master
     });
   }
   // The value change of one mouse move while dragging, from SSpinBox::OnMouseMove.
@@ -235,15 +176,7 @@ var UeSpinBoxElement = class extends UeElement {
     const before = valueOf(box);
     box.dataset.value = String(value);
     this.#render(box);
-<<<<<<< HEAD
     if (value !== before) this.emit("ue-spin-change", { value, text: format(value) + (box.dataset.unit ? " " + box.dataset.unit : "") });
-=======
-    if (value !== before) {
-      const status = this.one(".spinbox-status");
-      if (status) status.textContent = "Last change: " + format(value);
-      this.emit("ue-spin-change", { value });
-    }
->>>>>>> origin/master
   }
   #render(box) {
     const range = rangeOf(box);
@@ -254,7 +187,6 @@ var UeSpinBoxElement = class extends UeElement {
       box.setAttribute("aria-valuemax", String(range.max));
       box.style.setProperty("--spinbox-fill", String((value - range.min) / (range.max - range.min)));
     }
-<<<<<<< HEAD
     box.classList.toggle("spinbox--unbounded", !range.bounded);
     const text = box.querySelector(".spinbox__text");
     if (text && !box.classList.contains("spinbox--text")) text.textContent = format(value);
@@ -266,10 +198,6 @@ var UeSpinBoxElement = class extends UeElement {
       text.after(suffix);
     }
     if (suffix) suffix.textContent = unit ?? "";
-=======
-    const text = box.querySelector(".spinbox__text");
-    if (text && !box.classList.contains("spinbox--text")) text.textContent = format(value);
->>>>>>> origin/master
   }
   #enterText(box) {
     const text = box.querySelector(".spinbox__text");

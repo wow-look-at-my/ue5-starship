@@ -2,39 +2,20 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { test } from 'node:test';
-<<<<<<< HEAD
 import { openPreview, root, serve, withBrowser } from './lib.ts';
 
 const components = path.join(root, 'components');
 const names = fs.readdirSync(components, { withFileTypes: true }).filter((e) => e.isDirectory() && fs.existsSync(path.join(components, e.name, 'preview.html'))).map((e) => e.name).sort();
 const STATIC = new Set<string>();
-=======
-import { openPreview, root, withBrowser } from './lib.ts';
-
-const components = path.join(root, 'components');
-const names = fs.readdirSync(components, { withFileTypes: true }).filter((e) => e.isDirectory() && fs.existsSync(path.join(components, e.name, 'preview.html'))).map((e) => e.name).sort();
-const STATIC = new Set(['Cover']);
->>>>>>> origin/master
 
 test('every component folder is covered by this check', () => {
 	assert.ok(names.length >= 36, 'found ' + names.length + ' previews');
 });
 
 for (const name of names.filter((n) => !STATIC.has(n))) {
-<<<<<<< HEAD
 	test(name + ': the preview carries no script, the bundle supplies every element', () => {
 		const html = fs.readFileSync(path.join(components, name, 'preview.html'), 'utf8');
 		assert.doesNotMatch(html, /<script/i, 'script tag');
-=======
-	test(name + ': scripts are compiled TypeScript modules only', () => {
-		const html = fs.readFileSync(path.join(components, name, 'preview.html'), 'utf8');
-		const body = html.slice(html.indexOf('<body'));
-		const inline = [...body.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)].filter((m) => m[1].trim() !== '');
-		assert.equal(inline.length, 0, 'inline script bodies');
-		const modules = [...body.matchAll(/<script type="module" src="([^"]+)"><\/script>/g)].map((m) => m[1]);
-		assert.ok(modules.length > 0, 'a module script');
-		for (const src of modules) assert.ok(fs.existsSync(path.join(components, name, src)), src + ' exists');
->>>>>>> origin/master
 	});
 
 	test(name + ': at least one live custom element is defined and upgraded', async () => {
@@ -51,7 +32,6 @@ for (const name of names.filter((n) => !STATIC.has(n))) {
 		});
 	});
 }
-<<<<<<< HEAD
 
 const kebab = (name: string): string => 'ue-' + name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
 
@@ -203,5 +183,3 @@ for (const name of names) {
 		});
 	});
 }
-=======
->>>>>>> origin/master

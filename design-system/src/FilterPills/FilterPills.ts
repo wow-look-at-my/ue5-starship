@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // <ue-filter-pills> wraps one .FilterPills-strip. Pills form a tablist with one active pill and roving focus. Chips are removable filters.
 import { UeElement, define } from '../_shared/element.ts';
 import './FilterPills.css';
@@ -102,43 +101,12 @@ export class UeFilterPills extends UeElement {
 	#select(pill: HTMLElement, focus: boolean): void {
 		const changed = !pill.classList.contains('is-checked');
 		for (const other of this.#pills()) {
-=======
-// <ue-filter-pills> wraps the FilterPills markup: one active pill per strip, with roving keyboard focus.
-import { UeElement, define } from '../_shared/element.ts';
-
-class UeFilterPills extends UeElement {
-	protected setup(): void {
-		for (const strip of this.all('.FilterPills-strip')) {
-			this.on(strip, 'click', (event) => {
-				const pill = (event.target as Element).closest<HTMLElement>('.FilterPills-pill');
-				if (pill && strip.contains(pill)) this.select(strip, pill, false);
-			});
-			this.on(strip, 'keydown', (event) => {
-				const pills = Array.from(strip.querySelectorAll<HTMLElement>('.FilterPills-pill'));
-				const at = pills.indexOf(document.activeElement as HTMLElement);
-				if (at < 0) return;
-				let next = -1;
-				if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = (at + 1) % pills.length;
-				else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') next = (at - 1 + pills.length) % pills.length;
-				else if (event.key === 'Home') next = 0;
-				else if (event.key === 'End') next = pills.length - 1;
-				if (next < 0) return;
-				event.preventDefault();
-				this.select(strip, pills[next], true);
-			});
-		}
-	}
-
-	private select(strip: Element, pill: HTMLElement, focus: boolean): void {
-		for (const other of strip.querySelectorAll<HTMLElement>('.FilterPills-pill')) {
->>>>>>> origin/master
 			const on = other === pill;
 			other.classList.toggle('is-checked', on);
 			other.setAttribute('aria-selected', String(on));
 			other.tabIndex = on ? 0 : -1;
 		}
 		if (focus) pill.focus();
-<<<<<<< HEAD
 		if (changed) this.emit<FilterChangeDetail>('ue-filter-change', { value: this.#valueOf(pill), label: (pill.textContent ?? '').trim() });
 	}
 
@@ -210,9 +178,6 @@ class UeFilterPills extends UeElement {
 		const wanted = new Set(chips.map((chip) => chip.id));
 		for (const have of this.getChips()) if (!wanted.has(have.id)) this.removeChip(have.id);
 		for (const chip of chips) this.addChip(chip);
-=======
-		this.emit('ue-filter-change', { label: pill.textContent ?? '' });
->>>>>>> origin/master
 	}
 }
 

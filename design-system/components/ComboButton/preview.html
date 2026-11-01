@@ -15,54 +15,6 @@
 	.combobutton-row { display: flex; align-items: center; gap: 12px; }
 	.combobutton-live { flex: 1 1 100%; display: flex; flex-direction: column; gap: 8px; }
 	.combobutton-status { color: var(--foreground-hover); }
-<<<<<<< HEAD
-=======
-	[data-pinned] { pointer-events: none; } /* a pinned specimen shows one forced state and ignores the pointer */
-
-	.combobutton {
-		display: inline-flex; align-items: center; margin: 0; border: 0; outline: 0; min-width: 120px;
-		padding: 1px 8px; /* ComboButtonMargin (8,1,8,1) CoreStyle.h:114; ContentPadding 0 StarshipCoreStyle.cpp:1490 */
-		border-radius: 4px; /* InputFocusRadius CoreStyle.h:117 */
-		background: var(--input); /* StarshipCoreStyle.cpp:1471 */
-		box-shadow: inset 0 0 0 1px var(--input-outline); /* :1471, thickness CoreStyle.h:118 */
-		color: var(--foreground); /* NormalForeground :1475 */
-		font: 400 13.333px/16px var(--font-sans); /* NormalText 10pt */
-		white-space: nowrap; cursor: default; user-select: none;
-	}
-	.combobutton:hover, .combobutton--hover { box-shadow: inset 0 0 0 1px var(--hover); color: var(--foreground-hover); } /* :1472, :1476 */
-	.combobutton:active, .combobutton--open { box-shadow: inset 0 0 0 1px var(--hover); color: var(--foreground-hover); padding: 2px 8px 0; } /* :1473, :1477, PressedComboButtonMargin (8,2,8,0) CoreStyle.h:115 */
-	.combobutton--disabled, .combobutton--disabled:hover, .combobutton[aria-disabled="true"], .combobutton[aria-disabled="true"]:hover, .combobutton[aria-disabled="true"]:active { opacity: .45; box-shadow: inset 0 0 0 1px var(--input-outline); color: var(--foreground); } /* alpha x .45 SlateElementPixelShader.usf:535 */
-	.combobutton__label { flex: 1 1 auto; }
-	.combobutton__arrow {
-		flex: none; width: 16px; height: 16px; margin: 2px; /* wide-chevron-down 16x16 :1491, DownArrowPadding 2 SlateTypes.cpp:165 */
-		fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; /* approximation of the SVG */
-	}
-
-	.combobutton--simple {
-		min-width: 0; background: transparent; box-shadow: none; color: var(--foreground); /* SimpleButtonLabelAndIcon: NoResource :1390, fg :1394 */
-		padding: 1px 4px; /* (4,1,4,1) :1402 */
-	}
-	.combobutton--simple:hover, .combobutton--simple.combobutton--hover { background: var(--dropdown); color: var(--foreground-hover); box-shadow: none; } /* :1391, :1395 */
-	.combobutton--simple:active, .combobutton--simple.combobutton--open { background: var(--dropdown); color: var(--foreground-hover); box-shadow: none; padding: 2px 4px 0; } /* :1392, (4,2,4,0) :1403 */
-	.combobutton--simple .combobutton__label { margin-right: 4px; }
-	.combobutton[aria-disabled="true"], .combobutton[aria-disabled="true"]:hover, .combobutton[aria-disabled="true"]:active { padding: 1px 8px; }
-	.combobutton:focus-visible:not(.combobutton--open), .combobutton--simple:focus-visible:not(.combobutton--open) { box-shadow: inset 0 0 0 1px var(--primary); } /* FocusRectangle 1px Primary r4, StarshipCoreStyle.cpp:218 */
-
-	.combobutton-anchor { display: inline-block; position: relative; }
-	.combobutton-menu {
-		position: absolute; left: 0; top: 100%; min-width: 100%; box-sizing: border-box; z-index: 20;
-		background: var(--dropdown); /* MenuBorderBrush fill :1492 */
-		box-shadow: inset 0 0 0 1px var(--dropdown-outline); /* outline 1px, radius 0 :1492 */
-		padding: 0; /* MenuBorderPadding :1493 */
-	}
-	.combobutton-row-item {
-		position: relative; padding: 3px 8px; /* MenuRowPadding (8,3) :1503 */
-		font: 400 13.333px/16px var(--font-sans); color: var(--foreground-hover); /* TextColor White :1549 */
-	}
-	.combobutton-row-item:hover, .combobutton-row-item--hover { background: var(--primary); } /* hovered brush :1534 */
-	.combobutton-menu--keys .combobutton-row-item:hover:not(.combobutton-row-item--hover) { background: transparent; } /* after an arrow key, only the keyboard row is highlighted */
-	.combobutton-row-item--focus::after { content: ""; position: absolute; inset: 0; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--select); } /* SelectorFocusedBrush r4 1px Select :1539 */
->>>>>>> origin/master
 	.combobutton-spacer { height: 78px; }
 	.combobutton-row--end { justify-content: flex-end; width: 360px; }
 	.combobutton-panel-demo { --combobutton-menu-min-width: 200px; }
@@ -70,7 +22,6 @@
 </head>
 <body>
 <div class="combobutton-page">
-<<<<<<< HEAD
 	<div class="combobutton-live">
 		<span class="combobutton-cap">Live: click, or Tab then Enter, Space or Down to open. Arrows and hover highlight, Enter picks, Escape or an outside click closes.</span>
 		<div class="combobutton-row">
@@ -166,70 +117,26 @@
 		<ue-event-status class="combobutton-cap combobutton-status" event="ue-combo-pick" template="Picked: {value}">Picked: nothing yet</ue-event-status>
 		<div class="combobutton-spacer"></div>
 	</div>
-=======
-	<ue-combo-button class="combobutton-live-host">
-		<div class="combobutton-live">
-			<span class="combobutton-cap">Live: click, or Tab then Enter, Space or Down to open. Arrows and hover highlight, Enter picks, Escape or an outside click closes.</span>
-			<div class="combobutton-row">
-				<div class="combobutton-anchor">
-					<span class="combobutton" role="combobox" tabindex="0" aria-haspopup="listbox" aria-expanded="false" style="min-width:160px"><span class="combobutton__label">Location</span><svg class="combobutton__arrow"><use href="#combobutton-caret"/></svg></span>
-					<div class="combobutton-menu" role="listbox" hidden>
-						<div class="combobutton-row-item" role="option">Location</div>
-						<div class="combobutton-row-item" role="option">Rotation</div>
-						<div class="combobutton-row-item" role="option">Scale</div>
-					</div>
-				</div>
-				<div class="combobutton-anchor">
-					<span class="combobutton combobutton--simple" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false"><span class="combobutton__label">Settings</span><svg class="combobutton__arrow"><use href="#combobutton-caret"/></svg></span>
-					<div class="combobutton-menu" role="menu" hidden>
-						<div class="combobutton-row-item" role="menuitem">Editor Preferences</div>
-						<div class="combobutton-row-item" role="menuitem">Project Settings</div>
-						<div class="combobutton-row-item" role="menuitem">Plugins</div>
-					</div>
-				</div>
-				<span class="combobutton" role="combobox" aria-disabled="true" aria-expanded="false"><span class="combobutton__label">Location</span><svg class="combobutton__arrow"><use href="#combobutton-caret"/></svg></span>
-			</div>
-			<span class="combobutton-cap combobutton-status">Picked: nothing yet</span>
-			<div class="combobutton-spacer"></div>
-		</div>
-	</ue-combo-button>
->>>>>>> origin/master
 	<div class="combobutton-col">
 		<span class="combobutton-cap">Pinned: forced states for reference, not interactive</span>
 		<span class="combobutton-cap">ComboButton</span>
 		<div class="combobutton-row">
-<<<<<<< HEAD
 			<ue-combo-button data-pinned><span class="combobutton"><span class="combobutton__label">Location</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></ue-combo-button>
 			<ue-combo-button data-pinned><span class="combobutton combobutton--hover"><span class="combobutton__label">Location</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></ue-combo-button>
 			<ue-combo-button data-pinned><span class="combobutton combobutton--disabled"><span class="combobutton__label">Location</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></ue-combo-button>
-=======
-			<span class="combobutton" data-pinned><span class="combobutton__label">Location</span><svg class="combobutton__arrow"><use href="#combobutton-caret"/></svg></span>
-			<span class="combobutton combobutton--hover" data-pinned><span class="combobutton__label">Location</span><svg class="combobutton__arrow"><use href="#combobutton-caret"/></svg></span>
-			<span class="combobutton combobutton--disabled" data-pinned><span class="combobutton__label">Location</span><svg class="combobutton__arrow"><use href="#combobutton-caret"/></svg></span>
->>>>>>> origin/master
 		</div>
 		<span class="combobutton-cap">Normal, hovered, disabled</span>
 		<span class="combobutton-cap" style="margin-top:6px">SimpleComboButton (borderless)</span>
 		<div class="combobutton-row">
-<<<<<<< HEAD
 			<ue-combo-button data-pinned><span class="combobutton combobutton--simple"><span class="combobutton__label">Settings</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></ue-combo-button>
 			<ue-combo-button data-pinned><span class="combobutton combobutton--simple combobutton--hover"><span class="combobutton__label">Settings</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span></ue-combo-button>
-=======
-			<span class="combobutton combobutton--simple" data-pinned><span class="combobutton__label">Settings</span><svg class="combobutton__arrow"><use href="#combobutton-caret"/></svg></span>
-			<span class="combobutton combobutton--simple combobutton--hover" data-pinned><span class="combobutton__label">Settings</span><svg class="combobutton__arrow"><use href="#combobutton-caret"/></svg></span>
->>>>>>> origin/master
 		</div>
 		<span class="combobutton-cap">Normal, hovered</span>
 	</div>
 	<div class="combobutton-col">
 		<span class="combobutton-cap">Open (mouse down) with ComboBox popup</span>
-<<<<<<< HEAD
 		<ue-combo-button data-pinned><div class="combobutton-anchor">
 			<span class="combobutton combobutton--open" style="min-width:160px"><span class="combobutton__label">Rotation</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
-=======
-		<div class="combobutton-anchor" data-pinned>
-			<span class="combobutton combobutton--open" data-pinned style="min-width:160px"><span class="combobutton__label">Rotation</span><svg class="combobutton__arrow"><use href="#combobutton-caret"/></svg></span>
->>>>>>> origin/master
 			<div class="combobutton-menu">
 				<ue-popup-menu><div class="popupmenu popupmenu--combo">
 					<div class="popupmenu__row"><span class="popupmenu__body"><span class="popupmenu__label">Location</span></span></div>
@@ -242,6 +149,5 @@
 		<span class="combobutton-cap">Hovered row fills with Primary.</span>
 	</div>
 </div>
-<script type="module" src="./ComboButton.js"></script>
 </body>
 </html>

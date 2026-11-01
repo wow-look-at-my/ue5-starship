@@ -1,15 +1,11 @@
 // Base class for the light-DOM custom elements that make the component previews live.
-<<<<<<< HEAD
 import './base.css';
-=======
->>>>>>> origin/master
 
 export type Listener<E extends Event> = (event: E) => void;
 
 export abstract class UeElement extends HTMLElement {
 	#disposers: Array<() => void> = [];
 
-<<<<<<< HEAD
 	#ready = false;
 	#pendingSetup: (() => void) | null = null;
 
@@ -40,17 +36,6 @@ export abstract class UeElement extends HTMLElement {
 		this.setup();
 	}
 
-=======
-	connectedCallback(): void {
-		this.style.display = 'contents';
-		this.setup();
-	}
-
-	disconnectedCallback(): void {
-		for (const dispose of this.#disposers.splice(0)) dispose();
-	}
-
->>>>>>> origin/master
 	// Wires the existing markup. Runs on every connect, after the run's listeners are removed.
 	protected abstract setup(): void;
 
@@ -71,14 +56,11 @@ export abstract class UeElement extends HTMLElement {
 		return this.dispatchEvent(new CustomEvent<T>(name, { detail, bubbles: true, composed: true }));
 	}
 
-<<<<<<< HEAD
 	// True when the nearest element of this tag above the target is this element, so a nested instance keeps its own events.
 	protected owns(target: EventTarget | null): boolean {
 		return target instanceof Element && target.closest(this.localName) === this;
 	}
 
-=======
->>>>>>> origin/master
 	protected all<T extends Element = HTMLElement>(selector: string): T[] {
 		return Array.from(this.querySelectorAll<T>(selector));
 	}

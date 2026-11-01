@@ -18,26 +18,6 @@
 	.windowChrome-live b, .windowChrome-status { color: var(--foreground); }
 	ue-window-chrome { display: contents; }
 
-	/* Pressed: the button style sets only Hovered on the fill (StarshipCoreStyle.cpp:789-792), so Pressed falls back to NoBorder (no fill, :233-239) and the glyph tint is Foreground (:751, :766). */
-	.windowChrome-btn--pressed { background: transparent; color: var(--foreground); }
-
-	/* Live states. Each rule repeats the declarations of the forced-state class above. A button with data-pinned opts out. */
-	.windowChrome-btn--minmax:not([data-pinned]):hover { background: rgba(255, 255, 255, .157); color: var(--foreground-hover); }
-	.windowChrome-btn--close:not([data-pinned]):hover { background: rgba(255, 79, 79, .588); color: var(--foreground-hover); }
-	.windowChrome-btn:not([data-pinned]):active { background: transparent; color: var(--foreground); }
-	.windowChrome-btn:not([data-pinned]):focus-visible { outline: 1px solid var(--primary); outline-offset: -2px; /* keyboard focus ring; the engine buttons are not focusable (SWindowTitleBar.cpp:139) */ }
-	.windowChrome-frame:focus-visible { outline: 1px solid var(--primary); outline-offset: 2px; }
-	.windowChrome-frame[data-maximized] { border-radius: 0; }
-	.windowChrome-frame[data-maximized]::before { border-radius: 0; }
-	.windowChrome-frame[data-maximized] .windowChrome-content { height: 90px; }
-	.windowChrome-reopen { padding: 4px 12px; font: 400 11px/1.2 var(--font-sans); color: var(--foreground); background: transparent; border: 1px solid var(--input-outline); border-radius: 2px; cursor: default; }
-	.windowChrome-reopen:hover { color: var(--foreground-hover); background: var(--recessed); }
-	.windowChrome-reopen:active { color: var(--foreground); background: var(--background); }
-	.windowChrome-reopen:focus-visible { outline: 1px solid var(--primary); outline-offset: 1px; }
-	.windowChrome-live { margin: 0 0 8px; line-height: 1.45; }
-	.windowChrome-live b, .windowChrome-status { color: var(--foreground); }
-	ue-window-chrome { display: contents; }
-
 	.windowChrome-states { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: flex-start; }
 	.windowChrome-state { display: flex; flex-direction: column; gap: 4px; }
 	.windowChrome-stateBox { background: var(--title); }
@@ -72,24 +52,14 @@
 			</div>
 			<div class="windowChrome-right">
 				<div class="windowChrome-badge">LevelDesignProject</div>
-<<<<<<< HEAD
 				<ue-button><button class="button button--caption" type="button" data-action="minimize" aria-label="Minimize" title="Minimize"><svg><use href="#windowChrome-i-min"/></svg></button></ue-button>
 				<ue-button><button class="button button--caption" type="button" data-action="maximize" aria-label="Maximize" title="Maximize"><svg><use href="#windowChrome-i-max"/></svg></button></ue-button>
 				<ue-button><button class="button button--caption button--caption-close" type="button" data-action="close" aria-label="Close" title="Close"><svg><use href="#windowChrome-i-close"/></svg></button></ue-button>
-=======
-				<button class="windowChrome-btn windowChrome-btn--minmax" type="button" data-action="minimize" aria-label="Minimize" title="Minimize"><svg><use href="#windowChrome-i-min"/></svg></button>
-				<button class="windowChrome-btn windowChrome-btn--minmax" type="button" data-action="maximize" aria-label="Maximize" title="Maximize"><svg><use href="#windowChrome-i-max"/></svg></button>
-				<button class="windowChrome-btn windowChrome-btn--close" type="button" data-action="close" aria-label="Close" title="Close"><svg><use href="#windowChrome-i-close"/></svg></button>
->>>>>>> origin/master
 			</div>
 		</div>
 		<div class="windowChrome-content">Window content (dock area)</div>
 	</div>
-<<<<<<< HEAD
 	<span class="windowChrome-reopen" hidden><ue-button><button class="button" type="button">Window closed: reopen</button></ue-button></span>
-=======
-	<button class="windowChrome-reopen" type="button" hidden>Window closed: reopen</button>
->>>>>>> origin/master
 </div>
 </ue-window-chrome>
 	<div class="windowChrome-caption">Title area 59px tall; frame = 2px window-border stroke + 1px input-outline stroke, content inset 3px</div>
@@ -97,7 +67,6 @@
 	<h3 class="windowChrome-h">Button states (42 x 23)</h3>
 	<div class="windowChrome-caption" style="margin:0 0 8px">pinned: forced states, they do not react to the pointer</div>
 	<div class="windowChrome-states">
-<<<<<<< HEAD
 		<div class="windowChrome-state"><div class="windowChrome-stateBox"><ue-button data-pinned><button class="button button--caption" type="button" tabindex="-1" aria-label="Minimize, pinned normal"><svg><use href="#windowChrome-i-min"/></svg></button></ue-button></div><span class="windowChrome-caption" style="margin:0">minimize</span></div>
 		<div class="windowChrome-state"><div class="windowChrome-stateBox"><ue-button data-pinned><button class="button button--caption button--hover" type="button" tabindex="-1" aria-label="Minimize, pinned hover"><svg><use href="#windowChrome-i-min"/></svg></button></ue-button></div><span class="windowChrome-caption" style="margin:0">min / max hover</span></div>
 		<div class="windowChrome-state"><div class="windowChrome-stateBox"><ue-button data-pinned><button class="button button--caption button--hover" type="button" tabindex="-1" aria-label="Maximize, pinned hover"><svg><use href="#windowChrome-i-max"/></svg></button></ue-button></div><span class="windowChrome-caption" style="margin:0">maximize hover</span></div>
@@ -106,18 +75,7 @@
 		<div class="windowChrome-state"><div class="windowChrome-stateBox"><ue-button data-pinned><button class="button button--caption button--caption-close" type="button" tabindex="-1" aria-label="Close, pinned normal"><svg><use href="#windowChrome-i-close"/></svg></button></ue-button></div><span class="windowChrome-caption" style="margin:0">close</span></div>
 		<div class="windowChrome-state"><div class="windowChrome-stateBox"><ue-button data-pinned><button class="button button--caption button--caption-close button--hover" type="button" tabindex="-1" aria-label="Close, pinned hover"><svg><use href="#windowChrome-i-close"/></svg></button></ue-button></div><span class="windowChrome-caption" style="margin:0">close hover</span></div>
 		<div class="windowChrome-state"><div class="windowChrome-stateBox"><ue-button data-pinned><button class="button button--caption button--caption-close button--pressed" type="button" tabindex="-1" aria-label="Close, pinned pressed"><svg><use href="#windowChrome-i-close"/></svg></button></ue-button></div><span class="windowChrome-caption" style="margin:0">close pressed (no fill)</span></div>
-=======
-		<div class="windowChrome-state"><div class="windowChrome-stateBox"><button class="windowChrome-btn windowChrome-btn--minmax" type="button" data-pinned tabindex="-1" aria-label="Minimize, pinned normal"><svg><use href="#windowChrome-i-min"/></svg></button></div><span class="windowChrome-caption" style="margin:0">minimize</span></div>
-		<div class="windowChrome-state"><div class="windowChrome-stateBox"><button class="windowChrome-btn windowChrome-btn--minmax windowChrome-btn--hover" type="button" data-pinned tabindex="-1" aria-label="Minimize, pinned hover"><svg><use href="#windowChrome-i-min"/></svg></button></div><span class="windowChrome-caption" style="margin:0">min / max hover</span></div>
-		<div class="windowChrome-state"><div class="windowChrome-stateBox"><button class="windowChrome-btn windowChrome-btn--minmax windowChrome-btn--hover" type="button" data-pinned tabindex="-1" aria-label="Maximize, pinned hover"><svg><use href="#windowChrome-i-max"/></svg></button></div><span class="windowChrome-caption" style="margin:0">maximize hover</span></div>
-		<div class="windowChrome-state"><div class="windowChrome-stateBox"><button class="windowChrome-btn windowChrome-btn--minmax windowChrome-btn--pressed" type="button" data-pinned tabindex="-1" aria-label="Maximize, pinned pressed"><svg><use href="#windowChrome-i-max"/></svg></button></div><span class="windowChrome-caption" style="margin:0">min / max pressed (no fill)</span></div>
-		<div class="windowChrome-state"><div class="windowChrome-stateBox"><button class="windowChrome-btn windowChrome-btn--minmax" type="button" data-pinned tabindex="-1" aria-label="Restore, pinned normal"><svg><use href="#windowChrome-i-restore"/></svg></button></div><span class="windowChrome-caption" style="margin:0">restore glyph</span></div>
-		<div class="windowChrome-state"><div class="windowChrome-stateBox"><button class="windowChrome-btn windowChrome-btn--close" type="button" data-pinned tabindex="-1" aria-label="Close, pinned normal"><svg><use href="#windowChrome-i-close"/></svg></button></div><span class="windowChrome-caption" style="margin:0">close</span></div>
-		<div class="windowChrome-state"><div class="windowChrome-stateBox"><button class="windowChrome-btn windowChrome-btn--close windowChrome-btn--hover" type="button" data-pinned tabindex="-1" aria-label="Close, pinned hover"><svg><use href="#windowChrome-i-close"/></svg></button></div><span class="windowChrome-caption" style="margin:0">close hover</span></div>
-		<div class="windowChrome-state"><div class="windowChrome-stateBox"><button class="windowChrome-btn windowChrome-btn--close windowChrome-btn--pressed" type="button" data-pinned tabindex="-1" aria-label="Close, pinned pressed"><svg><use href="#windowChrome-i-close"/></svg></button></div><span class="windowChrome-caption" style="margin:0">close pressed (no fill)</span></div>
->>>>>>> origin/master
 	</div>
 </div>
-<script type="module" src="./WindowChrome.js"></script>
 </body>
 </html>

@@ -1,10 +1,7 @@
 // <ue-notification> lets live toasts be dismissed (the stack closes up) and adds new toasts from its template.
 import { UeElement, define } from '../_shared/element.ts';
-<<<<<<< HEAD
 import '../Button/Button.ts';
 import './Notification.css';
-=======
->>>>>>> origin/master
 
 export class UeNotificationElement extends UeElement {
 	#shown = 0;
@@ -12,11 +9,7 @@ export class UeNotificationElement extends UeElement {
 	protected setup(): void {
 		this.on(this, 'click', (event) => {
 			if (!(event.target instanceof Element)) return;
-<<<<<<< HEAD
 			const button = event.target.closest<HTMLElement>('.button[data-action]');
-=======
-			const button = event.target.closest<HTMLElement>('.notification__btn');
->>>>>>> origin/master
 			if (!button) return;
 			switch (button.dataset.action) {
 				case 'dismiss': this.#dismiss(button.closest<HTMLElement>('.notification-slot')); break;

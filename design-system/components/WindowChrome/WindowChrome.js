@@ -1,7 +1,6 @@
 // design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
-<<<<<<< HEAD
   #ready = false;
   #pendingSetup = null;
   // The bundle can load before the parser reaches this element's children, so setup waits for the document to finish parsing.
@@ -28,15 +27,6 @@ var UeElement = class extends HTMLElement {
     this.#ready = true;
     this.setup();
   }
-=======
-  connectedCallback() {
-    this.style.display = "contents";
-    this.setup();
-  }
-  disconnectedCallback() {
-    for (const dispose of this.#disposers.splice(0)) dispose();
-  }
->>>>>>> origin/master
   on(target, type, listener, options) {
     target.addEventListener(type, listener, options);
     this.#disposers.push(() => target.removeEventListener(type, listener, options));
@@ -48,13 +38,10 @@ var UeElement = class extends HTMLElement {
   emit(name, detail) {
     return this.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
   }
-<<<<<<< HEAD
   // True when the nearest element of this tag above the target is this element, so a nested instance keeps its own events.
   owns(target) {
     return target instanceof Element && target.closest(this.localName) === this;
   }
-=======
->>>>>>> origin/master
   all(selector) {
     return Array.from(this.querySelectorAll(selector));
   }
@@ -66,7 +53,6 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-<<<<<<< HEAD
 // design-system/src/_shared/own.ts
 function ownedBy(host, target) {
   return target instanceof Element && target.closest(host.localName) === host;
@@ -685,8 +671,6 @@ var TabWellElement = class extends UeElement {
 };
 define("ue-tab-well", TabWellElement);
 
-=======
->>>>>>> origin/master
 // design-system/src/WindowChrome/WindowChrome.ts
 var MAXIMIZE_GLYPH = "#windowChrome-i-max";
 var RESTORE_GLYPH = "#windowChrome-i-restore";
@@ -695,12 +679,8 @@ var WindowChromeElement = class extends UeElement {
     const frame = this.one(".windowChrome-frame");
     if (!frame) throw new Error("ue-window-chrome needs a .windowChrome-frame child");
     const status = this.one(".windowChrome-status");
-<<<<<<< HEAD
     const reopenHost = this.one(".windowChrome-reopen");
     const reopen = reopenHost?.querySelector(".button") ?? null;
-=======
-    const reopen = this.one(".windowChrome-reopen");
->>>>>>> origin/master
     const setActive = (active) => {
       frame.dataset.active = String(active);
       if (status) status.textContent = active ? "Window active" : "Window inactive";
@@ -710,15 +690,9 @@ var WindowChromeElement = class extends UeElement {
     this.on(this, "focusout", (event) => setActive(event.relatedTarget instanceof Node && frame.contains(event.relatedTarget)));
     const hideWindow = (label) => {
       frame.hidden = true;
-<<<<<<< HEAD
       if (!reopenHost || !reopen) return;
       reopen.textContent = label;
       reopenHost.hidden = false;
-=======
-      if (!reopen) return;
-      reopen.textContent = label;
-      reopen.hidden = false;
->>>>>>> origin/master
       reopen.focus();
     };
     const toggleMaximized = (button) => {
@@ -732,19 +706,11 @@ var WindowChromeElement = class extends UeElement {
       const target = event.target instanceof Element ? event.target : null;
       if (target?.closest(".windowChrome-reopen")) {
         frame.hidden = false;
-<<<<<<< HEAD
         if (reopenHost) reopenHost.hidden = true;
         frame.focus();
         return;
       }
       const button = target?.closest(".button[data-action]");
-=======
-        if (reopen) reopen.hidden = true;
-        frame.focus();
-        return;
-      }
-      const button = target?.closest(".windowChrome-btn");
->>>>>>> origin/master
       if (!button || !frame.contains(button)) return;
       const action = button.dataset.action;
       if (action === "minimize") hideWindow("Window minimized: restore");

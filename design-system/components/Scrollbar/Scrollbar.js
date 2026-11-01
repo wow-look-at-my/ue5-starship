@@ -1,7 +1,6 @@
 // design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
-<<<<<<< HEAD
   #ready = false;
   #pendingSetup = null;
   // The bundle can load before the parser reaches this element's children, so setup waits for the document to finish parsing.
@@ -28,15 +27,6 @@ var UeElement = class extends HTMLElement {
     this.#ready = true;
     this.setup();
   }
-=======
-  connectedCallback() {
-    this.style.display = "contents";
-    this.setup();
-  }
-  disconnectedCallback() {
-    for (const dispose of this.#disposers.splice(0)) dispose();
-  }
->>>>>>> origin/master
   on(target, type, listener, options) {
     target.addEventListener(type, listener, options);
     this.#disposers.push(() => target.removeEventListener(type, listener, options));
@@ -48,13 +38,10 @@ var UeElement = class extends HTMLElement {
   emit(name, detail) {
     return this.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
   }
-<<<<<<< HEAD
   // True when the nearest element of this tag above the target is this element, so a nested instance keeps its own events.
   owns(target) {
     return target instanceof Element && target.closest(this.localName) === this;
   }
-=======
->>>>>>> origin/master
   all(selector) {
     return Array.from(this.querySelectorAll(selector));
   }
@@ -185,15 +172,12 @@ function bindBar(view, bar, thumb, vertical, onFits) {
   const observer = new ResizeObserver(update);
   observer.observe(view);
   observer.observe(bar);
-<<<<<<< HEAD
   for (const child of Array.from(view.children)) observer.observe(child);
   const mutations = new MutationObserver((records) => {
     for (const record of records) for (const added of Array.from(record.addedNodes)) if (added instanceof Element) observer.observe(added);
     update();
   });
   mutations.observe(view, { childList: true });
-=======
->>>>>>> origin/master
   update();
   return {
     update,
@@ -202,17 +186,13 @@ function bindBar(view, bar, thumb, vertical, onFits) {
       view.removeEventListener("scroll", onScroll);
       bar.removeEventListener("wheel", onWheel);
       observer.disconnect();
-<<<<<<< HEAD
       mutations.disconnect();
-=======
->>>>>>> origin/master
     }
   };
 }
 
 // design-system/src/Scrollbar/Scrollbar.ts
 var Scrollbar = class extends UeElement {
-<<<<<<< HEAD
   #visible = null;
   // True while the content overflows and the bar shows.
   get visible() {
@@ -242,17 +222,6 @@ var Scrollbar = class extends UeElement {
     if (this.#visible === visible) return;
     this.#visible = visible;
     this.emit("ue-scrollbar-visibility", { visible });
-=======
-  setup() {
-    for (const box of this.all(".sb-scroll")) {
-      const view = box.querySelector(".sb-view");
-      const bar = box.querySelector(".sb");
-      const thumb = bar?.querySelector(".sb-thumb");
-      if (!view || !bar || !thumb) continue;
-      const vertical = !bar.classList.contains("sb-h");
-      this.onDispose(bindBar(view, bar, thumb, vertical).dispose);
-    }
->>>>>>> origin/master
   }
 };
 define("ue-scrollbar", Scrollbar);

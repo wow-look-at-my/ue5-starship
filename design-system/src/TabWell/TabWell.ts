@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // <ue-tab-well> wraps one live .tabWell-stack: a tab well of <ue-dock-tab>
 // tabs over a content area.
 import { UeElement, define } from '../_shared/element.ts';
@@ -176,22 +175,6 @@ class TabWellElement extends UeElement {
 		const foreground = tabs.find((tab) => tab.classList.contains('dockTab--foreground'));
 		if (foreground && this.#activeTabs().length === 0) foreground.classList.add('dockTab--active');
 	}
-=======
-// <ue-tab-well> wraps one live .tabWell-stack and its reset button.
-import { define } from '../_shared/element.ts';
-import { TabStackElement, type TabStackNames } from '../_shared/tabstack.ts';
-
-class TabWellElement extends TabStackElement {
-	protected readonly names: TabStackNames = {
-		stack: 'tabWell-stack',
-		well: 'tabWell-well',
-		tab: 'tabWell-tab',
-		close: 'tabWell-close',
-		reset: 'tabWell-reset',
-		foreground: 'tabWell-tab--foreground',
-		active: 'tabWell-tab--active',
-	};
->>>>>>> origin/master
 }
 
 define('ue-tab-well', TabWellElement);

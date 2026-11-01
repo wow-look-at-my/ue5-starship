@@ -1,7 +1,6 @@
 // design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
-<<<<<<< HEAD
   #ready = false;
   #pendingSetup = null;
   // The bundle can load before the parser reaches this element's children, so setup waits for the document to finish parsing.
@@ -28,15 +27,6 @@ var UeElement = class extends HTMLElement {
     this.#ready = true;
     this.setup();
   }
-=======
-  connectedCallback() {
-    this.style.display = "contents";
-    this.setup();
-  }
-  disconnectedCallback() {
-    for (const dispose of this.#disposers.splice(0)) dispose();
-  }
->>>>>>> origin/master
   on(target, type, listener, options) {
     target.addEventListener(type, listener, options);
     this.#disposers.push(() => target.removeEventListener(type, listener, options));
@@ -48,13 +38,10 @@ var UeElement = class extends HTMLElement {
   emit(name, detail) {
     return this.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
   }
-<<<<<<< HEAD
   // True when the nearest element of this tag above the target is this element, so a nested instance keeps its own events.
   owns(target) {
     return target instanceof Element && target.closest(this.localName) === this;
   }
-=======
->>>>>>> origin/master
   all(selector) {
     return Array.from(this.querySelectorAll(selector));
   }
@@ -88,7 +75,6 @@ function nearestInRow(tiles, from, down) {
 
 // design-system/src/AssetTile/AssetTile.ts
 var SELECTED = "is-selected";
-<<<<<<< HEAD
 var FOLDER = '<svg class="AssetTile__folderIcon" viewBox="0 0 64 64" aria-hidden="true"><path d="M2 13.5a2 2 0 0 1 2-2h18l5 6h33a2 2 0 0 1 2 2v31a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="currentColor"/><path d="M2 13.5a2 2 0 0 1 2-2h18l5 6H2z" fill="#fff" opacity=".12"/><path d="M2 24.5h60v26a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="#000" opacity=".12"/></svg>';
 var CUBE = '<svg viewBox="0 0 32 32" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg>';
 var AssetTileElement = class extends UeElement {
@@ -133,43 +119,10 @@ var AssetTileElement = class extends UeElement {
   #tileAt(target) {
     const tile = target instanceof Element ? target.closest(".AssetTile") : null;
     return tile && this.#tiles().includes(tile) ? tile : null;
-=======
-var AssetTileElement = class extends UeElement {
-  #anchor = null;
-  #opened = "";
-  setup() {
-    this.#anchor = null;
-    this.#opened = "";
-    for (const group of this.#groups()) {
-      group.setAttribute("role", "listbox");
-      group.setAttribute("aria-multiselectable", "true");
-      for (const tile of this.#tiles(group)) {
-        tile.setAttribute("role", "option");
-        tile.setAttribute("aria-selected", String(tile.classList.contains(SELECTED)));
-      }
-      this.#rove(group, null);
-    }
-    this.#status();
-    this.on(this, "click", (event) => this.#click(event));
-    this.on(this, "dblclick", (event) => this.#open(this.#tileAt(event.target)));
-    this.on(this, "keydown", (event) => this.#keydown(event));
-  }
-  #groups() {
-    const groups = /* @__PURE__ */ new Set();
-    for (const tile of this.all(".AssetTile")) if (tile.parentElement) groups.add(tile.parentElement);
-    return Array.from(groups);
-  }
-  #tiles(group) {
-    return Array.from(group.children).filter((child) => child instanceof HTMLElement && child.classList.contains("AssetTile"));
-  }
-  #tileAt(target) {
-    return target instanceof Element ? target.closest(".AssetTile") : null;
->>>>>>> origin/master
   }
   #name(tile) {
     return (tile.querySelector(".AssetTile__name")?.textContent ?? "").trim();
   }
-<<<<<<< HEAD
   #idOf(tile) {
     return tile.dataset.id ?? this.#name(tile);
   }
@@ -238,30 +191,15 @@ var AssetTileElement = class extends UeElement {
     this.#lastIds = key;
     this.emit("ue-tile-select", { ids });
   }
-=======
-  // One tile per group takes the Tab stop: `stop`, else the first selected tile, else the first tile.
-  #rove(group, stop) {
-    const tiles = this.#tiles(group);
-    const chosen = stop ?? tiles.find((tile) => tile.classList.contains(SELECTED)) ?? tiles[0];
-    for (const tile of tiles) tile.tabIndex = tile === chosen ? 0 : -1;
-  }
->>>>>>> origin/master
   #mark(tile, selected) {
     tile.classList.toggle(SELECTED, selected);
     tile.setAttribute("aria-selected", String(selected));
   }
   // Applies a click or key movement to the selection of the tile's group.
-<<<<<<< HEAD
   #choose(tile, wantToggle, wantRange) {
     const toggle = wantToggle && !this.#single();
     const range = wantRange && !this.#single();
     const tiles = this.#tiles();
-=======
-  #choose(tile, toggle, range) {
-    const group = tile.parentElement;
-    if (!group) return;
-    const tiles = this.#tiles(group);
->>>>>>> origin/master
     if (range && this.#anchor && tiles.includes(this.#anchor)) {
       const from = tiles.indexOf(this.#anchor);
       const to = tiles.indexOf(tile);
@@ -273,14 +211,8 @@ var AssetTileElement = class extends UeElement {
       for (const each of tiles) this.#mark(each, each === tile);
       this.#anchor = tile;
     }
-<<<<<<< HEAD
     this.#rove(tile);
     this.#announce();
-=======
-    this.#rove(group, tile);
-    this.#status();
-    this.emit("assettile:select", { names: tiles.filter((each) => each.classList.contains(SELECTED)).map((each) => this.#name(each)) });
->>>>>>> origin/master
   }
   #click(event) {
     const tile = this.#tileAt(event.target);
@@ -290,32 +222,12 @@ var AssetTileElement = class extends UeElement {
   }
   #open(tile) {
     if (!tile) return;
-<<<<<<< HEAD
     this.emit("ue-tile-open", { id: this.#idOf(tile) });
   }
   #keydown(event) {
     const tile = event.target instanceof HTMLElement && event.target.matches(".AssetTile") ? this.#tileAt(event.target) : null;
     if (!tile) return;
     const tiles = this.#tiles();
-=======
-    const name = this.#name(tile);
-    this.#opened = name;
-    this.#status();
-    this.emit("assettile:open", { name, folder: tile.classList.contains("AssetTile--folder") });
-  }
-  #status() {
-    const line = this.one(".AssetTilePreview__status");
-    if (!line) return;
-    const selected = this.all(".AssetTile." + SELECTED).map((tile) => this.#name(tile));
-    const head = selected.length === 0 ? "Nothing selected" : selected.length + " selected: " + selected.join(", ");
-    line.textContent = head + (this.#opened ? ". Opened: " + this.#opened : "");
-  }
-  #keydown(event) {
-    const tile = event.target instanceof HTMLElement && event.target.matches(".AssetTile") ? event.target : null;
-    const group = tile?.parentElement;
-    if (!tile || !group) return;
-    const tiles = this.#tiles(group);
->>>>>>> origin/master
     const at = tiles.indexOf(tile);
     let go;
     switch (event.key) {
@@ -347,30 +259,18 @@ var AssetTileElement = class extends UeElement {
         return;
       case "a":
       case "A":
-<<<<<<< HEAD
         if (!(event.ctrlKey || event.metaKey) || this.#single()) return;
         event.preventDefault();
         for (const each of tiles) this.#mark(each, true);
         this.#announce();
-=======
-        if (!(event.ctrlKey || event.metaKey)) return;
-        event.preventDefault();
-        for (const each of tiles) this.#mark(each, true);
-        this.#status();
->>>>>>> origin/master
         return;
       default:
         return;
     }
     event.preventDefault();
     if (!go) return;
-<<<<<<< HEAD
     if ((event.ctrlKey || event.metaKey) && !this.#single()) {
       this.#rove(go);
-=======
-    if (event.ctrlKey || event.metaKey) {
-      this.#rove(group, go);
->>>>>>> origin/master
     } else {
       this.#choose(go, false, event.shiftKey);
     }
@@ -378,9 +278,6 @@ var AssetTileElement = class extends UeElement {
   }
 };
 define("ue-asset-tile", AssetTileElement);
-<<<<<<< HEAD
 export {
   AssetTileElement
 };
-=======
->>>>>>> origin/master

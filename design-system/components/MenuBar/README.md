@@ -45,7 +45,6 @@ The fill sits on a border outside the button and the button uses the NoBorder st
 
 ## Live behaviour
 
-<<<<<<< HEAD
 `<ue-menu-bar>` (`src/MenuBar/MenuBar.ts`, built to `MenuBar.js`) wraps a `.menuBar` and moves between its combos. It opens and closes nothing itself. It calls `open()` and `close()` of the nested `ue-combo-button` elements.
 
 - A click on an item opens its menu. A click on the open item closes it. The combo button owns Escape, Tab, an outside press, the row keys and the focus return.
@@ -54,16 +53,6 @@ The fill sits on a border outside the button and the button uses the NoBorder st
 - A picked row fires `ue-menu-select` with `{ label }`. The event repeats `ue-combo-pick` of the nested combo.
 - The menu entries in the preview are illustrative. They are not the full 5.5.3 menus.
 - A strip in `<ue-menu-bar data-pinned>` (the forced hover and open specimens) runs no setup and ignores the pointer.
-=======
-`<ue-menu-bar>` (`src/MenuBar/MenuBar.ts`, built to `MenuBar.js`) wraps a `.menuBar` and makes it work. It adds no look: it toggles `.is-open` on the item and `aria-expanded`, and the CSS shows the menu that follows the item inside its `.menuBar-slot`.
-
-- A press on an item opens its `.menuBar-menu`. A press on the open item closes it (the source opens on mouse down, `SMenuEntryBlock.cpp:276`).
-- While one menu is open, moving over another item opens that one instead.
-- Escape, Tab or a press outside closes. Left and Right move between items, Down, Up, Home and End move in the menu, Enter and Space pick, Escape returns focus to the item.
-- A picked row fires `ue-menu-select` with `{ label }`.
-- The menu look (Dropdown ground, Primary hovered row, disabled alpha .45) is copied from the PopupMenu component. The menu entries in the preview are illustrative. They are not the full 5.5.3 menus.
-- A strip with `data-pinned` (the forced hover and open specimens) is outside the element and stays plain HTML.
->>>>>>> origin/master
 
 ## Not found in source
 
