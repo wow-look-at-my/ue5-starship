@@ -1,0 +1,39 @@
+/* Every px value cites engine source. SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp, SS = Editor/EditorStyle/Private/StarshipStyle.cpp. The buttons are Button toolbar and plate variants, the combos are ComboButton variants. */
+
+/* Bar: SlimToolBar background Panel, BackgroundPadding (4,6) (SC:2200-2205), applied by MultiBox.cpp:1349-1350 */
+.toolBar { display: flex; align-items: stretch; background: var(--panel); padding: 6px 4px; }
+.toolBar .toolBar-slot { display: flex; align-items: center; flex-shrink: 0; white-space: nowrap; } /* a combo never wraps its label or shrinks; a slot that holds a menu also positions it */
+.toolBar .toolBar-slot--plate { align-items: stretch; }
+.toolBar-spacer { flex: 1; }
+
+/* Button block: ButtonPadding (4,0) (SC:2208); toggle block: CheckBoxPadding (8,0) (SC:2209); combo block: ComboButtonPadding (0,0) (SC:2207) */
+.toolBar-slot--button { padding: 0 4px; }
+.toolBar-slot--toggle { padding: 0 8px; }
+.toolBar-slot--combo { padding: 0; }
+
+/* Separator: Recessed brush, thickness 2 (ToolBarStyle.cpp:25), padding (4,-5) (SC:2210-2211) */
+.toolBar-slot--sep { padding: 0 4px; }
+.toolBar-sep { width: 2px; align-self: stretch; margin: -5px 0; background: var(--recessed); }
+
+/* Editor-modes combo is a bare SComboButton, gap 6 between its icon and label (LevelEditorToolBar.cpp:1407) */
+.toolBar-slot--modes { padding: 0 10px 0 0; }
+.toolBar .toolBar-modeIcon { margin-right: 6px; }
+
+/* Play group (backplate): SS:5516-5622. All plates use Dropdown fill; hover and press only change the foreground, which the button inherits. */
+.toolBar-plate { display: flex; align-items: center; justify-content: center; background: var(--dropdown); }
+.toolBar-plate--left { margin-left: 10px; padding: 2px 6px 2px 8px; border-radius: 4px 0 0 4px; } /* ButtonPadding (10,0,0,0) (SS:5529), padding (8,2,6,2) (SS:5524), corners (SS:5520) */
+.toolBar-plate--center { padding: 2px 6px 2px 2px; border-radius: 0; } /* padding (2,2,6,2) (SS:5558), ButtonPadding 0 (SS:5561) */
+.toolBar-plate--right { width: 22px; margin: 0 8px 0 1px; border-radius: 0 4px 4px 0; } /* ComboButtonPadding (1,0,8,0) (SS:5620), corners (SS:5605); width = 7+6 padding + 20 content + 6 arrow - 17 arrow shift (SS:5609, 5613) = 22 */
+.toolBar-plate--play { color: var(--accent-green); } /* NormalForeground AccentGreen (SS:5542) */
+.toolBar-plate--play:hover { color: #a9c296; } /* HSV S*0.5 of AccentGreen in linear space (SS:5536, 5544) */
+.toolBar-plate--play:active, .toolBar[data-playing="true"] .toolBar-plate--play { color: #658e34; } /* HSV V*0.5 (SS:5537, 5543); a running game keeps the pressed look */
+.toolBar-plate--step, .toolBar-plate--right { color: var(--foreground); }
+.toolBar-plate--step:hover, .toolBar-plate--step:active, .toolBar-plate--right:hover, .toolBar-plate--right:active { color: var(--foreground-hover); } /* pressed foreground ForegroundHover (SC:2190) */
+.toolBar-plate--stop { color: var(--accent-red); } /* NormalForeground AccentRed (SS:5576) */
+.toolBar-plate--stop:hover { color: #ffc0c0; } /* hover (SS:5570, 5578) */
+.toolBar-plate--stop:active { color: #bc2c2c; } /* HSV V*0.5 of AccentRed (SS:5571, 5577) */
+.toolBar-plate:has(:disabled) { opacity: .45; pointer-events: none; } /* disabled widgets draw at alpha .45 (SlateElementPixelShader.usf:535) */
+.toolBar-dots { flex: none; width: 6px; height: 24px; margin-left: 8px; fill: currentColor; stroke: none; } /* ellipsis-vertical-narrow 6x24 (SS:5614) */
+
+/* Settings block: right aligned with 7px right padding (LevelEditorToolBar.cpp:1639); CalloutToolbar shows labels (SC:2278-2283) */
+.toolBar-slot--settings { padding: 0 7px 0 0; }

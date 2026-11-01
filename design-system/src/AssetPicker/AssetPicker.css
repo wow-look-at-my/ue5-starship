@@ -1,0 +1,22 @@
+/* Layout of the asset property row. Every metric is cited in components/AssetPicker/README.md. The combo, the buttons and the reset arrow are primitives. */
+.AssetPicker-frame { background: var(--recessed); }
+/* Property row (see DetailsCategory): SDetailSingleItemRow.cpp:732-760 */
+.AssetPicker-row { display: flex; min-height: 27px; padding-bottom: 1px; background: var(--recessed); }
+.AssetPicker-name, .AssetPicker-value, .AssetPicker-right { background: var(--panel); display: flex; align-items: center; min-width: 0; }
+.AssetPicker-name { box-sizing: border-box; flex: 0 0 40%; padding-left: 20px; font: 400 10.667px/1.172 var(--font-sans); color: var(--foreground); }
+.AssetPicker-value { flex: 1; padding: 0 2px 0 12px; align-items: flex-start; } /* RightRowPadding (12,0,2,0): SDetailSingleItemRow.cpp:39 */
+.AssetPicker-right { flex: 0 0 22px; justify-content: flex-end; }
+.AssetPicker-split { flex: 0 0 1px; background: var(--recessed); }
+.AssetPicker-row:hover .AssetPicker-name, .AssetPicker-row:hover .AssetPicker-value, .AssetPicker-row:hover .AssetPicker-right { background: var(--header); }
+
+/* Thumbnail slot: Padding(0,3,5,0), drop-shadow border padding (0,0,4,4), overlay padding 1: SPropertyEditorAsset.cpp:613-648 */
+.AssetPicker-thumbSlot { flex: none; margin: 3px 5px 0 0; padding: 0 4px 4px 0; align-self: flex-start; }
+.AssetPicker-thumbFrame { position: relative; padding: 1px; width: 50px; height: 50px; border-radius: 4px; box-shadow: 2px 2px 4px rgba(0, 0, 0, .55); } /* drop-shadow is a raster box brush (not in source tree): approximated */
+.AssetPicker-thumb { position: relative; width: 48px; height: 48px; overflow: hidden; background: linear-gradient(160deg, var(--hover-2), var(--dropdown)); color: var(--header); } /* ThumbnailSize (48,48): SPropertyEditorAsset.h:62 */
+.AssetPicker-thumb svg { position: absolute; inset: 8px; width: 32px; height: 32px; fill: none; stroke: currentColor; stroke-width: 1; stroke-linejoin: round; }
+.AssetPicker-strip { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: #29f1f2; } /* 2px asset colour strip: AssetThumbnail.cpp:1050-1054; colour sampled from the reference screenshot, class colour not in this tree */
+.AssetPicker-thumbBorder { position: absolute; inset: 0; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--input-outline); pointer-events: none; } /* PropertyEditor.AssetThumbnailBorder: StarshipStyle.cpp:3021 */
+.AssetPicker-thumbFrame:hover .AssetPicker-thumbBorder { box-shadow: inset 0 0 0 1px var(--hover-2); } /* StarshipStyle.cpp:3022 */
+
+.AssetPicker-col { position: relative; flex: 1; min-width: 0; align-self: center; display: flex; flex-direction: column; } /* VBox, VAlign center: SPropertyEditorAsset.cpp:651-677 */
+.AssetPicker-buttons { display: flex; gap: 4px; padding: 2px 4px 2px 0; } /* SBox Padding(0,2,4,2), buttons 22 wide with slot padding (2,0): SPropertyEditorAsset.cpp:670-673, 721-748 */

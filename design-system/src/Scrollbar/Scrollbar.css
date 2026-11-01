@@ -1,0 +1,24 @@
+/* Metrics: StarshipCoreStyle.cpp:188-192, SScrollBar.cpp, SScrollBarTrack.cpp:12, STableViewBase.cpp:100. See README. */
+
+/* Slot: 16 wide inside a table view (STableViewBase.cpp:100), SScrollBar uniform padding 2 (SScrollBar.h:32) */
+.sb { position: relative; flex: none; }
+.sb-v { width: 16px; height: 150px; }
+.sb-h { width: 170px; height: 16px; }
+.sb-box-v { width: 12px; height: 150px; }
+/* Thumb: 8 thick centered in the slot, radius 4, no track fill -- StarshipCoreStyle.cpp:189,192 */
+.sb-thumb { position: absolute; border-radius: 4px; background: var(--hover); }
+.sb-v .sb-thumb { left: 4px; width: 8px; }
+.sb-box-v .sb-thumb { left: 2px; width: 8px; }
+.sb-h .sb-thumb { top: 4px; height: 8px; }
+/* Hovered or dragged thumb = Hover2 -- StarshipCoreStyle.cpp:190-191. The whole bar is the hover target -- SScrollBar.cpp:307-321 */
+.sb.is-hover .sb-thumb, .sb.is-drag .sb-thumb, .sb:hover .sb-thumb { background: var(--hover-2); }
+
+/* A scroll box: a natively scrolling view with its own scrollbar hidden, and a bar that follows it. The bar stretches to the view. */
+.sb-scroll { display: flex; }
+.sb-scroll.is-h { flex-direction: column; }
+.sb[hidden] { display: none; }
+.sb-scroll .sb-v, .sb-scroll .sb-box-v { height: auto; align-self: stretch; }
+.sb-scroll .sb-h { width: auto; align-self: stretch; }
+.sb-view { overflow: auto; scrollbar-width: none; overscroll-behavior: contain; }
+.sb-view::-webkit-scrollbar { display: none; }
+.sb-view:focus-visible { outline: 1px solid var(--primary); outline-offset: -1px; }

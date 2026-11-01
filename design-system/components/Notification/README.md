@@ -4,6 +4,8 @@ A grey-blue toast with a rounded black-outlined box, a faint ring watermark, a 3
 
 Source of truth: `Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp` (NotificationList block, lines 680-703), abbreviated `SCS`. This also covers layout in `Runtime/Slate/Private/Widgets/Notifications/SNotificationList.cpp` (abbreviated `SNL`) and `SNotificationBackground.cpp`. This also covers defaults in `Runtime/Slate/Public/Widgets/Notifications/SNotificationList.h`. The editor adds only `NotificationList.Glow` (`StarshipStyle.cpp:1207`), a white colour brush used for the flash.
 
+Built from the other components: every toast button (Retry, Dismiss, Show notification) is a `Button` (`ue-button` around a plain `.button`, the default look). The toast keeps only its own box, watermark, icons and stack animation. Nothing re-draws a button.
+
 ## What the consumer provides
 
 - Title text, optional sub text, optional hyperlink, optional checkbox, and button definitions (`FNotificationButtonInfo`).
