@@ -1,47 +1,41 @@
-// <ue-text-input> wraps live .textinput boxes. The browser edits the <input>. The element adds the search clear button.
+// <ue-text-input> is one .textinput box. The browser edits the <input>. The element adds the search clear button and the events.
 import { UeElement, define } from '../_shared/element.ts';
-
-function fieldOf(target: EventTarget | null): HTMLInputElement | null {
-	return target instanceof HTMLInputElement && target.classList.contains('textinput__field') ? target : null;
-}
+import './TextInput.css';
 
 export class UeTextInputElement extends UeElement {
 	protected setup(): void {
-		for (const field of this.all<HTMLInputElement>('.textinput__field')) this.#sync(field);
+		const box = this.one('.textinput');
+		const field = box?.querySelector<HTMLInputElement>('.textinput__field');
+		if (!box || !field) throw new Error('ue-text-input needs a .textinput box with a .textinput__field input');
+		const search = box.classList.contains('textinput--search');
+		const sync = (): void => {
+			if (search) box.classList.toggle('textinput--filled', field.value !== '');
+		};
+		const clear = (): void => {
+			field.value = '';
+			sync();
+			field.focus();
+			this.emit('ue-text-input', { value: '' });
+			this.emit('ue-text-clear', {});
+		};
+		sync();
 
-		this.on(this, 'input', (event) => {
-			const field = fieldOf(event.target);
-			if (field) this.#sync(field);
+		this.on(field, 'input', () => {
+			sync();
+			this.emit('ue-text-input', { value: field.value });
 		});
 
-		this.on(this, 'click', (event) => {
+		this.on(box, 'click', (event) => {
 			if (!(event.target instanceof Element)) return;
-			const clear = event.target.closest('.textinput__clear');
-			const box = event.target.closest<HTMLElement>('.textinput');
-			const field = box?.querySelector<HTMLInputElement>('.textinput__field') ?? null;
-			if (!box || !field) return;
-			if (clear) this.#clear(field);
-			else if (event.target !== field) field.focus();
+			if (event.target.closest('.textinput__clear')) clear();
+			else if (event.target !== field && !event.target.closest('.textinput__trail')) field.focus();
 		});
 
-		this.on(this, 'keydown', (event) => {
-			const field = fieldOf(event.target);
-			if (!field || event.key !== 'Escape' || field.readOnly || field.value === '') return;
-			if (!field.closest('.textinput--search')) return;
+		this.on(field, 'keydown', (event) => {
+			if (!search || event.key !== 'Escape' || field.readOnly || field.value === '') return;
 			event.preventDefault();
-			this.#clear(field);
+			clear();
 		});
-	}
-
-	#sync(field: HTMLInputElement): void {
-		field.closest('.textinput--search')?.classList.toggle('textinput--filled', field.value !== '');
-	}
-
-	#clear(field: HTMLInputElement): void {
-		field.value = '';
-		this.#sync(field);
-		field.focus();
-		this.emit('ue-text-clear', {});
 	}
 }
 

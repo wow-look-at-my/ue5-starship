@@ -1,8 +1,8 @@
 // Keyboard helpers shared by the popup menus of the toolbar components.
 
-// Rows a key press can reach: not marked aria-disabled.
+// Rows a key press can reach: not hidden and not marked aria-disabled.
 export function enabledRows(menu: Element, rowSelector: string): HTMLElement[] {
-	return Array.from(menu.querySelectorAll<HTMLElement>(rowSelector)).filter((row) => row.getAttribute('aria-disabled') !== 'true');
+	return Array.from(menu.querySelectorAll<HTMLElement>(rowSelector)).filter((row) => !row.hidden && row.getAttribute('aria-disabled') !== 'true');
 }
 
 // Moves focus within a menu for ArrowDown, ArrowUp, Home and End. Returns true when the key was one of those.

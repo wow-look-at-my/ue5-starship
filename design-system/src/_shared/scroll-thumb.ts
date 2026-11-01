@@ -101,6 +101,14 @@ export function bindBar(view: HTMLElement, bar: HTMLElement, thumb: HTMLElement,
 	const observer = new ResizeObserver(update);
 	observer.observe(view);
 	observer.observe(bar);
+	// The content can grow without the view resizing, for example when a web font loads.
+	for (const child of Array.from(view.children)) observer.observe(child);
+	// A child added to or removed from the view changes the content size without resizing the view.
+	const mutations = new MutationObserver((records) => {
+		for (const record of records) for (const added of Array.from(record.addedNodes)) if (added instanceof Element) observer.observe(added);
+		update();
+	});
+	mutations.observe(view, { childList: true });
 	update();
 
 	return {
@@ -110,6 +118,7 @@ export function bindBar(view: HTMLElement, bar: HTMLElement, thumb: HTMLElement,
 			view.removeEventListener('scroll', onScroll);
 			bar.removeEventListener('wheel', onWheel);
 			observer.disconnect();
+			mutations.disconnect();
 		},
 	};
 }

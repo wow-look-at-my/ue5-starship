@@ -1,12 +1,31 @@
 // design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
+  #ready = false;
+  #pendingSetup = null;
+  // The bundle can load before the parser reaches this element's children, so setup waits for the document to finish parsing.
+  // A pinned specimen (data-pinned on the element or an ancestor) keeps its authored markup: setup never runs.
   connectedCallback() {
     this.style.display = "contents";
-    this.setup();
+    if (this.closest("[data-pinned]")) return;
+    if (document.readyState !== "loading") {
+      this.#start();
+      return;
+    }
+    this.#pendingSetup = () => this.#start();
+    document.addEventListener("DOMContentLoaded", this.#pendingSetup, { once: true });
   }
   disconnectedCallback() {
+    if (this.#pendingSetup) document.removeEventListener("DOMContentLoaded", this.#pendingSetup);
+    this.#pendingSetup = null;
+    this.#ready = false;
     for (const dispose of this.#disposers.splice(0)) dispose();
+  }
+  #start() {
+    this.#pendingSetup = null;
+    if (this.#ready || !this.isConnected) return;
+    this.#ready = true;
+    this.setup();
   }
   on(target, type, listener, options) {
     target.addEventListener(type, listener, options);
@@ -18,6 +37,10 @@ var UeElement = class extends HTMLElement {
   }
   emit(name, detail) {
     return this.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
+  }
+  // True when the nearest element of this tag above the target is this element, so a nested instance keeps its own events.
+  owns(target) {
+    return target instanceof Element && target.closest(this.localName) === this;
   }
   all(selector) {
     return Array.from(this.querySelectorAll(selector));
@@ -31,9 +54,6 @@ function define(tag, ctor) {
 }
 
 // design-system/src/Checkbox/Checkbox.ts
-function control(target) {
-  return target instanceof Element ? target.closest(".checkbox, .checkbox-toggle") : null;
-}
 function disabled(el) {
   return el.getAttribute("aria-disabled") === "true";
 }
@@ -47,47 +67,45 @@ function nextState(el) {
 }
 var UeCheckboxElement = class extends UeElement {
   setup() {
-    this.on(this, "click", (event) => {
-      const el = control(event.target);
-      if (el && !disabled(el)) this.#toggle(el);
+    const el = this.one(".checkbox, .checkbox-toggle");
+    if (!el) throw new Error("ue-checkbox needs a .checkbox or .checkbox-toggle element");
+    const pressedClass = el.classList.contains("checkbox") ? "checkbox--pressed" : "checkbox-toggle--pressed";
+    this.on(el, "click", () => {
+      if (!disabled(el)) this.#toggle(el);
     });
-    this.on(this, "keydown", (event) => {
-      const el = control(event.target);
-      if (!el || disabled(el) || el !== event.target) return;
+    this.on(el, "keydown", (event) => {
+      if (disabled(el) || el !== event.target) return;
       if (event.key !== "Enter" && event.key !== " ") return;
       event.preventDefault();
-      if (!event.repeat) el.classList.add(el.classList.contains("checkbox") ? "checkbox--pressed" : "checkbox-toggle--pressed");
+      if (!event.repeat) el.classList.add(pressedClass);
     });
-    this.on(this, "keyup", (event) => {
-      const el = control(event.target);
-      if (!el || disabled(el) || el !== event.target) return;
+    this.on(el, "keyup", (event) => {
+      if (disabled(el) || el !== event.target) return;
       if (event.key !== "Enter" && event.key !== " ") return;
-      const cls = el.classList.contains("checkbox") ? "checkbox--pressed" : "checkbox-toggle--pressed";
-      if (el.classList.contains(cls)) {
-        el.classList.remove(cls);
+      if (el.classList.contains(pressedClass)) {
+        el.classList.remove(pressedClass);
         this.#toggle(el);
       }
     });
-    this.on(this, "focusout", (event) => {
-      const el = control(event.target);
-      if (el) el.classList.remove("checkbox--pressed", "checkbox-toggle--pressed");
-    });
+    this.on(el, "focusout", () => el.classList.remove(pressedClass));
   }
   #toggle(el) {
     let text;
+    let checked;
     if (el.classList.contains("checkbox-toggle")) {
       const on = !el.classList.contains("checkbox-toggle--checked");
       el.classList.toggle("checkbox-toggle--checked", on);
       el.setAttribute("aria-pressed", String(on));
       text = on ? "on" : "off";
+      checked = on;
     } else {
       const state = nextState(el);
       el.setAttribute("aria-checked", state);
       text = state === "mixed" ? "undetermined" : state === "true" ? "checked" : "unchecked";
+      checked = state === "mixed" ? null : state === "true";
     }
-    const status = this.one(".checkbox-status");
-    if (status) status.textContent = "Last change: " + (el.dataset.label ?? "") + " is " + text;
-    this.emit("ue-checkbox-change", { label: el.dataset.label ?? "", state: text });
+    const label = el.dataset.label ?? el.getAttribute("aria-label") ?? el.querySelector(".checkbox__label")?.textContent?.trim() ?? el.textContent?.trim() ?? "";
+    this.emit("ue-checkbox-change", { label, state: text, checked, text: label + " is " + text });
   }
 };
 define("ue-checkbox", UeCheckboxElement);

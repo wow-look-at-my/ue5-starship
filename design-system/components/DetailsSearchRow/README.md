@@ -10,6 +10,27 @@ This is the row of the Details panel filter: a pill-shaped search box that fills
 
 Icons in `preview.html` are 16x16 stroke approximations. The Starship SVG files are not in the source tree.
 
+## Composed from
+
+`src/DetailsSearchRow/DetailsSearchRow.css` holds only the row layout: the flex row and the 6px slot around the box. Every control is a primitive.
+
+| Part | Primitive | Count |
+|---|---|---|
+| Search box | `ue-text-input`, `textinput--search` ([TextInput README](../TextInput/README.md)) | 1 |
+| Property matrix | `ue-button`, `button--simple button--icon` | 1 |
+| Favorites | `ue-button`, `button--toggle button--icon`. `aria-pressed` is the state | 1 |
+| View options | `ue-combo-button`, `combobutton--icon`, in action mode, with a `ue-popup-menu` of check rows and `combobutton-menu--end` | 1 |
+
+`ue-details-search-row` listens to the primitives and announces in the Details vocabulary. All events bubble.
+
+| Event | Detail | When |
+|---|---|---|
+| `ue-search` | `{ text }` | The text of the box changes, including the clear X and Escape |
+| `ue-favorites` | `{ on }` | The favorites toggle flips |
+| `ue-view-option` | `{ option, checked }` | A menu row is picked. `option` is the row `data-value`. `checked` is the new state of a check row, else `false` |
+
+The primitive look wins where it differs from the Slate rows below. An active favorites toggle fills Primary, not the `--accent-blue` glyph. The options trigger shows the gear and a chevron.
+
 ## Metrics
 
 | Part | Value | Source |

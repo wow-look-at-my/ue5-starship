@@ -13,6 +13,27 @@ Rotation uses the same layout with Roll, Pitch, Yaw in red, green, blue. Its val
 
 Icons in `preview.html` are 16x16 stroke approximations. The Starship SVG files are not in the source tree.
 
+## Composed from
+
+`src/VectorInput/VectorInput.css` holds only the row layout and the three-column grid of the fields. Every control is a primitive.
+
+| Part | Primitive | Count per row |
+|---|---|---|
+| Fields | `ue-spin-box`, `spinbox--small`, unbounded, with `spinbox__axis` strips. `data-delta` is the step. `data-unit` is the degree sign on Rotation | 3 |
+| Label | `ue-combo-button`, action mode, `combobutton--small`, with a `ue-popup-menu` of a heading and two radio rows | 1 |
+| Reset arrow | `ue-reset-to-default`. The component sets `differs` while a value differs from `data-default` | 1 |
+| Scale lock | `ue-button`, `button--toggle button--icon`, on the Scale row only | 0 or 1 |
+
+The drag, the typing, the keys and the Escape restore of a field belong to `ue-spin-box`. The menu belongs to `ue-combo-button`. This component keeps things:
+
+- The scale lock. A `ue-spin-change` from one field moves the other fields by the same ratio, as in `ComponentTransformDetails.cpp:1377-1420`. It sets them through the `value` property of `ue-spin-box`.
+- The reset state. A change shows the arrow while a value differs from the default. A `ue-reset` puts the defaults back.
+- The events. `ue-vector-change` has `{ values }` and fires after every change, drag step or reset. `ue-vector-space` has `{ space }` and fires when a menu row is picked.
+
+A row names itself with `data-label`. A `ue-details-category` can filter it.
+
+The primitive look wins where it differs from the Slate rows below. A locked padlock is a Primary toggle fill, and the fields use the SpinBox look at the Small 8pt size.
+
 ## Metrics
 
 | Part | Value | Source |

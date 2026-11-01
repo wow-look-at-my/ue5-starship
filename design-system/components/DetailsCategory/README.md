@@ -10,6 +10,28 @@ The collapsible category header of the Details panel, expanded and collapsed, pl
 
 Icons in `preview.html` are filled-triangle approximations of the Starship caret SVGs, which are not in the source tree. The text box, checkbox and combo in the preview rows are the generic Starship styles, shown to give the grid something to hold.
 
+## Composed from
+
+`src/DetailsCategory/DetailsCategory.css` holds only the layout of the tree: the category rows, the row grid, the indent and the fold states. The live panel nests other composites and primitives instead of copying them.
+
+| Part | Nested element |
+|---|---|
+| Name area | `ue-details-header` |
+| Search row | `ue-details-search-row` |
+| Section pills | `ue-filter-pills`, tablist variant |
+| Transform row | `ue-vector-input` ([VectorInput README](../VectorInput/README.md)) |
+| Checkbox value | `ue-checkbox`, box only |
+| Text value | `ue-text-input`, `textinput--small` |
+| Number value | `ue-spin-box`, `spinbox--small` |
+| List value | `ue-combo-button`, value mode, `combobutton--small`, with a `popupmenu--small popupmenu--combo` list |
+| Reset arrow | `ue-reset-to-default` |
+
+`ue-details-category` listens to the nested elements: `ue-search`, `ue-filter-change` and `ue-view-option` set the filter. `ue-reset`, `ue-text-input` and `ue-spin-change` keep the `differs` state of a row, which the modified view reads. A nested row names itself with `data-label` and takes part in the search and the folds. An `ue-asset-picker` row works the same way.
+
+Enter ends a text edit and Escape restores the text from before it. That commit rule belongs to the row, because `ue-text-input` has none.
+
+Parts are not primitives. The category header and the Advanced row keep their own markup, because they are not an `ExpandableArea`. The Slate widget is a table row (`SDetailCategoryTableRow`) with a `--header` fill, a 26px minimum height, a `--foreground-header` title and Left and Right keys. `ExpandableArea` has a `--panel` surface, a white title and no fill. The category also forces its rows open while a search runs, which a fold state held in the primitive cannot do. The row caret keeps its own markup for the same reason: `SDetailExpanderArrow` hides it on rows without children and indents the children.
+
 ## Metrics
 
 | Part | Value | Source |

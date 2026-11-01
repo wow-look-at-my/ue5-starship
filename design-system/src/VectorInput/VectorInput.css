@@ -1,0 +1,14 @@
+/* Layout of the Details transform rows. Every metric is cited in components/VectorInput/README.md. The label combo, the three fields, the lock and the reset arrow are primitives. */
+.VectorInput-frame { background: var(--recessed); } /* GridLine brush behind rows: StarshipStyle.cpp:3251 */
+/* Property row: SDetailSingleItemRow.cpp:732-760. Row = 26px min + 1px GridLine bottom padding. */
+.VectorInput-row { display: flex; min-height: 27px; padding-bottom: 1px; background: var(--recessed); }
+.VectorInput-name, .VectorInput-value, .VectorInput-right { background: var(--panel); display: flex; align-items: center; min-width: 0; } /* GetRowBackgroundColor(0): PropertyEditorConstants.cpp:25-57 */
+.VectorInput-row:hover .VectorInput-name, .VectorInput-row:hover .VectorInput-value, .VectorInput-row:hover .VectorInput-right { background: var(--header); } /* hovered row = Colors.Header */
+.VectorInput-name { box-sizing: border-box; flex: 0 0 40%; padding-left: 20px; } /* indent 0 + arrow slot 2+16 + name slot pad 2: SDetailSingleItemRow.cpp:503-531 */
+.VectorInput-value { flex: 1; padding: 0 2px 0 12px; } /* RightRowPadding (12,0,2,0): SDetailSingleItemRow.cpp:39 */
+.VectorInput-right { flex: 0 0 22px; justify-content: flex-end; width: 22px; } /* RightColumnMinWidth 22: DetailsViewArgs.h:135 */
+.VectorInput-split { flex: 0 0 1px; background: var(--recessed); } /* DetailsView.Splitter 1px: SDetailSingleItemRow.cpp:426-428, StarshipStyle.cpp:3246-3249 */
+.VectorInput-lockSlot { display: inline-flex; margin-left: 4px; } /* slot padding left 4: ComponentTransformDetails.cpp:237-244 */
+.VectorInput-name [data-role="lock"]:not([aria-pressed="true"]) .VectorInput-shackle--shut, .VectorInput-name [data-role="lock"][aria-pressed="true"] .VectorInput-shackle--open { display: none; } /* the padlock closes while the lock is on */
+/* Three SNumericEntryBox slots, no gap: SVectorInputBox.h:425-464 */
+.VectorInput-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); flex: 1; min-width: 0; }
