@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // <ue-status-bar> wraps a .statusBar strip: drawer buttons, the Cmd menu and the console box with its history.
 import { UeElement, define } from '../_shared/element.ts';
 import { enabledRows, moveRowFocus } from '../_shared/popup.ts';
@@ -6,15 +7,30 @@ const DRAWER = '.statusBar-btn';
 const COMBO = '.statusBar-combo';
 const MENU = '.statusBar-menu';
 const ROW = '.statusBar-row';
+=======
+// <ue-status-bar> wraps a .statusBar strip: drawer ue-buttons (one open at a time), the Cmd ue-combo-button and the console ue-text-input with its history.
+import { UeElement, define } from '../_shared/element.ts';
+import '../Button/Button.ts';
+import '../ComboButton/ComboButton.ts';
+import '../TextInput/TextInput.ts';
+import './StatusBar.css';
+
+const DRAWER = '.statusBar-seg--drawer .button';
+>>>>>>> claude/adoring-faraday-94vc0i
 const MAX_LINES = 4;
 
 export class StatusBar extends UeElement {
 	protected setup(): void {
+<<<<<<< HEAD
 		const field = this.one<HTMLInputElement>('.statusBar-field');
+=======
+		const field = this.one<HTMLInputElement>('.statusBar-console .textinput__field');
+>>>>>>> claude/adoring-faraday-94vc0i
 		const history = this.one('.statusBar-history');
 		const recalled: string[] = [];
 		let recallIndex = 0;
 
+<<<<<<< HEAD
 		const openMenu = (): HTMLElement | null => this.one(MENU + '.is-open');
 		const comboOf = (menu: Element): HTMLElement | null => menu.parentElement?.querySelector<HTMLElement>(COMBO) ?? null;
 
@@ -68,6 +84,8 @@ export class StatusBar extends UeElement {
 			close(true);
 		};
 
+=======
+>>>>>>> claude/adoring-faraday-94vc0i
 		const run = (command: string): void => {
 			if (history) {
 				const line = document.createElement('div');
@@ -81,6 +99,7 @@ export class StatusBar extends UeElement {
 			this.emit('ue-command', { command });
 		};
 
+<<<<<<< HEAD
 		this.on(this, 'click', (event) => {
 			const target = event.target;
 			if (!(target instanceof Element)) return;
@@ -157,6 +176,37 @@ export class StatusBar extends UeElement {
 			if (combo && combo.contains(target)) return;
 			close(false);
 		});
+=======
+		this.on(this, 'ue-button-click', (event) => {
+			const button = event.target instanceof Element ? event.target.querySelector<HTMLElement>('.button') : null;
+			if (!button?.closest('.statusBar-seg--drawer')) return;
+			const detail = (event as CustomEvent<{ label: string; pressed: boolean | null }>).detail;
+			for (const other of this.all(DRAWER)) {
+				if (other !== button) other.setAttribute('aria-pressed', 'false');
+			}
+			this.emit('ue-drawer-change', { drawer: detail.pressed ? detail.label : null });
+		});
+
+		this.on(this, 'ue-combo-pick', (event) => {
+			if (!(event.target instanceof Element) || !event.target.closest('.statusBar-console')) return;
+			this.emit('ue-executor-change', { executor: (event as CustomEvent<{ label: string }>).detail.label });
+		});
+
+		if (!field) return;
+		this.on(field, 'keydown', (event) => {
+			if (event.key === 'Enter') {
+				const command = field.value.trim();
+				event.preventDefault();
+				if (command === '') return;
+				run(command);
+				field.value = '';
+			} else if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+				event.preventDefault();
+				recallIndex = Math.min(Math.max(recallIndex + (event.key === 'ArrowUp' ? -1 : 1), 0), recalled.length);
+				field.value = recalled[recallIndex] ?? '';
+			}
+		});
+>>>>>>> claude/adoring-faraday-94vc0i
 	}
 }
 

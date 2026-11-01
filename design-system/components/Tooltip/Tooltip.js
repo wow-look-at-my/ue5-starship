@@ -1,6 +1,7 @@
 // design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
+<<<<<<< HEAD
   connectedCallback() {
     this.style.display = "contents";
     this.setup();
@@ -8,6 +9,34 @@ var UeElement = class extends HTMLElement {
   disconnectedCallback() {
     for (const dispose of this.#disposers.splice(0)) dispose();
   }
+=======
+  #ready = false;
+  #pendingSetup = null;
+  // The bundle can load before the parser reaches this element's children, so setup waits for the document to finish parsing.
+  // A pinned specimen (data-pinned on the element or an ancestor) keeps its authored markup: setup never runs.
+  connectedCallback() {
+    this.style.display = "contents";
+    if (this.closest("[data-pinned]")) return;
+    if (document.readyState !== "loading") {
+      this.#start();
+      return;
+    }
+    this.#pendingSetup = () => this.#start();
+    document.addEventListener("DOMContentLoaded", this.#pendingSetup, { once: true });
+  }
+  disconnectedCallback() {
+    if (this.#pendingSetup) document.removeEventListener("DOMContentLoaded", this.#pendingSetup);
+    this.#pendingSetup = null;
+    this.#ready = false;
+    for (const dispose of this.#disposers.splice(0)) dispose();
+  }
+  #start() {
+    this.#pendingSetup = null;
+    if (this.#ready || !this.isConnected) return;
+    this.#ready = true;
+    this.setup();
+  }
+>>>>>>> claude/adoring-faraday-94vc0i
   on(target, type, listener, options) {
     target.addEventListener(type, listener, options);
     this.#disposers.push(() => target.removeEventListener(type, listener, options));
@@ -19,6 +48,13 @@ var UeElement = class extends HTMLElement {
   emit(name, detail) {
     return this.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
   }
+<<<<<<< HEAD
+=======
+  // True when the nearest element of this tag above the target is this element, so a nested instance keeps its own events.
+  owns(target) {
+    return target instanceof Element && target.closest(this.localName) === this;
+  }
+>>>>>>> claude/adoring-faraday-94vc0i
   all(selector) {
     return Array.from(this.querySelectorAll(selector));
   }
@@ -30,12 +66,21 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
+<<<<<<< HEAD
+=======
+// design-system/src/_shared/own.ts
+function ownedBy(host, target) {
+  return target instanceof Element && target.closest(host.localName) === host;
+}
+
+>>>>>>> claude/adoring-faraday-94vc0i
 // design-system/src/Tooltip/Tooltip.ts
 var SUMMON_DELAY = 150;
 var INTRO = 100;
 var OFFSET_X = 12;
 var OFFSET_Y = 8;
 var EDGE = 4;
+<<<<<<< HEAD
 function targetOf(node) {
   return node instanceof Element ? node.closest(".tooltip-target") : null;
 }
@@ -52,11 +97,30 @@ var UeTooltipElement = class extends UeElement {
     this.on(this, "pointermove", (event) => {
       const target = targetOf(event.target);
       if (target && this.#active?.target === target && this.#active.start >= 0) {
+=======
+var UeTooltipElement = class extends UeElement {
+  #active = null;
+  #suppressed = false;
+  #frame = 0;
+  #popup = null;
+  setup() {
+    const popup = this.all(".tooltip-popup").find((candidate) => ownedBy(this, candidate));
+    if (!popup) throw new Error("ue-tooltip needs a .tooltip-popup element");
+    this.#popup = popup;
+    const inTarget = (node) => ownedBy(this, node) && !popup.contains(node);
+    this.on(this, "pointerover", (event) => {
+      if (!inTarget(event.target) || this.#suppressed || this.#active) return;
+      this.#summon(event.clientX, event.clientY);
+    });
+    this.on(this, "pointermove", (event) => {
+      if (inTarget(event.target) && this.#active && this.#active.start >= 0) {
+>>>>>>> claude/adoring-faraday-94vc0i
         this.#active.x = event.clientX;
         this.#active.y = event.clientY;
       }
     });
     this.on(this, "pointerout", (event) => {
+<<<<<<< HEAD
       const target = targetOf(event.target);
       if (!target) return;
       if (event.relatedTarget instanceof Node && target.contains(event.relatedTarget)) return;
@@ -77,17 +141,45 @@ var UeTooltipElement = class extends UeElement {
     });
     this.on(this, "focusout", (event) => {
       if (this.#active && targetOf(event.target) === this.#active.target) this.#dismiss();
+=======
+      if (!inTarget(event.target)) return;
+      if (event.relatedTarget instanceof Node && this.contains(event.relatedTarget)) return;
+      this.#suppressed = false;
+      this.#dismiss();
+    });
+    this.on(this, "pointerdown", (event) => {
+      if (!inTarget(event.target)) return;
+      this.#suppressed = true;
+      this.#dismiss();
+    });
+    this.on(this, "focusin", (event) => {
+      const target = event.target;
+      if (!inTarget(target) || !target.matches(":focus-visible") || this.#active) return;
+      const rect = target.getBoundingClientRect();
+      this.#summon(rect.left, rect.bottom - OFFSET_Y);
+    });
+    this.on(this, "focusout", (event) => {
+      if (inTarget(event.target)) this.#dismiss();
+>>>>>>> claude/adoring-faraday-94vc0i
     });
     this.on(document, "keydown", (event) => {
       if (event.key === "Escape") this.#dismiss();
     });
     this.onDispose(() => this.#dismiss());
   }
+<<<<<<< HEAD
   #summon(target, x, y) {
     this.#dismiss();
     const popup = target.querySelector(".tooltip-popup");
     if (!popup) return;
     this.#active = { target, popup, start: performance.now(), x, y };
+=======
+  #summon(x, y) {
+    this.#dismiss();
+    const popup = this.#popup;
+    if (!popup) return;
+    this.#active = { popup, start: performance.now(), x, y };
+>>>>>>> claude/adoring-faraday-94vc0i
     this.#frame = requestAnimationFrame(this.#tick);
   }
   #dismiss() {

@@ -1,0 +1,7 @@
+/* SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp. Style set "WindowMenuBar" (SC:2443-2448), buttons built by SMenuEntryBlock.cpp:247-298. The items are ComboButton menubar triggers, the menus are PopupMenu lists. */
+
+/* Strip: WindowMenuBar.Background is FSlateNoResource (SC:2443); the bar is transparent and sits on the title area */
+.menuBar { display: flex; align-items: stretch; background: transparent; }
+
+/* Each item and its pop-up share a slot, so the pop-up anchors under the item and the item fills the strip height */
+.menuBar .menuBar-slot { display: flex; align-items: stretch; }

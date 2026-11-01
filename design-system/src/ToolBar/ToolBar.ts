@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // <ue-tool-bar> wraps a .toolBar strip: toggles, combo menus and the Play group.
 import { UeElement, define } from '../_shared/element.ts';
 import { enabledRows, moveRowFocus, rowLabel } from '../_shared/popup.ts';
@@ -11,10 +12,24 @@ type RowTarget = 'first' | 'last' | 'none';
 
 function isDisabled(el: Element): boolean {
 	return el.getAttribute('aria-disabled') === 'true';
+=======
+// <ue-tool-bar> wraps a .toolBar strip of ue-button and ue-combo-button controls. It drives the Play group and the arrow keys between controls.
+import { UeElement, define } from '../_shared/element.ts';
+import '../Button/Button.ts';
+import '../ComboButton/ComboButton.ts';
+import './ToolBar.css';
+
+const CONTROL = '.button, .combobutton';
+const PANEL = '.combobutton-menu';
+
+function isDisabled(el: Element): boolean {
+	return el.matches(':disabled') || el.getAttribute('aria-disabled') === 'true';
+>>>>>>> claude/adoring-faraday-94vc0i
 }
 
 export class ToolBar extends UeElement {
 	protected setup(): void {
+<<<<<<< HEAD
 		const menuOf = (control: Element): HTMLElement | null => {
 			const slot = control.closest('.toolBar-slot');
 			return slot ? slot.querySelector<HTMLElement>(':scope > ' + MENU) : null;
@@ -55,6 +70,16 @@ export class ToolBar extends UeElement {
 			stop.classList.toggle('is-disabled', !playing);
 			stop.setAttribute('aria-disabled', String(!playing));
 			stop.tabIndex = playing ? 0 : -1;
+=======
+		const buttonIn = (bar: Element, plate: string): HTMLButtonElement | null => bar.querySelector<HTMLButtonElement>(plate + ' .button');
+
+		const setPlaying = (bar: Element, playing: boolean): void => {
+			const play = buttonIn(bar, '.toolBar-plate--play');
+			const stop = buttonIn(bar, '.toolBar-plate--stop');
+			if (!play || !stop) return;
+			play.setAttribute('aria-pressed', String(playing));
+			stop.disabled = !playing;
+>>>>>>> claude/adoring-faraday-94vc0i
 			if (bar instanceof HTMLElement) bar.dataset.playing = String(playing);
 			this.emit('ue-play-change', { playing });
 		};
@@ -64,6 +89,7 @@ export class ToolBar extends UeElement {
 			if (bar) setPlaying(bar, bar.getAttribute('data-playing') === 'true');
 		}
 
+<<<<<<< HEAD
 		this.on(this, 'click', (event) => {
 			const target = event.target;
 			if (!(target instanceof Element)) return;
@@ -96,10 +122,29 @@ export class ToolBar extends UeElement {
 			if (!(target instanceof Element)) return;
 			const row = target.closest<HTMLElement>(ROW);
 			if (row && !isDisabled(row)) row.focus({ preventScroll: true });
+=======
+		this.on(this, 'ue-button-click', (event) => {
+			const target = event.target;
+			if (!(target instanceof Element)) return;
+			const bar = target.closest('.toolBar');
+			if (!bar) return;
+			if (target.closest('.toolBar-plate--play')) {
+				// ue-button flips aria-pressed on every click. Playing stays pressed until Stop.
+				if (bar.getAttribute('data-playing') !== 'true') setPlaying(bar, true);
+				else buttonIn(bar, '.toolBar-plate--play')?.setAttribute('aria-pressed', 'true');
+			} else if (target.closest('.toolBar-plate--stop')) {
+				setPlaying(bar, false);
+			}
+		});
+
+		this.on(this, 'ue-combo-pick', (event) => {
+			this.emit('ue-menu-select', { label: (event as CustomEvent<{ label: string }>).detail.label });
+>>>>>>> claude/adoring-faraday-94vc0i
 		});
 
 		this.on(this, 'keydown', (event) => {
 			const target = event.target;
+<<<<<<< HEAD
 			if (!(target instanceof HTMLElement)) return;
 			const key = event.key;
 			const row = target.closest<HTMLElement>(ROW);
@@ -146,6 +191,16 @@ export class ToolBar extends UeElement {
 			const control = controlOf(menu);
 			if (control && control.contains(target)) return;
 			close(false);
+=======
+			if (!(target instanceof HTMLElement) || (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft')) return;
+			const control = target.closest<HTMLElement>(CONTROL);
+			const bar = control?.closest('.toolBar');
+			if (!control || !bar || control.closest(PANEL)) return;
+			const list = Array.from(bar.querySelectorAll<HTMLElement>(CONTROL)).filter((c) => !c.closest(PANEL) && !isDisabled(c));
+			const next = list[(list.indexOf(control) + (event.key === 'ArrowRight' ? 1 : -1) + list.length) % list.length];
+			event.preventDefault();
+			next.focus();
+>>>>>>> claude/adoring-faraday-94vc0i
 		});
 	}
 }

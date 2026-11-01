@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // <ue-details-category> wraps a category tree (and, in the live panel, the
 // header, search row and pills above it).
 import { UeElement, define } from '../_shared/element.ts';
@@ -5,6 +6,23 @@ import { wireMenu } from '../_shared/popupmenu.ts';
 
 const DOWN = '#DetailsCategory-down';
 const RIGHT = '#DetailsCategory-right';
+=======
+// <ue-details-category> is a category tree. The live panel adds a ue-details-header, a ue-details-search-row and a ue-filter-pills strip above it.
+// The controls in the rows are primitives or nested composites. This element folds the categories and filters the rows.
+import { UeElement, define } from '../_shared/element.ts';
+import '../AssetPicker/AssetPicker.ts';
+import '../Checkbox/Checkbox.ts';
+import '../ComboButton/ComboButton.ts';
+import '../DetailsHeader/DetailsHeader.ts';
+import '../DetailsSearchRow/DetailsSearchRow.ts';
+import '../FilterPills/FilterPills.ts';
+import '../ResetToDefault/ResetToDefault.ts';
+import '../SpinBox/SpinBox.ts';
+import '../TextInput/TextInput.ts';
+import '../VectorInput/VectorInput.ts';
+import type { UeSpinBoxElement } from '../SpinBox/SpinBox.ts';
+import './DetailsCategory.css';
+>>>>>>> claude/adoring-faraday-94vc0i
 
 interface Item {
 	el: HTMLElement;
@@ -16,16 +34,34 @@ interface Item {
 
 const isIn = (el: Element, selector: string): HTMLElement | null => el.closest<HTMLElement>(selector);
 
+<<<<<<< HEAD
 class UeDetailsCategory extends UeElement {
 	protected setup(): void {
 		const frame = this.one('.DetailsCategory-frame');
 		if (!frame) return;
 		this.wireFrame(frame);
 		if (this.one('.DetailsCategory-panel')) this.wirePanel(frame);
+=======
+// A row of a nested composite, such as a ue-vector-input row, names itself with data-label.
+const isRow = (el: HTMLElement): boolean => el.classList.contains('DetailsCategory-row') || el.dataset.label !== undefined;
+
+class UeDetailsCategory extends UeElement {
+	#query = '';
+	#section = '';
+	#onlyModified = false;
+
+	protected setup(): void {
+		const frame = this.one('.DetailsCategory-frame');
+		if (!frame) return;
+		this.#section = this.one('.FilterPills-pill.is-checked')?.dataset.value ?? '';
+		this.wireFrame(frame);
+		this.wireControls(frame);
+>>>>>>> claude/adoring-faraday-94vc0i
 		for (const row of this.all('.DetailsCategory-row')) this.syncReset(row);
 		this.refresh(frame);
 	}
 
+<<<<<<< HEAD
 	private query(): string {
 		return (this.one<HTMLInputElement>('.DetailsCategory-srInput')?.value ?? '').trim().toLowerCase();
 	}
@@ -36,6 +72,26 @@ class UeDetailsCategory extends UeElement {
 
 	private modifiedOnly(): boolean {
 		return this.one('[data-option="modified"]')?.getAttribute('aria-checked') === 'true';
+=======
+	// The panel controls announce themselves with events. The tree only listens.
+	private wireControls(frame: HTMLElement): void {
+		this.on(this, 'ue-search', (event) => {
+			this.#query = (event as CustomEvent<{ text: string }>).detail.text.trim().toLowerCase();
+			this.refresh(frame);
+		});
+		this.on(this, 'ue-filter-change', (event) => {
+			this.#section = (event as CustomEvent<{ value: string }>).detail.value;
+			this.refresh(frame);
+		});
+		this.on(this, 'ue-view-option', (event) => {
+			const { option, checked } = (event as CustomEvent<{ option: string; checked: boolean }>).detail;
+			if (option === 'modified') this.#onlyModified = checked;
+			else if (option === 'collapseAll' || option === 'expandAll') {
+				for (const cat of this.all('.DetailsCategory-cat')) cat.classList.toggle('is-collapsed', option === 'collapseAll');
+			}
+			this.refresh(frame);
+		});
+>>>>>>> claude/adoring-faraday-94vc0i
 	}
 
 	private wireFrame(frame: HTMLElement): void {
@@ -44,6 +100,7 @@ class UeDetailsCategory extends UeElement {
 			const catRow = isIn(target, '.DetailsCategory-catRow');
 			const advRow = isIn(target, '.DetailsCategory-advRow');
 			const arrow = isIn(target, '.DetailsCategory-rowArrow.has-children');
+<<<<<<< HEAD
 			const check = isIn(target, '.DetailsCategory-check[role="checkbox"]');
 			const reset = isIn(target, '.DetailsCategory-reset[role="button"]');
 			if (catRow) catRow.closest('.DetailsCategory-cat')?.classList.toggle('is-collapsed');
@@ -64,6 +121,12 @@ class UeDetailsCategory extends UeElement {
 				}
 				return;
 			} else return;
+=======
+			if (catRow) catRow.closest('.DetailsCategory-cat')?.classList.toggle('is-collapsed');
+			else if (advRow) advRow.closest('.DetailsCategory-adv')?.classList.toggle('is-open');
+			else if (arrow) arrow.closest('.DetailsCategory-row')?.classList.toggle('is-collapsed');
+			else return;
+>>>>>>> claude/adoring-faraday-94vc0i
 			this.refresh(frame);
 		});
 
@@ -76,13 +139,18 @@ class UeDetailsCategory extends UeElement {
 				this.refresh(frame);
 				return;
 			}
+<<<<<<< HEAD
 			const activates = target.matches('.DetailsCategory-catRow, .DetailsCategory-advRow, .DetailsCategory-rowArrow, .DetailsCategory-check, .DetailsCategory-reset');
+=======
+			const activates = target.matches('.DetailsCategory-catRow, .DetailsCategory-advRow, .DetailsCategory-rowArrow');
+>>>>>>> claude/adoring-faraday-94vc0i
 			if (activates && (event.key === 'Enter' || event.key === ' ')) {
 				event.preventDefault();
 				target.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 			}
 		});
 
+<<<<<<< HEAD
 		this.on(frame, 'focusin', (event) => {
 			const text = isIn(event.target as Element, '.DetailsCategory-text');
 			if (text) text.dataset.before = text.textContent ?? '';
@@ -103,11 +171,44 @@ class UeDetailsCategory extends UeElement {
 			const row = text?.closest<HTMLElement>('.DetailsCategory-row');
 			if (!text || !row) return;
 			text.textContent = (text.textContent ?? '').trim();
+=======
+		// A text value commits live. Enter ends the edit and Escape restores the text from before it.
+		this.on(frame, 'focusin', (event) => {
+			const field = this.fieldOf(event.target);
+			if (field) field.dataset.before = field.value;
+		});
+		this.on(frame, 'keydown', (event) => {
+			const field = this.fieldOf(event.target);
+			if (!field) return;
+			if (event.key === 'Enter') field.blur();
+			else if (event.key === 'Escape') {
+				field.value = field.dataset.before ?? '';
+				this.touched(field);
+				field.blur();
+			} else return;
+			event.preventDefault();
+		});
+
+		this.on(frame, 'ue-text-input', (event) => this.touched(event.target));
+		this.on(frame, 'ue-spin-change', (event) => this.touched(event.target));
+		// A nested composite changed its own reset state, which the modified filter reads.
+		this.on(frame, 'ue-vector-change', () => this.refresh(frame));
+		this.on(frame, 'ue-asset-change', () => this.refresh(frame));
+		this.on(frame, 'ue-reset', (event) => {
+			const row = isIn(event.target as Element, '.DetailsCategory-row');
+			if (!row) return;
+			const def = row.dataset.default ?? '';
+			const field = row.querySelector<HTMLInputElement>('.textinput__field');
+			const spin = row.querySelector<UeSpinBoxElement>('ue-spin-box');
+			if (field) field.value = def;
+			else if (spin) spin.value = Number(def);
+>>>>>>> claude/adoring-faraday-94vc0i
 			this.syncReset(row);
 			this.refresh(frame);
 		});
 	}
 
+<<<<<<< HEAD
 	// The reset arrow shows only while the text differs from the row default.
 	private syncReset(row: HTMLElement): void {
 		const text = row.querySelector('.DetailsCategory-text');
@@ -245,12 +346,67 @@ class UeDetailsCategory extends UeElement {
 			else if (el.classList.contains('DetailsCategory-row')) {
 				const label = (el.querySelector('.DetailsCategory-label')?.textContent ?? '').toLowerCase();
 				const reset = el.querySelector('.DetailsCategory-reset[role="button"]');
+=======
+	// The text field of a row value, or null for any other target.
+	private fieldOf(target: EventTarget | null): HTMLInputElement | null {
+		const el = target as Element | null;
+		const field = el instanceof HTMLInputElement && el.classList.contains('textinput__field') ? el : null;
+		return field && isIn(field, '.DetailsCategory-row') ? field : null;
+	}
+
+	private touched(target: EventTarget | null): void {
+		const row = isIn(target as Element, '.DetailsCategory-row');
+		const frame = row?.closest<HTMLElement>('.DetailsCategory-frame');
+		if (!row || !frame) return;
+		this.syncReset(row);
+		this.refresh(frame);
+	}
+
+	private valueOf(row: HTMLElement): string | null {
+		const field = row.querySelector<HTMLInputElement>('.textinput__field');
+		if (field) return field.value;
+		return row.querySelector<HTMLElement>('.spinbox')?.dataset.value ?? null;
+	}
+
+	// The reset arrow shows only while the value differs from the row default.
+	private syncReset(row: HTMLElement): void {
+		const reset = row.querySelector('ue-reset-to-default');
+		const value = this.valueOf(row);
+		if (!reset || value === null || row.dataset.default === undefined) return;
+		reset.toggleAttribute('differs', value !== row.dataset.default);
+	}
+
+	// Recomputes which cats, rows and the Advanced bar show, and the arrow states.
+	private refresh(frame: HTMLElement): void {
+		const query = this.#query;
+		const searching = query !== '';
+		const section = this.#section;
+		const onlyModified = this.#onlyModified;
+
+		// A nested composite such as a ue-vector-input holds rows that take part in the tree.
+		const children: HTMLElement[] = [];
+		for (const child of Array.from(frame.children) as HTMLElement[]) {
+			if (child.localName.startsWith('ue-')) children.push(...(Array.from(child.children) as HTMLElement[]));
+			else children.push(child);
+		}
+
+		const items: Item[] = [];
+		for (const el of children) {
+			if (el.classList.contains('DetailsCategory-cat')) items.push({ el, kind: 'cat', level: 0, matchesText: true, isModified: true });
+			else if (el.classList.contains('DetailsCategory-adv')) items.push({ el, kind: 'adv', level: 0, matchesText: true, isModified: true });
+			else if (isRow(el)) {
+				const label = (el.dataset.label ?? el.querySelector('.DetailsCategory-label')?.textContent ?? '').toLowerCase();
+>>>>>>> claude/adoring-faraday-94vc0i
 				items.push({
 					el,
 					kind: 'row',
 					level: el.querySelectorAll(':scope > .DetailsCategory-indent').length,
 					matchesText: !searching || label.includes(query),
+<<<<<<< HEAD
 					isModified: !onlyModified || (reset !== null && !reset.classList.contains('is-idle')),
+=======
+					isModified: !onlyModified || el.querySelector('ue-reset-to-default[differs]') !== null,
+>>>>>>> claude/adoring-faraday-94vc0i
 				});
 			}
 		}
@@ -301,13 +457,19 @@ class UeDetailsCategory extends UeElement {
 				catHasRows = false;
 				inAdv = false;
 				closed.length = 0;
+<<<<<<< HEAD
 				this.setArrow(el.querySelector('.DetailsCategory-arrow use'), !catFolded);
+=======
+>>>>>>> claude/adoring-faraday-94vc0i
 				el.querySelector('.DetailsCategory-catRow')?.setAttribute('aria-expanded', String(!catFolded));
 			} else if (item.kind === 'adv') {
 				inAdv = true;
 				advOpen = el.classList.contains('is-open') || searching;
 				el.classList.toggle('is-hidden', catHidden || catFolded || searching);
+<<<<<<< HEAD
 				this.setArrow(el.querySelector('.DetailsCategory-arrow use'), advOpen);
+=======
+>>>>>>> claude/adoring-faraday-94vc0i
 				el.querySelector('.DetailsCategory-advRow')?.setAttribute('aria-expanded', String(advOpen));
 			} else {
 				closed.length = item.level;
@@ -317,10 +479,14 @@ class UeDetailsCategory extends UeElement {
 				const toggle = el.querySelector('.DetailsCategory-rowArrow.has-children');
 				const folded = toggle !== null && el.classList.contains('is-collapsed') && !searching;
 				closed[item.level] = folded;
+<<<<<<< HEAD
 				if (toggle) {
 					this.setArrow(toggle.querySelector('use'), !folded);
 					toggle.setAttribute('aria-expanded', String(!folded));
 				}
+=======
+				toggle?.setAttribute('aria-expanded', String(!folded));
+>>>>>>> claude/adoring-faraday-94vc0i
 				if (!hidden) catHasRows = true;
 			}
 		});
@@ -328,10 +494,13 @@ class UeDetailsCategory extends UeElement {
 
 		frame.querySelector('.DetailsCategory-empty')?.classList.toggle('is-shown', !anyCatShown && (searching || section !== '' || onlyModified));
 	}
+<<<<<<< HEAD
 
 	private setArrow(use: Element | null, expanded: boolean): void {
 		use?.setAttribute('href', expanded ? DOWN : RIGHT);
 	}
+=======
+>>>>>>> claude/adoring-faraday-94vc0i
 }
 
 define('ue-details-category', UeDetailsCategory);

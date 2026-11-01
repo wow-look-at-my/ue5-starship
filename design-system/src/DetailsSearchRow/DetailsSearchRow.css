@@ -1,0 +1,4 @@
+/* Layout of the Details search row. Every metric is cited in components/DetailsSearchRow/README.md. The box and the buttons are primitives. */
+.DetailsSearchRow { position: relative; display: flex; align-items: center; } /* SDetailsView.cpp:276 */
+.DetailsSearchRow + .DetailsSearchRow { margin-top: 2px; }
+.DetailsSearchRow-searchSlot { flex: 1; min-width: 0; padding: 6px; } /* Padding(6.f), FillWidth(1): SDetailsView.cpp:278-280 */

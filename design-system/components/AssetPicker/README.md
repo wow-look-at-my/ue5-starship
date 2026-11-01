@@ -11,6 +11,20 @@ A Details property value for an asset reference. A 48px thumbnail on the left. A
 
 The thumbnail in `preview.html` is a placeholder. The drop shadow is a raster brush in source, so the preview approximates it with a CSS shadow. Icons are 16x16 stroke approximations of the Starship SVGs, which are not in the source tree.
 
+## Composed from
+
+`src/AssetPicker/AssetPicker.css` holds only the row layout and the thumbnail. The thumbnail has no primitive: it is a 48px image with a colour strip and a drop shadow. Every control is a primitive.
+
+| Part | Primitive | Count |
+|---|---|---|
+| Asset combo | `ue-combo-button`, value mode, `combobutton--small`, `combobutton-anchor--fill`, with a `ue-popup-menu` of `popupmenu--small popupmenu--combo` | 1 |
+| Use selected, Browse | `ue-button`, `button--simple button--icon` | 2 |
+| Reset arrow | `ue-reset-to-default`. The component sets `differs` while the value is not the row `data-default` | 1 |
+
+The combo rows carry the asset name in `data-value`. `ue-asset-picker` listens to the primitives, keeps `data-value` of the row and the thumbnail tooltip in step, and announces `ue-asset-change` with `{ asset }` and `ue-asset-browse` with `{ asset }`. Use selected sets the combo through its `value` property to the row `data-selection`. Reset sets it to `data-default`.
+
+The primitive look wins where it differs from the Slate rows below. The list rows use the ComboBox list look with no check column. `aria-selected` only marks the selected row.
+
 ## Metrics
 
 | Part | Value | Source |

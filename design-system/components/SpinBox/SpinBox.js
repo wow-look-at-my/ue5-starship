@@ -1,6 +1,7 @@
 // design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
+<<<<<<< HEAD
   connectedCallback() {
     this.style.display = "contents";
     this.setup();
@@ -8,6 +9,34 @@ var UeElement = class extends HTMLElement {
   disconnectedCallback() {
     for (const dispose of this.#disposers.splice(0)) dispose();
   }
+=======
+  #ready = false;
+  #pendingSetup = null;
+  // The bundle can load before the parser reaches this element's children, so setup waits for the document to finish parsing.
+  // A pinned specimen (data-pinned on the element or an ancestor) keeps its authored markup: setup never runs.
+  connectedCallback() {
+    this.style.display = "contents";
+    if (this.closest("[data-pinned]")) return;
+    if (document.readyState !== "loading") {
+      this.#start();
+      return;
+    }
+    this.#pendingSetup = () => this.#start();
+    document.addEventListener("DOMContentLoaded", this.#pendingSetup, { once: true });
+  }
+  disconnectedCallback() {
+    if (this.#pendingSetup) document.removeEventListener("DOMContentLoaded", this.#pendingSetup);
+    this.#pendingSetup = null;
+    this.#ready = false;
+    for (const dispose of this.#disposers.splice(0)) dispose();
+  }
+  #start() {
+    this.#pendingSetup = null;
+    if (this.#ready || !this.isConnected) return;
+    this.#ready = true;
+    this.setup();
+  }
+>>>>>>> claude/adoring-faraday-94vc0i
   on(target, type, listener, options) {
     target.addEventListener(type, listener, options);
     this.#disposers.push(() => target.removeEventListener(type, listener, options));
@@ -19,6 +48,13 @@ var UeElement = class extends HTMLElement {
   emit(name, detail) {
     return this.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
   }
+<<<<<<< HEAD
+=======
+  // True when the nearest element of this tag above the target is this element, so a nested instance keeps its own events.
+  owns(target) {
+    return target instanceof Element && target.closest(this.localName) === this;
+  }
+>>>>>>> claude/adoring-faraday-94vc0i
   all(selector) {
     return Array.from(this.querySelectorAll(selector));
   }
@@ -42,7 +78,11 @@ function numberAttr(el, name) {
 function rangeOf(box) {
   const min = numberAttr(box, "min");
   const max = numberAttr(box, "max");
+<<<<<<< HEAD
   return { min: min ?? -Infinity, max: max ?? Infinity, bounded: min !== null && max !== null, delta: numberAttr(box, "delta") ?? 0 };
+=======
+  return { min: min ?? -Infinity, max: max ?? Infinity, bounded: min !== null && max !== null, delta: numberAttr(box, "delta") ?? numberAttr(box, "step") ?? 0 };
+>>>>>>> claude/adoring-faraday-94vc0i
 }
 function valueOf(box) {
   return numberAttr(box, "value") ?? 0;
@@ -54,6 +94,7 @@ function format(value) {
 function clamp(value, range) {
   return Math.min(range.max, Math.max(range.min, value));
 }
+<<<<<<< HEAD
 function boxOf(target) {
   return target instanceof Element ? target.closest(".spinbox") : null;
 }
@@ -64,16 +105,43 @@ var UeSpinBoxElement = class extends UeElement {
     this.on(this, "pointerdown", (event) => {
       const box = boxOf(event.target);
       if (!box || event.button !== 0 || box.getAttribute("aria-disabled") === "true") return;
+=======
+var UeSpinBoxElement = class extends UeElement {
+  #drags = /* @__PURE__ */ new WeakMap();
+  // The current value. The setter redraws the box and fires no ue-spin-change, because the owner that sets it already knows.
+  get value() {
+    const box = this.one(".spinbox");
+    return box ? valueOf(box) : 0;
+  }
+  set value(next) {
+    const box = this.one(".spinbox");
+    if (!box) throw new Error("ue-spin-box needs a .spinbox element");
+    box.dataset.value = String(next);
+    this.#render(box);
+  }
+  setup() {
+    const box = this.one(".spinbox");
+    if (!box) throw new Error("ue-spin-box needs a .spinbox element");
+    this.#render(box);
+    this.on(box, "pointerdown", (event) => {
+      if (event.button !== 0 || box.getAttribute("aria-disabled") === "true") return;
+>>>>>>> claude/adoring-faraday-94vc0i
       if (box.classList.contains("spinbox--text")) return;
       box.setPointerCapture(event.pointerId);
       this.#drags.set(box, { pointerId: event.pointerId, lastX: event.clientX, distance: 0, dragging: false, before: valueOf(box), internal: valueOf(box) });
       box.focus();
       event.preventDefault();
     });
+<<<<<<< HEAD
     this.on(this, "pointermove", (event) => {
       const box = boxOf(event.target);
       const state = box ? this.#drags.get(box) : void 0;
       if (!box || !state || state.pointerId !== event.pointerId) return;
+=======
+    this.on(box, "pointermove", (event) => {
+      const state = this.#drags.get(box);
+      if (!state || state.pointerId !== event.pointerId) return;
+>>>>>>> claude/adoring-faraday-94vc0i
       const dx = event.clientX - state.lastX;
       state.lastX = event.clientX;
       if (!state.dragging) {
@@ -87,9 +155,14 @@ var UeSpinBoxElement = class extends UeElement {
       this.#drag(box, state, dx);
     });
     const finish = (event) => {
+<<<<<<< HEAD
       const box = boxOf(event.target);
       const state = box ? this.#drags.get(box) : void 0;
       if (!box || !state || state.pointerId !== event.pointerId) return;
+=======
+      const state = this.#drags.get(box);
+      if (!state || state.pointerId !== event.pointerId) return;
+>>>>>>> claude/adoring-faraday-94vc0i
       this.#drags.delete(box);
       if (box.hasPointerCapture(event.pointerId)) box.releasePointerCapture(event.pointerId);
       box.classList.remove("spinbox--active");
@@ -101,11 +174,18 @@ var UeSpinBoxElement = class extends UeElement {
         this.#enterText(box);
       }
     };
+<<<<<<< HEAD
     this.on(this, "pointerup", finish);
     this.on(this, "pointercancel", finish);
     this.on(this, "keydown", (event) => {
       const box = boxOf(event.target);
       if (!box || box.getAttribute("aria-disabled") === "true") return;
+=======
+    this.on(box, "pointerup", finish);
+    this.on(box, "pointercancel", finish);
+    this.on(box, "keydown", (event) => {
+      if (box.getAttribute("aria-disabled") === "true") return;
+>>>>>>> claude/adoring-faraday-94vc0i
       const state = this.#drags.get(box);
       if (event.key === "Escape" && state?.dragging) {
         this.#drags.delete(box);
@@ -123,11 +203,16 @@ var UeSpinBoxElement = class extends UeElement {
       else return;
       event.preventDefault();
     });
+<<<<<<< HEAD
     this.on(this, "focusout", (event) => {
       if (event.target instanceof HTMLInputElement && event.target.classList.contains("spinbox__field")) {
         const box = boxOf(event.target);
         if (box) this.#exitText(box, true, false);
       }
+=======
+    this.on(box, "focusout", (event) => {
+      if (event.target instanceof HTMLInputElement && event.target.classList.contains("spinbox__field")) this.#exitText(box, true, false);
+>>>>>>> claude/adoring-faraday-94vc0i
     });
   }
   // The value change of one mouse move while dragging, from SSpinBox::OnMouseMove.
@@ -150,11 +235,15 @@ var UeSpinBoxElement = class extends UeElement {
     const before = valueOf(box);
     box.dataset.value = String(value);
     this.#render(box);
+<<<<<<< HEAD
     if (value !== before) {
       const status = this.one(".spinbox-status");
       if (status) status.textContent = "Last change: " + format(value);
       this.emit("ue-spin-change", { value });
     }
+=======
+    if (value !== before) this.emit("ue-spin-change", { value, text: format(value) + (box.dataset.unit ? " " + box.dataset.unit : "") });
+>>>>>>> claude/adoring-faraday-94vc0i
   }
   #render(box) {
     const range = rangeOf(box);
@@ -165,8 +254,22 @@ var UeSpinBoxElement = class extends UeElement {
       box.setAttribute("aria-valuemax", String(range.max));
       box.style.setProperty("--spinbox-fill", String((value - range.min) / (range.max - range.min)));
     }
+<<<<<<< HEAD
     const text = box.querySelector(".spinbox__text");
     if (text && !box.classList.contains("spinbox--text")) text.textContent = format(value);
+=======
+    box.classList.toggle("spinbox--unbounded", !range.bounded);
+    const text = box.querySelector(".spinbox__text");
+    if (text && !box.classList.contains("spinbox--text")) text.textContent = format(value);
+    const unit = box.dataset.unit;
+    let suffix = box.querySelector(".spinbox__unit");
+    if (unit && !suffix && text) {
+      suffix = document.createElement("span");
+      suffix.className = "spinbox__unit";
+      text.after(suffix);
+    }
+    if (suffix) suffix.textContent = unit ?? "";
+>>>>>>> claude/adoring-faraday-94vc0i
   }
   #enterText(box) {
     const text = box.querySelector(".spinbox__text");

@@ -1,6 +1,7 @@
 // design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
+<<<<<<< HEAD
   connectedCallback() {
     this.style.display = "contents";
     this.setup();
@@ -8,6 +9,34 @@ var UeElement = class extends HTMLElement {
   disconnectedCallback() {
     for (const dispose of this.#disposers.splice(0)) dispose();
   }
+=======
+  #ready = false;
+  #pendingSetup = null;
+  // The bundle can load before the parser reaches this element's children, so setup waits for the document to finish parsing.
+  // A pinned specimen (data-pinned on the element or an ancestor) keeps its authored markup: setup never runs.
+  connectedCallback() {
+    this.style.display = "contents";
+    if (this.closest("[data-pinned]")) return;
+    if (document.readyState !== "loading") {
+      this.#start();
+      return;
+    }
+    this.#pendingSetup = () => this.#start();
+    document.addEventListener("DOMContentLoaded", this.#pendingSetup, { once: true });
+  }
+  disconnectedCallback() {
+    if (this.#pendingSetup) document.removeEventListener("DOMContentLoaded", this.#pendingSetup);
+    this.#pendingSetup = null;
+    this.#ready = false;
+    for (const dispose of this.#disposers.splice(0)) dispose();
+  }
+  #start() {
+    this.#pendingSetup = null;
+    if (this.#ready || !this.isConnected) return;
+    this.#ready = true;
+    this.setup();
+  }
+>>>>>>> claude/adoring-faraday-94vc0i
   on(target, type, listener, options) {
     target.addEventListener(type, listener, options);
     this.#disposers.push(() => target.removeEventListener(type, listener, options));
@@ -19,6 +48,13 @@ var UeElement = class extends HTMLElement {
   emit(name, detail) {
     return this.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
   }
+<<<<<<< HEAD
+=======
+  // True when the nearest element of this tag above the target is this element, so a nested instance keeps its own events.
+  owns(target) {
+    return target instanceof Element && target.closest(this.localName) === this;
+  }
+>>>>>>> claude/adoring-faraday-94vc0i
   all(selector) {
     return Array.from(this.querySelectorAll(selector));
   }
@@ -30,6 +66,14 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
+<<<<<<< HEAD
+=======
+// design-system/src/_shared/own.ts
+function ownedBy(host, target) {
+  return target instanceof Element && target.closest(host.localName) === host;
+}
+
+>>>>>>> claude/adoring-faraday-94vc0i
 // design-system/src/_shared/popup.ts
 function enabledRows(menu, rowSelector) {
   return Array.from(menu.querySelectorAll(rowSelector)).filter((row) => row.getAttribute("aria-disabled") !== "true");
@@ -48,9 +92,12 @@ var KEYS = "popupmenu--keys";
 function rowOf(target) {
   return target instanceof Element ? target.closest(ROW) : null;
 }
+<<<<<<< HEAD
 function rootOf(node) {
   return node?.closest(".popupmenu[tabindex]") ?? null;
 }
+=======
+>>>>>>> claude/adoring-faraday-94vc0i
 function isDisabled(row) {
   return row.getAttribute("aria-disabled") === "true";
 }
@@ -61,11 +108,43 @@ function menuOf(row) {
   return row.parentElement;
 }
 var UePopupMenuElement = class extends UeElement {
+<<<<<<< HEAD
   setup() {
     this.on(this, "mousemove", (event) => {
       const row = rowOf(event.target);
       const root = rootOf(row);
       if (!row || !root) return;
+=======
+  // The focusable .popupmenu list.
+  get root() {
+    const root = this.one(".popupmenu[tabindex]");
+    if (!root) throw new Error("ue-popup-menu needs a .popupmenu[tabindex] element");
+    return root;
+  }
+  // Focuses the list and marks `row` current. `keys` hides the hover highlight, as after an arrow key.
+  focusMenu(row, keys) {
+    const root = this.root;
+    root.focus({ preventScroll: true });
+    root.classList.toggle(KEYS, keys);
+    this.#show(root, row, null);
+  }
+  // Clears the current row and closes every submenu.
+  reset() {
+    const root = this.root;
+    root.classList.remove(KEYS);
+    this.#show(root, null, null);
+  }
+  // The enabled rows of the top level, in order.
+  topRows() {
+    return enabledRows(this.root, ":scope > " + ROW);
+  }
+  setup() {
+    void this.root;
+    this.on(this, "mousemove", (event) => {
+      const row = rowOf(event.target);
+      if (!row || !ownedBy(this, event.target)) return;
+      const root = this.root;
+>>>>>>> claude/adoring-faraday-94vc0i
       root.classList.remove(KEYS);
       if (isDisabled(row)) return;
       const sub = submenuOf(row);
@@ -75,7 +154,11 @@ var UePopupMenuElement = class extends UeElement {
     });
     this.on(this, "pointerdown", (event) => {
       const row = rowOf(event.target);
+<<<<<<< HEAD
       if (row && event.button === 0 && !isDisabled(row)) row.classList.add(PRESSED);
+=======
+      if (row && ownedBy(this, event.target) && event.button === 0 && !isDisabled(row)) row.classList.add(PRESSED);
+>>>>>>> claude/adoring-faraday-94vc0i
     });
     const release = () => {
       for (const row of this.all(ROW + "." + PRESSED)) row.classList.remove(PRESSED);
@@ -88,6 +171,7 @@ var UePopupMenuElement = class extends UeElement {
     });
     this.on(this, "click", (event) => {
       const row = rowOf(event.target);
+<<<<<<< HEAD
       const root = rootOf(row);
       if (!row || !root || isDisabled(row)) return;
       const sub = submenuOf(row);
@@ -110,6 +194,29 @@ var UePopupMenuElement = class extends UeElement {
     this.on(this, "focusout", (event) => {
       const root = rootOf(event.target instanceof Element ? event.target : null);
       if (root && !(event.relatedTarget instanceof Node && root.contains(event.relatedTarget))) this.#show(root, null, null);
+=======
+      if (!row || !ownedBy(this, event.target) || isDisabled(row)) return;
+      const sub = submenuOf(row);
+      if (sub) {
+        this.#show(this.root, row, sub.hidden ? row : null);
+        return;
+      }
+      this.#show(this.root, row, null);
+      this.#activate(row);
+    });
+    this.on(this, "mouseout", (event) => {
+      const root = this.root;
+      if (!ownedBy(this, event.target) || event.relatedTarget instanceof Node && root.contains(event.relatedTarget)) return;
+      if (!root.classList.contains(KEYS)) this.#show(root, null, null);
+    });
+    this.on(this, "keydown", (event) => {
+      if (event.target === this.root) this.#key(event, this.root);
+    });
+    this.on(this, "focusout", (event) => {
+      const root = this.root;
+      if (!root.contains(event.target)) return;
+      if (!(event.relatedTarget instanceof Node && root.contains(event.relatedTarget))) this.#show(root, null, null);
+>>>>>>> claude/adoring-faraday-94vc0i
     });
   }
   // Marks one row current, opens the submenus on its path, and optionally opens the submenu of `open`.
@@ -133,20 +240,37 @@ var UePopupMenuElement = class extends UeElement {
   #activate(row) {
     const role = row.getAttribute("role");
     const label = rowLabel(row, ".popupmenu__label");
+<<<<<<< HEAD
     let text = "Activated: " + label;
     if (role === "menuitemcheckbox") {
       const on = row.getAttribute("aria-checked") !== "true";
       row.setAttribute("aria-checked", String(on));
       text += on ? " (checked)" : " (unchecked)";
+=======
+    let checked = null;
+    let text = label;
+    if (role === "menuitemcheckbox") {
+      checked = row.getAttribute("aria-checked") !== "true";
+      row.setAttribute("aria-checked", String(checked));
+      text += checked ? " (checked)" : " (unchecked)";
+>>>>>>> claude/adoring-faraday-94vc0i
     } else if (role === "menuitemradio") {
       for (const other of Array.from(menuOf(row)?.querySelectorAll(':scope > [role="menuitemradio"]') ?? [])) {
         other.setAttribute("aria-checked", String(other === row));
       }
+<<<<<<< HEAD
       text += " (selected)";
     }
     const status = row.closest(".popupmenu-live")?.querySelector(".popupmenu-status");
     if (status) status.textContent = text;
     this.emit("ue-menu-activate", { label });
+=======
+      checked = true;
+      text += " (selected)";
+    }
+    const detail = { label, role, checked, text, value: row.dataset.value ?? label, row };
+    this.emit("ue-menu-activate", detail);
+>>>>>>> claude/adoring-faraday-94vc0i
   }
   #key(event, root) {
     const current = root.querySelector(ROW + "." + CURRENT);
@@ -179,13 +303,26 @@ var UePopupMenuElement = class extends UeElement {
         break;
       case "Escape":
         root.classList.add(KEYS);
+<<<<<<< HEAD
         if (current && menu !== root) this.#leave(root, current);
         else this.#show(root, null, null);
+=======
+        if (current && menu !== root) {
+          this.#leave(root, current);
+          event.stopPropagation();
+        } else {
+          this.#show(root, null, null);
+        }
+>>>>>>> claude/adoring-faraday-94vc0i
         break;
       case "Enter":
       case " ":
         root.classList.add(KEYS);
+<<<<<<< HEAD
         if (!current) break;
+=======
+        if (event.repeat || !current) break;
+>>>>>>> claude/adoring-faraday-94vc0i
         if (submenuOf(current)) this.#enter(root, current);
         else this.#activate(current);
         break;

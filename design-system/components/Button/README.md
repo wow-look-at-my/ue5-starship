@@ -56,6 +56,42 @@ Slate unit = 1px. Font px = pt x 96/72. The 16px text line box is derived from R
 - Do not add a drop shadow, gradient or hover scale. The source has none.
 - Do not rely on `PrimaryButtonText` bold for every primary button. It is a separate text style.
 
+## Markup contract
+
+One `<ue-button>` wraps exactly one `.button`. The CSS lives in `src/Button/Button.css`. The markup works when pasted into any component. Glyphs are inline `svg` elements with a `viewBox`. No `symbol` reference is needed.
+
+```html
+<ue-button><button class="button button--primary">Create</button></ue-button>
+<ue-button><button class="button button--simple"><svg class="button__icon" viewBox="0 0 16 16"><path d="M3 3h8l2 2v8H3z"/></svg>Save All</button></ue-button>
+```
+
+The element can be a `button` or any element with `role="button"` and `tabindex="0"`. A non-`button` element gets Enter and Space handling from `ue-button`.
+
+| Class | Variant |
+|---|---|
+| `button` | Default (secondary): `--secondary` fill, `--input` outline |
+| `button--primary` | `--primary` fill. Add `button--bold` for `PrimaryButtonText` |
+| `button--simple` | Transparent, `--dropdown` on hover |
+| `button--icon` | Icon-only: padding 4 x 3, radius 4. Combine with `button--simple` or `button--toggle`. The icon is `button__icon button__icon--solo` |
+| `button--toggle` | A toggle with `aria-pressed="true\|false"`. Off looks like simple. On fills `--primary` (hover `--primary-hover`, pressed `--dropdown`). A click flips `aria-pressed` |
+| `button--tight` | Combine with `button--simple`. Side padding 4 instead of 8, at rest and pressed. For a consumer that sets `ContentPadding(2)` in place of the `SButton` default (4,2), as the Content Browser toolbar does (`SContentBrowser.cpp:1839,1857`) |
+| `button--caption` | Window caption button: 42 x 23, no outline, transparent, glyph `svg` 42 x 23 in `currentColor`. Hover fills white at 15.7% alpha, pressed has no fill. Add `button--caption-close` for the close button: hover fills red at 58.8% alpha (`StarshipCoreStyle.cpp:749-766`, `:789-792`) |
+| `button--small` | Fixed 22px height, padding 14 on both sides. For the Add button |
+| `button--toolbar` | The slim toolbar button: padding 8 x 4 (pressed 8, 5, 8, 3), 20px icon. Combine with `button--simple` or `button--toggle`. A toggle has no pressed shift (`StarshipCoreStyle.cpp:2193-2194`, `:2217-2218`, `:2240`) |
+| `button--plate` | A button on a backplate, as in the Play group. No fill, no padding, the foreground is inherited and a disabled one is not dimmed. The plate owns the fill, the foreground and the alpha. The icon is 20px (`StarshipStyle.cpp:5520-5578`) |
+| `button--status` | The status bar drawer button: no fill, Foreground, ForegroundHover on hover and press, padding 4 (pressed 5, 4, 3). `aria-pressed="true"` shows the pressed look, the open drawer (`StarshipCoreStyle.cpp:1867-1870`) |
+| disabled | the `disabled` attribute on a `button`, or `aria-disabled="true"` on any element |
+
+The icon class `button__icon` has a 4px gap to the label. Forced state classes for pinned specimens: `button--hover`, `button--pressed`, `button--focus`, `button--disabled`, `button--disabled-brush`.
+
+## Events
+
+| Event | Detail | When |
+|---|---|---|
+| `ue-button-click` | `{ label, pressed, count }` | The button is clicked, or Enter or Space presses it. A disabled button does not fire. `label` is the `aria-label` or the text. `pressed` is the new state of a toggle, else `null`. `count` is the clicks of this instance |
+
+Holding Enter or Space adds `button--pressed` to this button until the key comes up or the focus leaves.
+
 ## Not rebuilt
 
 - No `DangerButton` exists in the Starship styles. The only red buttons are the legacy `FlatButton.Danger` in `StarshipStyle.cpp:575` (linear colour 0.70117, 0.08464, 0.07593. Normal x0.8, hovered x1.0, pressed x0.6, `:559-567`). They use the texture `Common/FlatButton`, which is not available. They are not drawn. Computed sRGB values are `#c54a46`, `#da524e`, `#ae403c`.

@@ -1,10 +1,15 @@
 // Base class for the light-DOM custom elements that make the component previews live.
+<<<<<<< HEAD
+=======
+import './base.css';
+>>>>>>> claude/adoring-faraday-94vc0i
 
 export type Listener<E extends Event> = (event: E) => void;
 
 export abstract class UeElement extends HTMLElement {
 	#disposers: Array<() => void> = [];
 
+<<<<<<< HEAD
 	connectedCallback(): void {
 		this.style.display = 'contents';
 		this.setup();
@@ -14,6 +19,38 @@ export abstract class UeElement extends HTMLElement {
 		for (const dispose of this.#disposers.splice(0)) dispose();
 	}
 
+=======
+	#ready = false;
+	#pendingSetup: (() => void) | null = null;
+
+	// The bundle can load before the parser reaches this element's children, so setup waits for the document to finish parsing.
+	// A pinned specimen (data-pinned on the element or an ancestor) keeps its authored markup: setup never runs.
+	connectedCallback(): void {
+		this.style.display = 'contents';
+		if (this.closest('[data-pinned]')) return;
+		if (document.readyState !== 'loading') {
+			this.#start();
+			return;
+		}
+		this.#pendingSetup = () => this.#start();
+		document.addEventListener('DOMContentLoaded', this.#pendingSetup, { once: true });
+	}
+
+	disconnectedCallback(): void {
+		if (this.#pendingSetup) document.removeEventListener('DOMContentLoaded', this.#pendingSetup);
+		this.#pendingSetup = null;
+		this.#ready = false;
+		for (const dispose of this.#disposers.splice(0)) dispose();
+	}
+
+	#start(): void {
+		this.#pendingSetup = null;
+		if (this.#ready || !this.isConnected) return;
+		this.#ready = true;
+		this.setup();
+	}
+
+>>>>>>> claude/adoring-faraday-94vc0i
 	// Wires the existing markup. Runs on every connect, after the run's listeners are removed.
 	protected abstract setup(): void;
 
@@ -34,6 +71,14 @@ export abstract class UeElement extends HTMLElement {
 		return this.dispatchEvent(new CustomEvent<T>(name, { detail, bubbles: true, composed: true }));
 	}
 
+<<<<<<< HEAD
+=======
+	// True when the nearest element of this tag above the target is this element, so a nested instance keeps its own events.
+	protected owns(target: EventTarget | null): boolean {
+		return target instanceof Element && target.closest(this.localName) === this;
+	}
+
+>>>>>>> claude/adoring-faraday-94vc0i
 	protected all<T extends Element = HTMLElement>(selector: string): T[] {
 		return Array.from(this.querySelectorAll<T>(selector));
 	}

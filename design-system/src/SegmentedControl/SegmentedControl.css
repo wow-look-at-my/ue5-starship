@@ -1,0 +1,32 @@
+/* Track: SBorder with Style->BackgroundBrush, padding (0,0,UniformPadding.Right,0): SSegmentedControl.h:304-309 */
+.SegmentedControl { display: flex; flex: 1; min-width: 0; background: var(--input); border-radius: 4px; padding-right: 1px; } /* FSlateRoundedBoxBrush(Input, 4): StarshipCoreStyle.cpp:1684 */
+/* Cell: slot padding = UniformPadding (1) with Right = 0: SSegmentedControl.h:219-220, StarshipCoreStyle.cpp:1685 */
+.SegmentedControl-seg {
+	flex: 1 1 0; min-width: 0; overflow: hidden; /* ClipToBounds on each SCheckBox: SSegmentedControl.h:289 */
+	margin: 1px 0 1px 1px; padding: 3px 8px; /* SegmentedControlMargins (8,3): StarshipCoreStyle.cpp:1662 */
+	border: 0; border-radius: 4px; cursor: pointer; text-align: center; white-space: nowrap;
+	background: transparent; color: var(--foreground); /* unchecked: StarshipCoreStyle.cpp:1666, 1672 */
+	font: 400 10.667px/1.172 var(--font-sans); letter-spacing: .1em; /* MobilityFont = Small, LetterSpacing 100 -> 100*8/1000 pt: StarshipStyle.cpp:3127-3128, SlateTextShaper.cpp:412 */
+}
+.SegmentedControl-seg:hover, .SegmentedControl-seg.is-hover { background: var(--hover); color: var(--foreground-hover); } /* StarshipCoreStyle.cpp:1667, 1673 */
+.SegmentedControl-seg:active, .SegmentedControl-seg.is-pressed { background: var(--header); color: var(--foreground-hover); } /* StarshipCoreStyle.cpp:1668, 1674 */
+.SegmentedControl-seg.is-checked { background: var(--dropdown); color: var(--foreground-hover); } /* StarshipCoreStyle.cpp:1669, 1675 */
+.SegmentedControl-seg.is-checked:hover { background: var(--hover); } /* StarshipCoreStyle.cpp:1670 */
+.SegmentedControl-seg.is-checked:active { background: var(--header); } /* StarshipCoreStyle.cpp:1671 */
+.SegmentedControl-seg:focus-visible { outline: 1px solid var(--primary-hover); outline-offset: -1px; } /* browser keyboard ring: Slate draws none */
+.SegmentedControl-seg:disabled { opacity: .45; cursor: default; } /* alpha x .45: SlateElementPixelShader.usf:535 */
+
+/* Rail variant: the Place Actors category strip. A vertical stack of icon buttons on a Panel ground.
+   components/PlaceActorsPanel/preview.html:31-37 draws the same rail and buttons (SS = StarshipStyle.cpp:1750-1787, SC = StarshipCoreStyle.cpp:1631). */
+.SegmentedControl--rail { flex: none; flex-direction: column; width: 44px; box-sizing: border-box; padding: 4px; border-radius: 0; background: var(--panel); } /* UnlabelledButtonToolbarButtonWidth 44 (CategoryDrivenContentBuilderBase.cpp:18); Panel, BackgroundPadding 4 (SS:1772) */
+.SegmentedControl--rail.SegmentedControl--row { flex-direction: row; flex-wrap: wrap; width: auto; } /* reference-screenshot arrangement; the engine source stacks the rail vertically (PM:708, CategoryDrivenContentBuilderBase.cpp:139-147) */
+.SegmentedControl--rail .SegmentedControl-seg {
+	flex: none; display: flex; align-items: center; justify-content: center; box-sizing: border-box; width: 36px; height: 36px; margin: 2px 0; padding: 8px; /* ButtonContentMaxWidth 36 (SS:1786), IconPadding 8 (SS:1784), ButtonPadding (0,2,0,2) (SS:1780), toggle padding 0 (SS:1759) */
+	border-radius: 4px; /* radius 4 (SS:1750) */
+	letter-spacing: normal; cursor: default;
+}
+.SegmentedControl--rail .SegmentedControl-seg svg { width: 20px; height: 20px; flex: none; display: block; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; } /* PlacementBrowser.Icons.* are Icon20x20 (SS:4717-4725), stroke approximates the SVG */
+.SegmentedControl--rail .SegmentedControl-seg:hover, .SegmentedControl--rail .SegmentedControl-seg.is-hover { background: var(--dropdown); color: var(--foreground-hover); } /* unchecked hover Dropdown r4 (SC:1631), ForegroundHover (SS:1755) */
+.SegmentedControl--rail .SegmentedControl-seg.is-checked { background: var(--primary); color: var(--foreground-hover); box-shadow: inset 0 0 0 .5px rgba(0, 0, 0, .8); } /* CheckedImage Primary r4 with outline (0,0,0,.8) 0.5px (SS:1750), CheckedForeground ForegroundHover (SS:1756) */
+.SegmentedControl--rail .SegmentedControl-seg.is-checked:hover, .SegmentedControl--rail .SegmentedControl-seg.is-checked:active { background: var(--primary-hover); } /* SS:1751 */
+.SegmentedControl--rail .SegmentedControl-seg:active:not(.is-checked) { background: var(--dropdown); color: var(--foreground-hover); }

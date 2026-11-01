@@ -1,0 +1,50 @@
+/* The grid is a wrapping row of fixed-size cells. */
+.AssetTile-grid { display: flex; flex-wrap: wrap; align-content: flex-start; }
+
+/* Cell: GetTileViewItemWidth(), Medium thumbnails at a 1080p display = (150+2*9)*Lerp(..) ~ 82 (SAssetView.cpp:5727,5750; derived, depends on display). Item height (50+50)*k + 82 ~ 130 (SAssetView.cpp:5718, 5676-5678).
+   ChildSlot Padding(0,0,4,4) + shadow SBorder Padding(0,0,5,5) leave a 73px card (AssetViewWidgets.cpp:2204,2208, 2384-2391). */
+.AssetTile { box-sizing: border-box; width: 82px; height: 130px; padding: 0 9px 9px 0; flex: none; cursor: default; user-select: none; outline: 0; font-family: var(--font-sans); }
+.AssetTile__card { position: relative; width: 73px; height: 121px; border-radius: 4px; overflow: hidden; }
+
+/* ---- thumbnail box: 73 x 73 (GetThumbnailBoxSize, AssetViewWidgets.cpp:2389) ---- */
+.AssetTile__thumb { position: relative; width: 73px; height: 73px; }
+
+/* ---- folder ---- */
+.AssetTile--folder .AssetTile__thumb { padding: 5px; }                 /* AssetViewWidgets.cpp:173 overlay Padding(5) */
+.AssetTile__folderIcon { display: block; width: 100%; height: 100%; padding: 0 2px 2px 0; box-sizing: border-box; color: var(--accent-folder); /* StarshipStyle.cpp:6348; padding = shadow SBorder (0,0,2,2) at AssetViewWidgets.cpp:177 */
+	filter: drop-shadow(1.5px 1.5px 1.5px rgba(0,0,0,.55)); }          /* approximates folder-drop-shadow.png (StarshipStyle.cpp:6579), image not available */
+.AssetTile--folder .AssetTile__name { text-align: center; }
+/* FolderAreaHovered/Selected/SelectedHoverBackground = Secondary r4 (StarshipStyle.cpp:6540-6542), with the drop shadow brush approximated */
+.AssetTile--folder.is-hover .AssetTile__card, .AssetTile--folder:hover .AssetTile__card, .AssetTile--folder.is-selected .AssetTile__card { background: var(--secondary); box-shadow: 2px 2px 3px rgba(0,0,0,.5); overflow: visible; }
+
+/* ---- asset ---- */
+.AssetTile--asset .AssetTile__card { background: var(--recessed); box-shadow: 2px 2px 3px rgba(0,0,0,.45); } /* ThumbnailAreaBackground Recessed r4 (StarshipStyle.cpp:6543); AssetTileItem.DropShadow (:6578), approximated */
+.AssetTile__asset { position: absolute; inset: 2px; background: var(--recessed); display: grid; place-items: center; color: var(--foreground); overflow: hidden; } /* thumbnail Padding(2) AssetViewWidgets.cpp:2040; AssetBackground Recessed StarshipStyle.cpp:1229 */
+.AssetTile__asset svg { width: 32px; height: 32px; opacity: .8; }
+.AssetTile__image { width: 100%; height: 100%; object-fit: cover; display: block; }
+.AssetTile__strip { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--strip, var(--accent-blue)); } /* GetAssetColorStripThickness 2 (AssetThumbnail.cpp:1050-1053); colour = asset-type colour */
+.AssetTile--asset .AssetTile__nameArea { background: var(--secondary); border-radius: 0 0 4px 4px; } /* NameAreaBackground Secondary, radii (0,0,4,4) StarshipStyle.cpp:6544 */
+.AssetTile--asset.is-hover .AssetTile__nameArea, .AssetTile--asset:hover .AssetTile__nameArea { background: var(--hover); }  /* :6545 Hover */
+.AssetTile--asset.is-selected .AssetTile__nameArea { background: var(--primary); }                                        /* :6546 Primary */
+.AssetTile--asset.is-selected.is-hover .AssetTile__nameArea, .AssetTile--asset.is-selected:hover .AssetTile__nameArea { background: var(--primary-hover); } /* :6547 PrimaryHover */
+
+/* ---- name area: Border Padding(2,3); name slot Padding(2,2,0,0) (AssetViewWidgets.cpp:2237,2242) ---- */
+.AssetTile__nameArea { height: 48px; box-sizing: border-box; padding: 3px 2px; display: flex; flex-direction: column; justify-content: space-between; }
+.AssetTile--folder .AssetTile__nameArea { background: none; }
+.AssetTile__name { padding: 2px 0 0 2px; font: 400 12px/14px var(--font-sans); /* AssetTileViewNameFont Regular 9pt = 12px (StarshipStyle.cpp:6367) */
+	color: var(--foreground); flex: 1 1 0; min-height: 0; overflow: hidden; word-break: break-word; } /* fill slot above the class label; MultilineEllipsis (AssetViewWidgets.cpp:2111) */
+.AssetTile--folder .AssetTile__name { flex: none; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.AssetTile--asset .AssetTile__name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.AssetTile__class { font: 400 9.333px/12px var(--font-sans); /* ContentBrowser.ClassFont Regular 7pt (StarshipStyle.cpp:6477) */
+	color: var(--foreground); opacity: .6; padding-left: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } /* UseSubduedForeground = 0.6 alpha (WidgetStyle.cpp:11) */
+.is-hover .AssetTile__name, .is-selected .AssetTile__name, .AssetTile:hover .AssetTile__name { color: var(--white); }   /* GetNameAreaTextColor AssetViewWidgets.cpp:2572-2579 */
+.is-hover .AssetTile__class, .is-selected .AssetTile__class, .AssetTile:hover .AssetTile__class { color: var(--white); opacity: 1; }  /* GetAssetClassLabelTextColor :2400-2407 */
+
+/* ---- state outlines (overlay SImage, AssetViewWidgets.cpp:2287-2291, GetBorderImage :2344-2365) ---- */
+.AssetTile__card::after { content: ""; position: absolute; inset: 0; border-radius: 4px; pointer-events: none; }
+.AssetTile--asset.is-hover .AssetTile__card::after, .AssetTile--asset:hover .AssetTile__card::after { box-shadow: inset 0 0 0 1px var(--hover); }  /* HoverBorder, assets only (:2358) */
+.AssetTile.is-selected .AssetTile__card::after { box-shadow: inset 0 0 0 1px var(--primary); }                                                      /* SelectedBorder StarshipStyle.cpp:6567 */
+.AssetTile.is-selected.is-hover .AssetTile__card::after, .AssetTile.is-selected:hover .AssetTile__card::after { box-shadow: inset 0 0 0 1px var(--primary-hover); } /* SelectedHoverBorder :6571 */
+
+/* keyboard focus selector: SelectorFocusedBrush 1px, SelectorColor linear (0.701, 0.225, 0.003) = #da820a (StarshipCoreStyle.cpp:62,2007) */
+.AssetTile:focus-visible .AssetTile__card { outline: 1px solid #da820a; outline-offset: 1px; }

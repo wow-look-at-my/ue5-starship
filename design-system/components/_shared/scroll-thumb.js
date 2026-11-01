@@ -117,6 +117,15 @@ function bindBar(view, bar, thumb, vertical, onFits) {
   const observer = new ResizeObserver(update);
   observer.observe(view);
   observer.observe(bar);
+<<<<<<< HEAD
+=======
+  for (const child of Array.from(view.children)) observer.observe(child);
+  const mutations = new MutationObserver((records) => {
+    for (const record of records) for (const added of Array.from(record.addedNodes)) if (added instanceof Element) observer.observe(added);
+    update();
+  });
+  mutations.observe(view, { childList: true });
+>>>>>>> claude/adoring-faraday-94vc0i
   update();
   return {
     update,
@@ -125,6 +134,10 @@ function bindBar(view, bar, thumb, vertical, onFits) {
       view.removeEventListener("scroll", onScroll);
       bar.removeEventListener("wheel", onWheel);
       observer.disconnect();
+<<<<<<< HEAD
+=======
+      mutations.disconnect();
+>>>>>>> claude/adoring-faraday-94vc0i
     }
   };
 }
