@@ -1,5 +1,6 @@
 // Importing the modules above defines every ue-* element.
 
+import '../src/AssetList/AssetList.ts';
 import '../src/AssetPicker/AssetPicker.ts';
 import '../src/AssetSearchBar/AssetSearchBar.ts';
 import '../src/AssetTile/AssetTile.ts';

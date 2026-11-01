@@ -815,3 +815,113 @@ scenario('ContentBrowser: section headers collapse, search toggles press, menus 
 	await cbRow(page, 'Props').hover();
 	assert.equal(await fill(cbRow(page, 'Props')), await token(page, 'select-hover'));
 });
+
+// ---------------------------------------------------------------- AssetList
+
+const listRow = (page: Page, id: string): Locator => page.locator('ue-asset-list .AssetList__row[data-id="' + id + '"]');
+const shownIds = (page: Page): Promise<string[]> => page.$$eval('ue-asset-list .AssetList__row:not([hidden])', (els) => els.map((el) => (el as HTMLElement).dataset.id ?? ''));
+const listCount = (page: Page): Promise<string> => page.locator('ue-asset-list .AssetList__count').innerText();
+const GAME = ['SM_Bookshelf', 'SM_Chair', 'SM_Couch', 'SM_Lamp', 'SM_Rug', 'SM_Table'];
+
+scenario('AssetList: 36px rows striped Recessed and Background, a hidden engine set, and the count line', 'AssetList', async (page) => {
+	assert.deepEqual(await shownIds(page), GAME, 'engine content stays hidden by default');
+	assert.equal(await listCount(page), '6 items (1 selected)');
+	const rows = page.locator('ue-asset-list .AssetList__row:not([hidden])');
+	assert.equal((await rows.first().boundingBox())?.height, 36);
+	assert.equal(await fill(rows.nth(0)), await token(page, 'recessed'));
+	assert.equal(await fill(rows.nth(2)), await token(page, 'recessed'));
+	assert.equal(await fill(rows.nth(3)), await token(page, 'background'), 'stripes skip the hidden rows');
+	assert.equal(await fill(listRow(page, 'SM_Chair')), await token(page, 'select-inactive'), 'the selection without the focus');
+	await listRow(page, 'SM_Lamp').hover();
+	assert.equal(await fill(listRow(page, 'SM_Lamp')), await token(page, 'select-hover'));
+	assert.equal(await prop(listRow(page, 'SM_Lamp').locator('.AssetList__name'), 'color'), await token(page, 'white'));
+	assert.equal(await prop(listRow(page, 'SM_Lamp').locator('.AssetList__name'), 'font-size'), '12px');
+	assert.equal(await prop(listRow(page, 'SM_Lamp').locator('.AssetList__class'), 'font-size'), '13.333px');
+	const thumb = await listRow(page, 'SM_Lamp').locator('.AssetList__thumb').boundingBox();
+	assert.deepEqual([thumb?.width, thumb?.height], [36, 36], 'the thumbnail is as tall as the row');
+	const rc = await listRow(page, 'SM_Lamp').locator('.AssetList__rc').boundingBox();
+	assert.equal(rc?.width, 30, 'the revision control column');
+});
+
+scenario('AssetList: a click selects and activates, keys move with wrap, Enter activates, the focused selection is Select', 'AssetList', async (page) => {
+	await recordEvents(page, 'ue-asset-list-select');
+	await recordEvents(page, 'ue-asset-list-activate');
+	await listRow(page, 'SM_Lamp').click();
+	assert.equal(await attr(listRow(page, 'SM_Lamp'), 'aria-selected'), 'true');
+	assert.equal(await attr(listRow(page, 'SM_Chair'), 'aria-selected'), 'false');
+	assert.deepEqual(await recorded(page, 'ue-asset-list-select'), [{ id: 'SM_Lamp' }]);
+	assert.deepEqual(await recorded(page, 'ue-asset-list-activate'), [{ id: 'SM_Lamp' }]);
+
+	const rows = page.locator('ue-asset-list .AssetList__rows');
+	await rows.focus();
+	await farAway(page);
+	assert.equal(await fill(listRow(page, 'SM_Lamp')), await token(page, 'select'), 'the list holds the focus');
+	await tap(page, 'ArrowDown', 'ArrowDown', 'ArrowDown');
+	assert.equal(await attr(listRow(page, 'SM_Bookshelf'), 'aria-selected'), 'true', 'Down wraps past the last row');
+	await tap(page, 'ArrowUp');
+	assert.equal(await attr(listRow(page, 'SM_Table'), 'aria-selected'), 'true', 'Up wraps past the first row');
+	await tap(page, 'Home');
+	assert.equal(await attr(listRow(page, 'SM_Bookshelf'), 'aria-selected'), 'true');
+	await tap(page, 'End', 'Enter');
+	assert.deepEqual((await recorded(page, 'ue-asset-list-activate')).slice(-1), [{ id: 'SM_Table' }]);
+	assert.equal(await page.locator('ue-asset-list ue-event-status').nth(1).textContent(), 'Activated: SM_Table');
+});
+
+scenario('AssetList: the Name header flips the order', 'AssetList', async (page) => {
+	await page.locator('ue-asset-list .hr-cell[data-column="name"]').click();
+	assert.deepEqual(await shownIds(page), [...GAME].reverse());
+	assert.equal(await fill(page.locator('ue-asset-list .AssetList__row:not([hidden])').first()), await token(page, 'recessed'), 'the stripes follow the new order');
+	await page.locator('ue-asset-list .hr-cell[data-column="name"]').click();
+	assert.deepEqual(await shownIds(page), GAME);
+});
+
+scenario('AssetList: query, showEngine, select, move, activate and setItems drive the list', 'AssetList', async (page) => {
+	type Api = HTMLElement & { query: string; showEngine: boolean; selectedId: string | null; select(id: string | null): void; move(d: number): void; activate(): string | null; pathOf(id: string): string | null; setItems(items: unknown[]): void };
+	const api = <T>(body: (el: Api) => T): Promise<T> => page.locator('ue-asset-list').first().evaluate(body as (el: Element) => T);
+	await api((el) => {
+		el.showEngine = true;
+	});
+	assert.equal(await listCount(page), '11 items (1 selected)');
+	assert.equal(await api((el) => el.pathOf('Cube')), '/Engine/BasicShapes/Cube.Cube');
+	await api((el) => {
+		el.query = 'c';
+	});
+	assert.deepEqual(await shownIds(page), ['Cone', 'Cube', 'Cylinder', 'SM_Chair', 'SM_Couch'], 'the query ignores case');
+	await api((el) => {
+		el.query = 'sm_c';
+	});
+	assert.equal(await listCount(page), '2 items (1 selected)');
+	await api((el) => {
+		el.query = 'zz';
+	});
+	assert.equal(await listCount(page), '0 items');
+	assert.equal(await api((el) => el.selectedId), null, 'a filtered-out row loses the selection');
+	assert.equal(await api((el) => el.activate()), null, 'nothing to activate');
+	await api((el) => {
+		el.query = '';
+		el.showEngine = false;
+	});
+	await api((el) => el.select(null));
+	await api((el) => el.move(1));
+	assert.equal(await api((el) => el.selectedId), 'SM_Bookshelf', 'with no selection a move selects the first row');
+	assert.equal(await api((el) => el.activate()), 'SM_Bookshelf');
+	await api((el) => el.setItems([{ id: 'T_Brick', label: 'T_Brick', typeLabel: 'Texture', path: '/Game/T_Brick.T_Brick', strip: '#c00' }, { id: 'M_Wall', label: 'M_Wall', typeLabel: 'Material' }]));
+	assert.deepEqual(await shownIds(page), ['M_Wall', 'T_Brick'], 'setItems sorts by name');
+	assert.equal(await listCount(page), '2 items');
+	assert.equal(await listRow(page, 'T_Brick').locator('.AssetList__class').textContent(), 'Texture');
+	assert.equal(await listRow(page, 'T_Brick').locator('svg').count(), 1, 'a row without an image draws the cube');
+});
+
+scenario('AssetList: the pinned specimen shows a hovered and a selected row and ignores the pointer', 'AssetList', async (page) => {
+	const pinned = page.locator('ue-asset-list[data-pinned]');
+	await assertInert(pinned);
+	const row = (id: string): Locator => pinned.locator('.AssetList__row[data-id="' + id + '"]');
+	assert.equal(await fill(row('SM_Lamp')), await token(page, 'select-hover'));
+	assert.equal(await fill(row('SM_Chair')), await token(page, 'select-inactive'));
+	assert.equal(await fill(row('SM_Couch')), await token(page, 'recessed'));
+	assert.equal(await fill(row('SM_Bookshelf')), await token(page, 'recessed'));
+	assert.equal(await fill(row('SM_Rug')), await token(page, 'recessed'));
+	assert.equal(await fill(row('SM_Table')), await token(page, 'background'));
+	await clickAt(page, row('SM_Rug'));
+	assert.equal(await attr(row('SM_Rug'), 'aria-selected'), 'false', 'a real click changes nothing');
+});

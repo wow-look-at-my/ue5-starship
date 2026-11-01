@@ -396,15 +396,28 @@ test('SegmentedControl: the rail variant draws the Place Actors category look wi
 	});
 });
 
-test('AssetPicker: the combo list sets the label and thumbnail, the buttons react, reset restores', async () => {
+// The live asset picker: its open menu, its rows and its list.
+const pickerParts = (page: Page) => {
+	const picker = page.locator('ue-asset-picker');
+	const menu = picker.locator('.combobutton-menu').first();
+	return {
+		picker,
+		combo: picker.locator('.combobutton--small'),
+		menu,
+		label: picker.locator('.combobutton__label'),
+		reset: picker.locator('.resettodefault'),
+		thumb: picker.locator('.AssetPicker-thumbFrame'),
+		search: picker.locator('.AssetPicker-browse input'),
+		count: picker.locator('.AssetList__count'),
+		entry: (value: string): Locator => menu.locator('.popupmenu__row[data-value="' + value + '"]'),
+		asset: (id: string): Locator => picker.locator('.AssetList__row[data-id="' + id + '"]'),
+		shown: (): Promise<string[]> => picker.locator('.AssetList__row:not([hidden])').evaluateAll((els) => els.map((el) => (el as HTMLElement).dataset.id ?? '')),
+	};
+};
+
+test('AssetPicker: a list pick sets the label and thumbnail, keys pick from the search box, the buttons react, reset restores', async () => {
 	await inPreview('AssetPicker', async (page) => {
-		const picker = page.locator('ue-asset-picker');
-		const combo = picker.locator('.combobutton');
-		const menu = picker.locator('.combobutton-menu');
-		const label = picker.locator('.combobutton__label');
-		const reset = picker.locator('.resettodefault');
-		const thumb = picker.locator('.AssetPicker-thumbFrame');
-		const option = (name: string): Locator => picker.locator('.popupmenu__row[data-value="' + name + '"]');
+		const { picker, combo, menu, label, reset, thumb, search, asset } = pickerParts(page);
 		await watch(page, 'ue-asset-change');
 		await watch(page, 'ue-asset-browse');
 
@@ -415,19 +428,26 @@ test('AssetPicker: the combo list sets the label and thumbnail, the buttons reac
 		assert.ok((await shadowOf(combo)).includes(rgb('hover')));
 		await combo.click();
 		assert.ok(await menu.isVisible());
-		await option('SM_Couch').click();
+		assert.ok(await search.evaluate((el) => el === document.activeElement), 'the search box takes the focus on open');
+		assert.equal(await asset('SM_Chair').getAttribute('aria-selected'), 'true', 'the current value is selected');
+		await asset('SM_Couch').click();
 		assert.ok(!(await menu.isVisible()));
 		assert.equal(await trimmed(label), 'SM_Couch');
 		assert.equal(await thumb.getAttribute('title'), '/Game/Props/SM_Couch.SM_Couch');
-		assert.equal(await option('SM_Couch').getAttribute('aria-selected'), 'true');
-		assert.equal(await option('SM_Chair').getAttribute('aria-selected'), 'false');
+		assert.equal(await asset('SM_Couch').getAttribute('aria-selected'), 'true');
+		assert.equal(await asset('SM_Chair').getAttribute('aria-selected'), 'false');
 		assert.deepEqual(await seen(page, 'ue-asset-change'), [{ asset: 'SM_Couch' }]);
 
 		await combo.focus();
 		await key(page, 'ArrowDown');
 		assert.ok(await menu.isVisible());
+		assert.ok(await search.evaluate((el) => el === document.activeElement), 'a keyboard open focuses the search box too');
+		await key(page, 'ArrowDown');
+		assert.equal(await asset('SM_Lamp').getAttribute('aria-selected'), 'true', 'Down in the search box moves the list selection');
+		await key(page, 'ArrowUp');
 		await key(page, 'ArrowDown');
 		await key(page, 'Enter');
+		assert.ok(!(await menu.isVisible()));
 		assert.equal(await trimmed(label), 'SM_Lamp');
 		assert.ok(await combo.evaluate((el) => el === document.activeElement), 'focus returns to the combo');
 
@@ -436,7 +456,7 @@ test('AssetPicker: the combo list sets the label and thumbnail, the buttons reac
 		assert.equal(await bgOf(use), rgb('dropdown'));
 		await use.click();
 		assert.equal(await trimmed(label), 'SM_Table');
-		assert.equal(await option('SM_Table').getAttribute('aria-selected'), 'true', 'use-selected marks the list row too');
+		assert.equal(await asset('SM_Table').getAttribute('aria-selected'), 'true', 'use-selected marks the list row too');
 		assert.equal(await thumb.getAttribute('title'), '/Game/Props/SM_Table.SM_Table');
 
 		await picker.locator('[data-role="browse"]').click();
@@ -450,19 +470,120 @@ test('AssetPicker: the combo list sets the label and thumbnail, the buttons reac
 		assert.deepEqual((await seen(page, 'ue-asset-change')).slice(-1), [{ asset: 'None' }]);
 
 		await combo.click();
-		await page.mouse.click(910, 710);
-		assert.ok(!(await menu.isVisible()), 'an outside click closes the list');
+		assert.equal(await picker.locator('.AssetList__row[aria-selected="true"]').count(), 0, 'None selects no row');
+		await page.mouse.click(990, 790);
+		assert.ok(!(await menu.isVisible()), 'an outside click closes the menu');
 	});
 });
 
-test('AssetPicker: the pinned row shows the open list with one hovered row and ignores the pointer', async () => {
+test('AssetPicker: the menu has the Current Asset and Browse sections of SPropertyMenuAssetPicker at their source sizes', async () => {
 	await inPreview('AssetPicker', async (page) => {
-		const pinned = page.locator('[data-pinned]');
+		const { picker, combo, menu, search, count, entry } = pickerParts(page);
+		await combo.click();
+		const list = menu.locator('ue-popup-menu').first().locator('.popupmenu').first();
+		assert.deepEqual(await list.locator(':scope > .popupmenu__heading').allTextContents(), ['Current Asset', 'Browse']);
+		assert.deepEqual(await list.locator(':scope > .popupmenu__row .popupmenu__label').allTextContents(), ['Edit', 'Copy', 'Paste', 'Clear']);
+		assert.equal(await list.locator(':scope > .popupmenu__row .popupmenu__icon svg').count(), 4, 'every entry has its icon');
+		assert.equal(await entry('paste').getAttribute('aria-disabled'), 'true', 'nothing to paste yet');
+		assert.ok(await entry('edit').isVisible(), 'Edit shows for a set value');
+
+		const browse = await picker.locator('.AssetPicker-browse').boundingBox();
+		assert.deepEqual([browse?.width, browse?.height], [300, 300], 'ContentBrowserWindowSize 300 x 300');
+		assert.equal((await list.boundingBox())?.width, 302, 'the widget block adds 1px on each side');
+		assert.equal(await search.getAttribute('placeholder'), 'Search Assets');
+		assert.equal(await picker.locator('.AssetPicker-searchRow ue-checkbox').count(), 1, 'the other-developers toggle');
+		assert.equal(await picker.locator('.AssetPicker-searchRow .combobutton--simple').getAttribute('aria-label'), 'View Options');
+		const row = await picker.locator('.AssetList__row:not([hidden])').first().boundingBox();
+		assert.equal(row?.height, 36);
+		assert.equal(await picker.locator('.hr-cell[data-column="name"]').innerText(), 'Name');
+		assert.equal(await count.innerText(), '6 items (1 selected)');
+	});
+});
+
+test('AssetPicker: typing filters the list and the count, the clear X restores it, and each open starts with an empty search', async () => {
+	await inPreview('AssetPicker', async (page) => {
+		const { picker, combo, search, count, shown } = pickerParts(page);
+		await combo.click();
+		await typeIn(page, 'sm_c');
+		assert.deepEqual(await shown(), ['SM_Chair', 'SM_Couch']);
+		assert.equal(await count.innerText(), '2 items (1 selected)');
+		await typeIn(page, 'o');
+		assert.deepEqual(await shown(), ['SM_Couch']);
+		assert.equal(await count.innerText(), '1 item', 'the hidden selection leaves the count');
+		await picker.locator('.AssetPicker-browse .textinput__clear').click();
+		assert.equal(await count.innerText(), '6 items');
+		await typeIn(page, 'zz');
+		assert.equal(await count.innerText(), '0 items');
+		await key(page, 'Escape');
+		assert.equal(await search.inputValue(), '', 'Escape in the search box clears it first');
+		assert.ok(await picker.locator('.combobutton-menu').first().isVisible(), 'and the menu stays open');
+		await typeIn(page, 'lamp');
+		await key(page, 'Enter');
+		assert.equal(await picker.locator('.combobutton__label').first().textContent(), 'SM_Lamp', 'Enter with no selection picks the first row');
+		await combo.click();
+		assert.equal(await search.inputValue(), '');
+		assert.equal(await count.innerText(), '6 items (1 selected)');
+	});
+});
+
+test('AssetPicker: Clear sets None, Copy then Paste moves a value, Edit announces the asset', async () => {
+	await inPreview('AssetPicker', async (page) => {
+		const { combo, menu, label, entry, asset } = pickerParts(page);
+		await watch(page, 'ue-asset-edit');
+		await combo.click();
+		await entry('clear').click();
+		assert.ok(!(await menu.isVisible()));
+		assert.equal(await trimmed(label), 'None');
+		await combo.click();
+		assert.ok(!(await entry('edit').isVisible()), 'no Edit for None');
+		await asset('SM_Rug').click();
+		await combo.click();
+		await entry('copy').click();
+		assert.ok(!(await menu.isVisible()), 'Copy closes the menu');
+		await combo.click();
+		await asset('SM_Bookshelf').click();
+		assert.equal(await trimmed(label), 'SM_Bookshelf');
+		await combo.click();
+		assert.equal(await entry('paste').getAttribute('aria-disabled'), 'false', 'Paste is enabled after Copy');
+		await entry('paste').click();
+		assert.equal(await trimmed(label), 'SM_Rug');
+		await combo.click();
+		await entry('edit').click();
+		assert.deepEqual(await seen(page, 'ue-asset-edit'), [{ asset: 'SM_Rug' }]);
+	});
+});
+
+test('AssetPicker: the view options add engine content without closing the menu', async () => {
+	await inPreview('AssetPicker', async (page) => {
+		const { picker, combo, menu, count, thumb, asset } = pickerParts(page);
+		await combo.click();
+		const gear = picker.locator('.AssetPicker-searchRow .combobutton--simple');
+		await gear.click();
+		const options = picker.locator('.combobutton-menu--end');
+		assert.ok(await options.isVisible());
+		assert.deepEqual(await options.locator('.popupmenu__heading').allTextContents(), ['View Type', 'View', 'Content', 'Search', 'Thumbnails']);
+		await options.locator('.popupmenu__row[data-value="engine"]').click();
+		assert.ok(!(await options.isVisible()), 'the options menu closes');
+		assert.ok(await menu.isVisible(), 'the picker menu stays open');
+		assert.equal(await count.innerText(), '11 items (1 selected)');
+		await gear.click();
+		await key(page, 'Escape');
+		assert.ok(await menu.isVisible(), 'Escape in the options closes only the options');
+		await asset('Cube').click();
+		assert.equal(await thumb.getAttribute('title'), '/Engine/BasicShapes/Cube.Cube');
+	});
+});
+
+test('AssetPicker: the pinned row shows the open menu with Copy hovered and ignores the pointer', async () => {
+	await inPreview('AssetPicker', async (page) => {
+		const pinned = page.locator('ue-asset-picker[data-pinned]');
 		await assertInert(pinned);
-		assert.ok(await pinned.locator('.combobutton-menu').isVisible(), 'the list is open');
+		assert.ok(await pinned.locator('.combobutton-menu').first().isVisible(), 'the menu is open');
 		const hovered = pinned.locator('.popupmenu__row--hover');
-		assert.equal(await trimmed(hovered), 'SM_Table');
+		assert.equal(await trimmed(hovered), 'Copy');
 		assert.equal(await bgOf(hovered), rgb('primary'));
+		assert.equal(await pinned.locator('.popupmenu__row--disabled .popupmenu__label').textContent(), 'Paste');
+		assert.equal(await bgOf(pinned.locator('.AssetList__row[aria-selected="true"]')), rgb('select-inactive'));
 		const first = pinned.locator('.popupmenu__row').first();
 		await hoverAt(page, first);
 		assert.equal(await bgOf(first), CLEAR, 'a real pointer changes nothing');
@@ -774,7 +895,7 @@ const stripComments = (css: string): string => css.replace(/\/\*[\s\S]*?\*\//g, 
 const OWN: Record<string, string[]> = {
 	DetailsHeader: ['', 'frame', 'icon', 'label', 'name', 'actions', 'positive', 'shackle', 'shackle--open', 'shackle--shut', 'instanceBox', 'instance', 'instanceName', 'instanceContext', 'cap'],
 	DetailsSearchRow: ['', 'frame', 'searchSlot', 'cap'],
-	AssetPicker: ['frame', 'row', 'name', 'value', 'right', 'split', 'thumbSlot', 'thumbFrame', 'thumb', 'strip', 'thumbBorder', 'col', 'buttons', 'cap'],
+	AssetPicker: ['frame', 'row', 'name', 'value', 'right', 'split', 'thumbSlot', 'thumbFrame', 'thumb', 'strip', 'thumbBorder', 'col', 'buttons', 'browse', 'searchRow', 'searchSlot', 'toggleSlot', 'cap'],
 	VectorInput: ['frame', 'row', 'name', 'value', 'right', 'split', 'lockSlot', 'fields', 'shackle', 'shackle--open', 'shackle--shut', 'cap'],
 	DetailsCategory: ['frame', 'cat', 'catRow', 'arrow', 'title', 'row', 'indent', 'name', 'nameInner', 'rowArrow', 'label', 'value', 'right', 'split', 'adv', 'advRow', 'empty', 'panel', 'cap'],
 };
@@ -834,9 +955,11 @@ scenario('DetailsSearchRow: one search box, two buttons and one combo button wit
 	assert.deepEqual([await row.locator('ue-text-input').count(), await row.locator('ue-button').count(), await row.locator('ue-combo-button').count(), await row.locator('ue-popup-menu').count()], [1, 2, 1, 1]);
 });
 
-scenario('AssetPicker: one combo button, two buttons and one reset arrow', 'AssetPicker', async (page) => {
+scenario('AssetPicker: the asset combo with the view-options combo in its menu, two buttons, one reset arrow, and a search box, a toggle and an asset list in the menu', 'AssetPicker', async (page) => {
 	const picker = page.locator('ue-asset-picker');
-	assert.deepEqual([await picker.locator('ue-combo-button').count(), await picker.locator('ue-button').count(), await picker.locator('ue-reset-to-default').count()], [1, 2, 1]);
+	assert.deepEqual([await picker.locator('ue-combo-button').count(), await picker.locator('ue-button').count(), await picker.locator('ue-reset-to-default').count()], [2, 2, 1]);
+	const browse = picker.locator('.popupmenu__widget .AssetPicker-browse');
+	assert.deepEqual([await browse.locator('ue-text-input').count(), await browse.locator('ue-checkbox').count(), await browse.locator('ue-combo-button').count(), await browse.locator('ue-asset-list').count(), await browse.locator('ue-asset-list ue-header-row').count(), await browse.locator('ue-asset-list ue-scrollbar').count()], [1, 1, 1, 1, 1, 1]);
 });
 
 scenario('VectorInput: nine spin boxes, three label combos, one lock and three reset arrows', 'VectorInput', async (page) => {

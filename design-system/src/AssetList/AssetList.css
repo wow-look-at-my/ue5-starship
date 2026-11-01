@@ -1,0 +1,32 @@
+/* The list view of SAssetView (EAssetViewType::List). Every metric is cited in components/AssetList/README.md. The header and the scrollbar are primitives. */
+.AssetList { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; font: 400 13.333px/16px var(--font-sans); color: var(--foreground); } /* NormalText 10pt: the count line STextBlock, SAssetView.cpp:1385-1387 */
+.AssetList__scroll { flex: 1 1 auto; min-height: 0; }
+.AssetList__view { flex: 1 1 auto; min-width: 0; }
+.AssetList__rows { outline: 0; }
+
+/* Row: ContentBrowser.AssetListView.ColumnListTableRow, ContentBrowserStyle.cpp:101-114. Height (64 + 2 x 4) x Lerp(Min, Max, Scale) ~ 36 at Medium on a 1080p display at 125%: SAssetView.cpp:1108-1109,5708-5711 */
+.AssetList__row { display: flex; align-items: center; height: 36px; background: var(--recessed); cursor: default; user-select: none; } /* even row Recessed :103 */
+.AssetList__row[hidden] { display: none; } /* filtered out */
+.AssetList__row.is-odd { background: var(--background); } /* odd row Background :105 */
+.AssetList__row:hover, .AssetList__row.is-hover { background: var(--select-hover); } /* hovered rows SelectHover :104,106 */
+.AssetList__row[aria-selected="true"] { background: var(--select-inactive); } /* InactiveBrush SelectInactive :110; the search box, not the list, holds the focus in a picker */
+.AssetList__rows:focus .AssetList__row[aria-selected="true"] { background: var(--select); } /* ActiveBrush Select :108 while the list has the focus */
+.AssetList__row:hover .AssetList__text, .AssetList__row.is-hover .AssetList__text, .AssetList__row[aria-selected="true"] .AssetList__text { color: var(--white); } /* GetColumnTextColor White when hovered or selected: AssetViewWidgets.cpp:1866-1876 */
+
+/* Revision Control column: fixed 30, a centred 16x16 state icon: SAssetView.cpp:2576-2581, AssetViewWidgets.cpp:1952-1961 */
+.AssetList__rc { flex: none; width: 30px; }
+
+/* Thumbnail: a square box as tall as the row, padding ThumbnailPadding - 4 = 0: AssetViewWidgets.cpp:1899-1903,1986-1988 */
+.AssetList__thumb { position: relative; flex: none; width: 36px; height: 36px; display: grid; place-items: center; overflow: hidden; background: var(--recessed); color: var(--foreground); } /* AssetBackground Recessed, as the tile */
+.AssetList__thumb svg { width: 24px; height: 24px; opacity: .8; }
+.AssetList__image { width: 100%; height: 100%; object-fit: cover; display: block; }
+.AssetList__strip { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--strip, var(--accent-blue)); } /* asset colour strip 2px: AssetThumbnail.cpp:1050-1054 */
+
+/* Name and class: slot Padding(6,0,0,0), each line Padding(0,1): AssetViewWidgets.cpp:1908-1941 */
+.AssetList__text { display: flex; flex-direction: column; min-width: 0; padding-left: 6px; color: var(--foreground); }
+.AssetList__name, .AssetList__class { padding: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.AssetList__name { font: 400 12px/14px var(--font-sans); } /* ContentBrowser.AssetTileViewNameFont Regular 9: ContentBrowserStyle.cpp:96 */
+.AssetList__class { font: 300 13.333px/16px var(--font-sans); } /* ContentBrowser.AssetListViewClassFont Light 10: ContentBrowserStyle.cpp:80 */
+
+/* Bottom toolbar: the asset count, Padding(8,5): SAssetView.cpp:1371-1387 */
+.AssetList__count { flex: none; padding: 5px 8px; white-space: nowrap; }

@@ -318,6 +318,9 @@
   background: transparent;
   color: var(--foreground-hover);
 }
+.popupmenu__row[hidden] {
+  display: none;
+}
 .popupmenu__row:hover,
 .popupmenu__row--hover {
   background: var(--primary);
@@ -433,6 +436,10 @@
 .popupmenu__radio--on {
   background: var(--white);
 }
+.popupmenu__widget {
+  padding: 1px;
+  cursor: default;
+}
 .popupmenu__sep {
   height: 1px;
   margin: 6px 12px;
@@ -514,6 +521,9 @@
   stroke-width: 1.5;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+.combobutton__icon:last-child {
+  margin-right: 0;
 }
 .combobutton--simple,
 .combobutton--icon {

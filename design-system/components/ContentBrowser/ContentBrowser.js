@@ -99,7 +99,7 @@ define("ue-button", UeButtonElement);
 
 // design-system/src/_shared/popup.ts
 function enabledRows(menu, rowSelector) {
-  return Array.from(menu.querySelectorAll(rowSelector)).filter((row) => row.getAttribute("aria-disabled") !== "true");
+  return Array.from(menu.querySelectorAll(rowSelector)).filter((row) => !row.hidden && row.getAttribute("aria-disabled") !== "true");
 }
 function rowLabel(row, labelSelector) {
   const label = row.querySelector(labelSelector);
@@ -206,7 +206,7 @@ var UePopupMenuElement = class extends UeElement {
       if (row !== current) keep.add(row);
     }
     if (open) keep.add(open);
-    for (const row of Array.from(root.querySelectorAll(ROW))) {
+    for (const row of Array.from(root.querySelectorAll(ROW)).filter((each) => ownedBy(this, each))) {
       row.classList.toggle(CURRENT, row === current);
       const sub = submenuOf(row);
       if (sub) {
@@ -312,12 +312,12 @@ var UeComboButtonElement = class extends UeElement {
   // In value mode: the value of the picked row. The setter picks the row whose value or label matches, shows its label and fires no ue-combo-pick. This is because the owner that sets it
   // already knows.
   get value() {
-    const picked = this.querySelector('.popupmenu__row[aria-selected="true"]');
+    const picked = this.#ownRows().find((row) => row.getAttribute("aria-selected") === "true");
     return picked?.dataset.value ?? (picked ? rowLabel(picked, ".popupmenu__label") : "");
   }
   set value(next) {
-    const row = this.querySelectorAll(".popupmenu[tabindex] > .popupmenu__row");
-    const match = Array.from(row).find((each) => (each.dataset.value ?? rowLabel(each, ".popupmenu__label")) === next);
+    const row = this.#ownRows();
+    const match = row.find((each) => (each.dataset.value ?? rowLabel(each, ".popupmenu__label")) === next);
     if (!match) throw new Error("ue-combo-button has no row with the value " + next);
     const label = this.querySelector(".combobutton__label");
     if (label) label.textContent = rowLabel(match, ".popupmenu__label");
@@ -342,12 +342,16 @@ var UeComboButtonElement = class extends UeElement {
       event.preventDefault();
       if (panel.hidden && !event.repeat) this.#open(true, event.key === "ArrowUp");
     });
-    this.on(panel, "mousedown", (event) => event.preventDefault());
+    this.on(panel, "mousedown", (event) => {
+      if (!this.#inWidget(event.target)) event.preventDefault();
+    });
     this.on(panel, "keydown", (event) => {
       if (event.key === "Escape") {
+        if (event.defaultPrevented && event.target instanceof HTMLInputElement && this.#inWidget(event.target)) return;
         event.preventDefault();
+        if (this.parentElement?.closest(".combobutton-menu")) event.stopPropagation();
         this.#close(true);
-      } else if (event.key === "Tab") {
+      } else if (event.key === "Tab" && !this.#inWidget(event.target)) {
         this.#close(false);
       }
     });
@@ -392,8 +396,18 @@ var UeComboButtonElement = class extends UeElement {
     if (!popup || typeof popup.focusMenu !== "function") throw new Error("ue-popup-menu is not defined");
     return popup;
   }
+  // The top-level rows of this combo's own list. A combo nested in a widget block keeps its rows.
+  #ownRows() {
+    const root = this.#panel.querySelector("ue-popup-menu .popupmenu[tabindex]");
+    return root ? Array.from(root.querySelectorAll(":scope > .popupmenu__row")) : [];
+  }
   #rows() {
-    return Array.from(this.#panel.querySelectorAll(".popupmenu[tabindex] > .popupmenu__row")).filter((row) => row.getAttribute("aria-disabled") !== "true");
+    return this.#ownRows().filter((row) => !row.hidden && row.getAttribute("aria-disabled") !== "true");
+  }
+  // True when the target sits in a widget block (.popupmenu__widget) of this combo's own menu.
+  #inWidget(target) {
+    const widget = target instanceof Element ? target.closest(".popupmenu__widget") : null;
+    return widget !== null && widget.closest(".combobutton-menu") === this.#panel;
   }
   #markSelected(label) {
     for (const row of this.#rows()) row.setAttribute("aria-selected", String(rowLabel(row, ".popupmenu__label") === label));
@@ -406,6 +420,9 @@ var UeComboButtonElement = class extends UeElement {
     const rows = this.#rows();
     const selected = rows.find((row) => row.getAttribute("aria-selected") === "true" || row.getAttribute("aria-checked") === "true");
     popup.focusMenu(keys ? selected ?? (fromEnd ? rows[rows.length - 1] : rows[0]) ?? null : null, keys);
+    const field = Array.from(this.#panel.querySelectorAll("[data-autofocus]")).find((each) => this.#inWidget(each));
+    field?.focus({ preventScroll: true });
+    this.emit("ue-combo-toggle", { open: true });
   }
   #close(refocus) {
     this.#panel.hidden = true;
@@ -413,6 +430,7 @@ var UeComboButtonElement = class extends UeElement {
     this.#trigger.setAttribute("aria-expanded", "false");
     this.#popup().reset();
     if (refocus) this.#trigger.focus();
+    this.emit("ue-combo-toggle", { open: false });
   }
   #pick(detail) {
     const label = this.#label();
@@ -698,7 +716,7 @@ function nearestInRow(tiles, from, down) {
 
 // design-system/src/AssetTile/AssetTile.ts
 var SELECTED = "is-selected";
-var FOLDER = '<svg class="AssetTile__folderIcon" viewBox="0 0 64 64" aria-hidden="true"><path d="M2 13a2 2 0 0 1 2-2h18l5 6h33a2 2 0 0 1 2 2v31a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="currentColor"/><path d="M2 13a2 2 0 0 1 2-2h18l5 6H2z" fill="#fff" opacity=".12"/><path d="M2 24h60v26a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="#000" opacity=".12"/></svg>';
+var FOLDER = '<svg class="AssetTile__folderIcon" viewBox="0 0 64 64" aria-hidden="true"><path d="M2 13.5a2 2 0 0 1 2-2h18l5 6h33a2 2 0 0 1 2 2v31a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="currentColor"/><path d="M2 13.5a2 2 0 0 1 2-2h18l5 6H2z" fill="#fff" opacity=".12"/><path d="M2 24.5h60v26a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="#000" opacity=".12"/></svg>';
 var CUBE = '<svg viewBox="0 0 32 32" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg>';
 var AssetTileElement = class extends UeElement {
   #anchor = null;
@@ -1228,7 +1246,7 @@ var TreeController = class {
 
 // design-system/src/TreeRow/TreeRow.ts
 var ARROW = '<svg class="tr-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4l4.5 4L6 12z"/></svg>';
-var FOLDER2 = '<svg class="tr-icon is-folder" viewBox="0 0 16 16" aria-hidden="true"><path class="tr-folder-closed" d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.5 4.5V12a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H5.2L3.8 11V4.5a1 1 0 0 1 1-1h2L8 5h5.5"/></svg>';
+var FOLDER2 = '<svg class="tr-icon is-folder" viewBox="0 0 16 16" aria-hidden="true"><path class="tr-folder-closed" d="M1.5 4.25v7.5a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1H8l-1.2-1.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.25 4.25v7.5a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H4.95l-1.4 4.3v-6.5a1 1 0 0 1 1-1h2l1.2 1.5h5.5"/></svg>';
 var OBJECT = '<svg class="tr-icon is-object" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg>';
 var TreeRow = class extends UeElement {
   #tree = null;

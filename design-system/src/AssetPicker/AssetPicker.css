@@ -20,3 +20,10 @@
 
 .AssetPicker-col { position: relative; flex: 1; min-width: 0; align-self: center; display: flex; flex-direction: column; } /* VBox, VAlign center: SPropertyEditorAsset.cpp:651-677 */
 .AssetPicker-buttons { display: flex; gap: 4px; padding: 2px 4px 2px 0; } /* SBox Padding(0,2,4,2), buttons 22 wide with slot padding (2,0): SPropertyEditorAsset.cpp:670-673, 721-748 */
+
+/* The menu behind the combo (SPropertyMenuAssetPicker). Browse section: an SBox of ContentBrowserWindowSize 300 x 300 in a widget block: PropertyEditorAssetConstants.h:8, SPropertyMenuAssetPicker.cpp:165-173 */
+.AssetPicker-browse { box-sizing: border-box; display: flex; flex-direction: column; width: 300px; height: 300px; }
+/* SAssetPicker search row: slot Padding(8,0,8,8); the search box fills; the other-developers toggle has slot padding left 4; the settings combo follows with none: SAssetPicker.cpp:146-178, 229-235, 371-382 */
+.AssetPicker-searchRow { flex: none; display: flex; align-items: center; padding: 0 8px 8px; }
+.AssetPicker-searchSlot { flex: 1 1 auto; min-width: 0; display: flex; }
+.AssetPicker-toggleSlot { flex: none; display: flex; margin-left: 4px; }

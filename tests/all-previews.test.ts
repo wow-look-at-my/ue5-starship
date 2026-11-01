@@ -90,6 +90,49 @@ test('components/bundle.js exists, is a classic script, and defines every ue-* e
 	});
 });
 
+// Every folder glyph draws its shape centred in its icon box: the box minus its padding, within 0.1px.
+const FOLDER_GLYPHS = ['.tr-icon.is-folder', '.AssetTile__folderIcon', '.ContentToolbar__folder', '[data-role="browse"] svg', '[aria-label="Create folder"] svg', '.checkbox-toggle__icon'];
+for (const name of ['AssetPicker', 'AssetTile', 'ContentBrowser', 'ContentToolbar', 'SourcePanel', 'TreeRow', 'SceneOutliner', 'EditorLayout']) {
+	test(name + ': every folder glyph is centred in its icon box', async () => {
+		await withBrowser(async (browser) => {
+			const { page } = await openPreview(browser, name);
+			const report = await page.evaluate((selectors) => {
+				const off: string[] = [];
+				let checked = 0;
+				for (const svg of Array.from(document.querySelectorAll<SVGSVGElement>(selectors.join(',')))) {
+					const box = svg.getBoundingClientRect();
+					if (box.width === 0 || box.height === 0) continue;
+					const style = getComputedStyle(svg);
+					const left = box.left + parseFloat(style.paddingLeft);
+					const right = box.right - parseFloat(style.paddingRight);
+					const top = box.top + parseFloat(style.paddingTop);
+					const bottom = box.bottom - parseFloat(style.paddingBottom);
+					let x0 = Infinity;
+					let y0 = Infinity;
+					let x1 = -Infinity;
+					let y1 = -Infinity;
+					for (const shape of Array.from(svg.querySelectorAll('path, circle, rect'))) {
+						if (getComputedStyle(shape).display === 'none') continue;
+						const r = shape.getBoundingClientRect();
+						x0 = Math.min(x0, r.left);
+						y0 = Math.min(y0, r.top);
+						x1 = Math.max(x1, r.right);
+						y1 = Math.max(y1, r.bottom);
+					}
+					const dx = (x0 + x1) / 2 - (left + right) / 2;
+					const dy = (y0 + y1) / 2 - (top + bottom) / 2;
+					checked++;
+					if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) off.push((svg.getAttribute('class') ?? svg.parentElement?.getAttribute('aria-label')) + ' off by ' + dx.toFixed(2) + ', ' + dy.toFixed(2));
+				}
+				return { checked, off: Array.from(new Set(off)) };
+			}, FOLDER_GLYPHS);
+			assert.ok(report.checked > 0, 'a folder glyph in the preview');
+			assert.deepEqual(report.off, []);
+			await page.close();
+		});
+	});
+}
+
 // Composition: each class is styled by one component, and markup that uses a component's classes sits inside that component's element.
 const src = path.join(root, 'src');
 const sources = fs.readdirSync(src, { withFileTypes: true }).filter((e) => e.isDirectory() && !e.name.startsWith('_')).map((e) => e.name).sort();

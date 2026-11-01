@@ -40,6 +40,9 @@
   background: transparent;
   color: var(--foreground-hover);
 }
+.popupmenu__row[hidden] {
+  display: none;
+}
 .popupmenu__row:hover,
 .popupmenu__row--hover {
   background: var(--primary);
@@ -154,6 +157,10 @@
 }
 .popupmenu__radio--on {
   background: var(--white);
+}
+.popupmenu__widget {
+  padding: 1px;
+  cursor: default;
 }
 .popupmenu__sep {
   height: 1px;

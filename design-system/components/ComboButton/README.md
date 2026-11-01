@@ -93,6 +93,10 @@ One `<ue-combo-button>` is one trigger and one dropdown panel. This is the trigg
 
 The host owns open and close, an outside click, Escape, Down, Up, Enter and Space on the trigger, and the focus return to the trigger. The popup menu owns row keys and activation.
 
+A menu can hold a widget block (`popupmenu__widget`, see the PopupMenu README), such as the browse section of the asset picker. Inside a widget block of its own menu the host lets a click focus a field. Tab moves between the fields without closing, and Escape in a search field that clears its text leaves the menu open. A field with `data-autofocus` in a widget block takes the focus when the menu opens. A combo in a widget block of another combo closes alone on Escape.
+
+An icon-only trigger, such as a gear with no arrow, is `combobutton--simple` with one `combobutton__icon` and nothing else. The icon then has no right margin.
+
 ## Modes
 
 | Mode | How | Behavior |
@@ -132,6 +136,7 @@ Panel width: the panel is at least as wide as the trigger. Set `--combobutton-me
 | Event | Detail | When |
 |---|---|---|
 | `ue-combo-pick` | `{ value, label, checked }` | A row is activated. `value` is the row `data-value` or its label. `checked` is the new state of a check or radio row, else `null` |
+| `ue-combo-toggle` | `{ open }` | The panel opened or closed. A host that rebuilds its menu on each open, as Slate does, listens for it |
 | `ue-menu-activate` | see PopupMenu | Also bubbles from the nested popup menu |
 
 ## Data API

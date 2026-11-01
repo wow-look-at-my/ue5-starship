@@ -16,13 +16,13 @@ export class UeComboButtonElement extends UeElement {
 	// In value mode: the value of the picked row. The setter picks the row whose value or label matches, shows its label and fires no ue-combo-pick. This is because the owner that sets it
 	// already knows.
 	get value(): string {
-		const picked = this.querySelector<HTMLElement>('.popupmenu__row[aria-selected="true"]');
+		const picked = this.#ownRows().find((row) => row.getAttribute('aria-selected') === 'true');
 		return picked?.dataset.value ?? (picked ? rowLabel(picked, '.popupmenu__label') : '');
 	}
 
 	set value(next: string) {
-		const row = this.querySelectorAll<HTMLElement>('.popupmenu[tabindex] > .popupmenu__row');
-		const match = Array.from(row).find((each) => (each.dataset.value ?? rowLabel(each, '.popupmenu__label')) === next);
+		const row = this.#ownRows();
+		const match = row.find((each) => (each.dataset.value ?? rowLabel(each, '.popupmenu__label')) === next);
 		if (!match) throw new Error('ue-combo-button has no row with the value ' + next);
 		const label = this.querySelector<HTMLElement>('.combobutton__label');
 		if (label) label.textContent = rowLabel(match, '.popupmenu__label');
@@ -51,14 +51,20 @@ export class UeComboButtonElement extends UeElement {
 			if (panel.hidden && !event.repeat) this.#open(true, event.key === 'ArrowUp');
 		});
 
-		// Keep the focus where it is while the pointer works the panel.
-		this.on(panel, 'mousedown', (event) => event.preventDefault());
+		// Keep the focus where it is while the pointer works the panel. A widget block in the menu takes the focus like any form.
+		this.on(panel, 'mousedown', (event) => {
+			if (!this.#inWidget(event.target)) event.preventDefault();
+		});
 
 		this.on(panel, 'keydown', (event) => {
 			if (event.key === 'Escape') {
+				// A search field in a widget block clears itself first, and the menu stays open.
+				if (event.defaultPrevented && event.target instanceof HTMLInputElement && this.#inWidget(event.target)) return;
 				event.preventDefault();
+				// A combo inside another menu closes alone.
+				if (this.parentElement?.closest('.combobutton-menu')) event.stopPropagation();
 				this.#close(true);
-			} else if (event.key === 'Tab') {
+			} else if (event.key === 'Tab' && !this.#inWidget(event.target)) {
 				this.#close(false);
 			}
 		});
@@ -114,8 +120,20 @@ export class UeComboButtonElement extends UeElement {
 		return popup;
 	}
 
+	// The top-level rows of this combo's own list. A combo nested in a widget block keeps its rows.
+	#ownRows(): HTMLElement[] {
+		const root = this.#panel.querySelector('ue-popup-menu .popupmenu[tabindex]');
+		return root ? Array.from(root.querySelectorAll<HTMLElement>(':scope > .popupmenu__row')) : [];
+	}
+
 	#rows(): HTMLElement[] {
-		return Array.from(this.#panel.querySelectorAll<HTMLElement>('.popupmenu[tabindex] > .popupmenu__row')).filter((row) => row.getAttribute('aria-disabled') !== 'true');
+		return this.#ownRows().filter((row) => !row.hidden && row.getAttribute('aria-disabled') !== 'true');
+	}
+
+	// True when the target sits in a widget block (.popupmenu__widget) of this combo's own menu.
+	#inWidget(target: EventTarget | null): boolean {
+		const widget = target instanceof Element ? target.closest('.popupmenu__widget') : null;
+		return widget !== null && widget.closest('.combobutton-menu') === this.#panel;
 	}
 
 	#markSelected(label: string): void {
@@ -130,6 +148,10 @@ export class UeComboButtonElement extends UeElement {
 		const rows = this.#rows();
 		const selected = rows.find((row) => row.getAttribute('aria-selected') === 'true' || row.getAttribute('aria-checked') === 'true');
 		popup.focusMenu(keys ? (selected ?? (fromEnd ? rows[rows.length - 1] : rows[0]) ?? null) : null, keys);
+		// A field marked data-autofocus in a widget block takes the focus, as bFocusSearchBoxWhenOpened does (SAssetPicker.cpp:98-101).
+		const field = Array.from(this.#panel.querySelectorAll<HTMLElement>('[data-autofocus]')).find((each) => this.#inWidget(each));
+		field?.focus({ preventScroll: true });
+		this.emit('ue-combo-toggle', { open: true });
 	}
 
 	#close(refocus: boolean): void {
@@ -138,6 +160,7 @@ export class UeComboButtonElement extends UeElement {
 		this.#trigger.setAttribute('aria-expanded', 'false');
 		this.#popup().reset();
 		if (refocus) this.#trigger.focus();
+		this.emit('ue-combo-toggle', { open: false });
 	}
 
 	#pick(detail: MenuActivateDetail): void {

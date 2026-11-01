@@ -60,7 +60,7 @@ function ownedBy(host, target) {
 
 // design-system/src/_shared/popup.ts
 function enabledRows(menu, rowSelector) {
-  return Array.from(menu.querySelectorAll(rowSelector)).filter((row) => row.getAttribute("aria-disabled") !== "true");
+  return Array.from(menu.querySelectorAll(rowSelector)).filter((row) => !row.hidden && row.getAttribute("aria-disabled") !== "true");
 }
 function rowLabel(row, labelSelector) {
   const label = row.querySelector(labelSelector);
@@ -167,7 +167,7 @@ var UePopupMenuElement = class extends UeElement {
       if (row !== current) keep.add(row);
     }
     if (open) keep.add(open);
-    for (const row of Array.from(root.querySelectorAll(ROW))) {
+    for (const row of Array.from(root.querySelectorAll(ROW)).filter((each) => ownedBy(this, each))) {
       row.classList.toggle(CURRENT, row === current);
       const sub = submenuOf(row);
       if (sub) {

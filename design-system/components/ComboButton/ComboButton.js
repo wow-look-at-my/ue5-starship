@@ -60,7 +60,7 @@ function ownedBy(host, target) {
 
 // design-system/src/_shared/popup.ts
 function enabledRows(menu, rowSelector) {
-  return Array.from(menu.querySelectorAll(rowSelector)).filter((row) => row.getAttribute("aria-disabled") !== "true");
+  return Array.from(menu.querySelectorAll(rowSelector)).filter((row) => !row.hidden && row.getAttribute("aria-disabled") !== "true");
 }
 function rowLabel(row, labelSelector) {
   const label = row.querySelector(labelSelector);
@@ -167,7 +167,7 @@ var UePopupMenuElement = class extends UeElement {
       if (row !== current) keep.add(row);
     }
     if (open) keep.add(open);
-    for (const row of Array.from(root.querySelectorAll(ROW))) {
+    for (const row of Array.from(root.querySelectorAll(ROW)).filter((each) => ownedBy(this, each))) {
       row.classList.toggle(CURRENT, row === current);
       const sub = submenuOf(row);
       if (sub) {
@@ -273,12 +273,12 @@ var UeComboButtonElement = class extends UeElement {
   // In value mode: the value of the picked row. The setter picks the row whose value or label matches, shows its label and fires no ue-combo-pick. This is because the owner that sets it
   // already knows.
   get value() {
-    const picked = this.querySelector('.popupmenu__row[aria-selected="true"]');
+    const picked = this.#ownRows().find((row) => row.getAttribute("aria-selected") === "true");
     return picked?.dataset.value ?? (picked ? rowLabel(picked, ".popupmenu__label") : "");
   }
   set value(next) {
-    const row = this.querySelectorAll(".popupmenu[tabindex] > .popupmenu__row");
-    const match = Array.from(row).find((each) => (each.dataset.value ?? rowLabel(each, ".popupmenu__label")) === next);
+    const row = this.#ownRows();
+    const match = row.find((each) => (each.dataset.value ?? rowLabel(each, ".popupmenu__label")) === next);
     if (!match) throw new Error("ue-combo-button has no row with the value " + next);
     const label = this.querySelector(".combobutton__label");
     if (label) label.textContent = rowLabel(match, ".popupmenu__label");
@@ -303,12 +303,16 @@ var UeComboButtonElement = class extends UeElement {
       event.preventDefault();
       if (panel.hidden && !event.repeat) this.#open(true, event.key === "ArrowUp");
     });
-    this.on(panel, "mousedown", (event) => event.preventDefault());
+    this.on(panel, "mousedown", (event) => {
+      if (!this.#inWidget(event.target)) event.preventDefault();
+    });
     this.on(panel, "keydown", (event) => {
       if (event.key === "Escape") {
+        if (event.defaultPrevented && event.target instanceof HTMLInputElement && this.#inWidget(event.target)) return;
         event.preventDefault();
+        if (this.parentElement?.closest(".combobutton-menu")) event.stopPropagation();
         this.#close(true);
-      } else if (event.key === "Tab") {
+      } else if (event.key === "Tab" && !this.#inWidget(event.target)) {
         this.#close(false);
       }
     });
@@ -353,8 +357,18 @@ var UeComboButtonElement = class extends UeElement {
     if (!popup || typeof popup.focusMenu !== "function") throw new Error("ue-popup-menu is not defined");
     return popup;
   }
+  // The top-level rows of this combo's own list. A combo nested in a widget block keeps its rows.
+  #ownRows() {
+    const root = this.#panel.querySelector("ue-popup-menu .popupmenu[tabindex]");
+    return root ? Array.from(root.querySelectorAll(":scope > .popupmenu__row")) : [];
+  }
   #rows() {
-    return Array.from(this.#panel.querySelectorAll(".popupmenu[tabindex] > .popupmenu__row")).filter((row) => row.getAttribute("aria-disabled") !== "true");
+    return this.#ownRows().filter((row) => !row.hidden && row.getAttribute("aria-disabled") !== "true");
+  }
+  // True when the target sits in a widget block (.popupmenu__widget) of this combo's own menu.
+  #inWidget(target) {
+    const widget = target instanceof Element ? target.closest(".popupmenu__widget") : null;
+    return widget !== null && widget.closest(".combobutton-menu") === this.#panel;
   }
   #markSelected(label) {
     for (const row of this.#rows()) row.setAttribute("aria-selected", String(rowLabel(row, ".popupmenu__label") === label));
@@ -367,6 +381,9 @@ var UeComboButtonElement = class extends UeElement {
     const rows = this.#rows();
     const selected = rows.find((row) => row.getAttribute("aria-selected") === "true" || row.getAttribute("aria-checked") === "true");
     popup.focusMenu(keys ? selected ?? (fromEnd ? rows[rows.length - 1] : rows[0]) ?? null : null, keys);
+    const field = Array.from(this.#panel.querySelectorAll("[data-autofocus]")).find((each) => this.#inWidget(each));
+    field?.focus({ preventScroll: true });
+    this.emit("ue-combo-toggle", { open: true });
   }
   #close(refocus) {
     this.#panel.hidden = true;
@@ -374,6 +391,7 @@ var UeComboButtonElement = class extends UeElement {
     this.#trigger.setAttribute("aria-expanded", "false");
     this.#popup().reset();
     if (refocus) this.#trigger.focus();
+    this.emit("ue-combo-toggle", { open: false });
   }
   #pick(detail) {
     const label = this.#label();

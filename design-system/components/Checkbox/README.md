@@ -67,6 +67,7 @@ One `<ue-checkbox>` wraps exactly one control. The CSS lives in `src/Checkbox/Ch
 | Box only, no visible label | leave out `.checkbox__label` and set `aria-label` on `.checkbox` |
 | Tri-state | add `checkbox--tristate`. The state cycles `false`, `true`, `mixed` |
 | Toggle button | `<span class="checkbox-toggle" role="button" tabindex="0" aria-pressed="false">Physics</span>`. A checked toggle also has `checkbox-toggle--checked` |
+| Icon toggle | add `checkbox-toggle--icon` and put one `<svg class="checkbox-toggle__icon" viewBox="0 0 16 16">` in the toggle, with an `aria-label`. Padding 4 on every side, as the other-developers filter of the asset picker sets (`SAssetPicker.cpp:166-178`) |
 | Disabled | `aria-disabled="true"` |
 
 The box draws the glyph of its `aria-checked` state: none for `false`, the check for `true`, the dash for `mixed`. The control needs both glyph elements to be live. A static specimen carries one `checkbox__glyph` of its state.

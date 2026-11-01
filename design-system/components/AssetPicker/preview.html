@@ -1,21 +1,26 @@
-<!-- @dsCard group="Details" height=76 subtitle="Asset row: 48px thumbnail, combo, use-selected and browse icon buttons, reset arrow" -->
+<!-- @dsCard group="Details" height=620 subtitle="Asset row: 48px thumbnail, combo, use-selected and browse buttons, reset arrow; the combo opens the asset picker menu with Current Asset actions and a searchable list" -->
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AssetPicker</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Roboto+Condensed:wght@400;700&family=Roboto+Mono&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Roboto+Condensed:wght@400;700&family=Roboto+Mono&display=swap">
 <style>body { font-family: var(--font-sans); }</style>
 <style>
 	/* Demo layout only. The component layout is src/AssetPicker/AssetPicker.css. */
+	.picker-page { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+	.picker-col { width: 360px; }
 	.AssetPicker-frame { width: 360px; }
 	.AssetPicker-cap { width: 360px; box-sizing: border-box; margin: 0; padding: 6px 8px 12px; font: 400 10.667px/1.4 var(--font-sans); color: var(--foreground); opacity: .8; }
 	.AssetPicker-cap b { color: var(--foreground-hover); }
-	.AssetPicker-frame.is-menuRoom { margin-bottom: 150px; }
+	.AssetPicker-frame.is-menuRoom { margin-bottom: 470px; }
 </style>
 </head>
 <body>
+<!-- Icons are 16x16 stroke approximations of the Starship SVGs, which are not in the source tree. -->
+<div class="picker-page">
+<div class="picker-col">
 <ue-asset-picker>
 <div class="AssetPicker-frame">
 	<div class="AssetPicker-row" data-default="None" data-selection="SM_Table">
@@ -29,7 +34,7 @@
 				</div>
 			</div>
 			<div class="AssetPicker-col">
-				<ue-combo-button>
+				<ue-combo-button mode="action">
 					<div class="combobutton-anchor combobutton-anchor--fill">
 						<span class="combobutton combobutton--small" role="combobox" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="Static Mesh">
 							<span class="combobutton__label">SM_Chair</span>
@@ -37,13 +42,91 @@
 						</span>
 						<div class="combobutton-menu" hidden>
 							<ue-popup-menu>
-								<div class="popupmenu popupmenu--small popupmenu--combo" role="menu" tabindex="0" aria-label="Assets">
-									<div class="popupmenu__row" role="menuitem" data-value="None"><span class="popupmenu__body"><span class="popupmenu__label">None</span></span></div>
-									<div class="popupmenu__row" role="menuitem" data-value="SM_Chair"><span class="popupmenu__body"><span class="popupmenu__label">SM_Chair</span></span></div>
-									<div class="popupmenu__row" role="menuitem" data-value="SM_Table"><span class="popupmenu__body"><span class="popupmenu__label">SM_Table</span></span></div>
-									<div class="popupmenu__row" role="menuitem" data-value="SM_Couch"><span class="popupmenu__body"><span class="popupmenu__label">SM_Couch</span></span></div>
-									<div class="popupmenu__row" role="menuitem" data-value="SM_Lamp"><span class="popupmenu__body"><span class="popupmenu__label">SM_Lamp</span></span></div>
-									<div class="popupmenu__row" role="menuitem" data-value="SM_Bookshelf"><span class="popupmenu__body"><span class="popupmenu__label">SM_Bookshelf</span></span></div>
+								<div class="popupmenu" role="menu" tabindex="0" aria-label="Static Mesh asset">
+									<div class="popupmenu__heading">Current Asset</div>
+									<div class="popupmenu__row" role="menuitem" data-value="edit" title="Edit this asset"><span class="popupmenu__body"><span class="popupmenu__icon"><svg viewBox="0 0 16 16"><path d="M3 13l.5-2.5 7-7 2 2-7 7z M9 5l2 2"/></svg></span><span class="popupmenu__label">Edit</span></span></div>
+									<div class="popupmenu__row" role="menuitem" data-value="copy" title="Copies the asset to the clipboard"><span class="popupmenu__body"><span class="popupmenu__icon"><svg viewBox="0 0 16 16"><path d="M5.5 5.5h7v7h-7z M3.5 10.5v-7h7"/></svg></span><span class="popupmenu__label">Copy</span></span></div>
+									<div class="popupmenu__row" role="menuitem" data-value="paste" aria-disabled="true" title="Pastes an asset from the clipboard to this field"><span class="popupmenu__body"><span class="popupmenu__icon"><svg viewBox="0 0 16 16"><path d="M4 3.5h8v10H4z M6 2.5h4v2H6z"/></svg></span><span class="popupmenu__label">Paste</span></span></div>
+									<div class="popupmenu__row" role="menuitem" data-value="clear" title="Clears the asset set on this field"><span class="popupmenu__body"><span class="popupmenu__icon"><svg viewBox="0 0 16 16"><path d="M3 4.5h10 M6.5 4.5V3h3v1.5 M4.5 4.5l.75 9h5.5l.75-9"/></svg></span><span class="popupmenu__label">Clear</span></span></div>
+									<div class="popupmenu__heading">Browse</div>
+									<div class="popupmenu__widget">
+										<div class="AssetPicker-browse">
+											<div class="AssetPicker-searchRow">
+												<span class="AssetPicker-searchSlot"><ue-text-input><div class="textinput textinput--search"><svg class="textinput__glyph textinput__glass" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><svg class="textinput__glyph textinput__clear" role="button" aria-label="Clear search" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg><input class="textinput__text textinput__field" type="text" placeholder="Search Assets" aria-label="Search Assets" autocomplete="off" spellcheck="false" data-autofocus><span class="textinput__tail"></span></div></ue-text-input></span>
+												<span class="AssetPicker-toggleSlot"><ue-checkbox><span class="checkbox-toggle checkbox-toggle--icon" role="button" tabindex="0" aria-pressed="false" aria-label="Show Other Developers Assets" title="Show Other Developers Assets"><svg class="checkbox-toggle__icon" viewBox="0 0 16 16"><path d="M1.5 4.25v7.5a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1H8l-1.2-1.5H2.5a1 1 0 0 0-1 1z"/><circle cx="8" cy="7.75" r="1.25"/><path d="M5.75 11.25a2.25 2.25 0 0 1 4.5 0"/></svg></span></ue-checkbox></span>
+												<ue-combo-button>
+													<div class="combobutton-anchor">
+														<span class="combobutton combobutton--simple" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-label="View Options" title="View Options"><svg class="combobutton__icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.2"/><path d="M8 1.8v2M8 12.2v2M1.8 8h2M12.2 8h2M3.6 3.6L5 5M11 11l1.4 1.4M3.6 12.4L5 11M11 5l1.4-1.4"/></svg></span>
+														<div class="combobutton-menu combobutton-menu--end" hidden>
+															<ue-popup-menu>
+																<div class="popupmenu" role="menu" tabindex="0" aria-label="View Options">
+																	<div class="popupmenu__heading">View Type</div>
+																	<div class="popupmenu__row" role="menuitemradio" aria-checked="false" title="View assets as tiles in a grid."><span class="popupmenu__check"><span class="popupmenu__radio"></span></span><span class="popupmenu__body"><span class="popupmenu__label">Tiles</span></span></div>
+																	<div class="popupmenu__row" role="menuitemradio" aria-checked="true" title="View assets in a list with thumbnails."><span class="popupmenu__check"><span class="popupmenu__radio"></span></span><span class="popupmenu__body"><span class="popupmenu__label">List</span></span></div>
+																	<div class="popupmenu__row" role="menuitemradio" aria-checked="false" title="View assets in a list with columns of details."><span class="popupmenu__check"><span class="popupmenu__radio"></span></span><span class="popupmenu__body"><span class="popupmenu__label">Columns</span></span></div>
+																	<div class="popupmenu__heading">View</div>
+																	<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false" aria-disabled="true"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Folders</span></span></div>
+																	<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false" aria-disabled="true"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Empty Folders</span></span></div>
+																	<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Favorites</span></span></div>
+																	<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Filter Recursively</span></span></div>
+																	<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show All Folder</span></span></div>
+																	<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Organize Folders</span></span></div>
+																	<div class="popupmenu__heading">Content</div>
+																	<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show C++ Classes</span></span></div>
+																	<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Developers Content</span></span></div>
+																	<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false" data-value="engine" title="Show engine content in the view?"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Engine Content</span></span></div>
+																	<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Plugin Content</span></span></div>
+																	<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Show Localized Content</span></span></div>
+																	<div class="popupmenu__heading">Search</div>
+																	<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Search Asset Class Names</span></span></div>
+																	<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Search Asset Path</span></span></div>
+																	<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Search Collection Names</span></span></div>
+																	<div class="popupmenu__heading">Thumbnails</div>
+																	<div class="popupmenu__row" role="menuitem" aria-haspopup="menu" aria-expanded="false"><span class="popupmenu__check"></span><span class="popupmenu__body"><span class="popupmenu__label">Thumbnail Size</span></span><svg class="popupmenu__arrow" viewBox="0 0 16 16"><path d="M6 3.5l4.5 4.5L6 12.5"/></svg>
+																		<div class="popupmenu popupmenu__sub" role="menu" hidden>
+																			<div class="popupmenu__row" role="menuitemradio" aria-checked="false"><span class="popupmenu__check"><span class="popupmenu__radio"></span></span><span class="popupmenu__body"><span class="popupmenu__label">Tiny</span></span></div>
+																			<div class="popupmenu__row" role="menuitemradio" aria-checked="false"><span class="popupmenu__check"><span class="popupmenu__radio"></span></span><span class="popupmenu__body"><span class="popupmenu__label">Small</span></span></div>
+																			<div class="popupmenu__row" role="menuitemradio" aria-checked="true"><span class="popupmenu__check"><span class="popupmenu__radio"></span></span><span class="popupmenu__body"><span class="popupmenu__label">Medium</span></span></div>
+																			<div class="popupmenu__row" role="menuitemradio" aria-checked="false"><span class="popupmenu__check"><span class="popupmenu__radio"></span></span><span class="popupmenu__body"><span class="popupmenu__label">Large</span></span></div>
+																			<div class="popupmenu__row" role="menuitemradio" aria-checked="false"><span class="popupmenu__check"><span class="popupmenu__radio"></span></span><span class="popupmenu__body"><span class="popupmenu__label">Huge</span></span></div>
+																		</div>
+																	</div>
+																	<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Thumbnail Edit Mode</span></span></div>
+																	<div class="popupmenu__row" role="menuitemcheckbox" aria-checked="false"><span class="popupmenu__check"><svg class="popupmenu__tick" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="popupmenu__body"><span class="popupmenu__label">Real-Time Thumbnails</span></span></div>
+																</div>
+															</ue-popup-menu>
+														</div>
+													</div>
+												</ue-combo-button>
+											</div>
+											<ue-asset-list>
+												<div class="AssetList">
+													<ue-header-row grips="off"><div class="hr-row"><div class="hr-cells"><div class="hr-cell is-fixed" style="--hr-fixed:30px" title="Revision Control"><svg class="hr-icon" viewBox="0 0 16 16"><path d="M5 2.5v11M5 10a3 3 0 0 1 3-3h1.5" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="11" cy="7" r="1.6" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></div><div class="hr-cell is-text" role="columnheader" tabindex="0" aria-sort="ascending" data-column="name">Name</div><div class="hr-spacer"></div></div><div class="hr-rule"></div></div></ue-header-row>
+													<ue-scrollbar>
+														<div class="sb-scroll AssetList__scroll">
+															<div class="sb-view AssetList__view">
+																<div class="AssetList__rows" role="listbox" tabindex="-1" aria-label="Static Mesh assets">
+																	<div class="AssetList__row" role="option" aria-selected="false" data-id="Cone" data-path="/Engine/BasicShapes/Cone.Cone"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">Cone</span><span class="AssetList__class">Static Mesh</span></span></div>
+																	<div class="AssetList__row" role="option" aria-selected="false" data-id="Cube" data-path="/Engine/BasicShapes/Cube.Cube"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">Cube</span><span class="AssetList__class">Static Mesh</span></span></div>
+																	<div class="AssetList__row" role="option" aria-selected="false" data-id="Cylinder" data-path="/Engine/BasicShapes/Cylinder.Cylinder"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">Cylinder</span><span class="AssetList__class">Static Mesh</span></span></div>
+																	<div class="AssetList__row" role="option" aria-selected="false" data-id="Plane" data-path="/Engine/BasicShapes/Plane.Plane"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">Plane</span><span class="AssetList__class">Static Mesh</span></span></div>
+																	<div class="AssetList__row" role="option" aria-selected="false" data-id="SM_Bookshelf" data-path="/Game/Props/SM_Bookshelf.SM_Bookshelf"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">SM_Bookshelf</span><span class="AssetList__class">Static Mesh</span></span></div>
+																	<div class="AssetList__row" role="option" aria-selected="true" data-id="SM_Chair" data-path="/Game/Props/SM_Chair.SM_Chair"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">SM_Chair</span><span class="AssetList__class">Static Mesh</span></span></div>
+																	<div class="AssetList__row" role="option" aria-selected="false" data-id="SM_Couch" data-path="/Game/Props/SM_Couch.SM_Couch"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">SM_Couch</span><span class="AssetList__class">Static Mesh</span></span></div>
+																	<div class="AssetList__row" role="option" aria-selected="false" data-id="SM_Lamp" data-path="/Game/Props/SM_Lamp.SM_Lamp"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">SM_Lamp</span><span class="AssetList__class">Static Mesh</span></span></div>
+																	<div class="AssetList__row" role="option" aria-selected="false" data-id="SM_Rug" data-path="/Game/Props/SM_Rug.SM_Rug"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">SM_Rug</span><span class="AssetList__class">Static Mesh</span></span></div>
+																	<div class="AssetList__row" role="option" aria-selected="false" data-id="SM_Table" data-path="/Game/Props/SM_Table.SM_Table"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">SM_Table</span><span class="AssetList__class">Static Mesh</span></span></div>
+																	<div class="AssetList__row" role="option" aria-selected="false" data-id="Sphere" data-path="/Engine/BasicShapes/Sphere.Sphere"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">Sphere</span><span class="AssetList__class">Static Mesh</span></span></div>
+																</div>
+															</div>
+															<div class="sb sb-v" aria-hidden="true"><div class="sb-thumb"></div></div>
+														</div>
+													</ue-scrollbar>
+													<div class="AssetList__count" role="status">6 items (1 selected)</div>
+												</div>
+											</ue-asset-list>
+										</div>
+									</div>
 								</div>
 							</ue-popup-menu>
 						</div>
@@ -51,7 +134,7 @@
 				</ue-combo-button>
 				<div class="AssetPicker-buttons">
 					<ue-button><button class="button button--simple button--icon" data-role="use" aria-label="Use Selected Asset from Content Browser" title="Use Selected Asset from Content Browser"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M11 8H5.5m2.5-2.75L5.25 8 8 10.75"/></svg></button></ue-button>
-					<ue-button><button class="button button--simple button--icon" data-role="browse" aria-label="Browse to Asset in Content Browser" title="Browse to Asset in Content Browser"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M1.75 4.25a1 1 0 0 1 1-1h3.2l1.3 1.5h5a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H2.75a1 1 0 0 1-1-1z"/></svg></button></ue-button>
+					<ue-button><button class="button button--simple button--icon" data-role="browse" aria-label="Browse to Asset in Content Browser" title="Browse to Asset in Content Browser"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M2.25 4.25a1 1 0 0 1 1-1h3.2l1.3 1.5h5a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H3.25a1 1 0 0 1-1-1z"/></svg></button></ue-button>
 				</div>
 			</div>
 		</div>
@@ -64,8 +147,10 @@
 	</div>
 </div>
 </ue-asset-picker>
-<p class="AssetPicker-cap"><b>Live.</b> Click the combo (or press Down) to open the asset list, choose with the pointer or Up, Down, Enter, Escape. The label and the thumbnail tooltip follow the choice. The use-selected button picks SM_Table, the stand-in for a Content Browser selection. The reset arrow shows when the value is not None and puts it back.</p>
+<p class="AssetPicker-cap"><b>Live.</b> Click the combo (or press Down) to open the asset picker menu. Current Asset: Edit, Copy, Paste (enabled after Copy) and Clear. Browse: the search box takes the focus; type to filter the list and the count, Up and Down move, Enter or a click picks. The gear holds the view options; Show Engine Content adds five /Engine/BasicShapes meshes. The use-selected button picks SM_Table, the stand-in for a Content Browser selection. The reset arrow shows when the value is not None and puts it back.</p>
+</div>
 
+<div class="picker-col">
 <ue-asset-picker data-pinned><div class="AssetPicker-frame is-menuRoom">
 	<div class="AssetPicker-row">
 		<div class="AssetPicker-name">Static Mesh</div>
@@ -80,18 +165,43 @@
 			<div class="AssetPicker-col">
 				<ue-combo-button><div class="combobutton-anchor combobutton-anchor--fill">
 					<span class="combobutton combobutton--small combobutton--open" tabindex="-1"><span class="combobutton__label">SM_Table</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span>
-					<div class="combobutton-menu">
-						<ue-popup-menu><div class="popupmenu popupmenu--small popupmenu--combo">
-							<div class="popupmenu__row"><span class="popupmenu__body"><span class="popupmenu__label">None</span></span></div>
-							<div class="popupmenu__row"><span class="popupmenu__body"><span class="popupmenu__label">SM_Chair</span></span></div>
-							<div class="popupmenu__row popupmenu__row--hover"><span class="popupmenu__body"><span class="popupmenu__label">SM_Table</span></span></div>
-							<div class="popupmenu__row"><span class="popupmenu__body"><span class="popupmenu__label">SM_Couch</span></span></div>
+					<div class="combobutton-menu combobutton-menu--end">
+						<ue-popup-menu><div class="popupmenu">
+							<div class="popupmenu__heading">Current Asset</div>
+							<div class="popupmenu__row"><span class="popupmenu__body"><span class="popupmenu__icon"><svg viewBox="0 0 16 16"><path d="M3 13l.5-2.5 7-7 2 2-7 7z M9 5l2 2"/></svg></span><span class="popupmenu__label">Edit</span></span></div>
+							<div class="popupmenu__row popupmenu__row--hover"><span class="popupmenu__body"><span class="popupmenu__icon"><svg viewBox="0 0 16 16"><path d="M5.5 5.5h7v7h-7z M3.5 10.5v-7h7"/></svg></span><span class="popupmenu__label">Copy</span></span></div>
+							<div class="popupmenu__row popupmenu__row--disabled"><span class="popupmenu__body"><span class="popupmenu__icon"><svg viewBox="0 0 16 16"><path d="M4 3.5h8v10H4z M6 2.5h4v2H6z"/></svg></span><span class="popupmenu__label">Paste</span></span></div>
+							<div class="popupmenu__row"><span class="popupmenu__body"><span class="popupmenu__icon"><svg viewBox="0 0 16 16"><path d="M3 4.5h10 M6.5 4.5V3h3v1.5 M4.5 4.5l.75 9h5.5l.75-9"/></svg></span><span class="popupmenu__label">Clear</span></span></div>
+							<div class="popupmenu__heading">Browse</div>
+							<div class="popupmenu__widget">
+								<div class="AssetPicker-browse">
+									<div class="AssetPicker-searchRow">
+										<span class="AssetPicker-searchSlot"><ue-text-input><div class="textinput textinput--search textinput--focus"><svg class="textinput__glyph" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><span class="textinput__text"><span class="textinput__caret"></span><span class="textinput__hint">Search Assets</span></span><span class="textinput__tail"></span></div></ue-text-input></span>
+										<span class="AssetPicker-toggleSlot"><ue-checkbox><span class="checkbox-toggle checkbox-toggle--icon"><svg class="checkbox-toggle__icon" viewBox="0 0 16 16"><path d="M1.5 4.25v7.5a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1H8l-1.2-1.5H2.5a1 1 0 0 0-1 1z"/><circle cx="8" cy="7.75" r="1.25"/><path d="M5.75 11.25a2.25 2.25 0 0 1 4.5 0"/></svg></span></ue-checkbox></span>
+										<ue-combo-button><span class="combobutton combobutton--simple"><svg class="combobutton__icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.2"/><path d="M8 1.8v2M8 12.2v2M1.8 8h2M12.2 8h2M3.6 3.6L5 5M11 11l1.4 1.4M3.6 12.4L5 11M11 5l1.4-1.4"/></svg></span></ue-combo-button>
+									</div>
+									<ue-asset-list>
+										<div class="AssetList">
+											<ue-header-row><div class="hr-row"><div class="hr-cells"><div class="hr-cell is-fixed" style="--hr-fixed:30px"><svg class="hr-icon" viewBox="0 0 16 16"><path d="M5 2.5v11M5 10a3 3 0 0 1 3-3h1.5" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="11" cy="7" r="1.6" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></div><div class="hr-cell is-text">Name<svg class="hr-sort" viewBox="0 0 12 12"><path d="M2 8l4-5 4 5z"/></svg></div><div class="hr-spacer" hidden></div></div><div class="hr-rule"></div></div></ue-header-row>
+											<ue-scrollbar><div class="sb-scroll AssetList__scroll"><div class="sb-view AssetList__view"><div class="AssetList__rows">
+															<div class="AssetList__row" role="option" aria-selected="false" data-id="SM_Bookshelf" data-path="/Game/Props/SM_Bookshelf.SM_Bookshelf"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">SM_Bookshelf</span><span class="AssetList__class">Static Mesh</span></span></div>
+															<div class="AssetList__row is-odd" role="option" aria-selected="false" data-id="SM_Chair" data-path="/Game/Props/SM_Chair.SM_Chair"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">SM_Chair</span><span class="AssetList__class">Static Mesh</span></span></div>
+															<div class="AssetList__row" role="option" aria-selected="false" data-id="SM_Couch" data-path="/Game/Props/SM_Couch.SM_Couch"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">SM_Couch</span><span class="AssetList__class">Static Mesh</span></span></div>
+															<div class="AssetList__row is-odd" role="option" aria-selected="false" data-id="SM_Lamp" data-path="/Game/Props/SM_Lamp.SM_Lamp"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">SM_Lamp</span><span class="AssetList__class">Static Mesh</span></span></div>
+															<div class="AssetList__row" role="option" aria-selected="false" data-id="SM_Rug" data-path="/Game/Props/SM_Rug.SM_Rug"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">SM_Rug</span><span class="AssetList__class">Static Mesh</span></span></div>
+															<div class="AssetList__row is-odd" role="option" aria-selected="true" data-id="SM_Table" data-path="/Game/Props/SM_Table.SM_Table"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">SM_Table</span><span class="AssetList__class">Static Mesh</span></span></div>
+											</div></div></div></ue-scrollbar>
+											<div class="AssetList__count">6 items (1 selected)</div>
+										</div>
+									</ue-asset-list>
+								</div>
+							</div>
 						</div></ue-popup-menu>
 					</div>
 				</div></ue-combo-button>
 				<div class="AssetPicker-buttons">
 					<ue-button><button class="button button--simple button--icon button--pressed" tabindex="-1" aria-label="Use Selected Asset"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M11 8H5.5m2.5-2.75L5.25 8 8 10.75"/></svg></button></ue-button>
-					<ue-button><button class="button button--simple button--icon button--hover" tabindex="-1" aria-label="Browse to Asset"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M1.75 4.25a1 1 0 0 1 1-1h3.2l1.3 1.5h5a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H2.75a1 1 0 0 1-1-1z"/></svg></button></ue-button>
+					<ue-button><button class="button button--simple button--icon button--hover" tabindex="-1" aria-label="Browse to Asset"><svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M2.25 4.25a1 1 0 0 1 1-1h3.2l1.3 1.5h5a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H3.25a1 1 0 0 1-1-1z"/></svg></button></ue-button>
 				</div>
 			</div>
 		</div>
@@ -99,7 +209,9 @@
 		<div class="AssetPicker-right"><ue-reset-to-default><button class="resettodefault resettodefault--hover" type="button" tabindex="-1" aria-label="Reset to default"><svg class="resettodefault__glyph" viewBox="0 0 16 16"><path d="M5.5 3.5 2.5 6.5l3 3M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7"/></svg></button></ue-reset-to-default></div>
 	</div>
 </div></ue-asset-picker>
-<p class="AssetPicker-cap"><b>Pinned.</b> Forced states: combo open with SM_Table hovered, use pressed, browse and reset hovered. The list covers the buttons below it.</p>
+<p class="AssetPicker-cap"><b>Pinned.</b> The menu open as it opens, aligned to the combo's right edge to fit the card: Copy hovered, Paste disabled until something is copied, the search box focused with its hint, SM_Table selected with the inactive brush because the search box holds the focus.</p>
+</div>
+</div>
 
 </body>
 </html>

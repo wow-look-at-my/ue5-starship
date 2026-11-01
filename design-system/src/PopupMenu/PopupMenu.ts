@@ -133,7 +133,7 @@ export class UePopupMenuElement extends UeElement {
 			if (row !== current) keep.add(row);
 		}
 		if (open) keep.add(open);
-		for (const row of Array.from(root.querySelectorAll<HTMLElement>(ROW))) {
+		for (const row of Array.from(root.querySelectorAll<HTMLElement>(ROW)).filter((each) => ownedBy(this, each))) {
 			row.classList.toggle(CURRENT, row === current);
 			const sub = submenuOf(row);
 			if (sub) {
