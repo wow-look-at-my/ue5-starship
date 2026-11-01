@@ -1,6 +1,7 @@
 /// <reference lib="dom" />
 // Interaction tests for the Details group: the previews run their custom elements in a real browser.
 import assert from 'node:assert/strict';
+<<<<<<< HEAD
 import fs from 'node:fs';
 import path from 'node:path';
 import { test } from 'node:test';
@@ -9,6 +10,11 @@ import { root as ds } from './lib.ts';
 import { assertInert, clickAt, hoverAt } from './pinned.ts';
 import { bgOf, inPreview, rgb } from './preview-kit.ts';
 import { scenario } from './scenario.ts';
+=======
+import { test } from 'node:test';
+import type { Locator, Page } from 'playwright';
+import { bgOf, inPreview, rgb } from './preview-kit.ts';
+>>>>>>> origin/master
 
 const CLEAR = 'rgba(0, 0, 0, 0)';
 
@@ -17,6 +23,10 @@ const colorOf = (target: Locator): Promise<string> => target.evaluate((el) => ge
 const visibilityOf = (target: Locator): Promise<string> => target.evaluate((el) => getComputedStyle(el).visibility);
 const trimmed = async (target: Locator): Promise<string> => ((await target.textContent()) ?? '').trim();
 const dataValue = (target: Locator): Promise<number> => target.evaluate((el) => Number((el as HTMLElement).dataset.value));
+<<<<<<< HEAD
+=======
+const activeClass = (page: Page): Promise<string> => page.evaluate(() => (document.activeElement as HTMLElement).className);
+>>>>>>> origin/master
 const key = (page: Page, name: string): Promise<void> => page.keyboard.press(name);
 const typeIn = (page: Page, text: string): Promise<void> => page.keyboard.type(text);
 const replaceText = async (page: Page, text: string): Promise<void> => {
@@ -44,10 +54,16 @@ async function centerOf(target: Locator): Promise<{ x: number; y: number }> {
 	return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
 }
 
+<<<<<<< HEAD
 test('DetailsHeader: the buttons are ue-button primitives with their hover and pressed looks, the lock closes the padlock, the name edits', async () => {
 	await inPreview('DetailsHeader', async (page) => {
 		const header = page.locator('ue-details-header');
 		const add = header.locator('[data-role="add"]');
+=======
+test('DetailsHeader: buttons show hover and pressed, the lock toggles, the name edits', async () => {
+	await inPreview('DetailsHeader', async (page) => {
+		const add = page.locator('ue-details-header .DetailsHeader-add');
+>>>>>>> origin/master
 		assert.equal(await bgOf(add), rgb('secondary'));
 		await add.hover();
 		assert.equal(await bgOf(add), rgb('hover'));
@@ -55,11 +71,16 @@ test('DetailsHeader: the buttons are ue-button primitives with their hover and p
 		assert.equal(await bgOf(add), rgb('header'));
 		await pointerUp(page);
 
+<<<<<<< HEAD
 		const help = header.locator('[data-role="help"]');
+=======
+		const help = page.locator('ue-details-header .DetailsHeader-help');
+>>>>>>> origin/master
 		assert.equal(await bgOf(help), CLEAR);
 		await help.hover();
 		assert.equal(await bgOf(help), rgb('dropdown'));
 
+<<<<<<< HEAD
 		const lock = header.locator('[data-role="lock"]');
 		const open = lock.locator('.DetailsHeader-shackle--open');
 		const shut = lock.locator('.DetailsHeader-shackle--shut');
@@ -78,6 +99,19 @@ test('DetailsHeader: the buttons are ue-button primitives with their hover and p
 
 		const label = header.locator('.DetailsHeader-label');
 		const instance = header.locator('.DetailsHeader-instance .DetailsHeader-instanceName');
+=======
+		const lock = page.locator('ue-details-header .DetailsHeader-lock');
+		const glyph = lock.locator('use');
+		assert.equal(await glyph.getAttribute('href'), '#DetailsHeader-unlock');
+		await lock.click();
+		assert.equal(await lock.getAttribute('aria-pressed'), 'true');
+		assert.equal(await glyph.getAttribute('href'), '#DetailsHeader-locked');
+		await lock.click();
+		assert.equal(await glyph.getAttribute('href'), '#DetailsHeader-unlock');
+
+		const label = page.locator('ue-details-header .DetailsHeader-label');
+		const instance = page.locator('ue-details-header .DetailsHeader-instance .name');
+>>>>>>> origin/master
 		assert.equal(await bgOf(label), CLEAR);
 		await label.hover();
 		assert.equal(await bgOf(label), rgb('input'));
@@ -95,6 +129,7 @@ test('DetailsHeader: the buttons are ue-button primitives with their hover and p
 	});
 });
 
+<<<<<<< HEAD
 test('DetailsHeader: the pinned specimen shows its forced states and ignores the pointer', async () => {
 	await inPreview('DetailsHeader', async (page) => {
 		const pinned = page.locator('[data-pinned]');
@@ -122,6 +157,14 @@ test('DetailsSearchRow: the search box types, clears and announces, the star tog
 		await watch(page, 'ue-search');
 		await watch(page, 'ue-favorites');
 		await watch(page, 'ue-view-option');
+=======
+test('DetailsSearchRow: typing shows the clear X, Escape and X clear, star toggles, gear opens a menu', async () => {
+	await inPreview('DetailsSearchRow', async (page) => {
+		const row = page.locator('ue-details-search-row');
+		const input = row.locator('.DetailsSearchRow-text');
+		const box = row.locator('.DetailsSearchRow-search');
+		const clear = row.locator('.DetailsSearchRow-clear');
+>>>>>>> origin/master
 
 		assert.ok(!(await clear.isVisible()), 'no X without text');
 		await box.hover();
@@ -131,6 +174,7 @@ test('DetailsSearchRow: the search box types, clears and announces, the star tog
 		await typeIn(page, 'scale');
 		assert.equal(await input.inputValue(), 'scale');
 		assert.ok(await clear.isVisible(), 'X shows with text');
+<<<<<<< HEAD
 		assert.deepEqual((await seen(page, 'ue-search')).slice(-1), [{ text: 'scale' }]);
 		await clear.click();
 		assert.equal(await input.inputValue(), '');
@@ -140,10 +184,19 @@ test('DetailsSearchRow: the search box types, clears and announces, the star tog
 		await key(page, 'Escape');
 		assert.equal(await input.inputValue(), '');
 		assert.deepEqual((await seen(page, 'ue-search')).slice(-1), [{ text: '' }], 'Escape announces the empty text');
+=======
+		await clear.click();
+		assert.equal(await input.inputValue(), '');
+		assert.ok(!(await clear.isVisible()));
+		await typeIn(page, 'abc');
+		await key(page, 'Escape');
+		assert.equal(await input.inputValue(), '');
+>>>>>>> origin/master
 
 		const star = row.locator('[data-role="favorites"]');
 		await star.click();
 		assert.equal(await star.getAttribute('aria-pressed'), 'true');
+<<<<<<< HEAD
 		await page.mouse.move(2, 2);
 		assert.equal(await bgOf(star), rgb('primary'), 'a toggle that is on fills Primary');
 		assert.deepEqual(await seen(page, 'ue-favorites'), [{ on: true }]);
@@ -159,6 +212,19 @@ test('DetailsSearchRow: the search box types, clears and announces, the star tog
 		const gear = row.locator('[data-role="options"]');
 		const menu = row.locator('.combobutton-menu');
 		const modified = row.locator('.popupmenu__row[data-value="modified"]');
+=======
+		assert.equal(await colorOf(star), rgb('accent-blue'));
+		await star.click();
+		assert.equal(await star.getAttribute('aria-pressed'), 'false');
+
+		const table = row.locator('.DetailsSearchRow-btn.is-button').first();
+		await table.hover();
+		assert.equal(await bgOf(table), rgb('dropdown'));
+
+		const gear = row.locator('[data-role="options"]');
+		const menu = row.locator('.DetailsSearchRow-menu');
+		const modified = row.locator('[data-option="modified"]');
+>>>>>>> origin/master
 		assert.ok(!(await menu.isVisible()));
 		await gear.click();
 		assert.ok(await menu.isVisible());
@@ -167,6 +233,7 @@ test('DetailsSearchRow: the search box types, clears and announces, the star tog
 		await modified.click();
 		assert.ok(!(await menu.isVisible()), 'menu closes after a pick');
 		assert.equal(await modified.getAttribute('aria-checked'), 'true');
+<<<<<<< HEAD
 		assert.deepEqual(await seen(page, 'ue-view-option'), [{ option: 'modified', checked: true }]);
 		await gear.click();
 		await key(page, 'Escape');
@@ -189,6 +256,11 @@ test('DetailsSearchRow: the pinned row shows the focused box and the favorites t
 		await clickAt(page, star);
 		assert.equal(await star.getAttribute('aria-pressed'), 'true');
 		assert.equal(await bgOf(star), rgb('primary'));
+=======
+		await gear.click();
+		await key(page, 'Escape');
+		assert.ok(!(await menu.isVisible()));
+>>>>>>> origin/master
 	});
 });
 
@@ -244,8 +316,13 @@ test('SegmentedControl: click selects, arrows move, hover fills, the pinned row 
 		assert.deepEqual(await checked(), ['Static']);
 
 		const pinnedRow = page.locator('.SegmentedControl-row').nth(1);
+<<<<<<< HEAD
 		assert.equal(await pinnedRow.locator('ue-segmented-control[data-pinned]').count(), 1);
 		await clickAt(page, pinnedRow.locator('.SegmentedControl-seg').nth(0));
+=======
+		assert.equal(await pinnedRow.locator('xpath=ancestor::ue-segmented-control').count(), 0);
+		await pinnedRow.locator('.SegmentedControl-seg').nth(0).click();
+>>>>>>> origin/master
 		assert.deepEqual(await pinnedRow.locator('.SegmentedControl-seg.is-checked').allTextContents(), ['Stationary']);
 
 		const second = page.locator('ue-segmented-control').nth(1);
@@ -255,6 +332,7 @@ test('SegmentedControl: click selects, arrows move, hover fills, the pinned row 
 	});
 });
 
+<<<<<<< HEAD
 // Records the detail of every bubbling event of this name that reaches the document.
 async function watch(page: Page, type: string): Promise<void> {
 	await page.evaluate((name) => {
@@ -423,11 +501,25 @@ test('AssetPicker: a list pick sets the label and thumbnail, keys pick from the 
 
 		assert.equal(await trimmed(label), 'SM_Chair');
 		assert.equal(await visibilityOf(reset), 'visible', 'SM_Chair is not the default');
+=======
+test('AssetPicker: the list sets the label and thumbnail, buttons react, reset restores', async () => {
+	await inPreview('AssetPicker', async (page) => {
+		const root = page.locator('ue-asset-picker');
+		const combo = root.locator('.AssetPicker-combo');
+		const menu = root.locator('.AssetPicker-menu');
+		const label = root.locator('.AssetPicker-combo .label');
+		const reset = root.locator('.AssetPicker-reset');
+		const thumb = root.locator('.AssetPicker-thumbFrame');
+		const option = (name: string): Locator => root.locator('.AssetPicker-menuItem[data-asset="' + name + '"]');
+
+		assert.equal(await trimmed(label), 'SM_Chair');
+>>>>>>> origin/master
 		assert.ok(!(await menu.isVisible()));
 		await combo.hover();
 		assert.ok((await shadowOf(combo)).includes(rgb('hover')));
 		await combo.click();
 		assert.ok(await menu.isVisible());
+<<<<<<< HEAD
 		assert.ok(await search.evaluate((el) => el === document.activeElement), 'the search box takes the focus on open');
 		assert.equal(await asset('SM_Chair').getAttribute('aria-selected'), 'true', 'the current value is selected');
 		await asset('SM_Couch').click();
@@ -437,10 +529,19 @@ test('AssetPicker: a list pick sets the label and thumbnail, keys pick from the 
 		assert.equal(await asset('SM_Couch').getAttribute('aria-selected'), 'true');
 		assert.equal(await asset('SM_Chair').getAttribute('aria-selected'), 'false');
 		assert.deepEqual(await seen(page, 'ue-asset-change'), [{ asset: 'SM_Couch' }]);
+=======
+		await option('SM_Couch').click();
+		assert.ok(!(await menu.isVisible()));
+		assert.equal(await trimmed(label), 'SM_Couch');
+		assert.equal(await thumb.getAttribute('title'), '/Game/Props/SM_Couch.SM_Couch');
+		assert.equal(await option('SM_Couch').getAttribute('aria-selected'), 'true');
+		assert.equal(await option('SM_Chair').getAttribute('aria-selected'), 'false');
+>>>>>>> origin/master
 
 		await combo.focus();
 		await key(page, 'ArrowDown');
 		assert.ok(await menu.isVisible());
+<<<<<<< HEAD
 		assert.ok(await search.evaluate((el) => el === document.activeElement), 'a keyboard open focuses the search box too');
 		await key(page, 'ArrowDown');
 		assert.equal(await asset('SM_Lamp').getAttribute('aria-selected'), 'true', 'Down in the search box moves the list selection');
@@ -452,21 +553,33 @@ test('AssetPicker: a list pick sets the label and thumbnail, keys pick from the 
 		assert.ok(await combo.evaluate((el) => el === document.activeElement), 'focus returns to the combo');
 
 		const use = picker.locator('[data-role="use"]');
+=======
+		await key(page, 'ArrowDown');
+		await key(page, 'Enter');
+		assert.equal(await trimmed(label), 'SM_Lamp');
+		assert.equal(await activeClass(page), 'AssetPicker-combo', 'focus returns to the combo');
+
+		const use = root.locator('[data-role="use"]');
+>>>>>>> origin/master
 		await use.hover();
 		assert.equal(await bgOf(use), rgb('dropdown'));
 		await use.click();
 		assert.equal(await trimmed(label), 'SM_Table');
+<<<<<<< HEAD
 		assert.equal(await asset('SM_Table').getAttribute('aria-selected'), 'true', 'use-selected marks the list row too');
 		assert.equal(await thumb.getAttribute('title'), '/Game/Props/SM_Table.SM_Table');
 
 		await picker.locator('[data-role="browse"]').click();
 		assert.deepEqual(await seen(page, 'ue-asset-browse'), [{ asset: 'SM_Table' }]);
+=======
+>>>>>>> origin/master
 
 		assert.equal(await visibilityOf(reset), 'visible');
 		await reset.click();
 		assert.equal(await trimmed(label), 'None');
 		assert.equal(await visibilityOf(reset), 'hidden');
 		assert.equal(await thumb.getAttribute('title'), 'None');
+<<<<<<< HEAD
 		assert.deepEqual((await seen(page, 'ue-asset-change')).slice(-1), [{ asset: 'None' }]);
 
 		await combo.click();
@@ -588,15 +701,27 @@ test('AssetPicker: the pinned row shows the open menu with Copy hovered and igno
 		await hoverAt(page, first);
 		assert.equal(await bgOf(first), CLEAR, 'a real pointer changes nothing');
 		assert.equal(await colorOf(pinned.locator('.resettodefault')), rgb('foreground-hover'), 'reset hovered');
+=======
+
+		await combo.click();
+		await page.mouse.click(910, 710);
+		assert.ok(!(await menu.isVisible()), 'an outside click closes the list');
+>>>>>>> origin/master
 	});
 });
 
 test('VectorInput: dragging changes a value and shows reset, reset restores, typing and keys work', async () => {
 	await inPreview('VectorInput', async (page) => {
 		const scale = page.locator('ue-vector-input .VectorInput-row').nth(2);
+<<<<<<< HEAD
 		const fields = scale.locator('.spinbox');
 		const reset = scale.locator('.resettodefault');
 		const shown = (i: number): Promise<string> => trimmed(fields.nth(i).locator('.spinbox__text'));
+=======
+		const fields = scale.locator('.VectorInput-field');
+		const reset = scale.locator('.VectorInput-reset');
+		const shown = (i: number): Promise<string> => trimmed(fields.nth(i).locator('.VectorInput-value-text'));
+>>>>>>> origin/master
 
 		assert.equal(await fields.nth(0).evaluate((el) => getComputedStyle(el).cursor), 'ew-resize');
 		assert.equal(await visibilityOf(reset), 'hidden', 'no reset at the default');
@@ -613,7 +738,11 @@ test('VectorInput: dragging changes a value and shows reset, reset restores, typ
 		assert.ok((await dataValue(fields.nth(0))) > 1.3, 'dragging right raised X: ' + (await dataValue(fields.nth(0))));
 		assert.equal(await dataValue(fields.nth(1)), 1, 'the other axes stay unlinked');
 		assert.equal(await visibilityOf(reset), 'visible', 'reset shows after a change');
+<<<<<<< HEAD
 		assert.ok(!(await fields.nth(0).evaluate((el) => el.classList.contains('spinbox--active'))), 'active outline ends with the drag');
+=======
+		assert.ok(!(await fields.nth(0).evaluate((el) => el.classList.contains('is-active'))), 'active outline ends with the drag');
+>>>>>>> origin/master
 
 		await reset.click();
 		assert.deepEqual(await triple(fields), [1, 1, 1]);
@@ -628,7 +757,11 @@ test('VectorInput: dragging changes a value and shows reset, reset restores, typ
 		assert.equal(await dataValue(fields.nth(0)), 1, 'Escape restores the value from before the drag');
 
 		await fields.nth(1).click();
+<<<<<<< HEAD
 		assert.ok(await fields.nth(1).evaluate((el) => el.classList.contains('spinbox--text')));
+=======
+		assert.ok(await fields.nth(1).evaluate((el) => el.classList.contains('is-editing')));
+>>>>>>> origin/master
 		await typeIn(page, '2.5');
 		await key(page, 'Enter');
 		assert.equal(await dataValue(fields.nth(1)), 2.5);
@@ -640,6 +773,7 @@ test('VectorInput: dragging changes a value and shows reset, reset restores, typ
 
 		await fields.nth(2).focus();
 		await key(page, 'ArrowUp');
+<<<<<<< HEAD
 		assert.ok(Math.abs((await dataValue(fields.nth(2))) - 1.0025) < 1e-9);
 		await key(page, 'ArrowDown');
 		await key(page, 'ArrowDown');
@@ -662,27 +796,55 @@ test('VectorInput: the scale lock links the axes, the label menu opens, units su
 		assert.ok(await shut.isVisible(), 'the padlock closes');
 		assert.ok(!(await open.isVisible()));
 		assert.equal(await lock.getAttribute('title'), 'Scale uniformly (locked)');
+=======
+		assert.equal(await dataValue(fields.nth(2)), 1.0025);
+		await key(page, 'ArrowDown');
+		await key(page, 'ArrowDown');
+		assert.equal(await dataValue(fields.nth(2)), 0.9975);
+	});
+});
+
+test('VectorInput: the scale lock links the axes, the label menu opens, units survive an edit', async () => {
+	await inPreview('VectorInput', async (page) => {
+		const rows = page.locator('ue-vector-input .VectorInput-row');
+		const fields = rows.nth(2).locator('.VectorInput-field');
+		const lock = rows.nth(2).locator('.VectorInput-lock');
+
+		await lock.click();
+		assert.equal(await lock.getAttribute('aria-pressed'), 'true');
+		assert.equal(await lock.locator('use').getAttribute('href'), '#VectorInput-locked');
+>>>>>>> origin/master
 		await fields.nth(0).click();
 		await typeIn(page, '2');
 		await key(page, 'Enter');
 		assert.deepEqual(await triple(fields), [2, 2, 2]);
+<<<<<<< HEAD
 		assert.deepEqual((await seen(page, 'ue-vector-change')).slice(-1), [{ values: [2, 2, 2] }]);
+=======
+>>>>>>> origin/master
 
 		await fields.nth(1).focus();
 		await key(page, 'ArrowUp');
 		const [x, , z] = await triple(fields);
 		assert.ok(Math.abs(x - 2.0025) < 1e-6 && Math.abs(z - 2.0025) < 1e-6, 'stepping Y moves X and Z by the same ratio');
+<<<<<<< HEAD
 		assert.match(await trimmed(fields.nth(0).locator('.spinbox__text')), /^2\.00[23]$/, 'the linked field redraws');
 
 		await lock.click();
 		assert.ok(await open.isVisible(), 'the padlock opens');
 		assert.equal(await lock.getAttribute('title'), 'Scale uniformly (unlocked)');
+=======
+
+		await lock.click();
+		assert.equal(await lock.locator('use').getAttribute('href'), '#VectorInput-unlock');
+>>>>>>> origin/master
 		await fields.nth(0).click();
 		await typeIn(page, '3');
 		await key(page, 'Enter');
 		assert.equal(await dataValue(fields.nth(0)), 3);
 		assert.ok((await dataValue(fields.nth(1))) < 3, 'unlocked axes move alone');
 
+<<<<<<< HEAD
 		const menu = rows.nth(0).locator('.combobutton-menu');
 		assert.ok(!(await menu.isVisible()));
 		await rows.nth(0).locator('.combobutton').click();
@@ -720,16 +882,41 @@ test('VectorInput: the pinned rows show the active field and ignore the pointer'
 });
 
 test('DetailsCategory: headers fold their rows, row arrows fold children, checkbox, combo and text edit work', async () => {
+=======
+		const menu = rows.nth(0).locator('.VectorInput-menu');
+		assert.ok(!(await menu.isVisible()));
+		await rows.nth(0).locator('.VectorInput-combo').click();
+		assert.ok(await menu.isVisible());
+		assert.equal(await trimmed(menu.locator('.VectorInput-menuHead')), 'Location Type');
+		await menu.locator('.VectorInput-menuItem', { hasText: 'World' }).click();
+		assert.ok(!(await menu.isVisible()));
+		assert.equal(await menu.locator('.VectorInput-menuItem', { hasText: 'World' }).getAttribute('aria-checked'), 'true');
+		assert.equal(await menu.locator('.VectorInput-menuItem', { hasText: 'Relative' }).getAttribute('aria-checked'), 'false');
+
+		const yaw = rows.nth(1).locator('.VectorInput-field').nth(2);
+		await yaw.click();
+		await replaceText(page, '90');
+		await key(page, 'Enter');
+		assert.equal(await trimmed(yaw.locator('.VectorInput-value-text')), '90.0 °');
+	});
+});
+
+test('DetailsCategory: headers fold their rows, row arrows fold children, checkbox and text edit work', async () => {
+>>>>>>> origin/master
 	await inPreview('DetailsCategory', async (page) => {
 		const frame = page.locator('ue-details-category').nth(0);
 		const header = frame.locator('.DetailsCategory-catRow').nth(0);
 		const rowOf = (name: string): Locator => frame.locator('.DetailsCategory-row').filter({ has: page.locator('.DetailsCategory-label', { hasText: new RegExp('^' + name + '$') }) });
+<<<<<<< HEAD
 		const turn = (target: Locator): Promise<string> => target.evaluate((el) => getComputedStyle(el).transform);
+=======
+>>>>>>> origin/master
 
 		assert.ok(await rowOf('Visible').isVisible());
 		assert.ok(!(await rowOf('Static Mesh').isVisible()), 'Static Mesh rows start folded');
 		await header.hover();
 		assert.equal(await colorOf(header.locator('.DetailsCategory-arrow')), await computedColor(page, 'color-mix(in srgb, var(--foreground-hover) 60%, transparent)'));
+<<<<<<< HEAD
 		assert.notEqual(await turn(header.locator('.DetailsCategory-arrow')), 'none', 'the caret points down while expanded');
 
 		await header.click();
@@ -738,6 +925,15 @@ test('DetailsCategory: headers fold their rows, row arrows fold children, checkb
 		for (const name of ['Visible', 'Actor Label', 'Collision Preset', 'Lighting', 'Cast Shadow']) assert.ok(!(await rowOf(name).isVisible()), name + ' folded');
 		await header.press('ArrowRight');
 		assert.notEqual(await turn(header.locator('.DetailsCategory-arrow')), 'none');
+=======
+
+		await header.click();
+		assert.equal(await header.getAttribute('aria-expanded'), 'false');
+		assert.equal(await header.locator('use').getAttribute('href'), '#DetailsCategory-right');
+		for (const name of ['Visible', 'Actor Label', 'Collision Preset', 'Lighting', 'Cast Shadow']) assert.ok(!(await rowOf(name).isVisible()), name + ' folded');
+		await header.press('ArrowRight');
+		assert.equal(await header.locator('use').getAttribute('href'), '#DetailsCategory-down');
+>>>>>>> origin/master
 		assert.ok(await rowOf('Visible').isVisible());
 		await header.press('Enter');
 		assert.ok(!(await rowOf('Visible').isVisible()), 'Enter folds');
@@ -757,6 +953,7 @@ test('DetailsCategory: headers fold their rows, row arrows fold children, checkb
 		await name.hover();
 		assert.equal(await bgOf(name), rgb('header'));
 
+<<<<<<< HEAD
 		const check = rowOf('Visible').locator('.checkbox');
 		const tick = check.locator('.checkbox__glyph--check');
 		assert.equal(await check.getAttribute('aria-checked'), 'true');
@@ -791,6 +988,30 @@ test('DetailsCategory: headers fold their rows, row arrows fold children, checkb
 		await field.click();
 		await typeIn(page, 'X');
 		assert.equal(await visibilityOf(reset), 'visible', 'typing a different value shows the arrow');
+=======
+		const check = rowOf('Visible').locator('.DetailsCategory-check');
+		assert.equal(await check.getAttribute('aria-checked'), 'true');
+		await check.click();
+		assert.equal(await check.getAttribute('aria-checked'), 'false');
+		assert.equal(await visibilityOf(check.locator('svg')), 'hidden');
+		await check.press('Space');
+		assert.equal(await check.getAttribute('aria-checked'), 'true');
+
+		const field = rowOf('Actor Label').locator('.DetailsCategory-text');
+		const reset = rowOf('Actor Label').locator('.DetailsCategory-reset');
+		await field.click();
+		assert.ok((await shadowOf(field)).includes(rgb('primary')));
+		await replaceText(page, 'Table');
+		await key(page, 'Enter');
+		assert.equal(await trimmed(field), 'Table');
+		await field.click();
+		await replaceText(page, 'Junk');
+		await key(page, 'Escape');
+		assert.equal(await trimmed(field), 'Table');
+		await reset.click();
+		assert.equal(await trimmed(field), 'StaticMeshActor_0');
+		assert.equal(await visibilityOf(reset), 'hidden');
+>>>>>>> origin/master
 
 		assert.ok(!(await rowOf('Render in Main Pass').isVisible()));
 		await frame.locator('.DetailsCategory-advRow').click();
@@ -798,6 +1019,7 @@ test('DetailsCategory: headers fold their rows, row arrows fold children, checkb
 		await frame.locator('.DetailsCategory-catRow').nth(1).click();
 		assert.ok(await frame.locator('.DetailsCategory-row', { hasText: 'SM_Chair' }).isVisible());
 
+<<<<<<< HEAD
 		const pinned = page.locator('[data-pinned] .DetailsCategory-frame');
 		assert.equal(await pinned.locator('xpath=ancestor::ue-details-category[@data-pinned]').count(), 1);
 		await assertInert(pinned);
@@ -824,11 +1046,34 @@ test('DetailsCategory: the live details panel filters rows by search and section
 
 		assert.deepEqual(await cats(), ['General', 'Rendering']);
 		assert.deepEqual(await shown(), everything);
+=======
+		const pinned = page.locator('.DetailsCategory-frame').last();
+		assert.equal(await pinned.locator('xpath=ancestor::ue-details-category').count(), 0);
+		assert.ok(await pinned.locator('.DetailsCategory-row.is-hover').isVisible());
+	});
+});
+
+test('DetailsCategory: the live details panel filters rows by search and section', async () => {
+	await inPreview('DetailsCategory', async (page) => {
+		const panel = page.locator('.DetailsCategory-panel');
+		const input = panel.locator('.DetailsCategory-srInput');
+		const shown = (): Promise<string[]> => panel.locator('.DetailsCategory-row').evaluateAll((rows) => rows.filter((row) => (row as HTMLElement).offsetParent !== null).map((row) => (row.querySelector('.DetailsCategory-label')?.textContent ?? '').trim()));
+		const cats = (): Promise<string[]> => panel.locator('.DetailsCategory-cat').evaluateAll((els) => els.filter((el) => (el as HTMLElement).offsetParent !== null).map((el) => (el.querySelector('.DetailsCategory-title')?.textContent ?? '').trim()));
+		const pill = (label: string): Locator => panel.locator('.DetailsCategory-pill', { hasText: new RegExp('^' + label + '$') });
+		const option = async (name: string): Promise<void> => {
+			await panel.locator('[data-role="options"]').click();
+			await panel.locator('[data-option="' + name + '"]').click();
+		};
+
+		assert.deepEqual(await cats(), ['General', 'Rendering']);
+		assert.equal((await shown()).length, 7);
+>>>>>>> origin/master
 
 		await input.click();
 		await typeIn(page, 'shadow');
 		assert.deepEqual(await shown(), ['Lighting', 'Cast Shadow'], 'the parent row stays with its matching child');
 		assert.deepEqual(await cats(), ['Rendering'], 'a category with no match hides');
+<<<<<<< HEAD
 		assert.ok(await panel.locator('.textinput__clear').isVisible());
 		await key(page, 'Escape');
 		assert.equal(await input.inputValue(), '');
@@ -841,11 +1086,26 @@ test('DetailsCategory: the live details panel filters rows by search and section
 		assert.deepEqual(await shown(), []);
 		assert.ok(await panel.locator('.DetailsCategory-empty').isVisible(), 'empty message');
 		await panel.locator('.textinput__clear').click();
+=======
+		assert.ok(await panel.locator('.DetailsCategory-srClear').isVisible());
+		await key(page, 'Escape');
+		assert.equal(await input.inputValue(), '');
+		assert.equal((await shown()).length, 7);
+
+		await typeIn(page, 'zzz');
+		assert.deepEqual(await shown(), []);
+		assert.ok(await panel.locator('.DetailsCategory-empty').isVisible(), 'empty message');
+		await panel.locator('.DetailsCategory-srClear').click();
+>>>>>>> origin/master
 		assert.ok(!(await panel.locator('.DetailsCategory-empty').isVisible()));
 
 		await pill('General').click();
 		assert.deepEqual(await cats(), ['General']);
+<<<<<<< HEAD
 		assert.equal(await panel.locator('.FilterPills-pill.is-checked').count(), 1);
+=======
+		assert.equal(await panel.locator('.DetailsCategory-pill.is-checked').count(), 1);
+>>>>>>> origin/master
 		await pill('Physics').click();
 		assert.deepEqual(await cats(), []);
 		assert.ok(await panel.locator('.DetailsCategory-empty').isVisible());
@@ -854,12 +1114,17 @@ test('DetailsCategory: the live details panel filters rows by search and section
 		await input.click();
 		await typeIn(page, 'tags');
 		assert.deepEqual(await shown(), [], 'search and section combine');
+<<<<<<< HEAD
 		await panel.locator('.textinput__clear').click();
+=======
+		await panel.locator('.DetailsCategory-srClear').click();
+>>>>>>> origin/master
 		await pill('All').click();
 
 		await option('collapseAll');
 		assert.deepEqual(await shown(), []);
 		await option('expandAll');
+<<<<<<< HEAD
 		assert.deepEqual(await shown(), everything);
 		await option('modified');
 		assert.deepEqual(await shown(), ['Actor Label', 'Tags', 'Mass', 'Location'], 'only rows with a reset arrow');
@@ -869,19 +1134,32 @@ test('DetailsCategory: the live details panel filters rows by search and section
 		assert.deepEqual(await shown(), ['Actor Label', 'Tags'], 'resetting the nested vector row drops it too');
 		await option('modified');
 		assert.deepEqual(await shown(), everything);
+=======
+		assert.equal((await shown()).length, 7);
+		await option('modified');
+		assert.deepEqual(await shown(), ['Actor Label', 'Tags'], 'only rows with a reset arrow');
+		await option('modified');
+		assert.equal((await shown()).length, 7);
+>>>>>>> origin/master
 
 		const star = panel.locator('[data-role="favorites"]');
 		await star.click();
 		assert.equal(await star.getAttribute('aria-pressed'), 'true');
 		const lock = panel.locator('[data-role="lock"]');
 		await lock.click();
+<<<<<<< HEAD
 		assert.equal(await lock.getAttribute('aria-pressed'), 'true');
 		assert.ok(await lock.locator('.DetailsHeader-shackle--shut').isVisible());
 		const name = panel.locator('.DetailsHeader-label');
+=======
+		assert.equal(await lock.locator('use').getAttribute('href'), '#DetailsCategory-locked');
+		const name = panel.locator('.DetailsCategory-hdrName');
+>>>>>>> origin/master
 		await name.click();
 		await replaceText(page, 'Bench');
 		await key(page, 'Enter');
 		assert.equal(await trimmed(name), 'Bench');
+<<<<<<< HEAD
 		assert.equal(await trimmed(panel.locator('.DetailsHeader-instance .DetailsHeader-instanceName')), 'Bench');
 	});
 });
@@ -983,6 +1261,16 @@ for (const name of ['DetailsHeader', 'DetailsSearchRow', 'FilterPills', 'Details
 		await inPreview(name, async (page) => {
 			assert.equal(await page.locator('script:not([src])').count(), 0, 'inline script');
 			assert.equal(await page.locator('script:not([src$="bundle.js"]):not([src$=".js"])').count(), 0, 'script tag');
+=======
+	});
+});
+
+for (const name of ['DetailsHeader', 'DetailsSearchRow', 'FilterPills', 'DetailsCategory', 'VectorInput', 'SegmentedControl', 'AssetPicker']) {
+	test(name + ': one module script, no inline script, captions present', async () => {
+		await inPreview(name, async (page) => {
+			assert.equal(await page.locator('script:not([src])').count(), 0, 'inline script');
+			assert.equal(await page.locator('script[type="module"]').count(), 1);
+>>>>>>> origin/master
 			assert.ok((await page.locator('[class*="-cap"]').count()) >= 1, 'captions');
 		});
 	});

@@ -1,13 +1,20 @@
+<<<<<<< HEAD
 // <ue-header-row> wraps one .hr-row. A .hr-cell with aria-sort sorts on click; a .hr-grip inside a cell resizes it against the next cell.
 import { UeElement, define } from '../_shared/element.ts';
 import { drag } from '../_shared/drag.ts';
 import './HeaderRow.css';
+=======
+// <ue-header-row> wraps a .hr-row. A .hr-cell with aria-sort sorts on click; a .hr-grip inside a cell resizes it against the next cell.
+import { UeElement, define } from '../_shared/element.ts';
+import { drag } from '../_shared/drag.ts';
+>>>>>>> origin/master
 
 const CELL = '.hr-cell';
 const SORTABLE = '.hr-cell[aria-sort]';
 const GRIP = '.hr-grip';
 const ARROW = '.hr-sort';
 
+<<<<<<< HEAD
 const GLYPH: Record<string, string> = {
 	up: 'M2 8l4-5 4 5z',
 	down: 'M2 4l4 5 4-5z',
@@ -16,6 +23,8 @@ const GLYPH: Record<string, string> = {
 };
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
+=======
+>>>>>>> origin/master
 // Smallest column width, SHeaderRow.cpp:872.
 const MIN_WIDTH = 20;
 const KEY_STEP = 8;
@@ -26,6 +35,7 @@ type Priority = 'primary' | 'secondary';
 export interface SortDetail {
 	column: string;
 	mode: Mode;
+<<<<<<< HEAD
 	// Same as mode: 'ascending', 'descending' or 'none'.
 	direction: Mode;
 	priority: Priority;
@@ -38,6 +48,11 @@ export interface ResizeDetail {
 	nextWidth: number;
 }
 
+=======
+	priority: Priority;
+}
+
+>>>>>>> origin/master
 function modeOf(cell: HTMLElement): Mode {
 	const value = cell.getAttribute('aria-sort');
 	return value === 'ascending' || value === 'descending' ? value : 'none';
@@ -51,6 +66,7 @@ function priorityOf(cell: HTMLElement): Priority {
 function paint(cell: HTMLElement, mode: Mode, priority: Priority): void {
 	cell.setAttribute('aria-sort', mode);
 	cell.dataset.priority = priority;
+<<<<<<< HEAD
 	let arrow = cell.querySelector<SVGElement>(ARROW);
 	if (!arrow) {
 		arrow = document.createElementNS(SVG_NS, 'svg');
@@ -68,11 +84,22 @@ function paint(cell: HTMLElement, mode: Mode, priority: Priority): void {
 	}
 	arrow.toggleAttribute('hidden', mode === 'none');
 	path.setAttribute('d', GLYPH[(mode === 'descending' ? 'down' : 'up') + (priority === 'secondary' ? '2' : '')]);
+=======
+	const arrow = cell.querySelector<SVGElement>(ARROW);
+	if (!arrow) return;
+	arrow.toggleAttribute('hidden', mode === 'none');
+	const symbol = 'hr-' + (mode === 'descending' ? 'down' : 'up') + (priority === 'secondary' ? '2' : '');
+	arrow.querySelector('use')?.setAttribute('href', '#' + symbol);
+>>>>>>> origin/master
 }
 
 export class HeaderRow extends UeElement {
 	protected setup(): void {
+<<<<<<< HEAD
 		const sortable = (): HTMLElement[] => this.all(SORTABLE).filter((cell) => this.owns(cell));
+=======
+		const sortable = (): HTMLElement[] => this.all(SORTABLE);
+>>>>>>> origin/master
 		for (const cell of sortable()) paint(cell, modeOf(cell), priorityOf(cell));
 
 		// SHeaderRow.cpp:392-430: an unsorted column starts ascending, a sorted one flips. Shift adds a secondary key.
@@ -90,30 +117,46 @@ export class HeaderRow extends UeElement {
 				if (other !== cell && modeOf(other) !== 'none' && priorityOf(other) === priority) paint(other, 'none', priority);
 			}
 			paint(cell, mode, priority);
+<<<<<<< HEAD
 			this.emit<SortDetail>('ue-sort', { column: cell.dataset.column ?? '', mode, direction: mode, priority });
+=======
+			this.emit<SortDetail>('ue-sort', { column: cell.dataset.column ?? '', mode, priority });
+>>>>>>> origin/master
 		};
 
 		this.on(this, 'click', (event) => {
 			const target = event.target;
+<<<<<<< HEAD
 			if (!(target instanceof Element) || target.closest(GRIP) || !this.owns(target)) return;
+=======
+			if (!(target instanceof Element) || target.closest(GRIP)) return;
+>>>>>>> origin/master
 			const cell = target.closest<HTMLElement>(SORTABLE);
 			if (cell && this.contains(cell)) activate(cell, event.shiftKey);
 		});
 
 		this.on(this, 'keydown', (event) => {
 			const target = event.target;
+<<<<<<< HEAD
 			if (!(target instanceof HTMLElement) || !target.matches(SORTABLE) || !this.owns(target)) return;
+=======
+			if (!(target instanceof HTMLElement) || !target.matches(SORTABLE)) return;
+>>>>>>> origin/master
 			if (event.key !== 'Enter' && event.key !== ' ') return;
 			event.preventDefault();
 			activate(target, event.shiftKey);
 		});
 
+<<<<<<< HEAD
 		const grips = this.all(GRIP).filter((grip) => this.owns(grip));
 		const resizable = this.getAttribute('grips') !== 'off';
 		for (const grip of grips) {
 			grip.hidden = !resizable;
 			if (resizable) this.#bindGrip(grip);
 		}
+=======
+		for (const grip of this.all(GRIP)) this.#bindGrip(grip);
+>>>>>>> origin/master
 	}
 
 	#bindGrip(grip: HTMLElement): void {
@@ -126,6 +169,7 @@ export class HeaderRow extends UeElement {
 		let total = 0;
 		const apply = (width: number): void => {
 			const clamped = Math.min(total - MIN_WIDTH, Math.max(MIN_WIDTH, width));
+<<<<<<< HEAD
 			left.style.flex = clamped + ' 1 ' + clamped + 'px';
 			right.style.flex = total - clamped + ' 1 ' + (total - clamped) + 'px';
 			grip.setAttribute('aria-valuenow', String(Math.round(clamped)));
@@ -138,6 +182,13 @@ export class HeaderRow extends UeElement {
 			flexible.forEach((cell, i) => {
 				cell.style.flex = widths[i] + ' 1 ' + widths[i] + 'px';
 			});
+=======
+			cells.style.setProperty('--hr-a', clamped + 'fr');
+			cells.style.setProperty('--hr-b', total - clamped + 'fr');
+			grip.setAttribute('aria-valuenow', String(Math.round(clamped)));
+		};
+		const measure = (): void => {
+>>>>>>> origin/master
 			startLeft = left.getBoundingClientRect().width;
 			total = startLeft + right.getBoundingClientRect().width;
 		};

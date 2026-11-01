@@ -1,6 +1,7 @@
 // design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
+<<<<<<< HEAD
   #ready = false;
   #pendingSetup = null;
   // The bundle can load before the parser reaches this element's children, so setup waits for the document to finish parsing.
@@ -27,6 +28,15 @@ var UeElement = class extends HTMLElement {
     this.#ready = true;
     this.setup();
   }
+=======
+  connectedCallback() {
+    this.style.display = "contents";
+    this.setup();
+  }
+  disconnectedCallback() {
+    for (const dispose of this.#disposers.splice(0)) dispose();
+  }
+>>>>>>> origin/master
   on(target, type, listener, options) {
     target.addEventListener(type, listener, options);
     this.#disposers.push(() => target.removeEventListener(type, listener, options));
@@ -38,10 +48,13 @@ var UeElement = class extends HTMLElement {
   emit(name, detail) {
     return this.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
   }
+<<<<<<< HEAD
   // True when the nearest element of this tag above the target is this element, so a nested instance keeps its own events.
   owns(target) {
     return target instanceof Element && target.closest(this.localName) === this;
   }
+=======
+>>>>>>> origin/master
   all(selector) {
     return Array.from(this.querySelectorAll(selector));
   }
@@ -53,6 +66,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
+<<<<<<< HEAD
 // design-system/src/_shared/own.ts
 function ownedBy(host, target) {
   return target instanceof Element && target.closest(host.localName) === host;
@@ -97,13 +111,19 @@ var UeButtonElement = class extends UeElement {
 };
 define("ue-button", UeButtonElement);
 
+=======
+>>>>>>> origin/master
 // design-system/src/Notification/Notification.ts
 var UeNotificationElement = class extends UeElement {
   #shown = 0;
   setup() {
     this.on(this, "click", (event) => {
       if (!(event.target instanceof Element)) return;
+<<<<<<< HEAD
       const button = event.target.closest(".button[data-action]");
+=======
+      const button = event.target.closest(".notification__btn");
+>>>>>>> origin/master
       if (!button) return;
       switch (button.dataset.action) {
         case "dismiss":

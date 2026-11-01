@@ -1,6 +1,10 @@
 // design-system/src/_shared/popup.ts
 function enabledRows(menu, rowSelector) {
+<<<<<<< HEAD
   return Array.from(menu.querySelectorAll(rowSelector)).filter((row) => !row.hidden && row.getAttribute("aria-disabled") !== "true");
+=======
+  return Array.from(menu.querySelectorAll(rowSelector)).filter((row) => row.getAttribute("aria-disabled") !== "true");
+>>>>>>> origin/master
 }
 function moveRowFocus(rows, current, key) {
   if (rows.length === 0) return false;

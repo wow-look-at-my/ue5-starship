@@ -1,6 +1,7 @@
 // design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
+<<<<<<< HEAD
   #ready = false;
   #pendingSetup = null;
   // The bundle can load before the parser reaches this element's children, so setup waits for the document to finish parsing.
@@ -27,6 +28,15 @@ var UeElement = class extends HTMLElement {
     this.#ready = true;
     this.setup();
   }
+=======
+  connectedCallback() {
+    this.style.display = "contents";
+    this.setup();
+  }
+  disconnectedCallback() {
+    for (const dispose of this.#disposers.splice(0)) dispose();
+  }
+>>>>>>> origin/master
   on(target, type, listener, options) {
     target.addEventListener(type, listener, options);
     this.#disposers.push(() => target.removeEventListener(type, listener, options));
@@ -38,10 +48,13 @@ var UeElement = class extends HTMLElement {
   emit(name, detail) {
     return this.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
   }
+<<<<<<< HEAD
   // True when the nearest element of this tag above the target is this element, so a nested instance keeps its own events.
   owns(target) {
     return target instanceof Element && target.closest(this.localName) === this;
   }
+=======
+>>>>>>> origin/master
   all(selector) {
     return Array.from(this.querySelectorAll(selector));
   }
@@ -53,6 +66,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
+<<<<<<< HEAD
 // design-system/src/_shared/own.ts
 function ownedBy(host, target) {
   return target instanceof Element && target.closest(host.localName) === host;
@@ -60,16 +74,29 @@ function ownedBy(host, target) {
 
 // design-system/src/Button/Button.ts
 var PRESSED = "button--pressed";
+=======
+// design-system/src/Button/Button.ts
+var PRESSED = "button--pressed";
+function buttonOf(target) {
+  return target instanceof Element ? target.closest(".button") : null;
+}
+>>>>>>> origin/master
 function isDisabled(button) {
   return button.matches(":disabled") || button.getAttribute("aria-disabled") === "true";
 }
 var UeButtonElement = class extends UeElement {
   #clicks = 0;
   setup() {
+<<<<<<< HEAD
     const button = this.one(".button");
     if (!button) throw new Error("ue-button needs a .button element");
     this.on(button, "keydown", (event) => {
       if (!ownedBy(this, event.target) || isDisabled(button) || event.repeat) return;
+=======
+    this.on(this, "keydown", (event) => {
+      const button = buttonOf(event.target);
+      if (!button || isDisabled(button) || event.repeat) return;
+>>>>>>> origin/master
       if (event.key !== "Enter" && event.key !== " ") return;
       button.classList.add(PRESSED);
       if (button.tagName !== "BUTTON") {
@@ -77,11 +104,18 @@ var UeButtonElement = class extends UeElement {
         if (event.key === "Enter") button.click();
       }
     });
+<<<<<<< HEAD
     this.on(button, "keyup", (event) => {
+=======
+    this.on(this, "keyup", (event) => {
+      const button = buttonOf(event.target);
+      if (!button) return;
+>>>>>>> origin/master
       const wasPressed = button.classList.contains(PRESSED);
       button.classList.remove(PRESSED);
       if (wasPressed && button.tagName !== "BUTTON" && event.key === " ") button.click();
     });
+<<<<<<< HEAD
     this.on(button, "focusout", () => button.classList.remove(PRESSED));
     this.on(button, "click", () => {
       if (isDisabled(button)) return;
@@ -92,6 +126,19 @@ var UeButtonElement = class extends UeElement {
       }
       this.#clicks++;
       this.emit("ue-button-click", { label: button.getAttribute("aria-label") ?? button.textContent?.trim() ?? "", pressed, count: this.#clicks });
+=======
+    this.on(this, "focusout", (event) => {
+      const button = buttonOf(event.target);
+      if (button) button.classList.remove(PRESSED);
+    });
+    this.on(this, "click", (event) => {
+      const button = buttonOf(event.target);
+      if (!button || isDisabled(button)) return;
+      this.#clicks++;
+      this.dataset.clicks = String(this.#clicks);
+      const counter = this.one(".button-count");
+      if (counter) counter.textContent = "Clicks: " + this.#clicks + " (last: " + (button.getAttribute("aria-label") ?? button.textContent?.trim() ?? "") + ")";
+>>>>>>> origin/master
     });
   }
 };

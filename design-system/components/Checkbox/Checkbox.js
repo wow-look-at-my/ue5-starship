@@ -1,6 +1,7 @@
 // design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
+<<<<<<< HEAD
   #ready = false;
   #pendingSetup = null;
   // The bundle can load before the parser reaches this element's children, so setup waits for the document to finish parsing.
@@ -27,6 +28,15 @@ var UeElement = class extends HTMLElement {
     this.#ready = true;
     this.setup();
   }
+=======
+  connectedCallback() {
+    this.style.display = "contents";
+    this.setup();
+  }
+  disconnectedCallback() {
+    for (const dispose of this.#disposers.splice(0)) dispose();
+  }
+>>>>>>> origin/master
   on(target, type, listener, options) {
     target.addEventListener(type, listener, options);
     this.#disposers.push(() => target.removeEventListener(type, listener, options));
@@ -38,10 +48,13 @@ var UeElement = class extends HTMLElement {
   emit(name, detail) {
     return this.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
   }
+<<<<<<< HEAD
   // True when the nearest element of this tag above the target is this element, so a nested instance keeps its own events.
   owns(target) {
     return target instanceof Element && target.closest(this.localName) === this;
   }
+=======
+>>>>>>> origin/master
   all(selector) {
     return Array.from(this.querySelectorAll(selector));
   }
@@ -54,6 +67,12 @@ function define(tag, ctor) {
 }
 
 // design-system/src/Checkbox/Checkbox.ts
+<<<<<<< HEAD
+=======
+function control(target) {
+  return target instanceof Element ? target.closest(".checkbox, .checkbox-toggle") : null;
+}
+>>>>>>> origin/master
 function disabled(el) {
   return el.getAttribute("aria-disabled") === "true";
 }
@@ -67,6 +86,7 @@ function nextState(el) {
 }
 var UeCheckboxElement = class extends UeElement {
   setup() {
+<<<<<<< HEAD
     const el = this.one(".checkbox, .checkbox-toggle");
     if (!el) throw new Error("ue-checkbox needs a .checkbox or .checkbox-toggle element");
     const pressedClass = el.classList.contains("checkbox") ? "checkbox--pressed" : "checkbox-toggle--pressed";
@@ -92,20 +112,60 @@ var UeCheckboxElement = class extends UeElement {
   #toggle(el) {
     let text;
     let checked;
+=======
+    this.on(this, "click", (event) => {
+      const el = control(event.target);
+      if (el && !disabled(el)) this.#toggle(el);
+    });
+    this.on(this, "keydown", (event) => {
+      const el = control(event.target);
+      if (!el || disabled(el) || el !== event.target) return;
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      if (!event.repeat) el.classList.add(el.classList.contains("checkbox") ? "checkbox--pressed" : "checkbox-toggle--pressed");
+    });
+    this.on(this, "keyup", (event) => {
+      const el = control(event.target);
+      if (!el || disabled(el) || el !== event.target) return;
+      if (event.key !== "Enter" && event.key !== " ") return;
+      const cls = el.classList.contains("checkbox") ? "checkbox--pressed" : "checkbox-toggle--pressed";
+      if (el.classList.contains(cls)) {
+        el.classList.remove(cls);
+        this.#toggle(el);
+      }
+    });
+    this.on(this, "focusout", (event) => {
+      const el = control(event.target);
+      if (el) el.classList.remove("checkbox--pressed", "checkbox-toggle--pressed");
+    });
+  }
+  #toggle(el) {
+    let text;
+>>>>>>> origin/master
     if (el.classList.contains("checkbox-toggle")) {
       const on = !el.classList.contains("checkbox-toggle--checked");
       el.classList.toggle("checkbox-toggle--checked", on);
       el.setAttribute("aria-pressed", String(on));
       text = on ? "on" : "off";
+<<<<<<< HEAD
       checked = on;
+=======
+>>>>>>> origin/master
     } else {
       const state = nextState(el);
       el.setAttribute("aria-checked", state);
       text = state === "mixed" ? "undetermined" : state === "true" ? "checked" : "unchecked";
+<<<<<<< HEAD
       checked = state === "mixed" ? null : state === "true";
     }
     const label = el.dataset.label ?? el.getAttribute("aria-label") ?? el.querySelector(".checkbox__label")?.textContent?.trim() ?? el.textContent?.trim() ?? "";
     this.emit("ue-checkbox-change", { label, state: text, checked, text: label + " is " + text });
+=======
+    }
+    const status = this.one(".checkbox-status");
+    if (status) status.textContent = "Last change: " + (el.dataset.label ?? "") + " is " + text;
+    this.emit("ue-checkbox-change", { label: el.dataset.label ?? "", state: text });
+>>>>>>> origin/master
   }
 };
 define("ue-checkbox", UeCheckboxElement);

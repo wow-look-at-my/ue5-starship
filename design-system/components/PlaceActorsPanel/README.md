@@ -59,15 +59,26 @@ Citations: `SC` is `Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp`, `S
 
 ## Live behaviour
 
+<<<<<<< HEAD
 `<ue-place-actors-panel>` (`src/PlaceActorsPanel/PlaceActorsPanel.ts`, built to `PlaceActorsPanel.js`) wraps a `.placeActors`. Each `.SegmentedControl-seg` carries `data-value` with the category name, and each `.placeActors-group` holds the rows of the same category.
 
 - A category change (`ue-segment-change`, by click or by Left, Right, Home and End on the strip) shows its group and writes the name into the section label. `ue-category-change` repeats it with `{ category }`.
 - The search field is the real input of the `ue-text-input`. Typing (`ue-text-input`) hides the rows of the shown group whose name does not contain the text. The clear X and Escape belong to the text input. A message shows when no row matches.
+=======
+`<ue-place-actors-panel>` (`src/PlaceActorsPanel/PlaceActorsPanel.ts`, built to `PlaceActorsPanel.js`) wraps a `.placeActors`. Each `.placeActors-cat` carries `data-category`, and each `.placeActors-group` holds the rows of the same category.
+
+- Clicking a category (or Left, Right, Home, End on the strip) sets `.is-active` and `aria-checked`, shows its group and writes the name into the section label.
+- The search field is a real `<input class="placeActors-field">` with the hint as its placeholder. Typing hides the rows of the shown group whose name does not contain the text. The clear X shows while the field text (`SSearchBox.cpp:251-256`). It and Escape empty the field. A message shows when no row matches.
+>>>>>>> origin/master
 - Rows show the hover and pressed outlines through `:hover` and `:active`. The info button fills Hover on hover.
 - Double click or Enter on a row fires `ue-place` with `{ name }`.
 - The live panel lists the built-in categories of `PlacementModeModule.cpp:130-290`. The Basic, Lights, Shapes and Visual Effects items are factories registered there (`PlacementModeModule.cpp:150-260`). The Recent, Volumes and All items are illustrative, because the engine fills them at run time. The clapperboard category of the reference screenshot is not in this module and is left out of the live panel.
 - Search filters only the shown category. The engine search spans every category. This is a simplification.
+<<<<<<< HEAD
 - A panel in `<ue-place-actors-panel data-pinned>` (the forced-state specimens) runs no setup and ignores the pointer.
+=======
+- A panel with `data-pinned` (the forced-state specimens) stays plain HTML.
+>>>>>>> origin/master
 
 ## Not found in source
 

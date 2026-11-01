@@ -54,6 +54,7 @@ let baseUrl: Promise<string> | undefined;
 export function serve(): Promise<string> {
 	baseUrl ??= new Promise((resolve, reject) => {
 		const server = http.createServer((req, res) => {
+<<<<<<< HEAD
 			if (process.env.UE_PUBLISHED) {
 				// UE_PUBLISHED is the published artifact's project URL, so the suite runs against the bytes the viewer serves.
 				void fetch(process.env.UE_PUBLISHED + (req.url ?? '/')).then(async (upstream) => {
@@ -62,6 +63,8 @@ export function serve(): Promise<string> {
 				}, () => res.writeHead(502).end());
 				return;
 			}
+=======
+>>>>>>> origin/master
 			const file = path.join(root, decodeURIComponent(new URL(req.url ?? '/', 'http://x').pathname));
 			if (!file.startsWith(root) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
 				res.writeHead(404).end();
@@ -80,6 +83,7 @@ export function serve(): Promise<string> {
 	return baseUrl;
 }
 
+<<<<<<< HEAD
 // The design system page preloads components/bundle.js as a classic script ahead of the preview markup.
 const pascal = (tag: string): string => tag.split('-').slice(1).map((part) => part[0].toUpperCase() + part.slice(1)).join('');
 
@@ -109,11 +113,17 @@ export async function openPreview(browser: Browser, name: string, viewport = { w
 		const original = page[method].bind(page) as (selector: string, ...rest: unknown[]) => Promise<unknown>;
 		(page as unknown as Record<string, unknown>)[method] = (selector: string, ...rest: unknown[]) => original(live(selector), ...rest);
 	}
+=======
+// Opens a component preview with the tokens injected. Console and page errors collect in `errors`.
+export async function openPreview(browser: Browser, name: string, viewport = { width: 1000, height: 800 }): Promise<Preview> {
+	const page = await browser.newPage({ viewport });
+>>>>>>> origin/master
 	const errors: string[] = [];
 	page.on('pageerror', (e) => errors.push(String(e)));
 	page.on('console', (m) => {
 		if (m.type() === 'error' && !/fonts\.g|ERR_|Failed to load resource/.test(m.text())) errors.push(m.text());
 	});
+<<<<<<< HEAD
 	await page.route('**/components/*/preview.html', async (route) => {
 		const response = await route.fetch();
 		await route.fulfill({ response, body: withBundle(await response.text()) });
@@ -122,6 +132,10 @@ export async function openPreview(browser: Browser, name: string, viewport = { w
 	await page.addStyleTag({ content: tokensCss() });
 	// Text widths change when the web font arrives, so measure only after it loads.
 	await page.evaluate(() => document.fonts.ready.then(() => undefined));
+=======
+	await page.goto((await serve()) + '/components/' + name + '/preview.html');
+	await page.addStyleTag({ content: tokensCss() });
+>>>>>>> origin/master
 	await page.waitForTimeout(100);
 	return { page, errors };
 }

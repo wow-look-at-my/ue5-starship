@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // <ue-details-category> is a category tree. The live panel adds a ue-details-header, a ue-details-search-row and a ue-filter-pills strip above it.
 // The controls in the rows are primitives or nested composites. This element folds the categories and filters the rows.
 import { UeElement, define } from '../_shared/element.ts';
@@ -13,6 +14,15 @@ import '../TextInput/TextInput.ts';
 import '../VectorInput/VectorInput.ts';
 import type { UeSpinBoxElement } from '../SpinBox/SpinBox.ts';
 import './DetailsCategory.css';
+=======
+// <ue-details-category> wraps a category tree (and, in the live panel, the
+// header, search row and pills above it).
+import { UeElement, define } from '../_shared/element.ts';
+import { wireMenu } from '../_shared/popupmenu.ts';
+
+const DOWN = '#DetailsCategory-down';
+const RIGHT = '#DetailsCategory-right';
+>>>>>>> origin/master
 
 interface Item {
 	el: HTMLElement;
@@ -24,6 +34,7 @@ interface Item {
 
 const isIn = (el: Element, selector: string): HTMLElement | null => el.closest<HTMLElement>(selector);
 
+<<<<<<< HEAD
 // A row of a nested composite, such as a ue-vector-input row, names itself with data-label.
 const isRow = (el: HTMLElement): boolean => el.classList.contains('DetailsCategory-row') || el.dataset.label !== undefined;
 
@@ -38,10 +49,19 @@ class UeDetailsCategory extends UeElement {
 		this.#section = this.one('.FilterPills-pill.is-checked')?.dataset.value ?? '';
 		this.wireFrame(frame);
 		this.wireControls(frame);
+=======
+class UeDetailsCategory extends UeElement {
+	protected setup(): void {
+		const frame = this.one('.DetailsCategory-frame');
+		if (!frame) return;
+		this.wireFrame(frame);
+		if (this.one('.DetailsCategory-panel')) this.wirePanel(frame);
+>>>>>>> origin/master
 		for (const row of this.all('.DetailsCategory-row')) this.syncReset(row);
 		this.refresh(frame);
 	}
 
+<<<<<<< HEAD
 	// The panel controls announce themselves with events. The tree only listens.
 	private wireControls(frame: HTMLElement): void {
 		this.on(this, 'ue-search', (event) => {
@@ -60,6 +80,18 @@ class UeDetailsCategory extends UeElement {
 			}
 			this.refresh(frame);
 		});
+=======
+	private query(): string {
+		return (this.one<HTMLInputElement>('.DetailsCategory-srInput')?.value ?? '').trim().toLowerCase();
+	}
+
+	private section(): string {
+		return this.one('.DetailsCategory-pill.is-checked')?.dataset.section ?? '';
+	}
+
+	private modifiedOnly(): boolean {
+		return this.one('[data-option="modified"]')?.getAttribute('aria-checked') === 'true';
+>>>>>>> origin/master
 	}
 
 	private wireFrame(frame: HTMLElement): void {
@@ -68,10 +100,33 @@ class UeDetailsCategory extends UeElement {
 			const catRow = isIn(target, '.DetailsCategory-catRow');
 			const advRow = isIn(target, '.DetailsCategory-advRow');
 			const arrow = isIn(target, '.DetailsCategory-rowArrow.has-children');
+<<<<<<< HEAD
 			if (catRow) catRow.closest('.DetailsCategory-cat')?.classList.toggle('is-collapsed');
 			else if (advRow) advRow.closest('.DetailsCategory-adv')?.classList.toggle('is-open');
 			else if (arrow) arrow.closest('.DetailsCategory-row')?.classList.toggle('is-collapsed');
 			else return;
+=======
+			const check = isIn(target, '.DetailsCategory-check[role="checkbox"]');
+			const reset = isIn(target, '.DetailsCategory-reset[role="button"]');
+			if (catRow) catRow.closest('.DetailsCategory-cat')?.classList.toggle('is-collapsed');
+			else if (advRow) advRow.closest('.DetailsCategory-adv')?.classList.toggle('is-open');
+			else if (arrow) arrow.closest('.DetailsCategory-row')?.classList.toggle('is-collapsed');
+			else if (check) {
+				const on = check.getAttribute('aria-checked') !== 'true';
+				check.setAttribute('aria-checked', String(on));
+				check.classList.toggle('is-off', !on);
+				return;
+			} else if (reset) {
+				const row = reset.closest<HTMLElement>('.DetailsCategory-row');
+				const text = row?.querySelector('.DetailsCategory-text');
+				if (row && text) {
+					text.textContent = row.dataset.default ?? '';
+					this.syncReset(row);
+					this.refresh(frame);
+				}
+				return;
+			} else return;
+>>>>>>> origin/master
 			this.refresh(frame);
 		});
 
@@ -84,13 +139,18 @@ class UeDetailsCategory extends UeElement {
 				this.refresh(frame);
 				return;
 			}
+<<<<<<< HEAD
 			const activates = target.matches('.DetailsCategory-catRow, .DetailsCategory-advRow, .DetailsCategory-rowArrow');
+=======
+			const activates = target.matches('.DetailsCategory-catRow, .DetailsCategory-advRow, .DetailsCategory-rowArrow, .DetailsCategory-check, .DetailsCategory-reset');
+>>>>>>> origin/master
 			if (activates && (event.key === 'Enter' || event.key === ' ')) {
 				event.preventDefault();
 				target.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 			}
 		});
 
+<<<<<<< HEAD
 		// A text value commits live. Enter ends the edit and Escape restores the text from before it.
 		this.on(frame, 'focusin', (event) => {
 			const field = this.fieldOf(event.target);
@@ -121,11 +181,34 @@ class UeDetailsCategory extends UeElement {
 			const spin = row.querySelector<UeSpinBoxElement>('ue-spin-box');
 			if (field) field.value = def;
 			else if (spin) spin.value = Number(def);
+=======
+		this.on(frame, 'focusin', (event) => {
+			const text = isIn(event.target as Element, '.DetailsCategory-text');
+			if (text) text.dataset.before = text.textContent ?? '';
+		});
+		this.on(frame, 'keydown', (event) => {
+			const text = isIn(event.target as Element, '.DetailsCategory-text');
+			if (!text) return;
+			if (event.key === 'Enter') {
+				event.preventDefault();
+				text.blur();
+			} else if (event.key === 'Escape') {
+				text.textContent = text.dataset.before ?? '';
+				text.blur();
+			}
+		});
+		this.on(frame, 'focusout', (event) => {
+			const text = isIn(event.target as Element, '.DetailsCategory-text');
+			const row = text?.closest<HTMLElement>('.DetailsCategory-row');
+			if (!text || !row) return;
+			text.textContent = (text.textContent ?? '').trim();
+>>>>>>> origin/master
 			this.syncReset(row);
 			this.refresh(frame);
 		});
 	}
 
+<<<<<<< HEAD
 	// The text field of a row value, or null for any other target.
 	private fieldOf(target: EventTarget | null): HTMLInputElement | null {
 		const el = target as Element | null;
@@ -175,12 +258,155 @@ class UeDetailsCategory extends UeElement {
 			else if (el.classList.contains('DetailsCategory-adv')) items.push({ el, kind: 'adv', level: 0, matchesText: true, isModified: true });
 			else if (isRow(el)) {
 				const label = (el.dataset.label ?? el.querySelector('.DetailsCategory-label')?.textContent ?? '').toLowerCase();
+=======
+	// The reset arrow shows only while the text differs from the row default.
+	private syncReset(row: HTMLElement): void {
+		const text = row.querySelector('.DetailsCategory-text');
+		const reset = row.querySelector<HTMLElement>('.DetailsCategory-reset[role="button"]');
+		if (!text || !reset || row.dataset.default === undefined) return;
+		const idle = (text.textContent ?? '') === row.dataset.default;
+		reset.classList.toggle('is-idle', idle);
+		reset.tabIndex = idle ? -1 : 0;
+	}
+
+	private wirePanel(frame: HTMLElement): void {
+		const input = this.one<HTMLInputElement>('.DetailsCategory-srInput');
+		const clear = this.one('.DetailsCategory-srClear');
+		if (input && clear) {
+			const sync = (): void => {
+				input.classList.toggle('has-value', input.value !== '');
+				clear.classList.toggle('is-hidden', input.value === '');
+				this.refresh(frame);
+			};
+			const wipe = (): void => {
+				input.value = '';
+				sync();
+				input.focus();
+			};
+			this.on(input, 'input', sync);
+			this.on(input, 'keydown', (event) => {
+				if (event.key === 'Escape' && input.value !== '') {
+					event.preventDefault();
+					wipe();
+				}
+			});
+			this.on(clear, 'click', wipe);
+		}
+
+		const name = this.one('.DetailsCategory-hdrName');
+		if (name) {
+			let before = name.textContent ?? '';
+			this.on(name, 'focus', () => {
+				before = name.textContent ?? '';
+			});
+			this.on(name, 'keydown', (event) => {
+				if (event.key === 'Enter') {
+					event.preventDefault();
+					name.blur();
+				} else if (event.key === 'Escape') {
+					name.textContent = before;
+					name.blur();
+				}
+			});
+			this.on(name, 'blur', () => {
+				const text = (name.textContent ?? '').trim();
+				name.textContent = text === '' ? before : text;
+			});
+		}
+
+		const lock = this.one('[data-role="lock"]');
+		if (lock) {
+			this.on(lock, 'click', () => {
+				const on = lock.getAttribute('aria-pressed') !== 'true';
+				lock.setAttribute('aria-pressed', String(on));
+				lock.querySelector('use')?.setAttribute('href', on ? '#DetailsCategory-locked' : '#DetailsCategory-unlock');
+			});
+		}
+		const star = this.one('[data-role="favorites"]');
+		if (star) {
+			this.on(star, 'click', () => {
+				const on = star.getAttribute('aria-pressed') !== 'true';
+				star.setAttribute('aria-pressed', String(on));
+				star.classList.toggle('is-on', on);
+			});
+		}
+
+		const gear = this.one('[data-role="options"]');
+		const menu = this.one('.DetailsCategory-menu');
+		if (gear && menu) {
+			const handle = wireMenu({
+				trigger: gear,
+				menu,
+				itemSelector: '.DetailsCategory-menuItem',
+				onPick: (item) => {
+					const option = item.dataset.option;
+					if (option === 'modified') item.setAttribute('aria-checked', String(item.getAttribute('aria-checked') !== 'true'));
+					else if (option === 'collapseAll' || option === 'expandAll') {
+						for (const cat of this.all('.DetailsCategory-cat')) cat.classList.toggle('is-collapsed', option === 'collapseAll');
+					}
+					this.refresh(frame);
+				},
+			});
+			this.onDispose(handle.dispose);
+		}
+
+		const strip = this.one('.DetailsCategory-pills');
+		if (strip) {
+			const pills = (): HTMLElement[] => Array.from(strip.querySelectorAll<HTMLElement>('.DetailsCategory-pill'));
+			const select = (pill: HTMLElement, focus: boolean): void => {
+				for (const other of pills()) {
+					other.classList.toggle('is-checked', other === pill);
+					other.setAttribute('aria-selected', String(other === pill));
+					other.tabIndex = other === pill ? 0 : -1;
+				}
+				if (focus) pill.focus();
+				this.refresh(frame);
+			};
+			this.on(strip, 'click', (event) => {
+				const pill = isIn(event.target as Element, '.DetailsCategory-pill');
+				if (pill) select(pill, false);
+			});
+			this.on(strip, 'keydown', (event) => {
+				const all = pills();
+				const at = all.indexOf(document.activeElement as HTMLElement);
+				if (at < 0) return;
+				let next = -1;
+				if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = (at + 1) % all.length;
+				else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') next = (at - 1 + all.length) % all.length;
+				else if (event.key === 'Home') next = 0;
+				else if (event.key === 'End') next = all.length - 1;
+				if (next < 0) return;
+				event.preventDefault();
+				select(all[next], true);
+			});
+		}
+	}
+
+	// Recomputes which cats, rows and the Advanced bar show, and the arrow glyphs.
+	private refresh(frame: HTMLElement): void {
+		const query = this.query();
+		const searching = query !== '';
+		const section = this.section();
+		const onlyModified = this.modifiedOnly();
+
+		const items: Item[] = [];
+		for (const el of Array.from(frame.children) as HTMLElement[]) {
+			if (el.classList.contains('DetailsCategory-cat')) items.push({ el, kind: 'cat', level: 0, matchesText: true, isModified: true });
+			else if (el.classList.contains('DetailsCategory-adv')) items.push({ el, kind: 'adv', level: 0, matchesText: true, isModified: true });
+			else if (el.classList.contains('DetailsCategory-row')) {
+				const label = (el.querySelector('.DetailsCategory-label')?.textContent ?? '').toLowerCase();
+				const reset = el.querySelector('.DetailsCategory-reset[role="button"]');
+>>>>>>> origin/master
 				items.push({
 					el,
 					kind: 'row',
 					level: el.querySelectorAll(':scope > .DetailsCategory-indent').length,
 					matchesText: !searching || label.includes(query),
+<<<<<<< HEAD
 					isModified: !onlyModified || el.querySelector('ue-reset-to-default[differs]') !== null,
+=======
+					isModified: !onlyModified || (reset !== null && !reset.classList.contains('is-idle')),
+>>>>>>> origin/master
 				});
 			}
 		}
@@ -231,11 +457,19 @@ class UeDetailsCategory extends UeElement {
 				catHasRows = false;
 				inAdv = false;
 				closed.length = 0;
+<<<<<<< HEAD
+=======
+				this.setArrow(el.querySelector('.DetailsCategory-arrow use'), !catFolded);
+>>>>>>> origin/master
 				el.querySelector('.DetailsCategory-catRow')?.setAttribute('aria-expanded', String(!catFolded));
 			} else if (item.kind === 'adv') {
 				inAdv = true;
 				advOpen = el.classList.contains('is-open') || searching;
 				el.classList.toggle('is-hidden', catHidden || catFolded || searching);
+<<<<<<< HEAD
+=======
+				this.setArrow(el.querySelector('.DetailsCategory-arrow use'), advOpen);
+>>>>>>> origin/master
 				el.querySelector('.DetailsCategory-advRow')?.setAttribute('aria-expanded', String(advOpen));
 			} else {
 				closed.length = item.level;
@@ -245,7 +479,14 @@ class UeDetailsCategory extends UeElement {
 				const toggle = el.querySelector('.DetailsCategory-rowArrow.has-children');
 				const folded = toggle !== null && el.classList.contains('is-collapsed') && !searching;
 				closed[item.level] = folded;
+<<<<<<< HEAD
 				toggle?.setAttribute('aria-expanded', String(!folded));
+=======
+				if (toggle) {
+					this.setArrow(toggle.querySelector('use'), !folded);
+					toggle.setAttribute('aria-expanded', String(!folded));
+				}
+>>>>>>> origin/master
 				if (!hidden) catHasRows = true;
 			}
 		});
@@ -253,6 +494,13 @@ class UeDetailsCategory extends UeElement {
 
 		frame.querySelector('.DetailsCategory-empty')?.classList.toggle('is-shown', !anyCatShown && (searching || section !== '' || onlyModified));
 	}
+<<<<<<< HEAD
+=======
+
+	private setArrow(use: Element | null, expanded: boolean): void {
+		use?.setAttribute('href', expanded ? DOWN : RIGHT);
+	}
+>>>>>>> origin/master
 }
 
 define('ue-details-category', UeDetailsCategory);

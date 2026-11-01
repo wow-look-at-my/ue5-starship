@@ -1,5 +1,6 @@
 // Interaction tests for the toolbar group: MenuBar, ToolBar, PlaceActorsPanel, StatusBar.
 import { strict as assert } from 'node:assert';
+<<<<<<< HEAD
 import fs from 'node:fs';
 import path from 'node:path';
 import { test } from 'node:test';
@@ -45,6 +46,17 @@ const menuOf = (page: Page, label: string): Locator => after(item(page, label));
 const listOf = (page: Page, label: string): Locator => menuOf(page, label).locator('.popupmenu');
 const currentRow = (page: Page): Promise<string> => page.locator(MB + '.popupmenu__row--hover .popupmenu__label').first().textContent().then((text) => text ?? '');
 const openItems = (page: Page): Promise<number> => page.locator(MB + '.combobutton--open').count();
+=======
+import type { Locator, Page } from 'playwright';
+import { CLEAR, token, prop, fill, ink, hasClass, texts, focusedText, after, press, hold, release, away, clickAway } from './probe.ts';
+import { scenario } from './scenario.ts';
+
+// ---------- MenuBar ----------
+
+const MB = 'ue-menu-bar ';
+const item = (page: Page, label: string): Locator => page.locator(MB + '.menuBar-item').filter({ hasText: new RegExp('^' + label + '$') });
+const menuOf = (page: Page, label: string): Locator => after(item(page, label));
+>>>>>>> origin/master
 
 scenario('MenuBar: hovering an item fills Hover with ForegroundHover text', 'MenuBar', async (page) => {
 	const file = item(page, 'File');
@@ -62,7 +74,11 @@ scenario('MenuBar: a click opens the dropdown, Escape closes it', 'MenuBar', asy
 	assert.equal(await menu.isVisible(), true);
 	assert.equal(await file.getAttribute('aria-expanded'), 'true');
 	assert.equal(await fill(file), await token(page, 'primary'));
+<<<<<<< HEAD
 	assert.equal(await fill(listOf(page, 'File')), await token(page, 'dropdown'));
+=======
+	assert.equal(await fill(menu), await token(page, 'dropdown'));
+>>>>>>> origin/master
 	await press(page, 'Escape');
 	assert.equal(await menu.isVisible(), false);
 	assert.equal(await file.getAttribute('aria-expanded'), 'false');
@@ -79,7 +95,11 @@ scenario('MenuBar: a click on the open item and a click outside both close the m
 	assert.equal(await menu.isVisible(), true);
 	await clickAway(page);
 	assert.equal(await menu.isVisible(), false);
+<<<<<<< HEAD
 	assert.equal(await openItems(page), 0);
+=======
+	assert.equal(await page.locator(MB + '.menuBar-item.is-open').count(), 0);
+>>>>>>> origin/master
 });
 
 scenario('MenuBar: hovering another item while a menu is open switches to it', 'MenuBar', async (page) => {
@@ -87,7 +107,11 @@ scenario('MenuBar: hovering another item while a menu is open switches to it', '
 	await item(page, 'Edit').hover();
 	assert.equal(await menuOf(page, 'Edit').isVisible(), true);
 	assert.equal(await menuOf(page, 'File').isVisible(), false);
+<<<<<<< HEAD
 	assert.equal(await openItems(page), 1);
+=======
+	assert.equal(await page.locator(MB + '.menuBar-item.is-open').count(), 1);
+>>>>>>> origin/master
 	await item(page, 'Help').hover();
 	assert.equal(await menuOf(page, 'Help').isVisible(), true);
 	assert.equal(await menuOf(page, 'Edit').isVisible(), false);
@@ -96,6 +120,7 @@ scenario('MenuBar: hovering another item while a menu is open switches to it', '
 scenario('MenuBar: hovering a dropdown row fills it with Primary; a disabled row does not react', 'MenuBar', async (page) => {
 	await item(page, 'Edit').click();
 	const menu = menuOf(page, 'Edit');
+<<<<<<< HEAD
 	const undo = menu.locator('.popupmenu__row').filter({ hasText: 'Undo' });
 	const redo = menu.locator('.popupmenu__row').filter({ hasText: 'Redo' });
 	assert.equal(await fill(undo), CLEAR);
@@ -107,6 +132,15 @@ scenario('MenuBar: hovering a dropdown row fills it with Primary; a disabled row
 	assert.equal(await menu.isVisible(), true);
 	await clickAt(page, redo);
 	assert.equal(await menu.isVisible(), true, 'a disabled row does not close the menu');
+=======
+	const undo = menu.locator('.menuBar-row').filter({ hasText: 'Undo' });
+	const redo = menu.locator('.menuBar-row').filter({ hasText: 'Redo' });
+	assert.equal(await fill(undo), CLEAR);
+	await undo.hover();
+	assert.equal(await fill(undo), await token(page, 'primary'));
+	assert.equal(await prop(redo, 'pointer-events'), 'none');
+	assert.equal(await prop(redo, 'opacity'), '0.45');
+>>>>>>> origin/master
 });
 
 scenario('MenuBar: clicking a row closes the menu and reports the label', 'MenuBar', async (page) => {
@@ -116,7 +150,11 @@ scenario('MenuBar: clicking a row closes the menu and reports the label', 'MenuB
 		document.addEventListener('ue-menu-select', (e) => picked.push((e as CustomEvent<{ label: string }>).detail.label));
 	});
 	await item(page, 'File').click();
+<<<<<<< HEAD
 	await menuOf(page, 'File').locator('.popupmenu__row').filter({ hasText: 'Save All' }).click();
+=======
+	await menuOf(page, 'File').locator('.menuBar-row').filter({ hasText: 'Save All' }).click();
+>>>>>>> origin/master
 	assert.equal(await menuOf(page, 'File').isVisible(), false);
 	assert.deepEqual(await page.evaluate(() => (window as unknown as { picked: string[] }).picked), ['Save All']);
 });
@@ -127,12 +165,20 @@ scenario('MenuBar: arrow keys move between items and into the dropdown', 'MenuBa
 	assert.equal(await focusedText(page), 'Edit');
 	await press(page, 'ArrowDown');
 	assert.equal(await menuOf(page, 'Edit').isVisible(), true);
+<<<<<<< HEAD
 	assert.equal(await currentRow(page), 'Undo');
 	await press(page, 'ArrowDown');
 	assert.equal(await currentRow(page), 'Cut', 'the disabled Redo row is skipped');
 	await press(page, 'ArrowRight');
 	assert.equal(await menuOf(page, 'Window').isVisible(), true);
 	assert.equal(await currentRow(page), 'Content Browser', 'the next menu opens on its first row');
+=======
+	assert.ok((await focusedText(page)).startsWith('Undo'));
+	await press(page, 'ArrowDown');
+	assert.ok((await focusedText(page)).startsWith('Cut'), 'the disabled Redo row is skipped');
+	await press(page, 'ArrowRight');
+	assert.equal(await menuOf(page, 'Window').isVisible(), true);
+>>>>>>> origin/master
 	assert.equal(await menuOf(page, 'Edit').isVisible(), false);
 	await press(page, 'Escape');
 	assert.equal(await menuOf(page, 'Window').isVisible(), false);
@@ -140,6 +186,7 @@ scenario('MenuBar: arrow keys move between items and into the dropdown', 'MenuBa
 });
 
 scenario('MenuBar: pinned specimens ignore clicks and keep their forced states', 'MenuBar', async (page) => {
+<<<<<<< HEAD
 	const pinned = page.locator('[data-pinned] .menuBar');
 	assert.equal(await pinned.count(), 2);
 	await assertInert(pinned.nth(0));
@@ -155,11 +202,20 @@ scenario('MenuBar: every top item is a ue-combo-button whose panel is a ue-popup
 	assert.equal(await page.locator(MB + 'ue-combo-button').count(), 8);
 	assert.equal(await page.locator(MB + 'ue-combo-button > .combobutton-anchor > .combobutton-menu > ue-popup-menu').count(), 8);
 	assert.equal(await page.locator(MB + '.combobutton--menubar').count(), 8);
+=======
+	const pinned = page.locator('.menuBar[data-pinned]');
+	assert.equal(await pinned.count(), 2);
+	assert.equal(await fill(pinned.nth(1).locator('.menuBar-item.is-open')), await token(page, 'primary'));
+	await pinned.nth(0).locator('.menuBar-item').nth(0).click();
+	assert.equal(await page.locator('.menuBar[data-pinned] .menuBar-item.is-open').count(), 1);
+	assert.equal(await fill(pinned.nth(0).locator('.menuBar-item.is-hover')), await token(page, 'hover'));
+>>>>>>> origin/master
 });
 
 // ---------- ToolBar ----------
 
 const TB = 'ue-tool-bar ';
+<<<<<<< HEAD
 const openMenus = (page: Page): Promise<number> => page.locator(TB + '.combobutton--open').count();
 
 scenario('ToolBar: every button is a ue-button and every combo a ue-combo-button with a ue-popup-menu panel', 'ToolBar', async (page) => {
@@ -183,6 +239,12 @@ scenario('ToolBar: a combo never wraps its label and never shrinks', 'ToolBar', 
 
 scenario('ToolBar: an icon button shows Dropdown on hover and shifts its padding while pressed', 'ToolBar', async (page) => {
 	const save = page.locator(TB + '.button[aria-label="Save"]');
+=======
+const openMenus = (page: Page): Promise<number> => page.locator(TB + '.toolBar-menu.is-open').count();
+
+scenario('ToolBar: an icon button shows Dropdown on hover and shifts its padding while pressed', 'ToolBar', async (page) => {
+	const save = page.locator(TB + '.toolBar-btn[aria-label="Save"]');
+>>>>>>> origin/master
 	assert.equal(await fill(save), CLEAR);
 	await save.hover();
 	assert.equal(await fill(save), await token(page, 'dropdown'));
@@ -195,6 +257,7 @@ scenario('ToolBar: an icon button shows Dropdown on hover and shifts its padding
 });
 
 scenario('ToolBar: toggle buttons toggle checked, by mouse and by keyboard', 'ToolBar', async (page) => {
+<<<<<<< HEAD
 	const select = page.locator(TB + '.button--toggle[aria-label="Select"]');
 	const blueprints = page.locator(TB + '.button--toggle[aria-label="Blueprints"]');
 	assert.equal(await select.getAttribute('aria-pressed'), 'true');
@@ -205,6 +268,16 @@ scenario('ToolBar: toggle buttons toggle checked, by mouse and by keyboard', 'To
 	assert.equal(await fill(select), CLEAR);
 	await blueprints.click();
 	assert.equal(await blueprints.getAttribute('aria-pressed'), 'true');
+=======
+	const select = page.locator(TB + '.toolBar-btn--toggle[aria-label="Select"]');
+	const blueprints = page.locator(TB + '.toolBar-btn--toggle[aria-label="Blueprints"]');
+	assert.equal(await select.getAttribute('aria-pressed'), 'true');
+	await select.click();
+	assert.equal(await select.getAttribute('aria-pressed'), 'false');
+	assert.equal(await hasClass(select, 'is-checked'), false);
+	await blueprints.click();
+	assert.equal(await hasClass(blueprints, 'is-checked'), true);
+>>>>>>> origin/master
 	assert.equal(await fill(blueprints), await token(page, 'primary-hover'), 'checked and hovered');
 	await away(page);
 	assert.equal(await fill(blueprints), await token(page, 'primary'));
@@ -216,13 +289,21 @@ scenario('ToolBar: toggle buttons toggle checked, by mouse and by keyboard', 'To
 });
 
 scenario('ToolBar: combo buttons open a menu, Escape and an outside click close it', 'ToolBar', async (page) => {
+<<<<<<< HEAD
 	const add = page.locator(TB + '.combobutton[aria-label="Add"]');
+=======
+	const add = page.locator(TB + '.toolBar-btn[aria-label="Add"]');
+>>>>>>> origin/master
 	const menu = after(add);
 	assert.equal(await menu.isVisible(), false);
 	await add.click();
 	assert.equal(await menu.isVisible(), true);
 	assert.equal(await add.getAttribute('aria-expanded'), 'true');
+<<<<<<< HEAD
 	assert.equal(await fill(menu.locator('.popupmenu')), await token(page, 'dropdown'));
+=======
+	assert.equal(await fill(menu), await token(page, 'dropdown'));
+>>>>>>> origin/master
 	await press(page, 'Escape');
 	assert.equal(await menu.isVisible(), false);
 	await add.click();
@@ -232,9 +313,15 @@ scenario('ToolBar: combo buttons open a menu, Escape and an outside click close 
 });
 
 scenario('ToolBar: one menu at a time; the mode, overflow and settings menus open and pick', 'ToolBar', async (page) => {
+<<<<<<< HEAD
 	const modes = page.locator(TB + '.toolBar-slot--modes .combobutton');
 	const wrap = page.locator(TB + '.combobutton--overflow');
 	const settings = page.locator(TB + '.toolBar-slot--settings .combobutton');
+=======
+	const modes = page.locator(TB + '.toolBar-modes');
+	const wrap = page.locator(TB + '.toolBar-wrap');
+	const settings = page.locator(TB + '.toolBar-slot--settings .toolBar-btn');
+>>>>>>> origin/master
 	await modes.click();
 	assert.equal(await openMenus(page), 1);
 	assert.equal(await after(modes).isVisible(), true);
@@ -247,29 +334,47 @@ scenario('ToolBar: one menu at a time; the mode, overflow and settings menus ope
 	assert.equal(await menu.isVisible(), true);
 	const box = await menu.boundingBox();
 	assert.ok(box && box.x + box.width <= 1000, 'the settings menu stays inside the page');
+<<<<<<< HEAD
 	await menu.locator('.popupmenu__row').filter({ hasText: 'World Settings' }).click();
+=======
+	await menu.locator('.toolBar-row').filter({ hasText: 'World Settings' }).click();
+>>>>>>> origin/master
 	assert.equal(await openMenus(page), 0);
 });
 
 scenario('ToolBar: Play presses itself and enables Stop; Stop returns to idle', 'ToolBar', async (page) => {
+<<<<<<< HEAD
 	const play = page.locator(TB + '.toolBar-plate--play .button');
 	const stop = page.locator(TB + '.toolBar-plate--stop .button');
 	const stopPlate = page.locator(TB + '.toolBar-plate--stop');
 	assert.equal(await prop(stopPlate, 'opacity'), '0.45');
 	assert.equal(await stop.isDisabled(), true);
+=======
+	const play = page.locator(TB + '.toolBar-plate--play');
+	const stop = page.locator(TB + '.toolBar-plate--stop');
+	assert.equal(await prop(stop, 'opacity'), '0.45');
+	assert.equal(await stop.getAttribute('aria-disabled'), 'true');
+>>>>>>> origin/master
 	assert.equal(await ink(play), await token(page, 'accent-green'));
 	await play.click();
 	assert.equal(await play.getAttribute('aria-pressed'), 'true');
 	assert.equal(await ink(play), 'rgb(101, 142, 52)');
+<<<<<<< HEAD
 	assert.equal(await prop(stopPlate, 'opacity'), '1');
 	assert.equal(await stop.isDisabled(), false);
 	assert.equal(await ink(stop), await token(page, 'accent-red'));
 	await play.click();
 	assert.equal(await play.getAttribute('aria-pressed'), 'true', 'a second Play press keeps the game running');
+=======
+	assert.equal(await prop(stop, 'opacity'), '1');
+	assert.equal(await stop.getAttribute('aria-disabled'), 'false');
+	assert.equal(await ink(stop), await token(page, 'accent-red'));
+>>>>>>> origin/master
 	await stop.click();
 	await away(page);
 	assert.equal(await play.getAttribute('aria-pressed'), 'false');
 	assert.equal(await ink(play), await token(page, 'accent-green'));
+<<<<<<< HEAD
 	assert.equal(await prop(stopPlate, 'opacity'), '0.45');
 	assert.equal(await stop.isDisabled(), true);
 });
@@ -279,11 +384,21 @@ scenario('ToolBar: the plates change only their colour on hover and press', 'Too
 	await play.hover();
 	assert.equal(await ink(play), 'rgb(169, 194, 150)');
 	assert.equal(await fill(play), CLEAR, 'the button has no fill of its own');
+=======
+	assert.equal(await prop(stop, 'opacity'), '0.45');
+});
+
+scenario('ToolBar: the plates change only their colour on hover and press', 'ToolBar', async (page) => {
+	const play = page.locator(TB + '.toolBar-plate--play');
+	await play.hover();
+	assert.equal(await ink(play), 'rgb(169, 194, 150)');
+>>>>>>> origin/master
 	await hold(page);
 	assert.equal(await ink(play), 'rgb(101, 142, 52)');
 	await release(page);
 	const step = page.locator(TB + '.toolBar-plate--step').first();
 	await step.hover();
+<<<<<<< HEAD
 	assert.equal(await ink(step.locator('.button')), await token(page, 'foreground-hover'));
 	assert.equal(await fill(step), await token(page, 'dropdown'));
 	assert.equal(await fill(step.locator('.button')), CLEAR);
@@ -317,12 +432,29 @@ scenario('ToolBar: pinned specimens ignore clicks', 'ToolBar', async (page) => {
 	assert.equal(await fill(pinned.nth(1).locator('.combobutton--hover')), await token(page, 'dropdown'));
 	await hoverAt(page, pinned.nth(0).locator('.toolBar-plate--play .button'));
 	assert.equal(await ink(pinned.nth(0).locator('.toolBar-plate--play .button')), await token(page, 'accent-green'), 'a pinned plate does not react to the pointer');
+=======
+	assert.equal(await ink(step), await token(page, 'foreground-hover'));
+	assert.equal(await fill(step), await token(page, 'dropdown'));
+});
+
+scenario('ToolBar: pinned specimens ignore clicks', 'ToolBar', async (page) => {
+	const pinned = page.locator('.toolBar[data-pinned]');
+	assert.equal(await pinned.count(), 2);
+	const toggle = pinned.nth(1).locator('.toolBar-btn--toggle').first();
+	await toggle.click();
+	assert.equal(await hasClass(toggle, 'is-checked'), false);
+	assert.equal(await prop(pinned.nth(1).locator('.toolBar-btn.is-pressed'), 'padding-top'), '5px');
+>>>>>>> origin/master
 });
 
 // ---------- PlaceActorsPanel ----------
 
 const PA = 'ue-place-actors-panel ';
+<<<<<<< HEAD
 const cat = (page: Page, name: string): Locator => page.locator(PA + '.SegmentedControl-seg[data-value="' + name + '"]');
+=======
+const cat = (page: Page, name: string): Locator => page.locator(PA + '.placeActors-cat[data-category="' + name + '"]');
+>>>>>>> origin/master
 const visibleRows = (page: Page): Promise<string[]> => texts(page, PA + '.placeActors-group:not([hidden]) .placeActors-row:not([hidden]) .placeActors-name');
 
 scenario('PlaceActorsPanel: clicking a category activates it and swaps the list and the label', 'PlaceActorsPanel', async (page) => {
@@ -335,7 +467,11 @@ scenario('PlaceActorsPanel: clicking a category activates it and swaps the list 
 	await away(page);
 	assert.equal(await fill(cat(page, 'Lights')), await token(page, 'primary'));
 	assert.equal(await fill(cat(page, 'Basic')), CLEAR);
+<<<<<<< HEAD
 	assert.equal(await page.locator(PA + '.SegmentedControl-seg.is-checked').count(), 1);
+=======
+	assert.equal(await page.locator(PA + '.placeActors-cat.is-active').count(), 1);
+>>>>>>> origin/master
 	await cat(page, 'Volumes').click();
 	assert.deepEqual(await visibleRows(page), ['Trigger Volume', 'Blocking Volume']);
 });
@@ -348,9 +484,15 @@ scenario('PlaceActorsPanel: an inactive category fills Dropdown on hover, the ac
 });
 
 scenario('PlaceActorsPanel: typing filters the rows and shows the clear button', 'PlaceActorsPanel', async (page) => {
+<<<<<<< HEAD
 	const field = page.locator(PA + '.textinput__field');
 	const clear = page.locator(PA + '.textinput__clear');
 	const box = page.locator(PA + '.textinput--search');
+=======
+	const field = page.locator(PA + '.placeActors-field');
+	const clear = page.locator(PA + '.placeActors-clear');
+	const box = page.locator(PA + '.placeActors-searchbox');
+>>>>>>> origin/master
 	assert.equal(await clear.isVisible(), false);
 	await field.click();
 	assert.ok((await prop(box, 'box-shadow')).includes(await token(page, 'primary')), 'focus outline is Primary');
@@ -370,7 +512,11 @@ scenario('PlaceActorsPanel: typing filters the rows and shows the clear button',
 });
 
 scenario('PlaceActorsPanel: the filter follows the category and Escape clears it', 'PlaceActorsPanel', async (page) => {
+<<<<<<< HEAD
 	const field = page.locator(PA + '.textinput__field');
+=======
+	const field = page.locator(PA + '.placeActors-field');
+>>>>>>> origin/master
 	await field.fill('light');
 	await cat(page, 'Lights').click();
 	assert.equal((await visibleRows(page)).length, 5);
@@ -401,11 +547,16 @@ scenario('PlaceActorsPanel: arrow keys move the category and activate it', 'Plac
 	await cat(page, 'Basic').focus();
 	await press(page, 'ArrowRight');
 	assert.equal(await cat(page, 'Lights').getAttribute('aria-checked'), 'true');
+<<<<<<< HEAD
 	assert.equal(await page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset.value), 'Lights');
+=======
+	assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('data-category')), 'Lights');
+>>>>>>> origin/master
 	await press(page, 'End');
 	assert.equal(await page.locator(PA + '.placeActors-header').textContent(), 'All');
 });
 
+<<<<<<< HEAD
 scenario('PlaceActorsPanel: the search is a ue-text-input search and the rail a ue-segmented-control rail', 'PlaceActorsPanel', async (page) => {
 	assert.equal(await page.locator(PA + 'ue-text-input > .textinput--search').count(), 1);
 	assert.equal(await page.locator(PA + 'ue-segmented-control > .SegmentedControl--rail').count(), 1);
@@ -419,6 +570,12 @@ scenario('PlaceActorsPanel: pinned specimens ignore clicks and keep their forced
 	await clickAt(page, pinned.locator('.SegmentedControl-seg').nth(2));
 	assert.equal(await pinned.locator('.SegmentedControl-seg.is-checked').count(), 1);
 	assert.equal(await pinned.locator('.SegmentedControl-seg.is-checked svg path').first().getAttribute('d'), 'M5 2.5L8.5 6h-7z', 'the Basic category stays checked');
+=======
+scenario('PlaceActorsPanel: pinned specimens ignore clicks and keep their forced rows', 'PlaceActorsPanel', async (page) => {
+	const pinned = page.locator('div[data-pinned]').first();
+	await pinned.locator('.placeActors-cat').nth(2).click();
+	assert.equal(await pinned.locator('.placeActors-cat.is-active use').getAttribute('href'), '#placeActors-i-basic');
+>>>>>>> origin/master
 	assert.equal(await pinned.locator('.placeActors-header').textContent(), 'Basic');
 	assert.equal(await pinned.locator('.placeActors-row.is-hover').count(), 1);
 	assert.equal(await pinned.locator('.placeActors-row.is-pressed').count(), 1);
@@ -427,6 +584,7 @@ scenario('PlaceActorsPanel: pinned specimens ignore clicks and keep their forced
 // ---------- StatusBar ----------
 
 const SB = 'ue-status-bar ';
+<<<<<<< HEAD
 const drawer = (page: Page, label: string): Locator => page.locator(SB + '.statusBar-seg--drawer .button').filter({ hasText: label });
 
 scenario('StatusBar: the drawers are ue-buttons, the combos ue-combo-buttons, the console a ue-text-input', 'StatusBar', async (page) => {
@@ -435,10 +593,14 @@ scenario('StatusBar: the drawers are ue-buttons, the combos ue-combo-buttons, th
 	assert.equal(await page.locator(SB + 'ue-combo-button .combobutton-menu > ue-popup-menu').count(), 3);
 	assert.equal(await page.locator(SB + 'ue-text-input > .textinput--console').count(), 1);
 });
+=======
+const drawer = (page: Page, label: string): Locator => page.locator(SB + '.statusBar-btn').filter({ hasText: label });
+>>>>>>> origin/master
 
 scenario('StatusBar: the drawer buttons toggle an open look, one at a time', 'StatusBar', async (page) => {
 	const content = drawer(page, 'Content Drawer');
 	const log = drawer(page, 'Output Log');
+<<<<<<< HEAD
 	const changes = await page.evaluate(() => {
 		const seen: Array<string | null> = [];
 		(window as unknown as { drawers: Array<string | null> }).drawers = seen;
@@ -460,6 +622,21 @@ scenario('StatusBar: the drawer buttons toggle an open look, one at a time', 'St
 	assert.equal(await log.getAttribute('aria-pressed'), 'false');
 	assert.equal(await ink(log), await token(page, 'foreground'));
 	assert.deepEqual(await page.evaluate(() => (window as unknown as { drawers: Array<string | null> }).drawers), ['Content Drawer', 'Output Log', null]);
+=======
+	assert.equal(await ink(content), await token(page, 'foreground'));
+	await content.click();
+	assert.equal(await content.getAttribute('aria-expanded'), 'true');
+	await away(page);
+	assert.equal(await ink(content), await token(page, 'foreground-hover'));
+	assert.equal(await prop(content, 'padding-top'), '3px');
+	await log.click();
+	assert.equal(await content.getAttribute('aria-expanded'), 'false');
+	assert.equal(await log.getAttribute('aria-expanded'), 'true');
+	await log.click();
+	await away(page);
+	assert.equal(await log.getAttribute('aria-expanded'), 'false');
+	assert.equal(await ink(log), await token(page, 'foreground'));
+>>>>>>> origin/master
 });
 
 scenario('StatusBar: a drawer button turns white on hover and shifts down while pressed', 'StatusBar', async (page) => {
@@ -467,13 +644,20 @@ scenario('StatusBar: a drawer button turns white on hover and shifts down while 
 	await log.hover();
 	assert.equal(await ink(log), await token(page, 'foreground-hover'));
 	assert.equal(await fill(log), CLEAR, 'drawer buttons have no hover fill');
+<<<<<<< HEAD
 	assert.equal(await prop(log, 'padding-top'), '4px');
 	await hold(page);
 	assert.equal(await prop(log, 'padding-top'), '5px');
+=======
+	assert.equal(await prop(log, 'padding-top'), '2px');
+	await hold(page);
+	assert.equal(await prop(log, 'padding-top'), '3px');
+>>>>>>> origin/master
 	await release(page);
 });
 
 scenario('StatusBar: the Cmd combo opens an upward menu; choosing an entry renames it', 'StatusBar', async (page) => {
+<<<<<<< HEAD
 	const cmd = page.locator(SB + '.statusBar-cmd .combobutton');
 	const menu = page.locator(SB + '.statusBar-cmd .combobutton-menu');
 	const executors = await page.evaluate(() => {
@@ -483,6 +667,10 @@ scenario('StatusBar: the Cmd combo opens an upward menu; choosing an entry renam
 		return seen.length;
 	});
 	assert.equal(executors, 0);
+=======
+	const cmd = page.locator(SB + '.statusBar-cmd');
+	const menu = page.locator(SB + '.statusBar-menu');
+>>>>>>> origin/master
 	assert.equal(await menu.isVisible(), false);
 	await cmd.click();
 	assert.equal(await menu.isVisible(), true);
@@ -496,6 +684,7 @@ scenario('StatusBar: the Cmd combo opens an upward menu; choosing an entry renam
 	await clickAway(page);
 	assert.equal(await menu.isVisible(), false);
 	await cmd.click();
+<<<<<<< HEAD
 	await menu.locator('.popupmenu__row').filter({ hasText: 'Python' }).click();
 	assert.equal(await menu.isVisible(), false);
 	assert.equal((await cmd.textContent())?.trim(), 'Python');
@@ -520,6 +709,16 @@ scenario('StatusBar: the Derived Data and Source Control combos open an upward m
 scenario('StatusBar: the console box takes focus, Enter logs the command and clears the box', 'StatusBar', async (page) => {
 	const field = page.locator(SB + '.textinput__field');
 	const box = page.locator(SB + '.textinput--console');
+=======
+	await menu.locator('.statusBar-row').filter({ hasText: 'Python' }).click();
+	assert.equal(await menu.isVisible(), false);
+	assert.equal((await cmd.textContent())?.trim(), 'Python');
+});
+
+scenario('StatusBar: the console box takes focus, Enter logs the command and clears the box', 'StatusBar', async (page) => {
+	const field = page.locator(SB + '.statusBar-field');
+	const box = page.locator(SB + '.statusBar-input');
+>>>>>>> origin/master
 	const history = SB + '.statusBar-history-line';
 	assert.ok(!(await prop(box, 'box-shadow')).includes(await token(page, 'primary')));
 	await field.click();
@@ -547,7 +746,11 @@ scenario('StatusBar: the console box takes focus, Enter logs the command and cle
 
 scenario('StatusBar: Derived Data and Source Control fill Dropdown on hover', 'StatusBar', async (page) => {
 	for (const label of ['Derived Data', 'Source Control Off']) {
+<<<<<<< HEAD
 		const combo = page.locator(SB + '.combobutton--wide').filter({ hasText: label });
+=======
+		const combo = page.locator(SB + '.statusBar-combo--status').filter({ hasText: label });
+>>>>>>> origin/master
 		assert.equal(await fill(combo), CLEAR);
 		await combo.hover();
 		assert.equal(await fill(combo), await token(page, 'dropdown'));
@@ -556,6 +759,7 @@ scenario('StatusBar: Derived Data and Source Control fill Dropdown on hover', 'S
 });
 
 scenario('StatusBar: pinned specimens ignore clicks and keep their hover state', 'StatusBar', async (page) => {
+<<<<<<< HEAD
 	const pinned = page.locator('[data-pinned] .statusBar');
 	assert.equal(await pinned.count(), 2);
 	await assertInert(pinned.nth(0));
@@ -565,4 +769,11 @@ scenario('StatusBar: pinned specimens ignore clicks and keep their hover state',
 	assert.equal(await fill(pinned.nth(1).locator('.combobutton--hover')), await token(page, 'dropdown'));
 	await hoverAt(page, pinned.nth(0).locator('.combobutton').first());
 	assert.equal(await fill(pinned.nth(0).locator('.combobutton').first()), CLEAR, 'a pinned combo does not react to the pointer');
+=======
+	const pinned = page.locator('.statusBar[data-pinned]');
+	assert.equal(await pinned.count(), 2);
+	await pinned.nth(0).locator('.statusBar-btn').first().click();
+	assert.equal(await page.locator('.statusBar[data-pinned] .statusBar-btn.is-open').count(), 0);
+	assert.equal(await ink(pinned.nth(1).locator('.statusBar-btn.is-hover')), await token(page, 'foreground-hover'));
+>>>>>>> origin/master
 });

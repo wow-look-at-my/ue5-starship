@@ -1,6 +1,7 @@
 // design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
+<<<<<<< HEAD
   #ready = false;
   #pendingSetup = null;
   // The bundle can load before the parser reaches this element's children, so setup waits for the document to finish parsing.
@@ -27,6 +28,15 @@ var UeElement = class extends HTMLElement {
     this.#ready = true;
     this.setup();
   }
+=======
+  connectedCallback() {
+    this.style.display = "contents";
+    this.setup();
+  }
+  disconnectedCallback() {
+    for (const dispose of this.#disposers.splice(0)) dispose();
+  }
+>>>>>>> origin/master
   on(target, type, listener, options) {
     target.addEventListener(type, listener, options);
     this.#disposers.push(() => target.removeEventListener(type, listener, options));
@@ -38,10 +48,13 @@ var UeElement = class extends HTMLElement {
   emit(name, detail) {
     return this.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
   }
+<<<<<<< HEAD
   // True when the nearest element of this tag above the target is this element, so a nested instance keeps its own events.
   owns(target) {
     return target instanceof Element && target.closest(this.localName) === this;
   }
+=======
+>>>>>>> origin/master
   all(selector) {
     return Array.from(this.querySelectorAll(selector));
   }
@@ -96,9 +109,15 @@ function drag(target, handlers) {
 }
 
 // design-system/src/Splitter/Splitter.ts
+<<<<<<< HEAD
 var DEFAULT_MIN = 20;
 var DEFAULT_STEP = 5;
 var DEFAULT_STEP_LARGE = 20;
+=======
+var MIN_PANE = 20;
+var KEY_STEP = 5;
+var KEY_STEP_LARGE = 20;
+>>>>>>> origin/master
 var HIGHLIGHT = "splitter-handle--highlight";
 function panesOf(handle) {
   const before = handle.previousElementSibling;
@@ -109,6 +128,7 @@ function panesOf(handle) {
 var extent = (pane, vertical) => pane.getBoundingClientRect()[vertical ? "height" : "width"];
 var SplitterElement = class extends UeElement {
   setup() {
+<<<<<<< HEAD
     const handle = this.all(".splitter-handle").find((candidate) => this.owns(candidate));
     if (!handle) throw new Error("ue-splitter needs a .splitter-handle between two panes");
     this.#wire(handle);
@@ -117,10 +137,17 @@ var SplitterElement = class extends UeElement {
   #number(name, fallback) {
     const value = Number(this.getAttribute(name));
     return this.hasAttribute(name) && Number.isFinite(value) ? value : fallback;
+=======
+    for (const handle of this.all(".splitter-handle")) {
+      if (handle.hasAttribute("data-pinned")) continue;
+      this.#wire(handle);
+    }
+>>>>>>> origin/master
   }
   #wire(handle) {
     let startSize = 0;
     let total = 0;
+<<<<<<< HEAD
     const minStart = () => this.#number("data-min-start", DEFAULT_MIN);
     const minEnd = () => this.#number("data-min-end", DEFAULT_MIN);
     const resize = (size) => {
@@ -131,6 +158,15 @@ var SplitterElement = class extends UeElement {
       panes2.after.style.flex = "1 1 0";
       this.#publish(handle, panes2);
       this.emit("ue-splitter-resize", { size: clamped, total, orientation: panes2.vertical ? "vertical" : "horizontal" });
+=======
+    const resize = (size) => {
+      const panes2 = panesOf(handle);
+      if (!panes2) return;
+      const clamped = Math.min(Math.max(size, MIN_PANE), total - MIN_PANE);
+      panes2.before.style.flex = "0 0 " + clamped + "px";
+      panes2.after.style.flex = "1 1 0";
+      this.#publish(handle, panes2);
+>>>>>>> origin/master
     };
     const measure = () => {
       const panes2 = panesOf(handle);
@@ -160,11 +196,19 @@ var SplitterElement = class extends UeElement {
       if (!current) return;
       const grow = current.vertical ? "ArrowDown" : "ArrowRight";
       const shrink = current.vertical ? "ArrowUp" : "ArrowLeft";
+<<<<<<< HEAD
       const step = event.shiftKey ? this.#number("data-step-shift", DEFAULT_STEP_LARGE) : this.#number("data-step", DEFAULT_STEP);
       if (event.key === grow) resize(startSize + step);
       else if (event.key === shrink) resize(startSize - step);
       else if (event.key === "Home") resize(minStart());
       else if (event.key === "End") resize(total - minEnd());
+=======
+      const step = event.shiftKey ? KEY_STEP_LARGE : KEY_STEP;
+      if (event.key === grow) resize(startSize + step);
+      else if (event.key === shrink) resize(startSize - step);
+      else if (event.key === "Home") resize(MIN_PANE);
+      else if (event.key === "End") resize(total - MIN_PANE);
+>>>>>>> origin/master
       else return;
       event.preventDefault();
     });
@@ -173,8 +217,13 @@ var SplitterElement = class extends UeElement {
   #publish(handle, panes) {
     const size = extent(panes.before, panes.vertical);
     const total = size + extent(panes.after, panes.vertical);
+<<<<<<< HEAD
     handle.setAttribute("aria-valuemin", String(this.#number("data-min-start", DEFAULT_MIN)));
     handle.setAttribute("aria-valuemax", String(Math.round(total - this.#number("data-min-end", DEFAULT_MIN))));
+=======
+    handle.setAttribute("aria-valuemin", String(MIN_PANE));
+    handle.setAttribute("aria-valuemax", String(Math.round(total - MIN_PANE)));
+>>>>>>> origin/master
     handle.setAttribute("aria-valuenow", String(Math.round(size)));
   }
 };

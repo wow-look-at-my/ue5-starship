@@ -1,5 +1,8 @@
 node_modules/
 .build/
 .ts0-tsconfig.json
+<<<<<<< HEAD
 *.test.ts0.mjs
 .claude/worktrees/
+=======
+>>>>>>> origin/master

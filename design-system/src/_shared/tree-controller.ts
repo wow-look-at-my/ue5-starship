@@ -8,8 +8,11 @@ export interface TreeParts {
 	caretClosed: string;
 	folderOpen: string;
 	folderClosed: string;
+<<<<<<< HEAD
 	// Class a row carries while it shows its children. A filter can open a row that is stored as collapsed.
 	openClass?: string;
+=======
+>>>>>>> origin/master
 }
 
 export interface TreeHooks {
@@ -17,6 +20,7 @@ export interface TreeHooks {
 	excluded?: (row: HTMLElement) => boolean;
 	// Runs after every redraw.
 	changed?: () => void;
+<<<<<<< HEAD
 	// False makes every pick a plain single selection: Shift and Ctrl add nothing.
 	multi?: boolean;
 	// Rows this returns true for show their children although they are stored as collapsed.
@@ -27,6 +31,8 @@ export interface TreeHooks {
 	toggled?: (row: HTMLElement, open: boolean) => void;
 	// Runs after the selection was set.
 	selected?: (rows: HTMLElement[]) => void;
+=======
+>>>>>>> origin/master
 }
 
 export interface Modifiers {
@@ -72,7 +78,10 @@ export class TreeController {
 	}
 
 	hasChildren(row: HTMLElement): boolean {
+<<<<<<< HEAD
 		if (this.hooks.lazy?.(row)) return true;
+=======
+>>>>>>> origin/master
 		const next = row.nextElementSibling;
 		return next instanceof HTMLElement && next.matches(this.parts.row) && this.level(next) > this.level(row);
 	}
@@ -101,6 +110,7 @@ export class TreeController {
 				return;
 			}
 			hideBelow = Infinity;
+<<<<<<< HEAD
 			const kids = (index + 1 < rows.length && this.level(rows[index + 1]) > level) || (this.hooks.lazy?.(row) ?? false);
 			const stored = kids && this.isOpen(row);
 			const open = stored || (kids && (this.hooks.forceOpen?.(row) ?? false));
@@ -108,12 +118,23 @@ export class TreeController {
 			arrow?.classList.toggle('is-leaf', !kids);
 			if (kids) {
 				row.setAttribute('aria-expanded', stored ? 'true' : 'false');
+=======
+			const kids = index + 1 < rows.length && this.level(rows[index + 1]) > level;
+			const open = kids && this.isOpen(row);
+			const arrow = row.querySelector<SVGElement>(this.parts.arrow);
+			arrow?.classList.toggle('is-leaf', !kids);
+			if (kids) {
+				row.setAttribute('aria-expanded', open ? 'true' : 'false');
+>>>>>>> origin/master
 				this.#swap(arrow, open ? this.parts.caretOpen : this.parts.caretClosed);
 				if (!open) hideBelow = level;
 			} else {
 				row.removeAttribute('aria-expanded');
 			}
+<<<<<<< HEAD
 			if (this.parts.openClass) row.classList.toggle(this.parts.openClass, open);
+=======
+>>>>>>> origin/master
 			this.#swap(row.querySelector<SVGElement>(this.parts.folder), open ? this.parts.folderOpen : this.parts.folderClosed);
 			row.setAttribute('aria-selected', this.isSelected(row) ? 'true' : 'false');
 			if (this.hooks.excluded?.(row)) {
@@ -136,6 +157,7 @@ export class TreeController {
 		for (const row of this.rows()) row.classList.toggle('is-selected', set.has(row));
 		if (anchor) this.#anchor = anchor;
 		this.refresh();
+<<<<<<< HEAD
 		this.hooks.selected?.(this.selected());
 	}
 
@@ -144,6 +166,13 @@ export class TreeController {
 		row.setAttribute('aria-expanded', open ? 'true' : 'false');
 		this.refresh();
 		if (was !== open) this.hooks.toggled?.(row, open);
+=======
+	}
+
+	setOpen(row: HTMLElement, open: boolean): void {
+		row.setAttribute('aria-expanded', open ? 'true' : 'false');
+		this.refresh();
+>>>>>>> origin/master
 	}
 
 	focusRow(row: HTMLElement, reveal: boolean): void {
@@ -153,8 +182,12 @@ export class TreeController {
 	}
 
 	// Plain: replace the selection. Shift: range from the anchor. Ctrl or cmd: toggle the row.
+<<<<<<< HEAD
 	pick(row: HTMLElement, given: Modifiers, reveal: boolean): void {
 		const mods = this.hooks.multi === false ? { shiftKey: false, ctrlKey: false, metaKey: false } : given;
+=======
+	pick(row: HTMLElement, mods: Modifiers, reveal: boolean): void {
+>>>>>>> origin/master
 		const chosen = this.selected();
 		const toggle = mods.ctrlKey || mods.metaKey;
 		if (mods.shiftKey) {

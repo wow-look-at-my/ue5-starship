@@ -1,6 +1,7 @@
 // design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
+<<<<<<< HEAD
   #ready = false;
   #pendingSetup = null;
   // The bundle can load before the parser reaches this element's children, so setup waits for the document to finish parsing.
@@ -27,6 +28,15 @@ var UeElement = class extends HTMLElement {
     this.#ready = true;
     this.setup();
   }
+=======
+  connectedCallback() {
+    this.style.display = "contents";
+    this.setup();
+  }
+  disconnectedCallback() {
+    for (const dispose of this.#disposers.splice(0)) dispose();
+  }
+>>>>>>> origin/master
   on(target, type, listener, options) {
     target.addEventListener(type, listener, options);
     this.#disposers.push(() => target.removeEventListener(type, listener, options));
@@ -38,10 +48,13 @@ var UeElement = class extends HTMLElement {
   emit(name, detail) {
     return this.dispatchEvent(new CustomEvent(name, { detail, bubbles: true, composed: true }));
   }
+<<<<<<< HEAD
   // True when the nearest element of this tag above the target is this element, so a nested instance keeps its own events.
   owns(target) {
     return target instanceof Element && target.closest(this.localName) === this;
   }
+=======
+>>>>>>> origin/master
   all(selector) {
     return Array.from(this.querySelectorAll(selector));
   }
@@ -83,7 +96,10 @@ var TreeController = class {
     return row.getAttribute("aria-expanded") === "true";
   }
   hasChildren(row) {
+<<<<<<< HEAD
     if (this.hooks.lazy?.(row)) return true;
+=======
+>>>>>>> origin/master
     const next = row.nextElementSibling;
     return next instanceof HTMLElement && next.matches(this.parts.row) && this.level(next) > this.level(row);
   }
@@ -110,6 +126,7 @@ var TreeController = class {
         return;
       }
       hideBelow = Infinity;
+<<<<<<< HEAD
       const kids = index + 1 < rows.length && this.level(rows[index + 1]) > level || (this.hooks.lazy?.(row) ?? false);
       const stored = kids && this.isOpen(row);
       const open = stored || kids && (this.hooks.forceOpen?.(row) ?? false);
@@ -117,12 +134,23 @@ var TreeController = class {
       arrow?.classList.toggle("is-leaf", !kids);
       if (kids) {
         row.setAttribute("aria-expanded", stored ? "true" : "false");
+=======
+      const kids = index + 1 < rows.length && this.level(rows[index + 1]) > level;
+      const open = kids && this.isOpen(row);
+      const arrow = row.querySelector(this.parts.arrow);
+      arrow?.classList.toggle("is-leaf", !kids);
+      if (kids) {
+        row.setAttribute("aria-expanded", open ? "true" : "false");
+>>>>>>> origin/master
         this.#swap(arrow, open ? this.parts.caretOpen : this.parts.caretClosed);
         if (!open) hideBelow = level;
       } else {
         row.removeAttribute("aria-expanded");
       }
+<<<<<<< HEAD
       if (this.parts.openClass) row.classList.toggle(this.parts.openClass, open);
+=======
+>>>>>>> origin/master
       this.#swap(row.querySelector(this.parts.folder), open ? this.parts.folderOpen : this.parts.folderClosed);
       row.setAttribute("aria-selected", this.isSelected(row) ? "true" : "false");
       if (this.hooks.excluded?.(row)) {
@@ -143,6 +171,7 @@ var TreeController = class {
     for (const row of this.rows()) row.classList.toggle("is-selected", set.has(row));
     if (anchor) this.#anchor = anchor;
     this.refresh();
+<<<<<<< HEAD
     this.hooks.selected?.(this.selected());
   }
   setOpen(row, open) {
@@ -150,6 +179,12 @@ var TreeController = class {
     row.setAttribute("aria-expanded", open ? "true" : "false");
     this.refresh();
     if (was !== open) this.hooks.toggled?.(row, open);
+=======
+  }
+  setOpen(row, open) {
+    row.setAttribute("aria-expanded", open ? "true" : "false");
+    this.refresh();
+>>>>>>> origin/master
   }
   focusRow(row, reveal) {
     for (const other of this.rows()) other.tabIndex = other === row ? 0 : -1;
@@ -157,8 +192,12 @@ var TreeController = class {
     if (reveal) row.scrollIntoView({ block: "nearest" });
   }
   // Plain: replace the selection. Shift: range from the anchor. Ctrl or cmd: toggle the row.
+<<<<<<< HEAD
   pick(row, given, reveal) {
     const mods = this.hooks.multi === false ? { shiftKey: false, ctrlKey: false, metaKey: false } : given;
+=======
+  pick(row, mods, reveal) {
+>>>>>>> origin/master
     const chosen = this.selected();
     const toggle = mods.ctrlKey || mods.metaKey;
     if (mods.shiftKey) {
@@ -253,6 +292,7 @@ var TreeController = class {
 };
 
 // design-system/src/TreeRow/TreeRow.ts
+<<<<<<< HEAD
 var ARROW = '<svg class="tr-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4l4.5 4L6 12z"/></svg>';
 var FOLDER = '<svg class="tr-icon is-folder" viewBox="0 0 16 16" aria-hidden="true"><path class="tr-folder-closed" d="M1.5 4.25v7.5a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1H8l-1.2-1.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.25 4.25v7.5a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H4.95l-1.4 4.3v-6.5a1 1 0 0 1 1-1h2l1.2 1.5h5.5"/></svg>';
 var OBJECT = '<svg class="tr-icon is-object" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg>';
@@ -450,6 +490,30 @@ var TreeRow = class extends UeElement {
       }
     });
   }
+=======
+var TreeRow = class extends UeElement {
+  setup() {
+    const tree = this.one(".tr-tree");
+    if (!tree) return;
+    const controller = new TreeController(tree, {
+      row: ".tr-row",
+      arrow: ".tr-arrow",
+      folder: ".tr-icon.is-folder",
+      caretOpen: "tr-caret-down",
+      caretClosed: "tr-caret-right",
+      folderOpen: "tr-folder-open",
+      folderClosed: "tr-folder"
+    });
+    this.on(tree, "click", (event) => {
+      controller.click(event);
+    });
+    this.on(tree, "dblclick", (event) => controller.doubleClick(event));
+    this.on(tree, "keydown", (event) => {
+      controller.keyDown(event);
+    });
+    controller.refresh();
+  }
+>>>>>>> origin/master
 };
 define("ue-tree-row", TreeRow);
 export {

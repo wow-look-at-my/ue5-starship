@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // <ue-asset-tile> wraps one .AssetTile-grid of .AssetTile items: single, Ctrl/Cmd and Shift selection, arrow-key movement, open on double-click or Enter.
 import { UeElement, define } from '../_shared/element.ts';
 import { nearestInRow } from '../_shared/tileGrid.ts';
@@ -76,12 +77,55 @@ export class AssetTileElement extends UeElement {
 	#tileAt(target: EventTarget | null): HTMLElement | null {
 		const tile = target instanceof Element ? target.closest<HTMLElement>('.AssetTile') : null;
 		return tile && this.#tiles().includes(tile) ? tile : null;
+=======
+// <ue-asset-tile> wraps a group of .AssetTile items: single, Ctrl/Cmd and Shift selection, arrow-key movement, open on double-click or Enter.
+import { UeElement, define } from '../_shared/element.ts';
+import { nearestInRow } from '../_shared/tileGrid.ts';
+
+const SELECTED = 'is-selected';
+
+class AssetTileElement extends UeElement {
+	#anchor: HTMLElement | null = null;
+	#opened = '';
+
+	protected setup(): void {
+		this.#anchor = null;
+		this.#opened = '';
+		for (const group of this.#groups()) {
+			group.setAttribute('role', 'listbox');
+			group.setAttribute('aria-multiselectable', 'true');
+			for (const tile of this.#tiles(group)) {
+				tile.setAttribute('role', 'option');
+				tile.setAttribute('aria-selected', String(tile.classList.contains(SELECTED)));
+			}
+			this.#rove(group, null);
+		}
+		this.#status();
+		this.on(this, 'click', (event) => this.#click(event));
+		this.on(this, 'dblclick', (event) => this.#open(this.#tileAt(event.target)));
+		this.on(this, 'keydown', (event) => this.#keydown(event));
+	}
+
+	#groups(): HTMLElement[] {
+		const groups = new Set<HTMLElement>();
+		for (const tile of this.all('.AssetTile')) if (tile.parentElement) groups.add(tile.parentElement);
+		return Array.from(groups);
+	}
+
+	#tiles(group: HTMLElement): HTMLElement[] {
+		return Array.from(group.children).filter((child): child is HTMLElement => child instanceof HTMLElement && child.classList.contains('AssetTile'));
+	}
+
+	#tileAt(target: EventTarget | null): HTMLElement | null {
+		return target instanceof Element ? target.closest<HTMLElement>('.AssetTile') : null;
+>>>>>>> origin/master
 	}
 
 	#name(tile: HTMLElement): string {
 		return (tile.querySelector('.AssetTile__name')?.textContent ?? '').trim();
 	}
 
+<<<<<<< HEAD
 	#idOf(tile: HTMLElement): string {
 		return tile.dataset.id ?? this.#name(tile);
 	}
@@ -144,10 +188,16 @@ export class AssetTileElement extends UeElement {
 	// One tile takes the Tab stop: `stop`, else the first selected tile, else the first tile.
 	#rove(stop: HTMLElement | null): void {
 		const tiles = this.#tiles();
+=======
+	// One tile per group takes the Tab stop: `stop`, else the first selected tile, else the first tile.
+	#rove(group: HTMLElement, stop: HTMLElement | null): void {
+		const tiles = this.#tiles(group);
+>>>>>>> origin/master
 		const chosen = stop ?? tiles.find((tile) => tile.classList.contains(SELECTED)) ?? tiles[0];
 		for (const tile of tiles) tile.tabIndex = tile === chosen ? 0 : -1;
 	}
 
+<<<<<<< HEAD
 	// Announces the selection when it differs from the last one announced.
 	#announce(): void {
 		const ids = this.getSelectedIds();
@@ -157,16 +207,25 @@ export class AssetTileElement extends UeElement {
 		this.emit<TileSelectDetail>('ue-tile-select', { ids });
 	}
 
+=======
+>>>>>>> origin/master
 	#mark(tile: HTMLElement, selected: boolean): void {
 		tile.classList.toggle(SELECTED, selected);
 		tile.setAttribute('aria-selected', String(selected));
 	}
 
 	// Applies a click or key movement to the selection of the tile's group.
+<<<<<<< HEAD
 	#choose(tile: HTMLElement, wantToggle: boolean, wantRange: boolean): void {
 		const toggle = wantToggle && !this.#single();
 		const range = wantRange && !this.#single();
 		const tiles = this.#tiles();
+=======
+	#choose(tile: HTMLElement, toggle: boolean, range: boolean): void {
+		const group = tile.parentElement;
+		if (!group) return;
+		const tiles = this.#tiles(group);
+>>>>>>> origin/master
 		if (range && this.#anchor && tiles.includes(this.#anchor)) {
 			const from = tiles.indexOf(this.#anchor);
 			const to = tiles.indexOf(tile);
@@ -178,8 +237,14 @@ export class AssetTileElement extends UeElement {
 			for (const each of tiles) this.#mark(each, each === tile);
 			this.#anchor = tile;
 		}
+<<<<<<< HEAD
 		this.#rove(tile);
 		this.#announce();
+=======
+		this.#rove(group, tile);
+		this.#status();
+		this.emit('assettile:select', { names: tiles.filter((each) => each.classList.contains(SELECTED)).map((each) => this.#name(each)) });
+>>>>>>> origin/master
 	}
 
 	#click(event: MouseEvent): void {
@@ -191,6 +256,7 @@ export class AssetTileElement extends UeElement {
 
 	#open(tile: HTMLElement | null): void {
 		if (!tile) return;
+<<<<<<< HEAD
 		this.emit<TileOpenDetail>('ue-tile-open', { id: this.#idOf(tile) });
 	}
 
@@ -198,6 +264,27 @@ export class AssetTileElement extends UeElement {
 		const tile = event.target instanceof HTMLElement && event.target.matches('.AssetTile') ? this.#tileAt(event.target) : null;
 		if (!tile) return;
 		const tiles = this.#tiles();
+=======
+		const name = this.#name(tile);
+		this.#opened = name;
+		this.#status();
+		this.emit('assettile:open', { name, folder: tile.classList.contains('AssetTile--folder') });
+	}
+
+	#status(): void {
+		const line = this.one('.AssetTilePreview__status');
+		if (!line) return;
+		const selected = this.all('.AssetTile.' + SELECTED).map((tile) => this.#name(tile));
+		const head = selected.length === 0 ? 'Nothing selected' : selected.length + ' selected: ' + selected.join(', ');
+		line.textContent = head + (this.#opened ? '. Opened: ' + this.#opened : '');
+	}
+
+	#keydown(event: KeyboardEvent): void {
+		const tile = event.target instanceof HTMLElement && event.target.matches('.AssetTile') ? event.target : null;
+		const group = tile?.parentElement;
+		if (!tile || !group) return;
+		const tiles = this.#tiles(group);
+>>>>>>> origin/master
 		const at = tiles.indexOf(tile);
 		let go: HTMLElement | undefined;
 		switch (event.key) {
@@ -229,18 +316,30 @@ export class AssetTileElement extends UeElement {
 				return;
 			case 'a':
 			case 'A':
+<<<<<<< HEAD
 				if (!(event.ctrlKey || event.metaKey) || this.#single()) return;
 				event.preventDefault();
 				for (const each of tiles) this.#mark(each, true);
 				this.#announce();
+=======
+				if (!(event.ctrlKey || event.metaKey)) return;
+				event.preventDefault();
+				for (const each of tiles) this.#mark(each, true);
+				this.#status();
+>>>>>>> origin/master
 				return;
 			default:
 				return;
 		}
 		event.preventDefault();
 		if (!go) return;
+<<<<<<< HEAD
 		if ((event.ctrlKey || event.metaKey) && !this.#single()) {
 			this.#rove(go);
+=======
+		if (event.ctrlKey || event.metaKey) {
+			this.#rove(group, go);
+>>>>>>> origin/master
 		} else {
 			this.#choose(go, false, event.shiftKey);
 		}
