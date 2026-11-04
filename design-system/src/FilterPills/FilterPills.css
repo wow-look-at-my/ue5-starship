@@ -1,4 +1,4 @@
-/* Tablist variant: the Details section strip. components/DetailsCategory/preview.html:95-99 draws the same pills (padding 4px 16px, 10.667px, --header fill). */
+/* Tablist variant: the Details section strip (padding 4px 16px, 10.667px, --header fill). */
 .FilterPills-strip {
 	display: flex; flex-wrap: wrap; gap: 4px; /* SWrapBox InnerSlotPadding(4,4): SDetailsView.cpp:379 */
 	padding: 2px 8px 7px; /* Padding(8,2,8,7): SDetailsView.cpp:374 */

@@ -14,21 +14,20 @@
 	.dockTab-caption { font: 400 11px/1.2 var(--font-sans); color: var(--hover-2); }
 	.dockTab-h { margin: 0 0 8px; font: 700 11px/1.2 var(--font-sans); letter-spacing: .04em; text-transform: uppercase; color: var(--hover-2); }
 
-	/* Demo ground: the strip a pinned tab sits on has 8px of room around it, and a pinned body is a thin strip. */
-	.dockTab-well { min-width: 150px; padding: 8px 8px 0; }
-	.dockTab-body { height: 6px; }
+	/* Demo ground: a pinned tab has 8px of room around it on the well colour, and a pinned content area is a thin strip. */
+	.dockTab-ground { min-width: 150px; padding-top: 8px; background: var(--background); }
+	.dockTab-ground--major { background: var(--title); }
+	.dockTab-ground .dockTab { margin-inline: 8px; }
+	.dockTab-strip { height: 6px; }
 
-	/* A live stack: a tab well over a content area, one panel per tab. */
-	.dockTab-stack { width: 420px; max-width: 100%; }
-	.dockTab-stack .dockTab-well { min-height: 33px; /* 8px padding + 25px tab: an emptied well keeps its height */ }
-	.dockTab-stack .dockTab-well--major { min-height: 38.8px; /* 8px padding + 30.8px major tab */ }
-	.dockTab-stack .dockTab-body { height: auto; min-height: 84px; box-sizing: border-box; }
-	.dockTab-panel { padding: 8px 10px; color: var(--foreground); }
+	/* A live stack is 420px wide. */
+	.dockTab-row--live > .dockTab-cell { width: 420px; max-width: 100%; }
+	.dockTab-panel { min-height: 68px; padding: 8px 10px; color: var(--foreground); }
 	.dockTab-panelRow { height: 22px; line-height: 22px; }
-	.dockTab-reset { align-self: flex-start; padding: 2px 8px; font: 400 11px/1.2 var(--font-sans); color: var(--foreground); background: transparent; border: 1px solid var(--input-outline); border-radius: 2px; cursor: default; }
-	.dockTab-reset:hover { color: var(--foreground-hover); background: var(--recessed); }
-	.dockTab-reset:active { color: var(--foreground); background: var(--background); }
-	.dockTab-reset:focus-visible { outline: 1px solid var(--primary); outline-offset: 1px; }
+	.tabWell-reset { align-self: flex-start; padding: 2px 8px; font: 400 11px/1.2 var(--font-sans); color: var(--foreground); background: transparent; border: 1px solid var(--input-outline); border-radius: 2px; cursor: default; }
+	.tabWell-reset:hover { color: var(--foreground-hover); background: var(--recessed); }
+	.tabWell-reset:active { color: var(--foreground); background: var(--background); }
+	.tabWell-reset:focus-visible { outline: 1px solid var(--primary); outline-offset: 1px; }
 	.dockTab-live { margin: 0 0 12px; max-width: 760px; line-height: 1.45; }
 	.dockTab-live b { color: var(--foreground); }
 	.dockTab-pinned { margin-bottom: 8px; }
@@ -40,16 +39,16 @@
 <div class="dockTab-page">
 	<h3 class="dockTab-h">Live</h3>
 	<div class="dockTab-caption dockTab-live"><b>Live.</b> Try: hover a tab (fill and close button appear), click a tab (it becomes the foreground tab and its panel shows; the stack you click becomes the active one and gets the primary line), click the x or middle-click a tab to close it (the left neighbour takes over), close the last tab to leave an empty well. Keyboard: focus a tab, then Left, Right, Home, End move and select, Enter or Space selects, Delete closes.</div>
-	<div class="dockTab-row">
+	<div class="dockTab-row dockTab-row--live">
 		<div class="dockTab-cell">
-			<ue-dock-tab>
-				<div class="dockTab-stack">
-					<div class="dockTab-well" role="tablist" aria-label="Minor tabs, left stack">
-						<div class="dockTab dockTab--foreground dockTab--active" role="tab" tabindex="0" aria-selected="true" data-tab="details"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M2.500 4h11 M2.500 8h11 M2.500 12h7"/><circle cx="12.500" cy="12" r="1.200"/></svg></span><span class="dockTab-label">Details</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div>
-						<div class="dockTab" role="tab" tabindex="-1" aria-selected="false" data-tab="outliner"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M5.500 3.500h8 M5.500 8h8 M5.500 12.500h8 M2.500 3.500h.5 M2.500 8h.5 M2.500 12.500h.5"/></svg></span><span class="dockTab-label">Outliner</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div>
-						<div class="dockTab" role="tab" tabindex="-1" aria-selected="false" data-tab="content"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M2 4.500h4l1.500 1.500H14v6.500H2z"/></svg></span><span class="dockTab-label">Content Browser</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div>
+			<ue-tab-well>
+				<div class="tabWell-stack">
+					<div class="tabWell-well" role="tablist" aria-label="Minor tabs, left stack">
+						<ue-dock-tab><div class="dockTab dockTab--foreground dockTab--active" role="tab" tabindex="0" aria-selected="true" data-tab="details"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M2.500 4h11 M2.500 8h11 M2.500 12h7"/><circle cx="12.500" cy="12" r="1.200"/></svg></span><span class="dockTab-label">Details</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab>
+						<ue-dock-tab><div class="dockTab" role="tab" tabindex="-1" aria-selected="false" data-tab="outliner"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M5.500 3.500h8 M5.500 8h8 M5.500 12.500h8 M2.500 3.500h.5 M2.500 8h.5 M2.500 12.500h.5"/></svg></span><span class="dockTab-label">Outliner</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab>
+						<ue-dock-tab><div class="dockTab" role="tab" tabindex="-1" aria-selected="false" data-tab="content"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M2 4.500h4l1.500 1.500H14v6.500H2z"/></svg></span><span class="dockTab-label">Content Browser</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab>
 					</div>
-					<div class="dockTab-body">
+					<div class="tabWell-content">
 						<div class="dockTab-panel" role="tabpanel" data-panel="details"><div class="dockTab-panelRow">Details panel: Transform</div><div class="dockTab-panelRow">Static Mesh</div><div class="dockTab-panelRow">Materials</div></div>
 						<div class="dockTab-panel" role="tabpanel" data-panel="outliner" hidden><div class="dockTab-panelRow">Outliner panel: PersistentLevel</div><div class="dockTab-panelRow">SM_Rock_01</div><div class="dockTab-panelRow">PointLight_2</div></div>
 						<div class="dockTab-panel" role="tabpanel" data-panel="content" hidden><div class="dockTab-panelRow">Content Browser panel: Content</div><div class="dockTab-panelRow">Maps</div><div class="dockTab-panelRow">Materials</div></div>
@@ -57,41 +56,41 @@
 				</div>
 				<span class="dockTab-caption">live minor stack, three tabs</span>
 				<ue-event-status event="ue-tab-close" template="Closed: {label} ({id})"></ue-event-status>
-				<button class="dockTab-reset" type="button">Restore tabs</button>
-			</ue-dock-tab>
+				<button class="tabWell-reset" type="button">Restore tabs</button>
+			</ue-tab-well>
 		</div>
 		<div class="dockTab-cell">
-			<ue-dock-tab>
-				<div class="dockTab-stack">
-					<div class="dockTab-well" role="tablist" aria-label="Minor tabs, right stack">
-						<div class="dockTab dockTab--foreground" role="tab" tabindex="0" aria-selected="true" data-tab="place"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M2.5 5.5 8 2.5l5.500 3v5L8 13.500l-5.500-3z M2.500 5.500 8 8.500l5.500-3 M8 8.500v5"/></svg></span><span class="dockTab-label">Place Actors</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div>
-						<div class="dockTab" role="tab" tabindex="-1" aria-selected="false" data-tab="layers"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M5.500 3.500h8 M5.500 8h8 M5.500 12.500h8 M2.500 3.500h.5 M2.500 8h.5 M2.500 12.500h.5"/></svg></span><span class="dockTab-label">Layers</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div>
+			<ue-tab-well>
+				<div class="tabWell-stack">
+					<div class="tabWell-well" role="tablist" aria-label="Minor tabs, right stack">
+						<ue-dock-tab><div class="dockTab dockTab--foreground" role="tab" tabindex="0" aria-selected="true" data-tab="place"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M2.5 5.5 8 2.5l5.500 3v5L8 13.500l-5.500-3z M2.500 5.500 8 8.500l5.500-3 M8 8.500v5"/></svg></span><span class="dockTab-label">Place Actors</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab>
+						<ue-dock-tab><div class="dockTab" role="tab" tabindex="-1" aria-selected="false" data-tab="layers"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M5.500 3.500h8 M5.500 8h8 M5.500 12.500h8 M2.500 3.500h.5 M2.500 8h.5 M2.500 12.500h.5"/></svg></span><span class="dockTab-label">Layers</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab>
 					</div>
-					<div class="dockTab-body">
+					<div class="tabWell-content">
 						<div class="dockTab-panel" role="tabpanel" data-panel="place"><div class="dockTab-panelRow">Place Actors panel: Basic</div><div class="dockTab-panelRow">Lights</div><div class="dockTab-panelRow">Cinematic</div></div>
 						<div class="dockTab-panel" role="tabpanel" data-panel="layers" hidden><div class="dockTab-panelRow">Layers panel: Layer_Default</div><div class="dockTab-panelRow">Layer_Lighting</div><div class="dockTab-panelRow">Layer_Props</div></div>
 					</div>
 				</div>
 				<span class="dockTab-caption">second live stack: clicking here moves the active line</span>
 				<ue-event-status event="ue-tab-activate" template="Activated: {label} ({id})"></ue-event-status>
-				<button class="dockTab-reset" type="button">Restore tabs</button>
-			</ue-dock-tab>
+				<button class="tabWell-reset" type="button">Restore tabs</button>
+			</ue-tab-well>
 		</div>
 		<div class="dockTab-cell">
-			<ue-dock-tab>
-				<div class="dockTab-stack">
-					<div class="dockTab-well dockTab-well--major" role="tablist" aria-label="Major tabs">
-						<div class="dockTab dockTab--major dockTab--foreground" role="tab" tabindex="0" aria-selected="true" data-tab="level1"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></svg></span><span class="dockTab-label">Minimal_Default</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div>
-						<div class="dockTab dockTab--major" role="tab" tabindex="-1" aria-selected="false" data-tab="level2"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></svg></span><span class="dockTab-label">Second_Level</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div>
+			<ue-tab-well>
+				<div class="tabWell-stack">
+					<div class="tabWell-well tabWell-well--major" role="tablist" aria-label="Major tabs">
+						<ue-dock-tab><div class="dockTab dockTab--major dockTab--foreground" role="tab" tabindex="0" aria-selected="true" data-tab="level1"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></svg></span><span class="dockTab-label">Minimal_Default</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab>
+						<ue-dock-tab><div class="dockTab dockTab--major" role="tab" tabindex="-1" aria-selected="false" data-tab="level2"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></svg></span><span class="dockTab-label">Second_Level</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab>
 					</div>
-					<div class="dockTab-body">
+					<div class="tabWell-content">
 						<div class="dockTab-panel" role="tabpanel" data-panel="level1"><div class="dockTab-panelRow">Minimal_Default: level editor</div></div>
 						<div class="dockTab-panel" role="tabpanel" data-panel="level2" hidden><div class="dockTab-panelRow">Second_Level: level editor</div></div>
 					</div>
 				</div>
 				<span class="dockTab-caption">live major stack (no active line)</span>
-				<button class="dockTab-reset" type="button">Restore tabs</button>
-			</ue-dock-tab>
+				<button class="tabWell-reset" type="button">Restore tabs</button>
+			</ue-tab-well>
 		</div>
 	</div>
 
@@ -99,27 +98,27 @@
 	<div class="dockTab-caption dockTab-pinned">pinned: forced states, they do not react to the pointer</div>
 	<div class="dockTab-row">
 		<div class="dockTab-cell">
-			<div><div class="dockTab-well"><div class="dockTab" data-pinned><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M2.500 4h11 M2.500 8h11 M2.500 12h7"/><circle cx="12.500" cy="12" r="1.200"/></svg></span><span class="dockTab-label">Details</span><span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></div><div class="dockTab-body"></div></div>
+			<div class="dockTab-ground"><ue-tab-well data-pinned><div class="tabWell-stack"><div class="tabWell-well"><ue-dock-tab><div class="dockTab"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M2.500 4h11 M2.500 8h11 M2.500 12h7"/><circle cx="12.500" cy="12" r="1.200"/></svg></span><span class="dockTab-label">Details</span><span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab></div><div class="tabWell-content dockTab-strip"></div></div></ue-tab-well></div>
 			<span class="dockTab-caption">normal</span>
 		</div>
 		<div class="dockTab-cell">
-			<div><div class="dockTab-well"><div class="dockTab dockTab--hovered" data-pinned><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M2.500 4h11 M2.500 8h11 M2.500 12h7"/><circle cx="12.500" cy="12" r="1.200"/></svg></span><span class="dockTab-label">Details</span><span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></div><div class="dockTab-body"></div></div>
+			<div class="dockTab-ground"><ue-tab-well data-pinned><div class="tabWell-stack"><div class="tabWell-well"><ue-dock-tab><div class="dockTab dockTab--hovered"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M2.500 4h11 M2.500 8h11 M2.500 12h7"/><circle cx="12.500" cy="12" r="1.200"/></svg></span><span class="dockTab-label">Details</span><span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab></div><div class="tabWell-content dockTab-strip"></div></div></ue-tab-well></div>
 			<span class="dockTab-caption">hovered</span>
 		</div>
 		<div class="dockTab-cell">
-			<div><div class="dockTab-well"><div class="dockTab dockTab--foreground" data-pinned><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M5.500 3.500h8 M5.500 8h8 M5.500 12.500h8 M2.500 3.500h.5 M2.500 8h.5 M2.500 12.500h.5"/></svg></span><span class="dockTab-label">Outliner</span><span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></div><div class="dockTab-body"></div></div>
+			<div class="dockTab-ground"><ue-tab-well data-pinned><div class="tabWell-stack"><div class="tabWell-well"><ue-dock-tab><div class="dockTab dockTab--foreground"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M5.500 3.500h8 M5.500 8h8 M5.500 12.500h8 M2.500 3.500h.5 M2.500 8h.5 M2.500 12.500h.5"/></svg></span><span class="dockTab-label">Outliner</span><span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab></div><div class="tabWell-content dockTab-strip"></div></div></ue-tab-well></div>
 			<span class="dockTab-caption">foreground (selected)</span>
 		</div>
 		<div class="dockTab-cell">
-			<div><div class="dockTab-well"><div class="dockTab dockTab--foreground dockTab--active" data-pinned><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M2.5 5.5 8 2.5l5.500 3v5L8 13.500l-5.500-3z M2.500 5.500 8 8.500l5.500-3 M8 8.500v5"/></svg></span><span class="dockTab-label">Place Actors</span><span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></div><div class="dockTab-body"></div></div>
+			<div class="dockTab-ground"><ue-tab-well data-pinned><div class="tabWell-stack"><div class="tabWell-well"><ue-dock-tab><div class="dockTab dockTab--foreground dockTab--active"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M2.5 5.5 8 2.5l5.500 3v5L8 13.500l-5.500-3z M2.500 5.500 8 8.500l5.500-3 M8 8.500v5"/></svg></span><span class="dockTab-label">Place Actors</span><span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab></div><div class="tabWell-content dockTab-strip"></div></div></ue-tab-well></div>
 			<span class="dockTab-caption">active (+ 1px primary line)</span>
 		</div>
 		<div class="dockTab-cell">
-			<div><div class="dockTab-well"><div class="dockTab dockTab--foreground" data-pinned><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M2.500 4h11 M2.500 8h11 M2.500 12h7"/><circle cx="12.500" cy="12" r="1.200"/></svg></span><span class="dockTab-label">Details</span><span class="dockTab-close dockTab-close--hot"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></div><div class="dockTab-body"></div></div>
+			<div class="dockTab-ground"><ue-tab-well data-pinned><div class="tabWell-stack"><div class="tabWell-well"><ue-dock-tab><div class="dockTab dockTab--foreground"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M2.500 4h11 M2.500 8h11 M2.500 12h7"/><circle cx="12.500" cy="12" r="1.200"/></svg></span><span class="dockTab-label">Details</span><span class="dockTab-close dockTab-close--hot"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab></div><div class="tabWell-content dockTab-strip"></div></div></ue-tab-well></div>
 			<span class="dockTab-caption">close button hovered</span>
 		</div>
 		<div class="dockTab-cell">
-			<div><div class="dockTab-well"><div class="dockTab dockTab--flash" data-pinned><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M5.500 3.500h8 M5.500 8h8 M5.500 12.500h8 M2.500 3.500h.5 M2.500 8h.5 M2.500 12.500h.5"/></svg></span><span class="dockTab-label">Outliner</span><span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></div><div class="dockTab-body"></div></div>
+			<div class="dockTab-ground"><ue-tab-well data-pinned><div class="tabWell-stack"><div class="tabWell-well"><ue-dock-tab><div class="dockTab dockTab--flash"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M5.500 3.500h8 M5.500 8h8 M5.500 12.500h8 M2.500 3.500h.5 M2.500 8h.5 M2.500 12.500h.5"/></svg></span><span class="dockTab-label">Outliner</span><span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab></div><div class="tabWell-content dockTab-strip"></div></div></ue-tab-well></div>
 			<span class="dockTab-caption">flash (peak; see README)</span>
 		</div>
 	</div>
@@ -128,19 +127,19 @@
 	<div class="dockTab-caption dockTab-pinned">pinned: forced states, they do not react to the pointer</div>
 	<div class="dockTab-row">
 		<div class="dockTab-cell">
-			<div class="dockTab-well dockTab-well--major"><div class="dockTab dockTab--major" data-pinned><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></svg></span><span class="dockTab-label">Minimal_Default</span><span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></div>
+			<div class="dockTab-ground dockTab-ground--major"><ue-tab-well data-pinned><div class="tabWell-well tabWell-well--major"><ue-dock-tab><div class="dockTab dockTab--major"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></svg></span><span class="dockTab-label">Minimal_Default</span><span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab></div></ue-tab-well></div>
 			<span class="dockTab-caption">normal</span>
 		</div>
 		<div class="dockTab-cell">
-			<div class="dockTab-well dockTab-well--major"><div class="dockTab dockTab--major dockTab--hovered" data-pinned><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></svg></span><span class="dockTab-label">Minimal_Default</span><span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></div>
+			<div class="dockTab-ground dockTab-ground--major"><ue-tab-well data-pinned><div class="tabWell-well tabWell-well--major"><ue-dock-tab><div class="dockTab dockTab--major dockTab--hovered"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></svg></span><span class="dockTab-label">Minimal_Default</span><span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab></div></ue-tab-well></div>
 			<span class="dockTab-caption">hovered</span>
 		</div>
 		<div class="dockTab-cell">
-			<div class="dockTab-well dockTab-well--major"><div class="dockTab dockTab--major dockTab--foreground dockTab--active" data-pinned><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></svg></span><span class="dockTab-label">Minimal_Default</span><span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></div>
+			<div class="dockTab-ground dockTab-ground--major"><ue-tab-well data-pinned><div class="tabWell-well tabWell-well--major"><ue-dock-tab><div class="dockTab dockTab--major dockTab--foreground dockTab--active"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></svg></span><span class="dockTab-label">Minimal_Default</span><span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab></div></ue-tab-well></div>
 			<span class="dockTab-caption">foreground / active (no top line)</span>
 		</div>
 		<div class="dockTab-cell">
-			<div class="dockTab-well dockTab-well--major"><div class="dockTab dockTab--major dockTab--foreground" data-pinned><span class="dockTab-icon dockTab-icon--tinted"><svg style="color:var(--foreground-inverted)" viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></svg></span><span class="dockTab-label">Minimal_Default</span><span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></div>
+			<div class="dockTab-ground dockTab-ground--major"><ue-tab-well data-pinned><div class="tabWell-well tabWell-well--major"><ue-dock-tab><div class="dockTab dockTab--major dockTab--foreground"><span class="dockTab-icon dockTab-icon--tinted"><svg style="color:var(--foreground-inverted)" viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></svg></span><span class="dockTab-label">Minimal_Default</span><span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab></div></ue-tab-well></div>
 			<span class="dockTab-caption">colour-coded icon cell</span>
 		</div>
 	</div>

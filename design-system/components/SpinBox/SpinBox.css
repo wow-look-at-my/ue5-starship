@@ -1,9 +1,9 @@
-/* src/_shared/base.css */
+/* design-system/src/_shared/base.css */
 [data-pinned] {
   pointer-events: none;
 }
 
-/* src/SpinBox/SpinBox.css */
+/* design-system/src/SpinBox/SpinBox.css */
 .spinbox {
   --spinbox-fill: .4;
   position: relative;
@@ -29,6 +29,9 @@
   width: calc(var(--spinbox-fill) * 100% - 2px);
   border-radius: 4px;
   background: var(--dropdown);
+}
+.spinbox--small {
+  font: 400 10.667px/1.172 var(--font-sans);
 }
 .spinbox__text {
   position: relative;

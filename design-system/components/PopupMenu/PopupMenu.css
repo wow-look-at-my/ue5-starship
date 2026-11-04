@@ -1,9 +1,9 @@
-/* src/_shared/base.css */
+/* design-system/src/_shared/base.css */
 [data-pinned] {
   pointer-events: none;
 }
 
-/* src/PopupMenu/PopupMenu.css */
+/* design-system/src/PopupMenu/PopupMenu.css */
 .popupmenu {
   box-sizing: border-box;
   padding: 8px 0;
@@ -39,6 +39,9 @@
   padding: 3px 5px 3px 12px;
   background: transparent;
   color: var(--foreground-hover);
+}
+.popupmenu__row[hidden] {
+  display: none;
 }
 .popupmenu__row:hover,
 .popupmenu__row--hover {
@@ -154,6 +157,10 @@
 }
 .popupmenu__radio--on {
   background: var(--white);
+}
+.popupmenu__widget {
+  padding: 1px;
+  cursor: default;
 }
 .popupmenu__sep {
   height: 1px;

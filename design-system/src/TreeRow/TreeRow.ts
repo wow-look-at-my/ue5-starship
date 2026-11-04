@@ -4,7 +4,7 @@ import { TreeController } from '../_shared/tree-controller.ts';
 import './TreeRow.css';
 
 const ARROW = '<svg class="tr-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4l4.5 4L6 12z"/></svg>';
-const FOLDER = '<svg class="tr-icon is-folder" viewBox="0 0 16 16" aria-hidden="true"><path class="tr-folder-closed" d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.5 4.5V12a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H5.2L3.8 11V4.5a1 1 0 0 1 1-1h2L8 5h5.5"/></svg>';
+const FOLDER = '<svg class="tr-icon is-folder" viewBox="0 0 16 16" aria-hidden="true"><path class="tr-folder-closed" d="M1.5 4.25v7.5a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1H8l-1.2-1.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.25 4.25v7.5a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H4.95l-1.4 4.3v-6.5a1 1 0 0 1 1-1h2l1.2 1.5h5.5"/></svg>';
 const OBJECT = '<svg class="tr-icon is-object" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg>';
 
 export interface TreeRowData {
@@ -38,6 +38,8 @@ export interface TreeRowInfo {
 	id: string;
 	label: string;
 	depth: number;
+	// The row element, for a consumer that reads its own cells.
+	element: HTMLElement;
 }
 
 export type TreeFilter = string | ((row: TreeRowInfo) => boolean) | null;
@@ -72,17 +74,22 @@ export class TreeRow extends UeElement {
 				excluded: (row) => this.#filter !== null && !this.#kept.has(row),
 				forceOpen: (row) => this.#filter !== null && this.#parentsOfKept.has(row),
 				lazy: (row) => row.dataset.expandable === 'true',
-				toggled: (row, open) => this.emit<TreeToggleDetail>('ue-tree-toggle', { id: this.#idOf(row), expanded: open }),
+				toggled: (row, open) => {
+					this.emit<TreeToggleDetail>('ue-tree-toggle', { id: this.#idOf(row), expanded: open });
+					if (!open && this.hasAttribute('collapse-selects') && this.#rows().some((each) => each.hidden && this.#controller?.isSelected(each))) this.select([this.#idOf(row)]);
+				},
 				selected: () => this.#announceSelection(),
 			},
 		);
 		this.#controller = controller;
 
+		// A click inside [data-tr-inert] belongs to a control in a cell. It changes no selection and opens nothing.
+		const live = (target: EventTarget | null): boolean => this.owns(target) && !(target as Element).closest('[data-tr-inert]');
 		this.on(tree, 'click', (event) => {
-			if (this.owns(event.target)) controller.click(event);
+			if (live(event.target)) controller.click(event);
 		});
 		this.on(tree, 'dblclick', (event) => {
-			if (this.owns(event.target)) controller.doubleClick(event);
+			if (live(event.target)) controller.doubleClick(event);
 		});
 		this.on(tree, 'keydown', (event) => {
 			if (this.owns(event.target)) controller.keyDown(event);
@@ -120,7 +127,7 @@ export class TreeRow extends UeElement {
 	}
 
 	#info(row: HTMLElement): TreeRowInfo {
-		return { id: this.#idOf(row), label: (row.querySelector('.tr-text')?.textContent ?? '').trim(), depth: (this.#controller?.level(row) ?? 1) - 1 };
+		return { id: this.#idOf(row), label: (row.querySelector('.tr-text')?.textContent ?? '').trim(), depth: (this.#controller?.level(row) ?? 1) - 1, element: row };
 	}
 
 	#announceSelection(): void {
@@ -162,6 +169,14 @@ export class TreeRow extends UeElement {
 		controller.refresh();
 	}
 
+	// Adds one row after the last row. It does not touch the selection.
+	appendRow(data: TreeRowData): void {
+		if (!this.#tree || !this.#controller) return;
+		this.#tree.append(this.#draw(data));
+		this.#refilter();
+		this.#controller.refresh();
+	}
+
 	#draw(data: TreeRowData): HTMLElement {
 		const depth = data.depth ?? 0;
 		const row = document.createElement('div');
@@ -181,6 +196,37 @@ export class TreeRow extends UeElement {
 			cellEls[i].textContent = value;
 		});
 		return row;
+	}
+
+	// Sorts the children of every parent with compare. A row keeps its subtree. Selection and open state stay.
+	sortChildren(compare: (a: TreeRowInfo, b: TreeRowInfo) => number): void {
+		const tree = this.#tree;
+		const controller = this.#controller;
+		if (!tree || !controller) return;
+		interface Node {
+			row: HTMLElement;
+			kids: Node[];
+		}
+		const roots: Node[] = [];
+		const stack: Node[] = [];
+		for (const row of this.#rows()) {
+			const node: Node = { row, kids: [] };
+			const level = controller.level(row);
+			stack.length = level - 1;
+			(stack[level - 2]?.kids ?? roots).push(node);
+			stack[level - 1] = node;
+		}
+		const flat: HTMLElement[] = [];
+		const walk = (list: Node[]): void => {
+			list.sort((a, b) => compare(this.#info(a.row), this.#info(b.row)));
+			for (const node of list) {
+				flat.push(node.row);
+				walk(node.kids);
+			}
+		};
+		walk(roots);
+		tree.append(...flat);
+		controller.refresh();
 	}
 
 	// Shows only the rows the filter accepts and their ancestors. Ancestors open while the filter is set. Null clears it.

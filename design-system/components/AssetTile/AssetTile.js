@@ -1,11 +1,13 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   #ready = false;
   #pendingSetup = null;
   // The bundle can load before the parser reaches this element's children, so setup waits for the document to finish parsing.
+  // A pinned specimen (data-pinned on the element or an ancestor) keeps its authored markup: setup never runs.
   connectedCallback() {
     this.style.display = "contents";
+    if (this.closest("[data-pinned]")) return;
     if (document.readyState !== "loading") {
       this.#start();
       return;
@@ -51,7 +53,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/_shared/tileGrid.ts
+// design-system/src/_shared/tileGrid.ts
 function nearestInRow(tiles, from, down) {
   const tops = new Map(tiles.map((tile) => [tile, tile.getBoundingClientRect()]));
   const box = from.getBoundingClientRect();
@@ -71,9 +73,9 @@ function nearestInRow(tiles, from, down) {
   return line.reduce((best, tile) => distance(tile) < distance(best) ? tile : best);
 }
 
-// src/AssetTile/AssetTile.ts
+// design-system/src/AssetTile/AssetTile.ts
 var SELECTED = "is-selected";
-var FOLDER = '<svg class="AssetTile__folderIcon" viewBox="0 0 64 64" aria-hidden="true"><path d="M2 13a2 2 0 0 1 2-2h18l5 6h33a2 2 0 0 1 2 2v31a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="currentColor"/><path d="M2 13a2 2 0 0 1 2-2h18l5 6H2z" fill="#fff" opacity=".12"/><path d="M2 24h60v26a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="#000" opacity=".12"/></svg>';
+var FOLDER = '<svg class="AssetTile__folderIcon" viewBox="0 0 64 64" aria-hidden="true"><path d="M2 13.5a2 2 0 0 1 2-2h18l5 6h33a2 2 0 0 1 2 2v31a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="currentColor"/><path d="M2 13.5a2 2 0 0 1 2-2h18l5 6H2z" fill="#fff" opacity=".12"/><path d="M2 24.5h60v26a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="#000" opacity=".12"/></svg>';
 var CUBE = '<svg viewBox="0 0 32 32" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg>';
 var AssetTileElement = class extends UeElement {
   #anchor = null;
@@ -276,3 +278,6 @@ var AssetTileElement = class extends UeElement {
   }
 };
 define("ue-asset-tile", AssetTileElement);
+export {
+  AssetTileElement
+};

@@ -92,9 +92,23 @@ function loaderTags(html: string): string {
 // The page also preloads components/bundle.css ahead of the preview's own styles.
 export const withBundle = (html: string): string => html.replace('<head>', '<head><link rel="stylesheet" href="/components/bundle.css">').replace('</head>', loaderTags(html) + '</head>');
 
+// A pinned specimen is a ue-* element with data-pinned, so a ue-* tag in a page selector must mean the live element.
+// A selector that names data-pinned is left alone: it picks pinned specimens on purpose.
+const NOT_PINNED = ':not([data-pinned], [data-pinned] *)';
+export function live(selector: string): string {
+	if (selector.includes('data-pinned')) return selector;
+	return selector.replace(/(^|[\s>+~,(])(ue-[a-z0-9-]+)(?![\w-])/g, '$1$2' + NOT_PINNED);
+}
+
 // Opens a component preview with the tokens injected. Console and page errors collect in `errors`.
 export async function openPreview(browser: Browser, name: string, viewport = { width: 1000, height: 800 }): Promise<Preview> {
 	const page = await browser.newPage({ viewport });
+	const pageLocator = page.locator.bind(page);
+	page.locator = ((selector: string, options?: Parameters<Page['locator']>[1]) => pageLocator(live(selector), options)) as Page['locator'];
+	for (const method of ['$eval', '$$eval'] as const) {
+		const original = page[method].bind(page) as (selector: string, ...rest: unknown[]) => Promise<unknown>;
+		(page as unknown as Record<string, unknown>)[method] = (selector: string, ...rest: unknown[]) => original(live(selector), ...rest);
+	}
 	const errors: string[] = [];
 	page.on('pageerror', (e) => errors.push(String(e)));
 	page.on('console', (m) => {

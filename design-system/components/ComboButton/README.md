@@ -93,12 +93,20 @@ One `<ue-combo-button>` is one trigger and one dropdown panel. This is the trigg
 
 The host owns open and close, an outside click, Escape, Down, Up, Enter and Space on the trigger, and the focus return to the trigger. The popup menu owns row keys and activation.
 
+A menu can hold a widget block (`popupmenu__widget`, see the PopupMenu README), such as the browse section of the asset picker. Inside a widget block of its own menu the host lets a click focus a field. Tab moves between the fields without closing, and Escape in a search field that clears its text leaves the menu open. A field with `data-autofocus` in a widget block takes the focus when the menu opens. A combo in a widget block of another combo closes alone on Escape.
+
+An icon-only trigger, such as a gear with no arrow, is `combobutton--simple` with one `combobutton__icon` and nothing else. The icon then has no right margin.
+
 ## Modes
 
 | Mode | How | Behavior |
 |---|---|---|
 | Value | default | The trigger label follows the pick. The picked row gets `aria-selected="true"`, the others `false` |
 | Action | `combobutton--simple` on the trigger, or `mode="action"` on the host, or a trigger without a label | The label stays fixed. Rows only fire events |
+
+`mode="value"` on the host gives a simple trigger value mode: the simple look with a label that follows the pick.
+
+The host also has a small code API for a composite that coordinates several combos: `open(keys?, fromEnd?)`, `close(refocus?)` and `isOpen`. `open` does nothing on a disabled combo or an open one. `close` does nothing on a closed one.
 
 A check row never changes the label.
 
@@ -110,9 +118,16 @@ A check row never changes the label.
 | `combobutton--simple` | Transparent, `--dropdown` on hover, padding 4 x 1 |
 | `combobutton--icon` | Transparent icon plus chevron, no label, padding 4 x 3 |
 | `combobutton--small` | Property row size: `400 10.667px/1.172` font, fixed 22px height, no minimum width |
-| `combobutton--button` | The Button look: `--secondary` fill, fixed 22px height, padding 14, 3px gap |
+| `combobutton--button` | The Button look: `--secondary` fill, fixed 22px height, padding 14, 3px gap. The plus icon is `--accent-green` (`ToolWidgetsStyle.cpp:76`) |
+| `combobutton--wide` (with `--simple`) | Content padding 6 on top of the simple padding: 10 x 1 (`SDerivedDataStatusBar.cpp:166`) |
+| `combobutton--menubar` | A menu bar item: no fill, padding 12 x 4, Hover fill on hover, Primary while open, no chevron. The panel is at least 220px wide (`StarshipCoreStyle.cpp:2433-2448`) |
+| `combobutton--toolbar` | The slim toolbar combo: padding 8 x 4 (pressed 8, 5, 8, 3), 20px icon, Dropdown fill on hover. Add `combobutton--overflow` for the 16px glyph with padding 12 x 4 (`StarshipCoreStyle.cpp:2193-2206`) |
+| `combobutton--plate` | A trigger on a backplate. It fills its host and draws nothing: the plate owns the fill and the foreground |
 | `combobutton-anchor--fill` (on the anchor) | The trigger takes the free width of a row |
 | `combobutton-menu--end` (on the panel) | The panel aligns to the right edge of the trigger |
+| `combobutton-menu--up` (on the panel) | The panel opens above the trigger, for a bar at the bottom edge |
+
+A trigger and its anchor never shrink or wrap in a flex row (`white-space: nowrap`, `flex-shrink: 0`).
 
 Panel width: the panel is at least as wide as the trigger. Set `--combobutton-menu-min-width` on the panel to change the minimum. Use `popupmenu--combo` on the list for value pickers and `popupmenu--small` for 10.667px rows.
 
@@ -121,4 +136,9 @@ Panel width: the panel is at least as wide as the trigger. Set `--combobutton-me
 | Event | Detail | When |
 |---|---|---|
 | `ue-combo-pick` | `{ value, label, checked }` | A row is activated. `value` is the row `data-value` or its label. `checked` is the new state of a check or radio row, else `null` |
+| `ue-combo-toggle` | `{ open }` | The panel opened or closed. A host that rebuilds its menu on each open, as Slate does, listens for it |
 | `ue-menu-activate` | see PopupMenu | Also bubbles from the nested popup menu |
+
+## Data API
+
+`el.value` is the value of the picked row in value mode. Setting it picks the row whose `data-value` (else label) matches, shows its label and marks it `aria-selected`. It throws when no row matches and fires no `ue-combo-pick`, because the owner that sets it already knows. Set it only after the element is upgraded, for example in an event handler.

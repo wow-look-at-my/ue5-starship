@@ -1,9 +1,9 @@
-/* src/_shared/base.css */
+/* design-system/src/_shared/base.css */
 [data-pinned] {
   pointer-events: none;
 }
 
-/* src/Checkbox/Checkbox.css */
+/* design-system/src/Checkbox/Checkbox.css */
 .checkbox {
   display: inline-flex;
   align-items: center;
@@ -90,6 +90,19 @@
   background: transparent;
   color: var(--foreground);
   font: 400 13.333px/16px var(--font-sans);
+}
+.checkbox-toggle--icon {
+  padding: 4px;
+}
+.checkbox-toggle__icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .checkbox-toggle:hover,
 .checkbox-toggle--hover {

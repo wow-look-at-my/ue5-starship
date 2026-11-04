@@ -1,11 +1,13 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   #ready = false;
   #pendingSetup = null;
   // The bundle can load before the parser reaches this element's children, so setup waits for the document to finish parsing.
+  // A pinned specimen (data-pinned on the element or an ancestor) keeps its authored markup: setup never runs.
   connectedCallback() {
     this.style.display = "contents";
+    if (this.closest("[data-pinned]")) return;
     if (document.readyState !== "loading") {
       this.#start();
       return;
@@ -51,7 +53,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/_shared/drag.ts
+// design-system/src/_shared/drag.ts
 var THRESHOLD = 3;
 function drag(target, handlers) {
   let originX = 0;
@@ -93,7 +95,7 @@ function drag(target, handlers) {
   };
 }
 
-// src/_shared/scroll-thumb.ts
+// design-system/src/_shared/scroll-thumb.ts
 var MIN_THUMB = 35;
 var BAR_PADDING = 2;
 function thumbLayout(slot, viewport, content, offset) {
@@ -189,7 +191,7 @@ function bindBar(view, bar, thumb, vertical, onFits) {
   };
 }
 
-// src/Scrollbar/Scrollbar.ts
+// design-system/src/Scrollbar/Scrollbar.ts
 var Scrollbar = class extends UeElement {
   #visible = null;
   // True while the content overflows and the bar shows.

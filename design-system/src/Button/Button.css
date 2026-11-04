@@ -44,8 +44,32 @@
 .button--toggle[aria-disabled="true"]:active { background: transparent; color: var(--foreground); }
 .button--toggle[aria-pressed="true"][aria-disabled="true"]:active { background: var(--primary); color: var(--foreground-hover); }
 
+/* Tight: a toolbar button whose consumer sets ContentPadding(2) in place of the SButton default (4,2), as the Content Browser does (SContentBrowser.cpp:1839,1857). */
+.button--tight, .button--tight:active, .button--tight.button--pressed { padding-left: 4px; padding-right: 4px; }
+
 .button--small { box-sizing: border-box; height: 22px; padding: 0 14px; } /* Add button: ComboButton content padding (2,1.5) + Button padding (12,1.5) ToolWidgetsStyle.cpp:16-21, fixed 22px */
 .button--small:active, .button--small.button--pressed { padding: 1px 14px 0; }
+
+.button--toolbar { padding: 4px 8px; } /* SlimToolBar button padding (8,4,8,4) StarshipCoreStyle.cpp:2193, toggle (8,4,8,4) :2217-2218 */
+.button--toolbar:active, .button--toolbar.button--pressed { padding: 5px 8px 3px; } /* PressedPadding (8,5,8,3) :2194 */
+.button--toolbar.button--toggle:active, .button--toolbar.button--toggle.button--pressed { padding: 4px 8px; } /* a toggle has no pressed shift :2217-2218 */
+.button--toolbar .button__icon { width: 20px; height: 20px; } /* SlimToolBar SetIconSize(Icon20x20) :2240 */
+
+.button--plate, .button--plate:hover, .button--plate:active, .button--plate.button--hover, .button--plate.button--pressed,
+.button--plate:disabled, .button--plate:disabled:hover, .button--plate[aria-disabled="true"], .button--plate[aria-disabled="true"]:hover { padding: 0; background: transparent; box-shadow: none; color: inherit; opacity: 1; } /* Play group plate: the host plate owns the fill, the foreground and the disabled alpha, StarshipStyle.cpp:5520-5578 */
+.button--plate .button__icon { width: 20px; height: 20px; margin-right: 0; }
+
+.button--status { padding: 4px; background: transparent; box-shadow: none; color: var(--foreground); } /* StatusBar.StatusBarButton padding (2,2,2,2) StarshipCoreStyle.cpp:1867-1870 plus the 2px content slots SWidgetDrawer.cpp:456, :467; NormalForeground Foreground :1868 */
+.button--status:hover, .button--status.button--hover { background: transparent; color: var(--foreground-hover); } /* NoBorder HoveredForeground ForegroundHover :237-239 */
+.button--status:active, .button--status.button--pressed, .button--status[aria-pressed="true"] { background: transparent; color: var(--foreground-hover); padding: 5px 4px 3px; } /* pressed padding (2,3,2,1) :1870; an open drawer reuses it, the source has no open style */
+.button--status:disabled, .button--status:disabled:hover, .button--status[aria-disabled="true"], .button--status[aria-disabled="true"]:hover { background: transparent; color: var(--foreground); }
+/* Window caption button (minimize, maximize, restore, close): 42x23 glyph cell, no outline, translucent hover fill. StarshipCoreStyle.cpp:749-766, :789-792 */
+.button--caption { box-sizing: border-box; width: 42px; height: 23px; padding: 0; border-radius: 0; background: transparent; box-shadow: none; color: var(--foreground); } /* Normal tint Foreground :749; ContentPadding(0) SWindowTitleBar.cpp:139 */
+.button--caption svg { display: block; width: 42px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1; }
+.button--caption:hover, .button--caption.button--hover { background: rgba(255, 255, 255, .157); color: var(--foreground-hover); } /* FColor(255,255,255,40) :789-790, tint :750 */
+.button--caption-close:hover, .button--caption-close.button--hover { background: rgba(255, 79, 79, .588); } /* FColor(255,20,20,150) as linear: :791-792 */
+.button--caption:active, .button--caption.button--pressed { background: transparent; color: var(--foreground); padding: 0; } /* Pressed has no fill in the style: NoBorder :233-239, tint :751, :766 */
+.button--caption:focus-visible { box-shadow: inset 0 0 0 1px var(--primary); } /* keyboard focus ring; the engine buttons are not focusable (SWindowTitleBar.cpp:139) */
 
 .button__icon { width: 16px; height: 16px; flex: none; margin-right: 4px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; } /* gap is consumer choice */
 .button__icon--solo { margin-right: 0; }

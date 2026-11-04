@@ -15,6 +15,7 @@
 	border-radius: 4px; /* :601-603 */
 	background: var(--dropdown); /* InactiveFillBrush :603 */
 }
+.spinbox--small { font: 400 10.667px/1.172 var(--font-sans); } /* a details row value: Small 8pt, ComponentTransformDetails.cpp:422,491 */
 .spinbox__text { position: relative; flex: 1 1 auto; min-width: 0; padding: 2.5px 7px; white-space: nowrap; } /* TextPadding (7,2.5,7,2.5) :606 */
 .spinbox__text:has(+ .spinbox__unit) { flex: 0 1 auto; padding-right: 0; }
 .spinbox--text .spinbox__text { flex: 1 1 auto; }

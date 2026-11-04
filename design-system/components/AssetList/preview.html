@@ -1,0 +1,83 @@
+<!-- @dsCard group="Content Browser" height=380 subtitle="List view of an asset view: header, 36px rows with thumbnail, name and class, item count" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AssetList</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Roboto+Condensed:wght@400;700&family=Roboto+Mono&display=swap">
+<style>body { font-family: var(--font-sans); }</style>
+<style>
+	/* Demo layout only. The list look is src/AssetList/AssetList.css. */
+	.AssetListPreview { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; padding: 12px 16px; background: var(--dropdown); }
+	.AssetListPreview__col { display: flex; flex-direction: column; gap: 8px; width: 300px; }
+	.AssetListPreview__box { height: 270px; display: flex; flex-direction: column; }
+	.AssetListPreview__cap { margin: 0; font: 400 10.667px/1.4 var(--font-sans); color: var(--foreground); opacity: .8; }
+	.AssetListPreview ue-event-status { font: 400 10.667px/14px var(--font-sans); color: var(--hover-2); min-height: 14px; }
+</style>
+</head>
+<body>
+<!-- The revision control icon and the cube thumbnail approximate Starship SVGs that are not in the source tree. -->
+<div class="AssetListPreview">
+<div class="AssetListPreview__col">
+	<div class="AssetListPreview__box">
+	<ue-asset-list>
+		<div class="AssetList">
+			<ue-header-row grips="off"><div class="hr-row"><div class="hr-cells"><div class="hr-cell is-fixed" style="--hr-fixed:30px"><svg class="hr-icon" viewBox="0 0 16 16"><path d="M5 2.5v11M5 10a3 3 0 0 1 3-3h1.5" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="11" cy="7" r="1.6" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></div><div class="hr-cell is-text" role="columnheader" tabindex="0" aria-sort="ascending" data-column="name">Name</div><div class="hr-spacer"></div></div><div class="hr-rule"></div></div></ue-header-row>
+			<ue-scrollbar>
+				<div class="sb-scroll AssetList__scroll">
+					<div class="sb-view AssetList__view">
+						<div class="AssetList__rows" role="listbox" tabindex="0" aria-label="Static Mesh assets">
+						<div class="AssetList__row" role="option" aria-selected="false" data-id="Cone" data-path="/Engine/BasicShapes/Cone.Cone"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">Cone</span><span class="AssetList__class">Static Mesh</span></span></div>
+						<div class="AssetList__row" role="option" aria-selected="false" data-id="Cube" data-path="/Engine/BasicShapes/Cube.Cube"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">Cube</span><span class="AssetList__class">Static Mesh</span></span></div>
+						<div class="AssetList__row" role="option" aria-selected="false" data-id="Cylinder" data-path="/Engine/BasicShapes/Cylinder.Cylinder"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">Cylinder</span><span class="AssetList__class">Static Mesh</span></span></div>
+						<div class="AssetList__row" role="option" aria-selected="false" data-id="Plane" data-path="/Engine/BasicShapes/Plane.Plane"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">Plane</span><span class="AssetList__class">Static Mesh</span></span></div>
+						<div class="AssetList__row" role="option" aria-selected="false" data-id="SM_Bookshelf" data-path="/Game/Props/SM_Bookshelf.SM_Bookshelf"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">SM_Bookshelf</span><span class="AssetList__class">Static Mesh</span></span></div>
+						<div class="AssetList__row" role="option" aria-selected="true" data-id="SM_Chair" data-path="/Game/Props/SM_Chair.SM_Chair"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">SM_Chair</span><span class="AssetList__class">Static Mesh</span></span></div>
+						<div class="AssetList__row" role="option" aria-selected="false" data-id="SM_Couch" data-path="/Game/Props/SM_Couch.SM_Couch"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">SM_Couch</span><span class="AssetList__class">Static Mesh</span></span></div>
+						<div class="AssetList__row" role="option" aria-selected="false" data-id="SM_Lamp" data-path="/Game/Props/SM_Lamp.SM_Lamp"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">SM_Lamp</span><span class="AssetList__class">Static Mesh</span></span></div>
+						<div class="AssetList__row" role="option" aria-selected="false" data-id="SM_Rug" data-path="/Game/Props/SM_Rug.SM_Rug"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">SM_Rug</span><span class="AssetList__class">Static Mesh</span></span></div>
+						<div class="AssetList__row" role="option" aria-selected="false" data-id="SM_Table" data-path="/Game/Props/SM_Table.SM_Table"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">SM_Table</span><span class="AssetList__class">Static Mesh</span></span></div>
+						<div class="AssetList__row" role="option" aria-selected="false" data-id="Sphere" data-path="/Engine/BasicShapes/Sphere.Sphere"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">Sphere</span><span class="AssetList__class">Static Mesh</span></span></div>
+						</div>
+					</div>
+					<div class="sb sb-v" aria-hidden="true"><div class="sb-thumb"></div></div>
+				</div>
+			</ue-scrollbar>
+			<div class="AssetList__count" role="status">6 items (1 selected)</div>
+		</div>
+		<ue-event-status event="ue-asset-list-select" template="Selected: {id}. "></ue-event-status>
+		<ue-event-status event="ue-asset-list-activate" template="Activated: {id}"></ue-event-status>
+	</ue-asset-list>
+	</div>
+	<p class="AssetListPreview__cap"><b>Live.</b> Click a row to select and activate it. Focus the list: Up and Down move and wrap, Home and End jump, Enter activates. Click Name to flip the sort. Engine content (five /Engine/BasicShapes meshes in the markup) stays hidden until <code>showEngine</code> is set.</p>
+</div>
+
+<div class="AssetListPreview__col">
+	<div class="AssetListPreview__box">
+	<ue-asset-list data-pinned>
+		<div class="AssetList">
+			<ue-header-row data-pinned><div class="hr-row"><div class="hr-cells"><div class="hr-cell is-fixed" style="--hr-fixed:30px"><svg class="hr-icon" viewBox="0 0 16 16"><path d="M5 2.5v11M5 10a3 3 0 0 1 3-3h1.5" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="11" cy="7" r="1.6" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></div><div class="hr-cell is-text">Name<svg class="hr-sort" viewBox="0 0 12 12"><path d="M2 8l4-5 4 5z"/></svg></div><div class="hr-spacer" hidden></div></div><div class="hr-rule"></div></div></ue-header-row>
+			<ue-scrollbar data-pinned>
+				<div class="sb-scroll AssetList__scroll">
+					<div class="sb-view AssetList__view">
+						<div class="AssetList__rows">
+						<div class="AssetList__row" role="option" aria-selected="false" data-id="SM_Bookshelf" data-path="/Game/Props/SM_Bookshelf.SM_Bookshelf"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">SM_Bookshelf</span><span class="AssetList__class">Static Mesh</span></span></div>
+						<div class="AssetList__row is-odd" role="option" aria-selected="true" data-id="SM_Chair" data-path="/Game/Props/SM_Chair.SM_Chair"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">SM_Chair</span><span class="AssetList__class">Static Mesh</span></span></div>
+						<div class="AssetList__row" role="option" aria-selected="false" data-id="SM_Couch" data-path="/Game/Props/SM_Couch.SM_Couch"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">SM_Couch</span><span class="AssetList__class">Static Mesh</span></span></div>
+						<div class="AssetList__row is-hover is-odd" role="option" aria-selected="false" data-id="SM_Lamp" data-path="/Game/Props/SM_Lamp.SM_Lamp"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">SM_Lamp</span><span class="AssetList__class">Static Mesh</span></span></div>
+						<div class="AssetList__row" role="option" aria-selected="false" data-id="SM_Rug" data-path="/Game/Props/SM_Rug.SM_Rug"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">SM_Rug</span><span class="AssetList__class">Static Mesh</span></span></div>
+						<div class="AssetList__row is-odd" role="option" aria-selected="false" data-id="SM_Table" data-path="/Game/Props/SM_Table.SM_Table"><span class="AssetList__rc"></span><span class="AssetList__thumb"><svg viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M16 3l11 6v14l-11 6-11-6V9z"/><path d="M5 9l11 6 11-6M16 15v14"/></g></svg><i class="AssetList__strip" style="--strip:#29f1f2"></i></span><span class="AssetList__text"><span class="AssetList__name">SM_Table</span><span class="AssetList__class">Static Mesh</span></span></div>
+						</div>
+					</div>
+				</div>
+			</ue-scrollbar>
+			<div class="AssetList__count">6 items (1 selected)</div>
+		</div>
+	</ue-asset-list>
+	</div>
+	<p class="AssetListPreview__cap"><b>Pinned.</b> Even rows Recessed, odd rows Background, SM_Chair selected with the inactive brush, SM_Lamp hovered.</p>
+</div>
+</div>
+</body>
+</html>

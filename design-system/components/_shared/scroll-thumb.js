@@ -1,4 +1,4 @@
-// src/_shared/drag.ts
+// design-system/src/_shared/drag.ts
 var THRESHOLD = 3;
 function drag(target, handlers) {
   let originX = 0;
@@ -40,7 +40,7 @@ function drag(target, handlers) {
   };
 }
 
-// src/_shared/scroll-thumb.ts
+// design-system/src/_shared/scroll-thumb.ts
 var MIN_THUMB = 35;
 var BAR_PADDING = 2;
 function thumbLayout(slot, viewport, content, offset) {

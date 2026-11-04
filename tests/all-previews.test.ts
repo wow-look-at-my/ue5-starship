@@ -89,3 +89,97 @@ test('components/bundle.js exists, is a classic script, and defines every ue-* e
 		await page.close();
 	});
 });
+
+// Every folder glyph draws its shape centred in its icon box: the box minus its padding, within 0.1px.
+const FOLDER_GLYPHS = ['.tr-icon.is-folder', '.AssetTile__folderIcon', '.ContentToolbar__folder', '[data-role="browse"] svg', '[aria-label="Create folder"] svg', '.checkbox-toggle__icon'];
+for (const name of ['AssetPicker', 'AssetTile', 'ContentBrowser', 'ContentToolbar', 'SourcePanel', 'TreeRow', 'SceneOutliner', 'EditorLayout']) {
+	test(name + ': every folder glyph is centred in its icon box', async () => {
+		await withBrowser(async (browser) => {
+			const { page } = await openPreview(browser, name);
+			const report = await page.evaluate((selectors) => {
+				const off: string[] = [];
+				let checked = 0;
+				for (const svg of Array.from(document.querySelectorAll<SVGSVGElement>(selectors.join(',')))) {
+					const box = svg.getBoundingClientRect();
+					if (box.width === 0 || box.height === 0) continue;
+					const style = getComputedStyle(svg);
+					const left = box.left + parseFloat(style.paddingLeft);
+					const right = box.right - parseFloat(style.paddingRight);
+					const top = box.top + parseFloat(style.paddingTop);
+					const bottom = box.bottom - parseFloat(style.paddingBottom);
+					let x0 = Infinity;
+					let y0 = Infinity;
+					let x1 = -Infinity;
+					let y1 = -Infinity;
+					for (const shape of Array.from(svg.querySelectorAll('path, circle, rect'))) {
+						if (getComputedStyle(shape).display === 'none') continue;
+						const r = shape.getBoundingClientRect();
+						x0 = Math.min(x0, r.left);
+						y0 = Math.min(y0, r.top);
+						x1 = Math.max(x1, r.right);
+						y1 = Math.max(y1, r.bottom);
+					}
+					const dx = (x0 + x1) / 2 - (left + right) / 2;
+					const dy = (y0 + y1) / 2 - (top + bottom) / 2;
+					checked++;
+					if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) off.push((svg.getAttribute('class') ?? svg.parentElement?.getAttribute('aria-label')) + ' off by ' + dx.toFixed(2) + ', ' + dy.toFixed(2));
+				}
+				return { checked, off: Array.from(new Set(off)) };
+			}, FOLDER_GLYPHS);
+			assert.ok(report.checked > 0, 'a folder glyph in the preview');
+			assert.deepEqual(report.off, []);
+			await page.close();
+		});
+	});
+}
+
+// Composition: each class is styled by one component, and markup that uses a component's classes sits inside that component's element.
+const src = path.join(root, 'src');
+const sources = fs.readdirSync(src, { withFileTypes: true }).filter((e) => e.isDirectory() && !e.name.startsWith('_')).map((e) => e.name).sort();
+
+function selectorClasses(css: string): Set<string> {
+	const out = new Set<string>();
+	for (const m of css.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/([^{}]+)\{/g)) {
+		if (m[1].trim().startsWith('@')) continue;
+		for (const c of m[1].matchAll(/\.(-?[_a-zA-Z][\w-]*)/g)) if (!/^(is|has)-/.test(c[1])) out.add(c[1]);
+	}
+	return out;
+}
+
+const previewStyle = (name: string): string => Array.from(fs.readFileSync(path.join(components, name, 'preview.html'), 'utf8').matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g), (m) => m[1]).join('\n');
+
+const owners = new Map<string, string[]>();
+for (const name of sources) {
+	for (const file of fs.readdirSync(path.join(src, name)).filter((f) => f.endsWith('.css'))) {
+		for (const cls of selectorClasses(fs.readFileSync(path.join(src, name, file), 'utf8'))) owners.set(cls, [...new Set([...(owners.get(cls) ?? []), name])]);
+	}
+}
+
+test('every class is styled by exactly one component stylesheet', () => {
+	assert.deepEqual(Array.from(owners).filter(([, list]) => list.length > 1).map(([cls, list]) => cls + ' in ' + list.join(' and ')), []);
+});
+
+for (const name of names) {
+	test(name + ': the preview style does not restyle another component', () => {
+		assert.deepEqual(Array.from(selectorClasses(previewStyle(name))).filter((cls) => owners.has(cls) && !owners.get(cls)?.includes(name)).map((cls) => cls + ' (' + owners.get(cls)?.join(', ') + ')'), []);
+	});
+
+	test(name + ': markup that uses a component class sits inside that component element', async () => {
+		const classTags = Object.fromEntries(Array.from(owners, ([cls, list]) => [cls, list.map(kebab)]));
+		await withBrowser(async (browser) => {
+			const { page } = await openPreview(browser, name);
+			const loose = await page.evaluate((map) => {
+				const found = new Set<string>();
+				for (const el of Array.from(document.body.querySelectorAll('[class]'))) {
+					for (const cls of Array.from(el.classList)) {
+						const tags = map[cls];
+						if (tags && !tags.some((tag) => el.closest(tag))) found.add(cls + ' outside ' + tags.join('/'));
+					}
+				}
+				return Array.from(found).sort();
+			}, classTags);
+			assert.deepEqual(loose, []);
+			await page.close();
+		});
+	});
+}

@@ -1,0 +1,37 @@
+/* SC = Runtime/SlateCore/Private/Styling/StarshipCoreStyle.cpp, SB = Editor/StatusBar/Private/SStatusBar.cpp, WD = Developer/ToolWidgets/Private/SWidgetDrawer.cpp, SU = Editor/StatusBar/Private/StatusBarSubsystem.cpp. */
+/* The drawer buttons are Button status variants. The combos are ComboButton simple variants. The console is a TextInput console variant. */
+
+
+/* Bar: SBox HeightOverride StatusBar.Height = 32 (SC:1883, SB:584). Segments are Panel (Brushes.Panel, SB:580) with 1px gaps (SB:597, 610, 622). */
+/* The console box alone is at least 300px (SOutputLog.cpp:220), so the bar has a minimum width. */
+/* No brush sets the gap colour in SB. The gap shows what is behind the bar, and --background is an assumption. */
+.statusBar { display: flex; min-width: 990px; height: 32px; background: var(--background); }
+.statusBar-seg { display: flex; flex: none; align-items: center; background: var(--panel); margin: 0 1px; white-space: nowrap; }
+.statusBar-seg--drawer { padding: 0 2px; } /* SBorder Padding (2,0) (WD:443) */
+.statusBar-seg--message { flex: 1; min-width: 0; padding: 0 6px; } /* SBorder Padding (6,0) (SB:602) */
+.statusBar-seg--joined { margin-right: 0; } /* the Output Log button and its console share one 1px-padded slot (WD:589) */
+.statusBar-seg--console { padding: 0 2px; margin-left: 2px; } /* slot Padding (2,0,0,0) (WD:506), SBorder Padding (2,0) (WD:509) */
+.statusBar-seg--console .statusBar-console { display: flex; align-items: center; align-self: stretch; padding: 0 6px; background: var(--panel); } /* SBorder Panel Padding (6,0) (SU:524-527) */
+.statusBar-seg--tools { padding: 0 4px; } /* StatusBarToolBar BackgroundPadding (4,4) (SC:1897); vertical 4 is absorbed by the 32px bar */
+
+/* A combo and its pop-up share an anchor. The Cmd slot has Padding (0,0,4,0) (SOutputLog.cpp:186). */
+.statusBar .statusBar-anchor { display: flex; align-items: center; }
+.statusBar-cmd { margin-right: 4px; }
+
+/* Console text box: width 300 to 600 (SOutputLog.cpp:220-221) */
+.statusBar .statusBar-input { width: 300px; flex: none; }
+
+/* Derived Data: icon, 3px gap, label, 10px after the label (SDerivedDataStatusBar.cpp:177, 224). */
+/* Source Control: icon, 5px gap, label (SourceControlMenuHelpers.cpp:449). */
+.statusBar .statusBar-dd-ico { margin-right: 3px; }
+.statusBar .statusBar-dd-txt { margin-right: 10px; }
+.statusBar .statusBar-sc-ico { margin-right: 0; }
+.statusBar .statusBar-sc-txt { margin-left: 5px; }
+
+/* Recessed ground of log text boxes. Log.Normal is Mono 12px (OutputLogStyle.cpp:54). */
+.statusBar-history { display: flex; flex-direction: column; justify-content: flex-end; box-sizing: border-box; width: 300px; min-height: 72px; margin: 0 0 4px 0; padding: 4px 8px; background: var(--recessed); font: 400 12px/16px var(--font-mono); color: var(--foreground); }
+
+/* docked (host attribute on ue-status-bar): the log history floats above the bar, so the bar keeps its height at the foot of a window. */
+ue-status-bar[docked] .statusBar-stage { position: relative; }
+ue-status-bar[docked] .statusBar-history { position: absolute; bottom: 100%; left: 0; min-height: 0; margin: 0; z-index: 5; }
+ue-status-bar[docked] .statusBar-history:empty { display: none; }

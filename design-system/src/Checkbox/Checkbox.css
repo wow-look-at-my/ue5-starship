@@ -26,6 +26,8 @@
 	color: var(--foreground); /* ForegroundColor :1633 */
 	font: 400 13.333px/16px var(--font-sans);
 }
+.checkbox-toggle--icon { padding: 4px; } /* a glyph toggle with .Padding(4), such as the other-developers filter: SAssetPicker.cpp:166-178 */
+.checkbox-toggle__icon { flex: none; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; } /* 16x16 icon tinted by the foreground (UseForeground) */
 .checkbox-toggle:hover, .checkbox-toggle--hover { background: var(--dropdown); color: var(--foreground-hover); } /* :1631, :1634 */
 .checkbox-toggle--pressed { background: var(--dropdown); color: var(--foreground-hover); } /* :1632, :1635 */
 .checkbox-toggle--checked { background: var(--primary); color: var(--foreground-hover); } /* :1627, :1636 */

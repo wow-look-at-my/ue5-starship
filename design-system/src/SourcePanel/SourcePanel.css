@@ -1,0 +1,17 @@
+/* SContentBrowser.cpp:880 SBox Padding(4); :886 the Background behind the splitter handles, 2px each (:897) */
+.SourcePanel { box-sizing: border-box; padding: 4px; background: var(--background); font: 400 13.333px/16px var(--font-sans); color: var(--foreground); }
+.SourcePanel__frame { display: flex; flex-direction: column; gap: 2px; background: var(--background); }
+
+/* One section: the ExpandableArea. The title takes the free width so the tool buttons sit at the right edge. */
+.SourcePanel__area { display: flex; flex-direction: column; min-height: 0; }
+.SourcePanel__title { flex: 1; }
+/* Search toggle: margin 4px each side, 24px hit box (SContentBrowser.cpp:1493). Add collection: slot Padding(4,0,0,0) (:1644-1655) */
+.SourcePanel__tools { display: flex; align-items: center; gap: 8px; margin: 0 4px; }
+.SourcePanel__body { min-height: 0; max-height: 208px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--hover) transparent; }
+
+/* A panel that fills its parent: the project section takes the free height and scrolls. A collapsed section gives it back. */
+.SourcePanel--fill { height: 100%; }
+.SourcePanel--fill .SourcePanel__frame { height: 100%; }
+.SourcePanel--fill .SourcePanel__area { flex: none; }
+.SourcePanel--fill .SourcePanel__area--fill:not(.is-collapsed) { flex: 1 1 0; }
+.SourcePanel--fill .SourcePanel__body { flex: 1 1 auto; max-height: none; }

@@ -1,9 +1,9 @@
-/* src/_shared/base.css */
+/* design-system/src/_shared/base.css */
 [data-pinned] {
   pointer-events: none;
 }
 
-/* src/Slider/Slider.css */
+/* design-system/src/Slider/Slider.css */
 .slider {
   --slider-value: .5;
   position: relative;

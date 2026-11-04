@@ -1,11 +1,13 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   #ready = false;
   #pendingSetup = null;
   // The bundle can load before the parser reaches this element's children, so setup waits for the document to finish parsing.
+  // A pinned specimen (data-pinned on the element or an ancestor) keeps its authored markup: setup never runs.
   connectedCallback() {
     this.style.display = "contents";
+    if (this.closest("[data-pinned]")) return;
     if (document.readyState !== "loading") {
       this.#start();
       return;
@@ -51,7 +53,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/_shared/tree-controller.ts
+// design-system/src/_shared/tree-controller.ts
 var TreeController = class {
   root;
   parts;
@@ -250,9 +252,9 @@ var TreeController = class {
   }
 };
 
-// src/TreeRow/TreeRow.ts
+// design-system/src/TreeRow/TreeRow.ts
 var ARROW = '<svg class="tr-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4l4.5 4L6 12z"/></svg>';
-var FOLDER = '<svg class="tr-icon is-folder" viewBox="0 0 16 16" aria-hidden="true"><path class="tr-folder-closed" d="M1.5 4.5V12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H8L6.8 3.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.5 4.5V12a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H5.2L3.8 11V4.5a1 1 0 0 1 1-1h2L8 5h5.5"/></svg>';
+var FOLDER = '<svg class="tr-icon is-folder" viewBox="0 0 16 16" aria-hidden="true"><path class="tr-folder-closed" d="M1.5 4.25v7.5a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1H8l-1.2-1.5H2.5a1 1 0 0 0-1 1z"/><path class="tr-folder-open" d="M1.25 4.25v7.5a1 1 0 0 0 1 1h10.6l1.9-5.2a.8.8 0 0 0-.75-1.1H4.95l-1.4 4.3v-6.5a1 1 0 0 1 1-1h2l1.2 1.5h5.5"/></svg>';
 var OBJECT = '<svg class="tr-icon is-object" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8l5.5 3.1v6.2L8 14.2 2.5 11.1V4.9zM2.5 4.9L8 8l5.5-3.1M8 8v6.2"/></svg>';
 var TreeRow = class extends UeElement {
   #tree = null;
@@ -283,16 +285,20 @@ var TreeRow = class extends UeElement {
         excluded: (row) => this.#filter !== null && !this.#kept.has(row),
         forceOpen: (row) => this.#filter !== null && this.#parentsOfKept.has(row),
         lazy: (row) => row.dataset.expandable === "true",
-        toggled: (row, open) => this.emit("ue-tree-toggle", { id: this.#idOf(row), expanded: open }),
+        toggled: (row, open) => {
+          this.emit("ue-tree-toggle", { id: this.#idOf(row), expanded: open });
+          if (!open && this.hasAttribute("collapse-selects") && this.#rows().some((each) => each.hidden && this.#controller?.isSelected(each))) this.select([this.#idOf(row)]);
+        },
         selected: () => this.#announceSelection()
       }
     );
     this.#controller = controller;
+    const live = (target) => this.owns(target) && !target.closest("[data-tr-inert]");
     this.on(tree, "click", (event) => {
-      if (this.owns(event.target)) controller.click(event);
+      if (live(event.target)) controller.click(event);
     });
     this.on(tree, "dblclick", (event) => {
-      if (this.owns(event.target)) controller.doubleClick(event);
+      if (live(event.target)) controller.doubleClick(event);
     });
     this.on(tree, "keydown", (event) => {
       if (this.owns(event.target)) controller.keyDown(event);
@@ -323,7 +329,7 @@ var TreeRow = class extends UeElement {
     return this.#rows().find((row) => this.#idOf(row) === id);
   }
   #info(row) {
-    return { id: this.#idOf(row), label: (row.querySelector(".tr-text")?.textContent ?? "").trim(), depth: (this.#controller?.level(row) ?? 1) - 1 };
+    return { id: this.#idOf(row), label: (row.querySelector(".tr-text")?.textContent ?? "").trim(), depth: (this.#controller?.level(row) ?? 1) - 1, element: row };
   }
   #announceSelection() {
     const ids = this.getSelectedIds();
@@ -359,6 +365,13 @@ var TreeRow = class extends UeElement {
     this.#refilter();
     controller.refresh();
   }
+  // Adds one row after the last row. It does not touch the selection.
+  appendRow(data) {
+    if (!this.#tree || !this.#controller) return;
+    this.#tree.append(this.#draw(data));
+    this.#refilter();
+    this.#controller.refresh();
+  }
   #draw(data) {
     const depth = data.depth ?? 0;
     const row = document.createElement("div");
@@ -378,6 +391,32 @@ var TreeRow = class extends UeElement {
       cellEls[i].textContent = value;
     });
     return row;
+  }
+  // Sorts the children of every parent with compare. A row keeps its subtree. Selection and open state stay.
+  sortChildren(compare) {
+    const tree = this.#tree;
+    const controller = this.#controller;
+    if (!tree || !controller) return;
+    const roots = [];
+    const stack = [];
+    for (const row of this.#rows()) {
+      const node = { row, kids: [] };
+      const level = controller.level(row);
+      stack.length = level - 1;
+      (stack[level - 2]?.kids ?? roots).push(node);
+      stack[level - 1] = node;
+    }
+    const flat = [];
+    const walk = (list) => {
+      list.sort((a, b) => compare(this.#info(a.row), this.#info(b.row)));
+      for (const node of list) {
+        flat.push(node.row);
+        walk(node.kids);
+      }
+    };
+    walk(roots);
+    tree.append(...flat);
+    controller.refresh();
   }
   // Shows only the rows the filter accepts and their ancestors. Ancestors open while the filter is set. Null clears it.
   setFilter(filter) {

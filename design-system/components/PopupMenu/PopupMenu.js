@@ -1,11 +1,13 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   #ready = false;
   #pendingSetup = null;
   // The bundle can load before the parser reaches this element's children, so setup waits for the document to finish parsing.
+  // A pinned specimen (data-pinned on the element or an ancestor) keeps its authored markup: setup never runs.
   connectedCallback() {
     this.style.display = "contents";
+    if (this.closest("[data-pinned]")) return;
     if (document.readyState !== "loading") {
       this.#start();
       return;
@@ -51,21 +53,21 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/_shared/own.ts
+// design-system/src/_shared/own.ts
 function ownedBy(host, target) {
   return target instanceof Element && target.closest(host.localName) === host;
 }
 
-// src/_shared/popup.ts
+// design-system/src/_shared/popup.ts
 function enabledRows(menu, rowSelector) {
-  return Array.from(menu.querySelectorAll(rowSelector)).filter((row) => row.getAttribute("aria-disabled") !== "true");
+  return Array.from(menu.querySelectorAll(rowSelector)).filter((row) => !row.hidden && row.getAttribute("aria-disabled") !== "true");
 }
 function rowLabel(row, labelSelector) {
   const label = row.querySelector(labelSelector);
   return (label ?? row).textContent?.trim() ?? "";
 }
 
-// src/PopupMenu/PopupMenu.ts
+// design-system/src/PopupMenu/PopupMenu.ts
 var ROW = ".popupmenu__row";
 var CURRENT = "popupmenu__row--hover";
 var OPEN = "popupmenu__row--open";
@@ -165,7 +167,7 @@ var UePopupMenuElement = class extends UeElement {
       if (row !== current) keep.add(row);
     }
     if (open) keep.add(open);
-    for (const row of Array.from(root.querySelectorAll(ROW))) {
+    for (const row of Array.from(root.querySelectorAll(ROW)).filter((each) => ownedBy(this, each))) {
       row.classList.toggle(CURRENT, row === current);
       const sub = submenuOf(row);
       if (sub) {

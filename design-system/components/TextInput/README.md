@@ -70,6 +70,8 @@ One `<ue-text-input>` wraps exactly one `.textinput` box. The CSS lives in `src/
 | Trailing buttons | put `<span class="textinput__trail">` with the buttons between the input and the tail. A click on the slot does not focus the field |
 | Console | add `textinput--console` for the status bar command line: 12px mono text, 4px radius. Escape does nothing special |
 
+Add `textinput--small` for a value in a Details row. It sets the Small 8pt font (10.667px) of `PropertyFontStyle` (`SPropertyEditorText.h:27`). Nothing else changes.
+
 Forced state classes for pinned specimens: `textinput--hover`, `textinput--focus`. A pinned specimen holds `.textinput__text` spans, `.textinput__hint`, `.textinput__sel` and `.textinput__caret` in place of an input.
 
 ## Events

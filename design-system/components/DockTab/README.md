@@ -2,29 +2,33 @@
 
 A docking tab: the small panel tab (`Docking.Tab`) and the major app tab (`Docking.MajorTab`) with icon, label and close button, drawn by `SDockTab`.
 
-`<ue-dock-tab>` wraps exactly one stack of dock tabs and is the `dockTab-*` spelling of `<ue-tab-well>`: same behaviour, same events, same pixels. Read `TabWell` for the full markup contract. A tab alone (no element) is plain markup.
+`<ue-dock-tab>` wraps exactly one `.dockTab`. It owns the tab look only. The stack behaviour (foreground and active state, close, keys, panels) belongs to the enclosing `<ue-tab-well>` (see `TabWell`), and `dockTab-*` is the only class family of a tab. A tab sits in the `.tabWell-well` of a `ue-tab-well`.
 
 ## Markup contract
 
 ```html
-<!-- One major tab alone, the title-bar tab. No element, no symbol. -->
-<div class="dockTab-well dockTab-well--major">
-	<div class="dockTab dockTab--major dockTab--foreground">
-		<span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="..."/></svg></span>
-		<span class="dockTab-label">Minimal_Default</span>
-		<span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.5 4.5l7 7 M11.5 4.5l-7 7"/></svg></span>
-	</div>
-</div>
-
-<!-- A live stack -->
-<ue-dock-tab>
-	<div class="dockTab-stack">
-		<div class="dockTab-well" role="tablist">
-			<div class="dockTab dockTab--foreground dockTab--active" role="tab" tabindex="0" aria-selected="true" data-tab="details">...</div>
+<!-- One tab in a well. The tab is the only child of its ue-dock-tab. -->
+<ue-tab-well>
+	<div class="tabWell-stack">
+		<div class="tabWell-well" role="tablist">
+			<ue-dock-tab>
+				<div class="dockTab dockTab--foreground dockTab--active" role="tab" tabindex="0" aria-selected="true" data-tab="details">
+					<span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="..."/></svg></span>
+					<span class="dockTab-label">Details</span>
+					<span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.5 4.5l7 7 M11.5 4.5l-7 7"/></svg></span>
+				</div>
+			</ue-dock-tab>
 		</div>
-		<div class="dockTab-body"><div role="tabpanel" data-panel="details">...</div></div>
+		<div class="tabWell-content"><div role="tabpanel" data-panel="details">...</div></div>
 	</div>
-</ue-dock-tab>
+</ue-tab-well>
+
+<!-- A pinned specimen: data-pinned on the element, so no setup runs and the pointer does nothing. -->
+<ue-tab-well data-pinned>
+	<div class="tabWell-well tabWell-well--major">
+		<ue-dock-tab><div class="dockTab dockTab--major dockTab--foreground">...</div></ue-dock-tab>
+	</div>
+</ue-tab-well>
 ```
 
 - Tab classes: `dockTab` (small), `dockTab--major`, plus the states `dockTab--foreground` (selected, `--panel` fill), `dockTab--active` (text `--foreground-hover` and a 1px primary line on a small tab), `dockTab--hovered` and `dockTab--flash` (forced states for a specimen). Parts: `dockTab-icon` (add `dockTab-icon--tinted` for the colour-coded cell of a major tab), `dockTab-label`, `dockTab-close` (add `dockTab-close--hot` to force its hover).

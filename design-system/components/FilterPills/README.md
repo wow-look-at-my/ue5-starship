@@ -29,7 +29,7 @@ One `<ue-filter-pills>` wraps exactly one `.FilterPills-strip`. The strip is eit
 
 - `data-value` names a pill, else its text. The element sets `is-checked`, `aria-selected` and `tabindex` (the checked pill is 0). Left, Up, Right and Down move and wrap, Home and End jump.
 - `data-id` names a chip, else its name text. The X is inline, so no `<symbol>` is needed. An empty chip strip takes no room.
-- The tablist look is the Details section pill: `padding: 4px 16px`, 10.667px text, `--header` fill, `--primary` when checked. `components/DetailsCategory/preview.html:95-99` repeats these values for its own strip, and `StarshipCoreStyle.cpp:922-930` is the source. The chip look is `components/AssetSearchBar/preview.html:56-65`: 22px tall, `--secondary` fill, radius 3, an 8px colour segment, the name with 6px padding each side, a 16px X button.
+- The tablist look is the Details section pill: `padding: 4px 16px`, 10.667px text, `--header` fill, `--primary` when checked. The `ue-details-category` panel nests this strip, and `StarshipCoreStyle.cpp:922-930` is the source. The chip look is `components/AssetSearchBar/preview.html:56-65`: 22px tall, `--secondary` fill, radius 3, an 8px colour segment, the name with 6px padding each side, a 16px X button.
 
 ## Events
 

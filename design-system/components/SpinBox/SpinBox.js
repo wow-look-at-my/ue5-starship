@@ -1,11 +1,13 @@
-// src/_shared/element.ts
+// design-system/src/_shared/element.ts
 var UeElement = class extends HTMLElement {
   #disposers = [];
   #ready = false;
   #pendingSetup = null;
   // The bundle can load before the parser reaches this element's children, so setup waits for the document to finish parsing.
+  // A pinned specimen (data-pinned on the element or an ancestor) keeps its authored markup: setup never runs.
   connectedCallback() {
     this.style.display = "contents";
+    if (this.closest("[data-pinned]")) return;
     if (document.readyState !== "loading") {
       this.#start();
       return;
@@ -51,7 +53,7 @@ function define(tag, ctor) {
   if (!customElements.get(tag)) customElements.define(tag, ctor);
 }
 
-// src/SpinBox/SpinBox.ts
+// design-system/src/SpinBox/SpinBox.ts
 var DRAG_TRIGGER = 5;
 var MIN_SLIDER_WIDTH = 100;
 function numberAttr(el, name) {
@@ -77,6 +79,17 @@ function clamp(value, range) {
 }
 var UeSpinBoxElement = class extends UeElement {
   #drags = /* @__PURE__ */ new WeakMap();
+  // The current value. The setter redraws the box and fires no ue-spin-change, because the owner that sets it already knows.
+  get value() {
+    const box = this.one(".spinbox");
+    return box ? valueOf(box) : 0;
+  }
+  set value(next) {
+    const box = this.one(".spinbox");
+    if (!box) throw new Error("ue-spin-box needs a .spinbox element");
+    box.dataset.value = String(next);
+    this.#render(box);
+  }
   setup() {
     const box = this.one(".spinbox");
     if (!box) throw new Error("ue-spin-box needs a .spinbox element");

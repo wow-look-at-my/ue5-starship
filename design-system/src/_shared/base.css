@@ -1,2 +1,2 @@
-/* A pinned specimen shows one forced state and ignores the pointer. */
+/* A pinned specimen is a component element with data-pinned. It shows one forced state and ignores the pointer, which its children inherit through the display: contents host. */
 [data-pinned] { pointer-events: none; }

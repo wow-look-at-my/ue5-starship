@@ -251,10 +251,10 @@ scenario('Button: Tab shows the Primary focus ring', 'Button', async (page) => {
 	await outlineIs(page, first, 'primary');
 });
 
-scenario('Button: pinned specimens ignore the pointer and sit outside the element', 'Button', async (page) => {
-	const pinned = page.locator('.button--hover[data-pinned]').first();
+scenario('Button: pinned specimens ignore the pointer and sit in a pinned ue-button', 'Button', async (page) => {
+	const pinned = page.locator('[data-pinned] .button--hover').first();
 	assert.equal(await prop(pinned, 'pointer-events'), 'none');
-	assert.equal(await pinned.evaluate((el) => el.closest('ue-button')), null);
+	assert.equal(await pinned.evaluate((el) => el.closest('ue-button')?.hasAttribute('data-pinned')), true);
 	await paints(page, pinned, 'hover');
 });
 
@@ -441,11 +441,86 @@ scenario('ComboButton: the panel minimum width follows --combobutton-menu-min-wi
 	assert.ok(trigger && trigger.width < 200);
 });
 
+interface ComboApi {
+	open(keys?: boolean, fromEnd?: boolean): void;
+	close(refocus?: boolean): void;
+	isOpen: boolean;
+}
+
+scenario('ComboButton: open() and close() drive the panel, mode=value gives a simple trigger value mode, --up opens above', 'ComboButton', async (page) => {
+	await page.evaluate(() => {
+		const holder = document.createElement('div');
+		holder.style.cssText = 'position:absolute;left:40px;top:420px';
+		holder.innerHTML = '<ue-combo-button mode="value" id="vm"><div class="combobutton-anchor"><span class="combobutton combobutton--simple" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false"><span class="combobutton__label">Cmd</span></span><div class="combobutton-menu combobutton-menu--up" hidden><ue-popup-menu><div class="popupmenu" role="menu" tabindex="0"><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Cmd</span></span></div><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Python</span></span></div></div></ue-popup-menu></div></div></ue-combo-button>';
+		document.body.append(holder);
+	});
+	const host = page.locator('#vm');
+	const trigger = host.locator('.combobutton');
+	const menu = host.locator('.combobutton-menu');
+	const isOpen = (): Promise<boolean> => host.evaluate((el) => (el as unknown as ComboApi).isOpen);
+	assert.equal(await isOpen(), false);
+	await host.evaluate((el) => (el as unknown as ComboApi).open());
+	await seen(menu, true);
+	await attr(trigger, 'aria-expanded', 'true');
+	await cls(trigger, 'combobutton--open', true);
+	assert.equal(await isOpen(), true);
+	const triggerBox = await trigger.boundingBox();
+	const menuBox = await menu.boundingBox();
+	assert.ok(triggerBox && menuBox && menuBox.y + menuBox.height <= triggerBox.y + 1, 'the --up panel sits above the trigger');
+	await host.evaluate((el) => (el as unknown as ComboApi).close());
+	await seen(menu, false);
+	assert.equal(await isOpen(), false);
+	await trigger.click();
+	await menu.locator('.popupmenu__row').nth(1).click();
+	assert.equal(await cbLabel(trigger), 'Python', 'a simple trigger in value mode follows the pick');
+});
+
+scenario('Button and ComboButton: the toolbar, plate, status, menubar and wide variants carry their own metrics', 'ComboButton', async (page) => {
+	await page.evaluate(() => {
+		const holder = document.createElement('div');
+		holder.style.cssText = 'position:absolute;left:40px;top:480px;color:rgb(10, 20, 30)';
+		const icon = '<svg class="button__icon button__icon--solo" viewBox="0 0 16 16"><path d="M3 3h10v10H3z"/></svg>';
+		holder.innerHTML = '<button class="button button--simple button--toolbar" id="tb">' + icon + '</button>'
+			+ '<button class="button button--simple button--toolbar button--pressed" id="tbp">' + icon + '</button>'
+			+ '<button class="button button--toggle button--toolbar button--pressed" id="tbt">' + icon + '</button>'
+			+ '<button class="button button--plate" id="pl">' + icon + '</button>'
+			+ '<button class="button button--plate" id="pld" disabled>' + icon + '</button>'
+			+ '<button class="button button--status" id="st">' + icon + 'Drawer</button>'
+			+ '<button class="button button--status" id="sto" aria-pressed="true">' + icon + 'Drawer</button>'
+			+ '<span class="combobutton combobutton--menubar" id="mb"><span class="combobutton__label">File</span></span>'
+			+ '<span class="combobutton combobutton--menubar combobutton--open" id="mbo"><span class="combobutton__label">File</span></span>'
+			+ '<span class="combobutton combobutton--toolbar" id="ct"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M3 3h10v10H3z"/></svg></span>'
+			+ '<span class="combobutton combobutton--simple combobutton--wide" id="cw"><span class="combobutton__label">Derived Data</span></span>';
+		document.body.append(holder);
+	});
+	const at = (id: string): Locator => page.locator('#' + id);
+	assert.equal(await prop(at('tb'), 'padding-top'), '4px');
+	assert.equal(await prop(at('tb'), 'padding-left'), '8px');
+	assert.equal(await prop(at('tb').locator('svg'), 'width'), '20px');
+	assert.equal(await prop(at('tbp'), 'padding-top'), '5px');
+	assert.equal(await prop(at('tbp'), 'padding-bottom'), '3px');
+	assert.equal(await prop(at('tbt'), 'padding-top'), '4px', 'a toggle does not shift when pressed');
+	assert.equal(await fill(at('pl')), CLEAR);
+	assert.equal(await prop(at('pl'), 'color'), 'rgb(10, 20, 30)', 'a plate button takes the foreground of its plate');
+	assert.equal(await prop(at('pld'), 'opacity'), '1', 'the plate owns the disabled alpha');
+	assert.equal(await prop(at('st'), 'padding-top'), '4px');
+	assert.equal(await prop(at('sto'), 'padding-top'), '5px');
+	assert.equal(await prop(at('sto'), 'color'), await token(page, 'foreground-hover'));
+	assert.equal(await fill(at('sto')), CLEAR, 'an open drawer has no fill');
+	assert.equal(await prop(at('mb'), 'padding-left'), '12px');
+	assert.equal(await prop(at('mb'), 'padding-top'), '4px');
+	assert.equal(await fill(at('mb')), CLEAR);
+	assert.equal(await fill(at('mbo')), await token(page, 'primary'));
+	assert.equal(await prop(at('ct'), 'padding-left'), '8px');
+	assert.equal(await prop(at('ct').locator('svg'), 'width'), '20px');
+	assert.equal(await prop(at('cw'), 'padding-left'), '10px');
+});
+
 scenario('ComboButton: a combo button inside another primitive acts on its own control only', 'ExpandableArea', async (page) => {
 	if (process.env.UE_MODE === 'modules') await page.addScriptTag({ type: 'module', url: '/components/ComboButton/ComboButton.js' });
 	await page.waitForFunction(() => customElements.get('ue-combo-button') !== undefined);
 	await page.evaluate(() => {
-		const body = document.querySelectorAll('ue-expandable-area .expandablearea__body')[1];
+		const body = document.querySelectorAll('ue-expandable-area:not([data-pinned], [data-pinned] *) .expandablearea__body')[1];
 		const row = document.createElement('div');
 		row.innerHTML = '<ue-combo-button><div class="combobutton-anchor"><span class="combobutton combobutton--small" role="combobox" tabindex="0" aria-expanded="false"><span class="combobutton__label">One</span><svg class="combobutton__arrow" viewBox="0 0 16 16"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></span><div class="combobutton-menu" hidden><ue-popup-menu><div class="popupmenu popupmenu--combo" role="menu" tabindex="0"><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">One</span></span></div><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">Two</span></span></div></div></ue-popup-menu></div></div></ue-combo-button>';
 		body.append(row);
@@ -1085,11 +1160,11 @@ scenario('Tooltip: a tooltip around another tooltip does not show for the inner 
 	await seen(page.locator('#outer > .tooltip-popup'), false);
 });
 
-scenario('Tooltip: pinned specimens stay visible plain HTML and the live tooltip starts hidden', 'Tooltip', async (page) => {
-	const pinned = page.locator('.tooltip[data-pinned]');
+scenario('Tooltip: pinned specimens stay visible in a pinned ue-tooltip and the live tooltip starts hidden', 'Tooltip', async (page) => {
+	const pinned = page.locator('[data-pinned] .tooltip');
 	assert.equal(await pinned.count(), 2);
 	await seen(pinned.first(), true);
-	assert.equal(await pinned.first().evaluate((el) => el.closest('ue-tooltip')), null);
+	assert.equal(await pinned.first().evaluate((el) => el.closest('ue-tooltip')?.hasAttribute('data-pinned')), true);
 	assert.equal(await popup(page, 0).evaluate((el) => el.hasAttribute('hidden')), true);
 });
 
@@ -1231,10 +1306,10 @@ scenario('PopupMenu: the small variant sets 10.667px rows and each list keeps it
 	assert.equal(await menuStatus(page, 0), 'Activated: nothing yet');
 });
 
-scenario('PopupMenu: pinned menus stay plain HTML and ignore the pointer', 'PopupMenu', async (page) => {
-	const pinned = page.locator('.popupmenu[data-pinned]');
+scenario('PopupMenu: pinned menus sit in a pinned ue-popup-menu and ignore the pointer', 'PopupMenu', async (page) => {
+	const pinned = page.locator('[data-pinned] .popupmenu');
 	assert.equal(await pinned.count(), 2);
-	assert.equal(await pinned.first().evaluate((el) => el.closest('ue-popup-menu')), null);
+	assert.equal(await pinned.first().evaluate((el) => el.closest('ue-popup-menu')?.hasAttribute('data-pinned')), true);
 	assert.equal(await prop(pinned.first(), 'pointer-events'), 'none');
 });
 
@@ -1244,12 +1319,12 @@ const NT = 'ue-notification ';
 const toastCount = (page: Page): Promise<number> => page.locator(NT + '.notification').count();
 const stackHeight = async (page: Page): Promise<number> => (await page.locator(NT + '.notification-stack').boundingBox())?.height ?? 0;
 const toastTitles = (page: Page): Promise<string[]> => page.locator(NT + '.notification__title').allTextContents();
-const toastGone = (page: Page, remaining: number): Promise<unknown> => page.waitForFunction((n) => document.querySelectorAll('ue-notification .notification').length === n, remaining);
+const toastGone = (page: Page, remaining: number): Promise<unknown> => page.waitForFunction((n) => document.querySelectorAll('ue-notification:not([data-pinned], [data-pinned] *) .notification').length === n, remaining);
 
 scenario('Notification: Dismiss removes the toast and the stack closes up', 'Notification', async (page) => {
 	assert.equal(await toastCount(page), 1);
 	assert.ok((await stackHeight(page)) > 60);
-	await page.locator(NT + '.notification__btn[data-action="dismiss"]').click();
+	await page.locator(NT + '.button[data-action="dismiss"]').click();
 	await toastGone(page, 0);
 	assert.equal(await stackHeight(page), 0);
 });
@@ -1295,7 +1370,7 @@ scenario('Notification: a dismissed toast can be brought back with Show notifica
 	await wait(page, 300);
 	assert.equal(await toastCount(page), 1);
 	await paints(page, page.locator(NT + '.notification'), 'notifications');
-	assert.equal(await page.locator('.notification[data-pinned]').count(), 3);
+	assert.equal(await page.locator('[data-pinned] .notification').count(), 3);
 });
 
 // ---------- ExpandableArea ----------
@@ -1372,7 +1447,7 @@ scenario('ExpandableArea: the panel keeps its Panel fill and the header has no h
 	await pointAt(page, header);
 	assert.equal(await fill(header), CLEAR);
 	await paints(page, panel, 'panel');
-	assert.equal(await page.locator('.expandablearea[data-pinned]').count(), 2);
+	assert.equal(await page.locator('[data-pinned] .expandablearea').count(), 2);
 });
 
 // ---------- ResetToDefault ----------
@@ -1434,5 +1509,110 @@ scenario('ResetToDefault: Tab reaches the arrow and shows the Primary focus ring
 	const button = rdButton(page, 0);
 	assert.equal(await isFocused(button), true);
 	await inks(page, button, 'outline-color', 'primary');
+});
+
+// ---------- variants the Content Browser needs ----------
+
+scenario('Button: the tight variant keeps 4px sides at rest and pressed', 'Button', async (page) => {
+	await page.evaluate(() => {
+		const host = document.createElement('ue-button');
+		host.id = 'tight';
+		host.innerHTML = '<button type="button" class="button button--simple button--tight">Import</button>';
+		document.body.append(host);
+	});
+	const tight = page.locator('#tight .button');
+	assert.equal(await prop(tight, 'padding-left'), '4px');
+	assert.equal(await prop(tight, 'padding-top'), '3px');
+	await tight.hover();
+	await hold(page);
+	assert.equal(await prop(tight, 'padding-left'), '4px', 'the pressed state keeps the sides');
+	assert.equal(await prop(tight, 'padding-top'), '4px', 'and drops the label 1px');
+	await release(page);
+});
+
+scenario('ComboButton: the Add variant draws its plus icon in AccentGreen', 'ComboButton', async (page) => {
+	await page.evaluate(() => {
+		const host = document.createElement('ue-combo-button');
+		host.id = 'add';
+		host.setAttribute('mode', 'action');
+		host.innerHTML = '<div class="combobutton-anchor"><span class="combobutton combobutton--button" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false"><svg class="combobutton__icon" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg><span class="combobutton__label">Add</span></span><div class="combobutton-menu" hidden><ue-popup-menu><div class="popupmenu" role="menu" tabindex="0"><div class="popupmenu__row" role="menuitem"><span class="popupmenu__body"><span class="popupmenu__label">New</span></span></div></div></ue-popup-menu></div></div>';
+		document.body.append(host);
+	});
+	const icon = page.locator('#add .combobutton__icon');
+	const probe = await page.evaluate(() => {
+		const el = document.createElement('i');
+		el.style.color = 'var(--accent-green)';
+		document.body.append(el);
+		return getComputedStyle(el).color;
+	});
+	assert.equal(await prop(icon, 'color'), probe);
+});
+
+scenario('ExpandableArea: the source variant draws the Header block with a recessed body', 'ExpandableArea', async (page) => {
+	await page.evaluate(() => {
+		const host = document.createElement('ue-expandable-area');
+		host.id = 'source';
+		host.innerHTML = '<div class="expandablearea expandablearea--source"><div class="expandablearea__header" role="button" tabindex="0" aria-expanded="true"><svg class="expandablearea__caret" viewBox="0 0 16 16"><path d="M6 4l4 4-4 4z"/></svg><span class="expandablearea__title">Sources</span></div><div class="expandablearea__body">Body</div></div>';
+		document.body.append(host);
+	});
+	const area = page.locator('#source .expandablearea');
+	assert.equal(await fill(area), await token(page, 'header'));
+	assert.equal(await prop(area, 'border-top-left-radius'), '0px');
+	assert.equal(await fill(page.locator('#source .expandablearea__body')), await token(page, 'recessed'));
+	assert.equal(await prop(page.locator('#source .expandablearea__title'), 'font-weight'), '700');
+	assert.equal(await prop(page.locator('#source .expandablearea__title'), 'font-size'), '13.333px');
+	assert.equal(Math.round((await page.locator('#source .expandablearea__header').boundingBox())?.height ?? 0), 24);
+});
+
+// ---------- Details row additions: small variants and data APIs ----------
+
+scenario('TextInput: the small variant sets the Details row font and nothing else', 'TextInput', async (page) => {
+	const small = tiBox(page, 6);
+	const normal = tiBox(page, 1);
+	assert.equal(await prop(small, 'font-size'), '10.667px');
+	assert.equal(await prop(normal, 'font-size'), '13.333px');
+	assert.equal(await prop(small, 'padding-top'), await prop(normal, 'padding-top'));
+	assert.equal(await prop(small, 'border-top-left-radius'), await prop(normal, 'border-top-left-radius'));
+});
+
+scenario('SpinBox: the small variant sets the Details row font, and value redraws the box without an event', 'SpinBox', async (page) => {
+	const small = page.locator('ue-spin-box .spinbox--small');
+	assert.equal(await prop(small, 'font-size'), '10.667px');
+	assert.equal(await prop(sbBox(page, 0), 'font-size'), '13.333px');
+	await record(page, 'ue-spin-change');
+	const host = page.locator('ue-spin-box').filter({ has: page.locator('.spinbox--small') });
+	type Api = HTMLElement & { value: number };
+	assert.equal(await host.evaluate((el) => (el as Api).value), 12.5);
+	await host.evaluate((el) => { (el as Api).value = 20; });
+	assert.equal(await sbValue(small), 20);
+	assert.equal(await sbText(small), '20.0');
+	assert.equal(await host.evaluate((el) => (el as Api).value), 20);
+	assert.deepEqual(await events(page, 'ue-spin-change'), [], 'setting value fires no event');
+	await small.focus();
+	await tap(page, 'ArrowUp');
+	assert.deepEqual(await events(page, 'ue-spin-change'), [{ value: 20.5, text: '20.5' }], 'a key step starts from the set value');
+});
+
+scenario('ComboButton: value reads the picked row, the setter picks a row by value or label and fires no event', 'ComboButton', async (page) => {
+	const host = page.locator('ue-combo-button').nth(0);
+	type Api = HTMLElement & { value: string };
+	assert.equal(await host.evaluate((el) => (el as Api).value), 'Location');
+	await record(page, 'ue-combo-pick');
+	await host.evaluate((el) => { (el as Api).value = 'Scale'; });
+	assert.equal(await cbLabel(cbTrigger(page, 0)), 'Scale');
+	await attr(cbRows(page, 0).nth(2), 'aria-selected', 'true');
+	await attr(cbRows(page, 0).nth(0), 'aria-selected', 'false');
+	assert.equal(await host.evaluate((el) => (el as Api).value), 'Scale');
+	assert.deepEqual(await events(page, 'ue-combo-pick'), [], 'setting value fires no event');
+	const failure = await host.evaluate((el) => {
+		try {
+			(el as Api).value = 'Nothing';
+			return '';
+		} catch (error) {
+			return String(error);
+		}
+	});
+	assert.match(failure, /no row with the value Nothing/);
+	assert.equal(await cbLabel(cbTrigger(page, 0)), 'Scale', 'a failed set changes nothing');
 });
 

@@ -81,6 +81,8 @@ One `<ue-popup-menu>` wraps exactly one list. The list is a `.popupmenu` with `r
 | Disabled | `aria-disabled="true"`. Keys and the pointer skip it |
 | Separator | `<div class="popupmenu__sep"></div>` |
 | Heading | `<div class="popupmenu__heading">Text</div>` |
+| Hidden entry | `hidden` on the row, for an entry the builder leaves out, such as Edit with no asset. Keys skip it |
+| Widget block | `<div class="popupmenu__widget">` with any content, for `FMenuBuilder::AddWidget` with no label: padding 1 so the menu outline shows (`SWidgetBlock.cpp:121-131`). Row keys skip it, and its fields take the focus and the keys. A nested `ue-combo-button` in it keeps its own rows |
 | Submenu | the row has `aria-haspopup="menu"`, a trailing `<svg class="popupmenu__arrow" viewBox="0 0 16 16"><path d="M6 3.5l4.5 4.5L6 12.5"/></svg>` and a last child `<div class="popupmenu popupmenu__sub" role="menu" hidden>` with its own rows |
 
 An optional `data-value` on a row replaces the label as the event `value`.

@@ -38,9 +38,9 @@
 		<ue-tab-well>
 			<div class="tabWell-stack">
 				<div class="tabWell-well" role="tablist" aria-label="Minor tabs">
-					<div class="tabWell-tab tabWell-tab--foreground tabWell-tab--active" role="tab" tabindex="0" aria-selected="true" data-tab="details"><span class="tabWell-icon"><svg viewBox="0 0 16 16"><path d="M2.500 4h11 M2.500 8h11 M2.500 12h7"/><circle cx="12.500" cy="12" r="1.200"/></svg></span><span class="tabWell-label">Details</span><span class="tabWell-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div>
-					<div class="tabWell-tab" role="tab" tabindex="-1" aria-selected="false" data-tab="outliner"><span class="tabWell-icon"><svg viewBox="0 0 16 16"><path d="M5.500 3.500h8 M5.500 8h8 M5.500 12.500h8 M2.500 3.500h.5 M2.500 8h.5 M2.500 12.500h.5"/></svg></span><span class="tabWell-label">Outliner</span><span class="tabWell-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div>
-					<div class="tabWell-tab" role="tab" tabindex="-1" aria-selected="false" data-tab="content"><span class="tabWell-icon"><svg viewBox="0 0 16 16"><path d="M2 4.500h4l1.500 1.500H14v6.500H2z"/></svg></span><span class="tabWell-label">Content Browser</span><span class="tabWell-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div>
+					<ue-dock-tab><div class="dockTab dockTab--foreground dockTab--active" role="tab" tabindex="0" aria-selected="true" data-tab="details"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M2.500 4h11 M2.500 8h11 M2.500 12h7"/><circle cx="12.500" cy="12" r="1.200"/></svg></span><span class="dockTab-label">Details</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab>
+					<ue-dock-tab><div class="dockTab" role="tab" tabindex="-1" aria-selected="false" data-tab="outliner"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M5.500 3.500h8 M5.500 8h8 M5.500 12.500h8 M2.500 3.500h.5 M2.500 8h.5 M2.500 12.500h.5"/></svg></span><span class="dockTab-label">Outliner</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab>
+					<ue-dock-tab><div class="dockTab" role="tab" tabindex="-1" aria-selected="false" data-tab="content"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M2 4.500h4l1.500 1.500H14v6.500H2z"/></svg></span><span class="dockTab-label">Content Browser</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab>
 				</div>
 				<div class="tabWell-content">
 					<div role="tabpanel" data-panel="details">
@@ -70,8 +70,8 @@
 		<ue-tab-well>
 			<div class="tabWell-stack">
 				<div class="tabWell-well tabWell-well--major" role="tablist" aria-label="Major tabs">
-					<div class="tabWell-tab tabWell-tab--major tabWell-tab--foreground" role="tab" tabindex="0" aria-selected="true" data-tab="level1"><span class="tabWell-icon"><svg viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></svg></span><span class="tabWell-label">Minimal_Default</span><span class="tabWell-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div>
-					<div class="tabWell-tab tabWell-tab--major" role="tab" tabindex="-1" aria-selected="false" data-tab="level2"><span class="tabWell-icon"><svg viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></svg></span><span class="tabWell-label">Second_Level</span><span class="tabWell-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div>
+					<ue-dock-tab><div class="dockTab dockTab--major dockTab--foreground" role="tab" tabindex="0" aria-selected="true" data-tab="level1"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></svg></span><span class="dockTab-label">Minimal_Default</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab>
+					<ue-dock-tab><div class="dockTab dockTab--major" role="tab" tabindex="-1" aria-selected="false" data-tab="level2"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></svg></span><span class="dockTab-label">Second_Level</span><span class="dockTab-close" role="button" aria-label="Close tab"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab>
 				</div>
 				<div class="tabWell-content tabWell-content--major">
 					<div role="tabpanel" data-panel="level1">
@@ -89,7 +89,7 @@
 	</div>
 
 	<div class="tabWell-col">
-		<div class="tabWell-well tabWell-well--major"><div class="tabWell-tab tabWell-tab--major tabWell-tab--foreground" data-pinned><span class="tabWell-icon"><svg viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></svg></span><span class="tabWell-label">Minimal_Default</span><span class="tabWell-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></div>
+		<ue-tab-well data-pinned><div class="tabWell-well tabWell-well--major"><ue-dock-tab><div class="dockTab dockTab--major dockTab--foreground"><span class="dockTab-icon"><svg viewBox="0 0 16 16"><path d="M1.500 13.500 6.500 5l3 5 1.500-2 3.500 5.500z M6.500 5V2.500h3"/></svg></span><span class="dockTab-label">Minimal_Default</span><span class="dockTab-close"><svg viewBox="0 0 16 16"><path d="M4.500 4.500l7 7 M11.500 4.500l-7 7"/></svg></span></div></ue-dock-tab></div></ue-tab-well>
 		<span class="tabWell-caption">one major tab alone, with no element: the title-bar tab. The window chrome copies this look.</span>
 	</div>
 </div>

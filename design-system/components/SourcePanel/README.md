@@ -2,45 +2,54 @@
 
 The left-hand "sources" column of the Content Browser: stacked collapsible sections (Favorites, the project tree, Collections), each with a caret, a bold title and trailing icon buttons. That column is over a recessed folder tree with selection and parent highlighting.
 
+## Composed from
+
+| Part | Built from |
+|---|---|
+| Each section | `ue-expandable-area` (`expandablearea--source`) |
+| The folder tree of a section | `ue-tree-row` (`tr-tree is-compact`, `collapse-selects`) |
+| Search toggles | `ue-button` (`button--toggle button--icon`) |
+| Add collection | `ue-button` (`button--simple button--icon`) |
+
+The composite owns only the layout (`src/SourcePanel/SourcePanel.css`): the 4px padding, the 2px gap between the sections and the scroll box of a section body. It also keeps one selection across all the trees.
+
 ## What the consumer provides
 
 - Section titles and which trailing buttons each section shows (Favorites: search. Project: search, Collections: plus-circle then search).
-- The tree rows: depth, expanded / has-children state, folder name and an optional folder colour (default `--accent-folder`).
-- Row state: selected, parent-of-selection, hovered.
+- The tree rows as `ue-tree-row` markup (see the TreeRow README): depth, expanded state and folder name. Give each `ue-tree-row` a `data-tree` name to fill it later with `setRows`.
+- A `SourcePanel--fill` class on the panel when a parent gives it a height. The section with `SourcePanel__area--fill` takes the free height and scrolls. A collapsed one gives it back.
 
-## Structure
+## API
 
-`4px padding` -> multiple sections separated by a 2px splitter handle painted `--background` -> each section is a `--header` block with 2px top padding holding a 24px. Header row and, when expanded, a `--recessed` body.
+```ts
+el.setRows(tree: string, rows: TreeRowData[]): void; // the rows of the ue-tree-row with this data-tree
+el.select(id: string): void;                         // selects the row with this id, clears the other trees
+el.setExpanded(id: string, expanded: boolean): void;
+```
 
-## Metrics
+| Event | `detail` | When |
+|---|---|---|
+| `sourcepanel:select` | `{ id, name }` | The user or `select` chose a row. A selection in one tree clears the others |
+
+The events of the parts bubble as they are (`ue-tree-toggle`, `ue-expand-toggle`, `ue-button-click`).
+
+## Structure and metrics owned by the panel
+
+`4px padding` -> multiple sections separated by a 2px gap painted `--background` -> each section is a `--header` block with 2px top padding holding a 24px. Header row and, when expanded, a `--recessed` body.
 
 | Part | Value | Source |
 |---|---|---|
 | Outer padding | 4px | `SContentBrowser.cpp:880` |
-| Splitter handle | 2px, `--background` | `SContentBrowser.cpp:897`, `StarshipCoreStyle.cpp:633-635` |
-| Section block | `--header`, padding (0,2,0,0) | `SContentBrowser.cpp:907-909` |
-| Section minimum height | 26px (24 header + 2 padding) | `SContentBrowser.cpp:900` |
-| Header padding | 4px left/right, 0 vertical | `SContentBrowser.cpp:1473` |
-| Caret | 16px caret-right / caret-down, 3px gap to title | `StarshipCoreStyle.cpp:564-565`, `SExpandableArea.h:40` |
-| Title | Normal 10pt **Bold**, `--foreground` | `SContentBrowser.cpp:1484-1487`, `StarshipCoreStyle.cpp:38` |
-| Search toggle | 24 x 24 (Padding 4 + 16 icon), hover `--dropdown` radius 4, margin 4px each side | `SSearchToggleButton.cpp:32-33`, `StarshipCoreStyle.cpp:1625-1641`, `SContentBrowser.cpp:1493` |
-| Add-collection button | `SimpleButton` padding 1px 3px + 16 icon, 4px left margin | `SContentBrowser.cpp:1644-1655` |
-| Body fill | `--recessed` | `SContentBrowser.cpp:1554` |
-| Tree row height | 16px (icon and arrow are 16) | `StarshipCoreStyle.cpp:2072`, `SourcesViewWidgets.cpp:140-150` |
-| Root row | +3px top padding (19px) | `SourcesViewWidgets.cpp:138` |
-| Indent per level | 10px; the 16px expander column is always reserved (leaf arrows are hidden, not removed) | `SExpanderArrow.cpp:73,182` |
-| Folder icon | 16px, 2px right margin, colour `DefaultFolderColor` = `--accent-folder` | `StarshipStyle.cpp:6336-6337,6348`, `SourcesViewWidgets.cpp:144` |
-| Tree text | Normal 10pt Regular | `StarshipStyle.cpp:6331-6332` |
-| Selected row | `--select`; text `--foreground-hover` | `StarshipCoreStyle.cpp:2009,2019` |
-| Selected, window unfocused | `--select-inactive` (reference screenshot state) | `StarshipCoreStyle.cpp:2012` |
-| Parent of selection | `--select-parent` | `StarshipCoreStyle.cpp:2015`, `SPathView.cpp:1193-1194` |
-| Hovered row | `--select-hover` | `StarshipCoreStyle.cpp:2002` |
+| Splitter handle between sections | 2px, `--background` | `SContentBrowser.cpp:897`, `StarshipCoreStyle.cpp:633-635` |
+| Search toggle margin | 4px each side | `SContentBrowser.cpp:1493` |
+| Add-collection button | 4px left margin | `SContentBrowser.cpp:1644-1655` |
+
+The section look (`expandablearea--source`), the 16px tree rows with the 19px root, the 10px indent, the folder tint. The selection colours follow the ExpandableArea and TreeRow READMEs. The toggle look follows the Button README.
 
 ## Do
 
-- Reserve the 16px expander column on leaf rows so names align.
-- Highlight every ancestor of the selection with `--select-parent`.
-- Keep the splitter handle between sections at 2px.
+- Reserve the 16px expander column on leaf rows so names align. The tree does this.
+- Keep the splitter gap between sections at 2px.
 
 ## Don't
 

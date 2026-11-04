@@ -20,7 +20,7 @@ One `<ue-scrollbar>` wraps exactly one scroll box. It hides the native scrollbar
 - Slot classes: `sb-v` (vertical, 16px wide, the table, list and tree slot), `sb-box-v` (vertical, 12px, the ScrollBox slot), `sb-h` (horizontal, 16px tall). The bar stretches to the view along the scroll axis. Use `sb-scroll is-h` with `sb-h` for a horizontal box.
 - The thumb is 8px thick, at least 35px long, and has no track. `sb-well` in the preview is a demo background for a bar, not part of the component.
 - Wheel over the bar scrolls the view. A click on the track centres the thumb there. A drag moves the thumb and keeps tracking outside the bar.
-- Each scroll box has its own `<ue-scrollbar>`. A pinned bar specimen (`.sb` outside any `.sb-scroll`, with `data-pinned`) takes `is-hover` or `is-drag` for a forced state.
+- Each scroll box has its own `<ue-scrollbar>`. A pinned bar specimen (`.sb` outside any `.sb-scroll`, in a `<ue-scrollbar data-pinned>`) takes `is-hover` or `is-drag` for a forced state.
 
 ## Events
 

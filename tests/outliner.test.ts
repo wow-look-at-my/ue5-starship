@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Locator, Page } from 'playwright';
 import { bgOf, centre, classes, clickBlank, colorOf, holdPointer, inPreview, keys, movePointer, parkPointer, releasePointer, rgb, rowIn, settle, shown, spin, visibleLabels, widthOf } from './preview-kit.ts';
-import { assertInert, hoverAt } from './pinned.ts';
+import { assertInert, clickAt, hoverAt } from './pinned.ts';
 
 // ---------------------------------------------------------------------------------------------------------------- TreeRow
 
@@ -159,16 +159,16 @@ test('TreeRow: rows alternate even and odd by visible position', async () => {
 
 test('TreeRow: pinned specimens stay pinned', async () => {
 	await inPreview('TreeRow', async (page) => {
-		const first = page.locator('.tr-page > .tr-row').first();
-		const specimen = page.locator('.tr-page > .tr-row.is-selected:not(.is-inactive)');
-		await first.click();
-		await first.hover();
+		const first = page.locator('.tr-page > ue-tree-row[data-pinned] > .tr-row').first();
+		const specimen = page.locator('.tr-page > ue-tree-row[data-pinned] > .tr-row.is-selected:not(.is-inactive)');
+		await clickAt(page, first);
+		await hoverAt(page, first);
 		assert.equal(await bgOf(first), rgb('recessed'));
 		assert.equal(await bgOf(specimen), rgb('select'));
 		await clickBlank(page);
 		assert.equal(await bgOf(specimen), rgb('select'), 'a pinned active row never turns inactive');
-		assert.equal(await bgOf(page.locator('.tr-page > .tr-row.is-selected.is-inactive')), rgb('select-inactive'));
-		assert.equal(await bgOf(page.locator('.tr-page > .tr-row.is-parent')), rgb('select-parent'));
+		assert.equal(await bgOf(page.locator('.tr-page > ue-tree-row[data-pinned] > .tr-row.is-selected.is-inactive')), rgb('select-inactive'));
+		assert.equal(await bgOf(page.locator('.tr-page > ue-tree-row[data-pinned] > .tr-row.is-parent')), rgb('select-parent'));
 		assert.equal(await page.locator('ue-tree-row .tr-row.is-selected').count(), 0, 'nothing in the live tree got selected');
 	});
 });
@@ -179,7 +179,10 @@ interface TreeApi extends HTMLElement {
 	select(ids: string[]): void;
 	getSelectedIds(): string[];
 	setExpanded(id: string, expanded: boolean): void;
+	sortChildren(compare: (a: { label: string }, b: { label: string }) => number): void;
 }
+
+const treeRowIn = (page: Page, tree: string, label: string): Locator => rowIn(page, tree, '.tr-row', '.tr-text', label);
 
 // Records the detail of every event of this name that reaches the document.
 async function watch(page: Page, name: string): Promise<void> {
@@ -298,6 +301,47 @@ test('TreeRow: setRows draws rows from data, with indent, icons, expand state, s
 	});
 });
 
+test('TreeRow: appendRow adds a row after the last one and keeps the selection', async () => {
+	await inPreview('TreeRow', async (page) => {
+		await page.evaluate(() => {
+			const tree = document.createElement('ue-tree-row') as TreeApi & { appendRow(row: object): void };
+			tree.id = 'tr-append';
+			document.body.append(tree);
+			tree.setRows([{ id: 'one', label: 'One', depth: 0, icon: 'folder', selected: true }]);
+			tree.appendRow({ id: 'two', label: 'Two', depth: 0, icon: 'folder' });
+		});
+		const labels = (): Promise<string[]> => visibleLabels(page, '#tr-append', '.tr-row', '.tr-text');
+		assert.deepEqual(await labels(), ['One', 'Two']);
+		assert.deepEqual(await page.evaluate(() => (document.querySelector('#tr-append') as TreeApi).getSelectedIds()), ['one'], 'appending leaves the selection alone');
+		await rowIn(page, '#tr-append', '.tr-row', '.tr-text', 'Two').click();
+		assert.deepEqual(await page.evaluate(() => (document.querySelector('#tr-append') as TreeApi).getSelectedIds()), ['two'], 'the new row selects like any other');
+	});
+});
+
+test('TreeRow: collapse-selects moves the selection to a folder that hides it, and a plain tree keeps it', async () => {
+	await inPreview('TreeRow', async (page) => {
+		await page.evaluate(() => {
+			for (const [id, attribute] of [['tr-keep', false], ['tr-fold', true]] as const) {
+				const tree = document.createElement('ue-tree-row') as TreeApi;
+				tree.id = id;
+				if (attribute) tree.setAttribute('collapse-selects', '');
+				document.body.append(tree);
+				tree.setRows([
+					{ id: 'dir', label: 'Dir', depth: 0, icon: 'folder', expanded: true },
+					{ id: 'leaf', label: 'Leaf', depth: 1, icon: 'object', selected: true },
+				]);
+			}
+		});
+		await watch(page, 'ue-tree-select');
+		const selected = (id: string): Promise<string[]> => page.evaluate((tree) => (document.querySelector('#' + tree) as TreeApi).getSelectedIds(), id);
+		await rowIn(page, '#tr-keep', '.tr-row', '.tr-text', 'Dir').locator('.tr-arrow').click();
+		assert.deepEqual(await selected('tr-keep'), ['leaf'], 'a plain tree keeps the hidden selection');
+		await rowIn(page, '#tr-fold', '.tr-row', '.tr-text', 'Dir').locator('.tr-arrow').click();
+		assert.deepEqual(await selected('tr-fold'), ['dir'], 'the folder takes the selection');
+		assert.deepEqual(await seen(page, 'ue-tree-select'), [{ ids: ['dir'] }]);
+	});
+});
+
 test('TreeRow: setFilter keeps the matches and their ancestors, opens them, and restores on clear', async () => {
 	await inPreview('TreeRow', async (page) => {
 		const filter = (text: string | null): Promise<void> => page.evaluate((value) => (document.querySelector('#tr-main') as TreeApi).setFilter(value), text);
@@ -314,6 +358,51 @@ test('TreeRow: setFilter keeps the matches and their ancestors, opens them, and 
 		assert.ok(labels.includes('Lights') && labels.includes('Furniture'));
 		assert.ok(!labels.includes('Sofa'), 'the collapsed folder hides its children again');
 		assert.ok(!(await classes(furniture)).includes('is-open'));
+	});
+});
+
+test('TreeRow: sortChildren orders the children of every parent, keeps each subtree with its row and keeps the selection', async () => {
+	await inPreview('TreeRow', async (page) => {
+		await page.evaluate(() => {
+			const tree = document.createElement('ue-tree-row') as TreeApi;
+			tree.id = 'tr-sort';
+			document.body.append(tree);
+			tree.setRows([
+				{ id: 'b', label: 'Bravo', depth: 0, icon: 'folder', expanded: true },
+				{ id: 'b2', label: 'Zulu', depth: 1 },
+				{ id: 'b1', label: 'Echo', depth: 1, selected: true },
+				{ id: 'a', label: 'Alpha', depth: 0, icon: 'folder', expanded: true },
+				{ id: 'a1', label: 'Mike', depth: 1 },
+			]);
+		});
+		const labels = (): Promise<string[]> => visibleLabels(page, '#tr-sort', '.tr-row', '.tr-text');
+		const sortBy = (direction: number): Promise<void> => page.evaluate((dir) => (document.querySelector('#tr-sort') as TreeApi).sortChildren((a, b) => dir * a.label.localeCompare(b.label)), direction);
+		await sortBy(1);
+		assert.deepEqual(await labels(), ['Alpha', 'Mike', 'Bravo', 'Echo', 'Zulu']);
+		await sortBy(-1);
+		assert.deepEqual(await labels(), ['Bravo', 'Zulu', 'Echo', 'Alpha', 'Mike']);
+		assert.deepEqual(await page.evaluate(() => (document.querySelector('#tr-sort') as TreeApi).getSelectedIds()), ['b1']);
+		const odd = await page.$$eval('#tr-sort .tr-row:not([hidden])', (els) => els.map((el) => el.classList.contains('is-odd')));
+		assert.deepEqual(odd, [false, true, false, true, false], 'stripes follow the new order');
+	});
+});
+
+test('TreeRow: a click inside a data-tr-inert cell selects nothing and opens nothing', async () => {
+	await inPreview('TreeRow', async (page) => {
+		await page.evaluate(() => {
+			const tree = document.createElement('ue-tree-row') as TreeApi;
+			tree.id = 'tr-inert';
+			document.body.append(tree);
+			tree.setRows([{ id: 'dir', label: 'Dir', depth: 0, icon: 'folder', expanded: false, cells: ['x'] }, { id: 'kid', label: 'Kid', depth: 1 }]);
+			tree.querySelector('.tr-cell')?.setAttribute('data-tr-inert', '');
+		});
+		const cell = page.locator('#tr-inert .tr-cell');
+		await cell.click();
+		await cell.dblclick();
+		assert.deepEqual(await page.evaluate(() => (document.querySelector('#tr-inert') as TreeApi).getSelectedIds()), []);
+		assert.equal(await treeRowIn(page, '#tr-inert', 'Dir').getAttribute('aria-expanded'), 'false');
+		await treeRowIn(page, '#tr-inert', 'Dir').locator('.tr-text').click();
+		assert.deepEqual(await page.evaluate(() => (document.querySelector('#tr-inert') as TreeApi).getSelectedIds()), ['dir']);
 	});
 });
 
@@ -435,11 +524,11 @@ test('HeaderRow: the splitter resizes from the keyboard', async () => {
 
 test('HeaderRow: pinned specimens keep their forced state', async () => {
 	await inPreview('HeaderRow', async (page) => {
-		assert.equal(await bgOf(page.locator('.hr-page > .hr-row .hr-cell.is-hover')), rgb('dropdown'));
-		const cell = page.locator('.hr-page > .hr-row').nth(1).locator('.hr-cell.is-text').nth(1);
-		await cell.hover();
+		assert.equal(await bgOf(page.locator('.hr-page > ue-header-row[data-pinned] > .hr-row .hr-cell.is-hover')), rgb('dropdown'));
+		const cell = page.locator('.hr-page > ue-header-row[data-pinned] > .hr-row').nth(1).locator('.hr-cell.is-text').nth(1);
+		await hoverAt(page, cell);
 		assert.equal(await bgOf(cell), rgb('header'), 'a pinned cell has no sort and no hover');
-		await cell.click();
+		await clickAt(page, cell);
 		assert.equal(await cell.getAttribute('aria-sort'), null);
 	});
 });
@@ -510,10 +599,10 @@ test('HeaderRow: ue-column-resize reports both widths and the other columns keep
 
 const MIN_THUMB = 35;
 const PAD = 2;
-const outlinerRow = (page: Page, label: string): Locator => rowIn(page, 'ue-scene-outliner', '.so-row', '.so-text', label);
-const outlinerLabels = (page: Page): Promise<string[]> => visibleLabels(page, 'ue-scene-outliner', '.so-row', '.so-text');
+const outlinerRow = (page: Page, label: string): Locator => rowIn(page, 'ue-scene-outliner', '.so-row', '.tr-text', label);
+const outlinerLabels = (page: Page): Promise<string[]> => visibleLabels(page, 'ue-scene-outliner', '.so-row', '.tr-text');
 const status = (page: Page): Promise<string> => page.locator('ue-scene-outliner .so-status').innerText();
-const selectedLabels = (page: Page): Promise<string[]> => page.$$eval('ue-scene-outliner .so-row.is-selected .so-text', (els) => els.map((el) => el.textContent ?? ''));
+const selectedLabels = (page: Page): Promise<string[]> => page.$$eval('ue-scene-outliner .so-row.is-selected .tr-text', (els) => els.map((el) => el.textContent ?? ''));
 
 test('SceneOutliner: starts with Chair selected and inactive, parents tinted, footer from the real count', async () => {
 	await inPreview('SceneOutliner', async (page) => {
@@ -560,18 +649,18 @@ test('SceneOutliner: ctrl toggles, shift selects a range, the footer follows', a
 
 test('SceneOutliner: the caret collapses a folder and indents 12px per level', async () => {
 	await inPreview('SceneOutliner', async (page) => {
-		const indent = (label: string): Promise<number> => widthOf(outlinerRow(page, label).locator('.so-indent'));
+		const indent = (label: string): Promise<number> => widthOf(outlinerRow(page, label).locator('.tr-indent'));
 		assert.equal(await indent('Minimal_Default'), 6);
 		assert.equal(await indent('Lights'), 18);
 		assert.equal(await indent('Light Source'), 30);
 		assert.equal(await indent('Chair'), 42);
 		const before = (await outlinerLabels(page)).length;
-		await outlinerRow(page, 'Lights').locator('.so-arrow').click();
+		await outlinerRow(page, 'Lights').locator('.tr-arrow').click();
 		const after = await outlinerLabels(page);
 		assert.equal(after.length, before - 4);
 		assert.ok(!after.includes('Light Source'));
 		assert.equal(await outlinerRow(page, 'Lights').getAttribute('aria-expanded'), 'false');
-		await outlinerRow(page, 'Lights').locator('.so-arrow').click();
+		await outlinerRow(page, 'Lights').locator('.tr-arrow').click();
 		assert.equal((await outlinerLabels(page)).length, before);
 	});
 });
@@ -579,7 +668,7 @@ test('SceneOutliner: the caret collapses a folder and indents 12px per level', a
 test('SceneOutliner: a collapsed folder that holds the selection keeps the parent tint', async () => {
 	await inPreview('SceneOutliner', async (page) => {
 		const meshes = outlinerRow(page, 'StaticMeshes');
-		await meshes.locator('.so-arrow').click();
+		await meshes.locator('.tr-arrow').click();
 		await parkPointer(page);
 		assert.ok(!(await outlinerLabels(page)).includes('Chair'));
 		assert.equal(await bgOf(meshes), rgb('select-parent'));
@@ -638,13 +727,13 @@ test('SceneOutliner: the eye shows on a hovered row and toggles open and closed'
 
 test('SceneOutliner: the search box filters, keeps ancestors, opens them and restores on clear', async () => {
 	await inPreview('SceneOutliner', async (page) => {
-		const input = page.locator('ue-scene-outliner .so-input');
-		const wipe = page.locator('ue-scene-outliner .so-clear');
+		const input = page.locator('ue-scene-outliner .textinput__field');
+		const wipe = page.locator('ue-scene-outliner .textinput__clear');
 		assert.equal(await shown(wipe), false);
-		await outlinerRow(page, 'Lights').locator('.so-arrow').click();
+		await outlinerRow(page, 'Lights').locator('.tr-arrow').click();
 		await input.fill('skylight');
 		assert.deepEqual(await outlinerLabels(page), ['Minimal_Default', 'Lights', 'SkyLight']);
-		assert.equal(await outlinerRow(page, 'Lights').getAttribute('aria-expanded'), 'true', 'the ancestor opens');
+		assert.ok((await classes(outlinerRow(page, 'Lights'))).includes('is-open'), 'the ancestor opens');
 		assert.equal(await status(page), 'Showing 1 of 15 actors (1 selected)');
 		assert.equal(await colorOf(page.locator('ue-scene-outliner .so-status')), rgb('accent-green'));
 		assert.equal(await shown(wipe), true);
@@ -661,7 +750,7 @@ test('SceneOutliner: the search box filters, keeps ancestors, opens them and res
 
 test('SceneOutliner: a filter with no match reads red, Escape clears it', async () => {
 	await inPreview('SceneOutliner', async (page) => {
-		const input = page.locator('ue-scene-outliner .so-input');
+		const input = page.locator('ue-scene-outliner .textinput__field');
 		const line = page.locator('ue-scene-outliner .so-status');
 		await input.fill('zzz');
 		assert.deepEqual(await outlinerLabels(page), []);
@@ -671,19 +760,19 @@ test('SceneOutliner: a filter with no match reads red, Escape clears it', async 
 		assert.equal(await input.inputValue(), '');
 		assert.equal((await outlinerLabels(page)).length, 23);
 		assert.equal(await colorOf(line), rgb('foreground'));
-		assert.equal(await page.locator('ue-scene-outliner .so-search').evaluate((el) => getComputedStyle(el).borderTopColor), rgb('primary'), 'focused outline is Primary');
+		assert.ok((await page.locator('ue-scene-outliner .textinput').evaluate((el) => getComputedStyle(el).boxShadow)).includes(rgb('primary')), 'focused outline is Primary');
 	});
 });
 
 test('SceneOutliner: sorting by Item Label or Type reorders rows within each parent', async () => {
 	await inPreview('SceneOutliner', async (page) => {
-		const head = page.locator('ue-scene-outliner .so-hcell[data-column="label"]');
-		const type = page.locator('ue-scene-outliner .so-hcell[data-column="type"]');
+		const head = page.locator('ue-scene-outliner .hr-cell[data-column="label"]');
+		const type = page.locator('ue-scene-outliner .hr-cell[data-column="type"]');
 		const initial = await outlinerLabels(page);
 		assert.deepEqual(initial.slice(0, 4), ['Minimal_Default', 'Audio', 'Ambient_Wind', 'Starter_Background']);
 		await head.click();
 		assert.equal(await head.getAttribute('aria-sort'), 'descending');
-		assert.equal(await head.locator('use').getAttribute('href'), '#so-down');
+		assert.equal(await head.locator('.hr-sort path').getAttribute('d'), 'M2 4l4 5 4-5z', 'the arrow points down');
 		const desc = await outlinerLabels(page);
 		assert.deepEqual(desc.slice(0, 9), ['Minimal_Default', 'StaticMeshes', 'Lamp_Floor', 'Bookshelf', 'Furniture', 'Table', 'Sofa', 'Chair', 'Sky and Fog']);
 		assert.deepEqual([...desc].sort(), [...initial].sort(), 'same rows');
@@ -692,7 +781,7 @@ test('SceneOutliner: sorting by Item Label or Type reorders rows within each par
 		await type.click();
 		assert.equal(await type.getAttribute('aria-sort'), 'ascending');
 		assert.equal(await head.getAttribute('aria-sort'), 'none');
-		assert.equal(await head.locator('.so-sort').evaluate((el) => getComputedStyle(el).display), 'none');
+		assert.equal(await head.locator('.hr-sort').evaluate((el) => getComputedStyle(el).display), 'none');
 		const byType = await outlinerLabels(page);
 		const lightsAt = byType.indexOf('Lights');
 		assert.deepEqual(byType.slice(lightsAt + 1, lightsAt + 5), ['Light Source', 'PointLight', 'SkyLight', 'SpotLight'], 'DirectionalLight, PointLight, SkyLight, SpotLight');
@@ -706,7 +795,7 @@ test('SceneOutliner: sorting by Item Label or Type reorders rows within each par
 
 test('SceneOutliner: stripes follow the visible order after a sort', async () => {
 	await inPreview('SceneOutliner', async (page) => {
-		await page.locator('ue-scene-outliner .so-hcell[data-column="type"]').click();
+		await page.locator('ue-scene-outliner .hr-cell[data-column="type"]').click();
 		const odd = await page.$$eval('ue-scene-outliner .so-row:not([hidden])', (els) => els.map((el) => el.classList.contains('is-odd')));
 		assert.deepEqual(odd, odd.map((_, i) => i % 2 === 1));
 	});
@@ -714,7 +803,7 @@ test('SceneOutliner: stripes follow the visible order after a sort', async () =>
 
 test('SceneOutliner: the header cell takes the Dropdown fill on hover', async () => {
 	await inPreview('SceneOutliner', async (page) => {
-		const type = page.locator('ue-scene-outliner .so-hcell[data-column="type"]');
+		const type = page.locator('ue-scene-outliner .hr-cell[data-column="type"]');
 		await parkPointer(page);
 		assert.equal(await bgOf(type), rgb('header'));
 		await type.hover();
@@ -732,8 +821,8 @@ interface Geometry {
 
 const geometry = (page: Page): Promise<Geometry> =>
 	page.evaluate(() => {
-		const view = document.querySelector<HTMLElement>('ue-scene-outliner .so-rows');
-		const thumb = document.querySelector<HTMLElement>('ue-scene-outliner .so-thumb');
+		const view = document.querySelector<HTMLElement>('ue-scene-outliner .sb-view');
+		const thumb = document.querySelector<HTMLElement>('ue-scene-outliner .sb-thumb');
 		const bar = thumb?.parentElement;
 		if (!view || !thumb || !bar) throw new Error('outliner parts');
 		const t = thumb.getBoundingClientRect();
@@ -756,14 +845,14 @@ test('SceneOutliner: the scrollbar thumb follows the rows, wheel, drag and track
 
 		await movePointer(page, 100, 200);
 		await spin(page, 0, 60);
-		await page.waitForFunction(() => (document.querySelector('ue-scene-outliner .so-rows')?.scrollTop ?? 0) > 0);
+		await page.waitForFunction(() => (document.querySelector('ue-scene-outliner .sb-view')?.scrollTop ?? 0) > 0);
 		await settle(page);
 		g = await geometry(page);
 		assert.ok(g.scrollTop > 0, 'wheel scrolls');
 		assert.ok(Math.abs(g.top - expectedThumb(g).top) < 0.5, 'thumb follows');
 
-		const bar = page.locator('ue-scene-outliner .so-sb');
-		const thumb = page.locator('ue-scene-outliner .so-thumb');
+		const bar = page.locator('ue-scene-outliner .sb');
+		const thumb = page.locator('ue-scene-outliner .sb-thumb');
 		const barBox = await bar.boundingBox();
 		assert.ok(barBox);
 		const grab = centre(await thumb.boundingBox());
@@ -796,18 +885,17 @@ test('SceneOutliner: the scrollbar thumb follows the rows, wheel, drag and track
 
 test('SceneOutliner: the bar and the header spacer go away while the rows fit', async () => {
 	await inPreview('SceneOutliner', async (page) => {
-		const bar = page.locator('ue-scene-outliner .so-sb');
-		const spacer = page.locator('ue-scene-outliner .so-hspacer');
+		const bar = page.locator('ue-scene-outliner .sb');
+		const spacer = page.locator('ue-scene-outliner .hr-spacer');
 		assert.equal(await shown(bar), true);
 		assert.equal(await shown(spacer), true);
 		const withBar = await widthOf(outlinerRow(page, 'Audio'));
-		await page.locator('ue-scene-outliner .so-input').fill('chair');
+		await page.locator('ue-scene-outliner .textinput__field').fill('chair');
 		await settle(page);
 		assert.equal(await shown(bar), false);
 		assert.equal(await shown(spacer), false);
-		assert.ok((await classes(page.locator('ue-scene-outliner .so-hcells'))).includes('is-no-bar'));
 		assert.ok((await widthOf(outlinerRow(page, 'Chair'))) >= withBar + 15.5, 'rows take the freed 16px');
-		await page.locator('ue-scene-outliner .so-input').fill('');
+		await page.locator('ue-scene-outliner .textinput__field').fill('');
 		await settle(page);
 		assert.equal(await shown(bar), true);
 		assert.equal(await shown(spacer), true);
@@ -821,9 +909,9 @@ test('SceneOutliner: the pinned specimen stays pinned', async () => {
 		const row = specimen.locator('.so-row').nth(2);
 		await parkPointer(page);
 		const before = await bgOf(row);
-		await row.hover();
+		await hoverAt(page, row);
 		assert.equal(await bgOf(row), before, 'a pinned row has no hover');
-		await row.click();
+		await clickAt(page, row);
 		assert.equal(await specimen.locator('.so-row.is-selected').count(), 1);
 		assert.equal(await specimen.locator('.so-eye').count(), 2);
 	});

@@ -82,6 +82,10 @@ An axis colour strip goes first inside `.spinbox`: `<span class="spinbox__axis s
 
 Input: a drag past 5px changes the value. Escape during a drag restores the start value. A click without a drag opens text entry, where Enter commits (clamped), Escape cancels and a blur commits. Up and Right add the step, Down and Left subtract it, and Enter opens text entry.
 
+Add `spinbox--small` for a value in a Details row. It sets the Small 8pt font (10.667px) that `ComponentTransformDetails.cpp:422,491` uses. Nothing else changes.
+
+Data API: `el.value` reads the number. Setting it redraws the box and fires no `ue-spin-change`, because the owner that sets it already knows. Set it only after the element is upgraded, for example in an event handler.
+
 Forced state classes for pinned specimens: `spinbox--hover`, `spinbox--active`, `spinbox--text`, `spinbox--disabled`.
 
 ## Events

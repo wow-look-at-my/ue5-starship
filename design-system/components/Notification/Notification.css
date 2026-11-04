@@ -1,4 +1,414 @@
-/* src/_shared/base.css */
+/* design-system/src/_shared/base.css */
 [data-pinned] {
   pointer-events: none;
+}
+
+/* design-system/src/Button/Button.css */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  border: 0;
+  outline: 0;
+  padding: 3.5px 16px;
+  border-radius: 4px;
+  background: var(--secondary);
+  box-shadow: inset 0 0 0 1px var(--input);
+  color: var(--foreground-hover);
+  font: 400 13.333px/16px var(--font-sans);
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+}
+.button:hover,
+.button--hover {
+  background: var(--hover);
+}
+.button:active,
+.button.button--pressed {
+  background: var(--header);
+  padding: 4.5px 16px 2.5px;
+}
+.button--disabled,
+.button--disabled:hover,
+.button:disabled,
+.button:disabled:hover,
+.button[aria-disabled=true],
+.button[aria-disabled=true]:hover {
+  background: var(--secondary);
+  opacity: .45;
+  color: var(--foreground);
+}
+.button--disabled-brush,
+.button--disabled-brush:hover {
+  background: var(--dropdown);
+  box-shadow: inset 0 0 0 1px var(--recessed);
+  color: var(--foreground);
+}
+.button--focus,
+.button:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+.button--primary {
+  background: var(--primary);
+}
+.button--primary:hover,
+.button--primary.button--hover {
+  background: var(--primary-hover);
+}
+.button--primary:active,
+.button--primary.button--pressed {
+  background: var(--primary-press);
+}
+.button--primary.button--disabled,
+.button--primary.button--disabled:hover,
+.button--primary:disabled,
+.button--primary:disabled:hover,
+.button--primary[aria-disabled=true],
+.button--primary[aria-disabled=true]:hover {
+  background: var(--primary);
+}
+.button--primary.button--disabled-brush,
+.button--primary.button--disabled-brush:hover {
+  background: var(--dropdown);
+}
+.button--bold {
+  font-weight: 700;
+}
+.button--simple,
+.button--toggle {
+  background: transparent;
+  box-shadow: none;
+  color: var(--foreground);
+  padding: 3px 8px;
+}
+.button--simple:hover,
+.button--simple.button--hover,
+.button--toggle:hover,
+.button--toggle.button--hover {
+  background: var(--dropdown);
+  color: var(--foreground-hover);
+}
+.button--simple:active,
+.button--simple.button--pressed {
+  background: var(--dropdown);
+  color: var(--foreground-hover);
+  padding: 4px 8px 2px;
+}
+.button--simple.button--disabled,
+.button--simple.button--disabled:hover,
+.button--simple:disabled,
+.button--simple:disabled:hover,
+.button--simple[aria-disabled=true],
+.button--simple[aria-disabled=true]:hover,
+.button--toggle.button--disabled,
+.button--toggle.button--disabled:hover,
+.button--toggle:disabled,
+.button--toggle:disabled:hover,
+.button--toggle[aria-disabled=true],
+.button--toggle[aria-disabled=true]:hover {
+  background: transparent;
+  color: var(--foreground);
+}
+.button--icon {
+  padding: 3px 4px;
+}
+.button--icon:active,
+.button--icon.button--pressed {
+  padding: 4px 4px 2px;
+}
+.button--toggle:active,
+.button--toggle.button--pressed {
+  background: var(--dropdown);
+  color: var(--foreground-hover);
+  padding: 3px 8px;
+}
+.button--toggle.button--icon:active,
+.button--toggle.button--icon.button--pressed {
+  padding: 3px 4px;
+}
+.button--toggle[aria-pressed=true],
+.button--toggle.button--checked {
+  background: var(--primary);
+  color: var(--foreground-hover);
+}
+.button--toggle[aria-pressed=true]:hover,
+.button--toggle.button--checked.button--hover {
+  background: var(--primary-hover);
+}
+.button--toggle[aria-pressed=true]:active,
+.button--toggle[aria-pressed=true].button--pressed {
+  background: var(--dropdown);
+}
+.button--toggle[aria-pressed=true][aria-disabled=true],
+.button--toggle[aria-pressed=true][aria-disabled=true]:hover,
+.button--toggle[aria-pressed=true]:disabled {
+  background: var(--primary);
+  color: var(--foreground-hover);
+}
+.button--toggle[aria-disabled=true]:active {
+  background: transparent;
+  color: var(--foreground);
+}
+.button--toggle[aria-pressed=true][aria-disabled=true]:active {
+  background: var(--primary);
+  color: var(--foreground-hover);
+}
+.button--tight,
+.button--tight:active,
+.button--tight.button--pressed {
+  padding-left: 4px;
+  padding-right: 4px;
+}
+.button--small {
+  box-sizing: border-box;
+  height: 22px;
+  padding: 0 14px;
+}
+.button--small:active,
+.button--small.button--pressed {
+  padding: 1px 14px 0;
+}
+.button--toolbar {
+  padding: 4px 8px;
+}
+.button--toolbar:active,
+.button--toolbar.button--pressed {
+  padding: 5px 8px 3px;
+}
+.button--toolbar.button--toggle:active,
+.button--toolbar.button--toggle.button--pressed {
+  padding: 4px 8px;
+}
+.button--toolbar .button__icon {
+  width: 20px;
+  height: 20px;
+}
+.button--plate,
+.button--plate:hover,
+.button--plate:active,
+.button--plate.button--hover,
+.button--plate.button--pressed,
+.button--plate:disabled,
+.button--plate:disabled:hover,
+.button--plate[aria-disabled=true],
+.button--plate[aria-disabled=true]:hover {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  opacity: 1;
+}
+.button--plate .button__icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 0;
+}
+.button--status {
+  padding: 4px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--foreground);
+}
+.button--status:hover,
+.button--status.button--hover {
+  background: transparent;
+  color: var(--foreground-hover);
+}
+.button--status:active,
+.button--status.button--pressed,
+.button--status[aria-pressed=true] {
+  background: transparent;
+  color: var(--foreground-hover);
+  padding: 5px 4px 3px;
+}
+.button--status:disabled,
+.button--status:disabled:hover,
+.button--status[aria-disabled=true],
+.button--status[aria-disabled=true]:hover {
+  background: transparent;
+  color: var(--foreground);
+}
+.button--caption {
+  box-sizing: border-box;
+  width: 42px;
+  height: 23px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--foreground);
+}
+.button--caption svg {
+  display: block;
+  width: 42px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+}
+.button--caption:hover,
+.button--caption.button--hover {
+  background: rgba(255, 255, 255, .157);
+  color: var(--foreground-hover);
+}
+.button--caption-close:hover,
+.button--caption-close.button--hover {
+  background: rgba(255, 79, 79, .588);
+}
+.button--caption:active,
+.button--caption.button--pressed {
+  background: transparent;
+  color: var(--foreground);
+  padding: 0;
+}
+.button--caption:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+.button__icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  margin-right: 4px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.button__icon--solo {
+  margin-right: 0;
+}
+
+/* design-system/src/Notification/Notification.css */
+.notification {
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  width: 352px;
+  padding: 8px 16px;
+  border-radius: 5px;
+  background: var(--notifications);
+  box-shadow: inset 0 0 0 1px var(--black);
+  color: var(--foreground-hover);
+  font: 400 13.333px/16px var(--font-sans);
+}
+.notification__mark {
+  position: absolute;
+  inset: 2px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.notification__mark svg {
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 130px;
+  height: 130px;
+  fill: none;
+  stroke: #4b5056;
+  stroke-width: 3;
+}
+.notification__body {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+}
+.notification__icon {
+  position: relative;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.notification__icon svg {
+  width: 32px;
+  height: 32px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.notification__icon--pending {
+  width: 40px;
+  height: 40px;
+  margin-left: -6px;
+}
+.notification__icon--pending .notification__throbber {
+  position: absolute;
+  inset: 0;
+  width: 40px;
+  height: 40px;
+  stroke: var(--primary-hover);
+  stroke-width: 3;
+}
+.notification__icon--success {
+  color: var(--success);
+}
+.notification__icon--fail {
+  color: var(--error);
+}
+.notification__icon--idle {
+  color: var(--foreground);
+}
+.notification__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-left: 10px;
+  display: flex;
+  flex-direction: column;
+}
+.notification__title {
+  font: 700 16px/19px var(--font-sans);
+}
+.notification__sub {
+  margin: 10px 0 2px;
+}
+.notification__buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 5px;
+}
+.notification__buttons ue-button {
+  margin-right: 4px;
+}
+.notification-stack {
+  display: flex;
+  flex-direction: column;
+}
+.notification-slot {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  animation: notification-in .25s ease-out;
+  transition: grid-template-rows .25s ease-in, opacity .25s ease-in;
+}
+.notification-slot__inner {
+  min-height: 0;
+  overflow: hidden;
+  padding-bottom: 8px;
+}
+.notification-slot--closing {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+@keyframes notification-in {
+  from {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+  to {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .notification-slot {
+    animation: none;
+    transition: none;
+  }
 }

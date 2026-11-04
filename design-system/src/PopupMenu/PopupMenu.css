@@ -18,6 +18,7 @@
 	padding: 3px 5px 3px 12px; /* Menu.Block.Padding (12,1,5,1) :2314-2316 + Menu.Button padding (0,2) :2423 */
 	background: transparent; color: var(--foreground-hover); /* Normal brush none :2419; NoBorder normal foreground ForegroundHover :240 */
 }
+.popupmenu__row[hidden] { display: none; } /* an entry the builder left out */
 .popupmenu__row:hover, .popupmenu__row--hover { background: var(--primary); } /* hovered brush Primary, no radius :2420-2421 */
 .popupmenu__row--pressed { background: var(--primary); padding: 4px 5px 2px 12px; } /* pressed padding (0,3,0,1) :2424 */
 .popupmenu__row--open { background: var(--primary); } /* a row keeps its hovered brush while its submenu is open */
@@ -41,6 +42,8 @@
 .popupmenu__tick { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; } /* Menu.Check 16x16, foreground tint :2347, SMenuEntryBlock.cpp:640 */
 .popupmenu__radio { width: 8px; height: 8px; border-radius: 50%; background: var(--input); } /* unchecked Input, 8x8 :2391 */
 .popupmenu__radio--on { background: var(--white); } /* checked White :2394 */
+
+.popupmenu__widget { padding: 1px; cursor: default; } /* a widget block with no label takes the whole width, padding 1 so the menu border shows: SWidgetBlock.cpp:121-131 */
 
 .popupmenu__sep { height: 1px; margin: 6px 12px; background: var(--white-25); } /* Menu.Separator White25, padding (12,6,12,6) :2318-2319; thickness 1 SMenuSeparatorBlock.cpp:56 */
 .popupmenu__heading {

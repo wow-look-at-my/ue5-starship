@@ -1,4 +1,4 @@
-// src/_shared/popupmenu.ts
+// design-system/src/_shared/popupmenu.ts
 function wireMenu(wiring) {
   const { trigger, menu, itemSelector } = wiring;
   const items = () => Array.from(menu.querySelectorAll(itemSelector));
