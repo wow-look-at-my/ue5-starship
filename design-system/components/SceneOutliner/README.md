@@ -17,7 +17,7 @@ Built from the other components, and nothing in it re-implements one:
 - 1 `TreeRow` (`select="multi"`) for the rows, the selection, the keyboard and the filter. The eye and Type columns are `.tr-cell` columns. The eye cell carries `data-tr-inert`, so a click on it toggles visibility and selects nothing.
 - 1 `Scrollbar` around the tree. The outliner hides the header spacer from its `ue-scrollbar-visibility` event.
 
-The outliner owns only the panel layout, the status line, the eye toggle (it cascades over the rows below a folder by `aria-level`) and the glue between these events. The eye is not a `Checkbox`: it has no box and no fill, so it stays a cell.
+The outliner owns only the panel layout, the status line, the eye toggle (it cascades over the rows below a folder by `aria-level`) and the glue between these events. The eye is not a `Checkbox`: it has no box and no fill. It stays a cell.
 
 ## Layout, top to bottom
 

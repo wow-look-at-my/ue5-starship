@@ -62,7 +62,7 @@ export class SceneOutliner extends UeElement {
 			if (spacer) spacer.hidden = !(event as CustomEvent<ScrollbarVisibilityDetail>).detail.visible;
 		});
 
-		// SSceneOutliner::SortItems: the primary key first, then the secondary key. Within a parent, folders come before actors.
+		// Within a parent, folders come before actors.
 		const keys: { primary?: SortKey; secondary?: SortKey } = {};
 		const compareBy = (key: SortKey, a: TreeRowInfo, b: TreeRowInfo): number => {
 			if (key.column === 'type') return key.direction * collator.compare(kind(a.element), kind(b.element));

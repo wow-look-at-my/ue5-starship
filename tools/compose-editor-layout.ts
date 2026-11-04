@@ -11,7 +11,6 @@ const local = process.argv.includes('--local');
 
 const read = (name: string): string => fs.readFileSync(path.join(root, 'components', name, 'preview.html'), 'utf8');
 
-// Returns the outerHTML of the element whose opening tag starts at `start`.
 function balancedFrom(html: string, start: number, tag: string): string {
 	let depth = 0;
 	const tokens = new RegExp('<(/?)' + tag + '\\b[^>]*>', 'g');
